@@ -4,11 +4,13 @@
 
 **Goal:** Demonstrate fail-closed SQLCipher storage, native key persistence, encrypted attachment BLOBs, and passphrase-portable AES-GCM backup/restore on iOS and Android while keeping the localhost preview synthetic-only.
 
-**Architecture:** Expo SDK 58 and React Native provide one native app plus a browser-only preview. Pure TypeScript packages own money/interest and backup-container logic; native SQLite is SQLCipher-keyed through SecureStore; attachments are BLOBs inside the encrypted database; Expo Crypto provides AES-GCM/CSPRNG and Noble Hashes provides PBKDF2.
+**Architecture:** Expo SDK 58 and React Native provide one native app plus a browser-only preview. Pure TypeScript packages own money/interest and backup-container logic; native SQLite is SQLCipher-keyed through SecureStore; attachments are BLOBs inside the encrypted database; Expo Crypto provides AES-GCM/CSPRNG and React Native Quick Crypto provides native PBKDF2.
 
-**Tech Stack:** Expo 58.0.21, React Native 0.88.1, React 19.3.0, expo-sqlite 58.0.14, expo-secure-store 58.0.2, expo-crypto 58.0.7, expo-file-system 58.0.13, expo-dev-client 58.0.17, @noble/hashes 2.4.0, decimal.js 10.6.0, Vitest 5.0.5, TypeScript 5.9.3.
+**Tech Stack:** Expo 58.0.21, React Native 0.88.1, React 19.3.0, expo-sqlite 58.0.14, expo-secure-store 58.0.2, expo-crypto 58.0.7, expo-file-system 58.0.13, expo-dev-client 58.0.17, react-native-quick-crypto 1.1.9, decimal.js 10.6.0, Vitest 5.0.5, TypeScript 6.0.3, Node 24.22.2.
 
 **Spec:** docs/architecture/ADR-0001-native-local-storage-and-portable-backup.md and docs/security/dependency-inventory.md
+
+**Execution status (2026-10-30):** Implemented the Expo scaffold, synthetic-only Web preview, a small pure TypeScript domain slice, the versioned backup envelope, native SQLCipher/SecureStore proof, and native in-memory backup proof. Twelve automated tests pass. The iOS 26.5 Simulator proof passed. Android emulator booted, but its first Gradle build failed with `No space left on device`; no Android application runtime proof exists. File-based fresh-install restore, cross-platform restore, SQLCipher-disabled native build, physical-device tests, and release readiness remain pending. Do not treat this plan as completed for those items and do not start the full bookkeeping MVP yet.
 
 ## Global Constraints
 
@@ -31,12 +33,12 @@
 
 - app.config.ts: SDK config, SQLCipher plugin switch for negative fail-closed build, disabled updates, and exact bundle identifiers.
 - package.json / package-lock.json: exact direct package pins and local scripts.
-- apps/mobile/App.tsx: native security diagnostics and synthetic-only web banner.
+- App.tsx: native security diagnostics and synthetic-only web preview.
 - packages/domain/src/money.ts, loan-interest.ts: pure decimal parse and simple-interest policy.
 - packages/domain/test/: independent deterministic domain tests.
-- packages/backup/src/format.ts, crypto.ts, restore.ts: byte format, passphrase encryption, validation, and staged restore coordination.
+- packages/backup/src/format.ts, crypto.native.ts, crypto.web.ts, native-portable-backup.ts: proof byte format, native passphrase encryption, and in-memory proof restore. Crash-safe staged replacement is not implemented.
 - packages/backup/test/: format, crypto, tamper, truncation, and schema validation tests.
-- packages/storage-native/src/secure-database.ts, migrations.ts, attachments.ts: cipher check, key lifecycle, SQLCipher database, BLOB storage, and migrations.
+- packages/storage-native/src/encrypted-database.ts: SQLCipher availability, SecureStore key lifecycle, and synthetic encrypted database/BLOB fixture. Production migrations and attachment service are not implemented.
 - packages/storage-native/test/: host-independent contract tests where possible; runtime assertions in the native diagnostics screen.
 - scripts/verify-native-db.sh: export simulator/emulator database copies and verify ordinary SQLite cannot read them.
 - docs/security/native-proof-results.md: actual platform, device type, build variant, commands, and results.
@@ -121,7 +123,7 @@ The database driver and SecureStore are injected into the secure database initia
 - [ ] Add tests for round-trip, wrong passphrase, one-bit header alteration, one-bit ciphertext alteration, truncated header/tag, overlong header, over-limit payload, unsupported version, and invalid attachment length/hash.
 - [ ] Run targeted tests to confirm failures are caused by unimplemented exports.
 - [ ] Implement binary envelope parsing and payload validation without file system or UI imports.
-- [ ] Encode the NFC-normalized passphrase as UTF-8 Uint8Array; implement PBKDF2 through @noble/hashes pbkdf2Async(sha256, passphraseBytes, salt, { c: 600000, dkLen: 32 }) and AES through Expo Crypto AESEncryptionKey.import / aesEncryptAsync / aesDecryptAsync with AAD. Inject CSPRNG so tests use deterministic fixture bytes; production passes Crypto.getRandomBytesAsync.
+- [ ] Encode the passphrase as UTF-8 Uint8Array; implement asynchronous native PBKDF2-HMAC-SHA-256 through react-native-quick-crypto at 600,000 iterations and AES through Expo Crypto AESEncryptionKey.import / aesEncryptAsync / aesDecryptAsync with authenticated metadata. Production salts/nonces use Crypto.getRandomBytesAsync.
 - [ ] Verify no passphrase, derived key, or decrypted payload is logged; best-effort overwrite byte buffers after use.
 - [ ] Run targeted and full test suites; benchmark PBKDF2 and payload encryption in Node only as preliminary timing, not device evidence.
 - [ ] Commit and push the backup format checkpoint.

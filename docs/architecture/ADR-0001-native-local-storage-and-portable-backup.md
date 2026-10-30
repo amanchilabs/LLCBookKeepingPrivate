@@ -1,6 +1,6 @@
 # ADR-0001: Native Local Storage and Portable Backup
 
-- Status: approved architecture direction; proof and compatibility remain pending.
+- Status: approved architecture direction; iOS simulator storage and in-memory backup proofs passed. Android native runtime, file-based restore, physical-device behavior, and cross-platform compatibility remain pending.
 - Date: 2026-10-30.
 - Scope: the first native storage, attachment, and encrypted-backup validation slice only.
 - Repository: `veerrajuamanchi/LLCBookKeepingPrivate` is public. Do not put secrets or real financial records in it.
@@ -20,22 +20,23 @@ The preview must not expose CSV import, receipt selection, backup restore, or re
 ### Application structure
 
 - Use Expo SDK 58, React Native, and TypeScript for one iOS/Android application, with Expo Web retained only for local synthetic UI review.
-- Keep `packages/domain` independent of Expo, SQLite, and UI. It owns decimal parsing, money values, calendar-date values, loan simple-interest policies, balanced journal validation, and deterministic report calculations.
-- Keep platform storage behind interfaces. `packages/storage-native` owns SQLCipher, SecureStore, migrations, and native attachment BLOBs. `packages/backup` owns a byte-level, platform-neutral encrypted backup container. `apps/mobile` owns screens and native wiring. `apps/web-preview` behavior is selected by platform guards and contains no data import or persistence.
-- The proof slice implements only a synthetic security/backup diagnostics screen, the smallest database fixture, an encrypted attachment fixture, and a small pure-domain example. It does not implement member books or tax mappings.
+- Keep `packages/domain` independent of Expo, SQLite, and UI. It owns exact cents parsing, strict business-date and simple-interest policies, and balanced-journal validation. Guaranteed-payment obligations, actual payments, book postings, and CPA adjustments remain distinct future domain records; this proof does not post them.
+- `packages/storage-native` owns SQLCipher, SecureStore, and the synthetic BLOB fixture. `packages/backup` owns a byte-level portable container and user-initiated file exchange. `App.tsx` selects a synthetic web preview or native diagnostics screen. The browser preview has no record intake, write, or persistence path.
+- `.node-version` pins local tooling to Node 24.22.2 because SDK 58, React Native 0.88, and Vitest 5 reject Node 25. The project does not bundle Node.
+- The proof slice implements only a synthetic security/backup diagnostics screen, a record with one BLOB, a small pure-domain example, and a logical-record backup proof. It does not implement member books or tax mappings.
 
 ### Database and native key lifecycle
 
 - Use `expo-sqlite` with its `useSQLCipher` config plugin set to true in native builds. Expo documents that SQLCipher is unavailable in Expo Go and that an unrecognized `PRAGMA key` can silently have no effect; therefore the application must query `PRAGMA cipher_version` before keying or accessing any data and fail closed if the result is absent.
 - Generate a 32-byte database key using `Crypto.getRandomBytesAsync(32)`, encode it as lowercase hex for the SQLCipher raw-key form, and store it in `expo-secure-store`. Do not use `Math.random` or synchronous Expo random bytes for key material.
 - On iOS, request `WHEN_UNLOCKED_THIS_DEVICE_ONLY`. On Android, SecureStore uses encrypted SharedPreferences backed by Android Keystore. Store only the small database key and versioned key metadata there, never business records.
-- Open order: open an empty native SQLite handle; verify `cipher_version`; retrieve or create the key only if no existing database is present; apply the raw key; run a schema read and integrity query; then allow repositories to read or write. If a database exists and its key is missing, reject startup and offer restore. Never create a replacement key for an existing database and never fall back to plaintext SQLite.
-- Use one encrypted database file for the proof. Keep `PRAGMA temp_store = MEMORY` for the proof and test the actual resulting database, WAL, and journal artifacts. SQLCipher documents encryption for database pages and journal/WAL pages, but build-specific behavior and temporary files still require inspection.
+- The implementation stores the database in an app-private `LLCBookKeepingPrivate` directory under the document directory. Before creating a key, it checks whether the named database exists. A missing key for an existing database fails closed rather than generating a replacement. It then checks `cipher_version`, applies the raw key, and reads the schema to force key validation before exposing the handle. `PRAGMA temp_store = MEMORY`, WAL/journal behavior, and actual artifacts remain to be verified.
+- Android generated config sets `allowBackup: false`; this limits normal OS backup/restore but does not yet establish behavior for every device-transfer path. The iOS database directory does not yet have a verified backup-exclusion attribute. Until that is addressed and tested, do not claim OS backup exclusion on iOS. The `WHEN_UNLOCKED_THIS_DEVICE_ONLY` key is not a portable recovery mechanism.
 - Device key loss is not recoverable from the device alone. Recovery is through the independent encrypted backup passphrase. The local database key is never included in backup plaintext or ciphertext payload records.
 
 ### Attachments
 
-For this proof, store attachment bytes and thumbnail bytes as BLOB rows in the SQLCipher database, with MIME type, generated identifier, size, SHA-256, and source transaction identifier in metadata. This avoids a second long-lived file-key lifecycle and makes attachment writes transactional with metadata. It also makes the portable logical backup include attachments without absolute paths.
+For this proof, store one synthetic attachment byte array in a BLOB column in the SQLCipher database. A production attachment record would also need a generated identifier, MIME type, size, SHA-256, source transaction, thumbnail policy, and atomic metadata updates. This avoids a second long-lived file-key lifecycle and makes the portable logical backup include attachments without absolute paths.
 
 This choice has costs: database and backup growth, larger SQLite page/WAL churn, memory copies, slower restore, and no secure-erasure guarantee after a row is deleted. Before full receipt support, benchmark realistic PDFs and images. If BLOB storage is too costly, replace it only with a separately reviewed per-file AEAD design, including wrapped keys, unique nonces, streaming/size limits, and crash-safe replacement.
 
@@ -45,20 +46,22 @@ The proof never imports a real receipt. Preview mode has no attachment picker. F
 
 Selected libraries:
 
-- `expo-crypto` performs AES-256-GCM on iOS, Android, and Web and accepts a caller-supplied nonce and AAD.
-- `@noble/hashes` performs asynchronous PBKDF2-HMAC-SHA-256 on the supported JavaScript runtimes. The proof uses the same library and byte inputs on both native targets.
+- `expo-crypto` performs AES-256-GCM on iOS and Android native builds and accepts a caller-supplied nonce and AAD. The web implementation is not used for preview records or backup actions.
+- `react-native-quick-crypto` 1.1.9 performs callback-based PBKDF2-HMAC-SHA-256 through native OpenSSL. It requires Nitro Modules and the New Architecture; the current Expo/RN config enables the native architecture. A simulator performance result and platform package build are still required.
 - `expo-crypto` asynchronous native random bytes supplies salts and nonces. No cryptographic primitive is handwritten.
 
-Proof format version 1 is a bounded single-buffer format, not yet a release format:
+Proof format version 1 is a bounded single-buffer format, not yet a release format. It is binary rather than JSON-header based:
 
-1. Magic bytes `LLCBKUP\0`, a big-endian format version, a big-endian header byte length, UTF-8 JSON header bytes with fixed producer field order, then ciphertext and the 16-byte GCM tag.
-2. Header fields, in a fixed producer order: format version; payload schema version; KDF identifier; iteration count; salt encoding/value; cipher identifier; nonce encoding/value; payload encoding; and declared ciphertext length. The parser authenticates the original header bytes rather than reserializing JSON.
-3. Passphrase encoding is UTF-8 after Unicode NFC normalization, with no trimming or truncation. A fresh 16-byte CSPRNG salt and 12-byte CSPRNG GCM nonce are generated for every backup. PBKDF2 uses HMAC-SHA-256, 600,000 iterations, and a 32-byte derived key. The work factor is a provisional proof value and must be benchmarked on supported hardware before release.
-4. AES-GCM uses a 128-bit tag. AAD is the exact magic, version, header-length, and header byte sequence. Wrong passphrases, modified metadata, ciphertext tampering, and truncation must fail authentication or structural validation before any live data is replaced.
-5. The encrypted payload is a schema-versioned UTF-8 JSON document containing logical records and base64 attachment BLOBs with declared lengths and SHA-256 checks. It contains no local SecureStore key, absolute path, or executable content. A strict parser enforces field allowlists and size limits; it treats strings as untrusted data.
-6. Proof maximum: 8 MiB per complete backup and 2 MiB per synthetic attachment. Export assembles and encrypts in memory before writing only the encrypted final artifact. Restore decrypts in memory, validates every field and attachment hash, creates a new SQLCipher database with a fresh local key, validates it, then swaps it into place using a durable restore journal. It never writes decrypted backup payload to a temporary plaintext file. Buffer zeroing is best-effort because the JavaScript runtime may retain copies.
+1. Bytes 0–7 are ASCII `LLCBKUP` followed by NUL. Bytes 8–11 are format version `1`, KDF ID `1` (PBKDF2-HMAC-SHA-256), cipher ID `1` (AES-256-GCM), and reserved zero. Bytes 12–15 are the big-endian iteration count. Bytes 16–17 are big-endian salt length; bytes 18 and 19 are nonce and tag lengths; bytes 20–23 are big-endian ciphertext length including the tag. Then come the 16-byte salt, 12-byte nonce, and ciphertext with 16-byte tag.
+2. AAD is the exact 52-byte prefix: the fixed 24-byte header, salt, and nonce. Parser bounds require the exact version/algorithms/iteration count/lengths, exact total size, and an 8 MiB complete-file maximum before KDF work.
+3. Passphrase encoding is its UTF-8 bytes exactly (no trimming or normalization), minimum 12 JavaScript characters. A fresh 16-byte CSPRNG salt and 12-byte CSPRNG GCM nonce are generated for every backup using Expo Crypto. Native Quick Crypto PBKDF2 uses HMAC-SHA-256, 600,000 iterations, and a 32-byte derived key. Benchmark this work factor on physical hardware before release.
+4. AES-GCM uses a 128-bit tag. Wrong passphrases, altered metadata, ciphertext tampering, and truncation must fail authentication or structural validation before a restore writer runs.
+5. The synthetic proof payload is a UTF-8 JSON record containing one record and a hex-encoded attachment fixture. This is a proof-only serializer, not the V1 data schema; no local SecureStore key, absolute path, or executable content is included. Full backup must add schema-versioned table allowlists, attachment hashes, migrations, and size limits.
+6. Export writes only encrypted bytes to an app-cache file and invokes the native system share sheet after user action. Restore uses the native document picker, reads only the encrypted artifact into cache, and decrypts in memory. App-created encrypted cache files are deleted in `finally`; plaintext buffers are zeroed best-effort. Share destinations, provider caches, crash snapshots, and runtime memory are outside that deletion guarantee. Production restore staging/swap journaling is not implemented by this proof.
 
 The portable format contains logical data, not the device-keyed SQLCipher file. A restore therefore needs only the backup file and passphrase, creates a fresh local SQLCipher key in SecureStore, and rebuilds database rows. Interoperability is not claimed until a backup created by an iOS native build restores on Android and vice versa.
+
+The iOS Simulator proof passed SQLCipher 4.17.0 detection, SecureStore key persistence, encrypted record/BLOB reopen, wrong-key rejection, host SQLite refusal, process restart, and in-memory backup authentication/restore/preservation checks. The Android API 36 emulator booted, but the first Gradle build stopped with `No space left on device`; no Android app runtime proof is claimed. See [native proof results](../security/native-proof-results.md) for the dated result matrix.
 
 Production data may exceed the proof's memory limits. Before release, either establish safe, tested limits or design a chunked authenticated format with independent per-chunk nonces, authenticated ordering, truncation detection, and bounded memory. Do not silently raise the 8 MiB limit.
 
@@ -80,8 +83,7 @@ Production data may exceed the proof's memory limits. Before release, either est
 
 ### OS backup and device transfer
 
-- Use the user-initiated encrypted backup as the recovery path. The local SQLCipher database, attachment BLOBs, and local SecureStore entry should be excluded from automatic OS backup/device transfer so an encrypted DB is not restored without its key.
-- Expo SecureStore documents that Android Keystore material is not restored and its config plugin excludes SecureStore preferences from Android Auto Backup. Configure the application to exclude its SQLite directory as well. On iOS, add and verify the platform-specific backup-exclusion attribute for the database directory. Exact native configuration and physical-device behavior remain release gates.
+- Use the user-initiated encrypted backup as the supported recovery path. Android generated config sets `allowBackup: false`; exact device transfer behavior remains unverified. iOS currently has no custom exclusion on `LLCBookKeepingPrivate`, so its OS backup/transfer behavior is unresolved and the database may be backed up without its this-device-only key. Add and verify the iOS backup-exclusion attribute before production persistence. Exact physical-device behavior remains a release gate.
 - iOS Keychain items can persist across reinstall with the same bundle identifier; that behavior is not a recovery contract. Android SecureStore values do not survive uninstall. New installs/restores generate a new local key.
 - User-initiated backup export creates an encrypted file. User-initiated report/CSV/PDF/share exports may be plaintext and leave the sandbox; disclose destination and cleanup limits. Do not claim all live data or exports are encrypted.
 
@@ -106,11 +108,13 @@ Production data may exceed the proof's memory limits. Before release, either est
 - Does the Expo SDK 58 SQLCipher build pass keying and host SQLite inspection on both target architectures, and what SQLCipher/crypto-provider versions are actually linked?
 - Does the Expo build disable file-based temporary storage, or can SQLite operations create unencrypted temporary files?
 - Does Expo Crypto AES-GCM produce byte-compatible 12-byte nonce/16-byte tag behavior across current iOS and Android native builds with identical AAD?
-- Is Noble PBKDF2 performance acceptable on supported low-end physical devices at 600,000 iterations? No physical device is currently available in the inspected environment.
+- Does native Quick Crypto PBKDF2 build and produce compatible output on both iOS and Android development builds? What are its installed OpenSSL/Nitro versions, measured latency, and dependency security review results?
 - Can the 8 MiB proof format evolve to large encrypted backups without plaintext files and without unacceptable memory pressure? It is not yet a release format.
 - Do app-private BLOBs perform acceptably for real receipt sizes, thumbnail generation, database compaction, and backup/restore time?
 - Exact iOS backup exclusion, Android data-extraction rules, file protection, crash/log redaction, memory cleanup, biometric/PIN behavior, and device transfer must be verified on physical devices.
 - App Store privacy disclosures, export-control questions, and encryption declarations require review against the actual release build. No registration, exemption, tax correctness, or legal compliance is assumed.
+- `npm audit --omit=dev` reports 8 transitive dependency advisories (5 low, 3 high), including `deepmerge` prototype poisoning and Zod memory-exhaustion reports through Expo config/CLI paths. The forced audit fix would downgrade Expo to 51; resolve through a compatible SDK update and assess binary reachability before release.
+- The first Android Gradle build exhausted the available disk while indexing native headers. Android SQLCipher, SecureStore, Quick Crypto, backup compatibility, and offline behavior have not been demonstrated.
 
 ## Evidence links
 
@@ -119,5 +123,7 @@ Production data may exceed the proof's memory limits. Before release, either est
 - Expo Crypto AES-GCM and random bytes: https://docs.expo.dev/versions/latest/sdk/crypto/
 - Expo Web: https://docs.expo.dev/workflow/web/
 - SQLCipher design: https://www.zetetic.net/sqlcipher/design/
-- Noble Hashes: https://github.com/paulmillr/noble-hashes
+- React Native Quick Crypto setup: https://margelo.github.io/react-native-quick-crypto/docs/introduction/complete-setup
+- React Native Quick Crypto PBKDF2: https://margelo.github.io/react-native-quick-crypto/docs/api/pbkdf2
+- React Native Quick Crypto releases: https://github.com/margelo/react-native-quick-crypto/releases
 - OWASP password-storage guidance: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
