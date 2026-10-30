@@ -1,0 +1,28 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "moduleSuffixes": [".native", ""],
+    "paths": {
+      "@domain/*": [
+        "./packages/domain/src/*"
+      ],
+      "@backup/*": [
+        "./packages/backup/src/*"
+      ],
+      "@storage/*": [
+        "./packages/storage-native/src/*"
+      ]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "ios",
+    "android"
+  ]
+}

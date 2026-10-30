@@ -1,0 +1,42 @@
+{
+  "name": "llc-bookkeeping-private",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo/AppEntry",
+  "scripts": {
+    "start": "EXPO_NO_TELEMETRY=1 expo start --dev-client --localhost",
+    "start:web": "EXPO_NO_TELEMETRY=1 expo start --web --localhost",
+    "start:ios": "EXPO_NO_TELEMETRY=1 expo run:ios",
+    "start:android": "EXPO_NO_TELEMETRY=1 expo run:android",
+    "prebuild": "EXPO_NO_TELEMETRY=1 expo prebuild",
+    "test:preview": "vitest run apps/mobile/preview-capabilities.test.ts",
+    "test:domain": "vitest run packages/domain/test",
+    "test:backup": "vitest run packages/backup/test",
+    "test": "npm run test:preview && npm run test:domain && npm run test:backup",
+    "typecheck": "tsc --noEmit",
+    "doctor": "EXPO_NO_TELEMETRY=1 expo install --check",
+    "config:public": "EXPO_NO_TELEMETRY=1 expo config --type public"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "58.0.15",
+    "decimal.js": "10.6.0",
+    "expo": "58.0.21",
+    "expo-crypto": "58.0.7",
+    "expo-document-picker": "58.0.4",
+    "expo-file-system": "58.0.13",
+    "expo-secure-store": "58.0.2",
+    "expo-sharing": "58.0.21",
+    "expo-sqlite": "58.0.14",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "react-native": "0.88.1",
+    "react-native-quick-crypto": "1.1.9",
+    "react-native-web": "0.21.4"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "expo-dev-client": "58.0.17",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  }
+}
