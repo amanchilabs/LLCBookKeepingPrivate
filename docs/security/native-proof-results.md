@@ -71,15 +71,16 @@ No current v2 cross-platform compatibility claim is made. Required test should s
 
 ## Clean-clone reproduction
 
-The required clean clone must start from the pushed branch SHA, not copy ignored files, and record:
+From `/tmp/llcb-clean-clone`, cloned from the pushed remote branch at `17259e23a90b6c36a587c74f11b6fcf0ee38f38e` without copying any ignored files:
 
-1. `npm ci` against committed lockfile.
-2. `npx expo prebuild --clean --no-install` for iOS and Android from config/plugins.
-3. Automated tests and typecheck.
-4. Available native build results, with exact SDK/signing requirements.
-5. Confirmation generated native changes match committed config/plugins and no manual edit exists only in ignored native directories.
+- `npm ci` with Node `24.22.2` and npm `11.6.2`: passed; 555 packages installed, 556 audited. npm reported the same 8 advisory entries (5 low, 3 high) described above.
+- `expo prebuild --clean --no-install`: passed and regenerated both `ios/` and `android/` using committed Expo config and config plugins. Generated iOS AppDelegate contains the fixed backup-exclusion helper. Android manifest and backup-rule resources were regenerated with `allowBackup=false` and cloud/device-transfer exclusions.
+- Android manifest/full-backup/data-extraction XML parsed successfully. `swiftc -frontend -parse` passed on generated AppDelegate. These are generation/syntax checks, not native app builds.
+- `npm test`: passed, 30 tests (2 preview, 5 security-config/storage, 8 domain, 15 backup). `npm run typecheck`: passed. `npm run doctor`: passed.
+- `git status` remained clean after generation; `ios/`, `android/`, and `node_modules/` are ignored. No required native manual edits were found outside config/plugins.
+- Native build: not run from the clone because only 1.4 GiB remained after installation/regeneration. In the implementation worktree, current-branch Android Gradle attempts failed with `No space left on device`; the current-branch iOS build installed Pods but its first compile found two plugin-generated Swift errors. Those source errors were corrected and regenerated, and the isolated helper typechecked, but a post-fix full native build could not fit. No current-branch Android app build or post-fix iOS app build is claimed.
 
-Result: **pending execution before final report**. Host prerequisites: macOS, Node 24.22.2, Xcode/iOS SDK and simulator runtime, Android SDK/NDK, Java/Gradle support, sufficient disk, and Apple signing identity only for physical-device installation. No secrets are committed.
+External prerequisites: macOS, Node 24.22.2/npm 11.6.2, Xcode 26.6 and an installed iOS simulator runtime, CocoaPods 1.17.0, Android SDK/NDK and compatible Java/Gradle, sufficient disk for native dependencies/build outputs, and Apple signing identity only for physical-device installation. No secrets are committed.
 
 ## Blockers
 
