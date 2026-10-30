@@ -2,6 +2,8 @@ import * as Crypto from 'expo-crypto';
 import * as SecureStore from 'expo-secure-store';
 import * as SQLite from 'expo-sqlite';
 import { Directory, File, Paths } from 'expo-file-system';
+import { openOnlyAfterCipherProbe } from './fail-closed-open';
+import { ensureDatabaseCatalog, openActiveDatabase } from './database-catalog';
 
 export const MAIN_DATABASE = 'llc-local.db';
 const DEVICE_KEY_ALIAS = 'llcbookkeepingprivate.database-key.v1';
@@ -36,24 +38,58 @@ export async function getOrCreateDeviceKeyHex(databaseName = MAIN_DATABASE, keyA
   return generated;
 }
 
-export async function openEncryptedDatabase(databaseName = MAIN_DATABASE, suppliedKeyHex?: string): Promise<SQLite.SQLiteDatabase> {
-  const keyHex = suppliedKeyHex ?? await getOrCreateDeviceKeyHex(databaseName);
-  if (!HEX.test(keyHex)) throw new Error('Database key must be 32 bytes of hexadecimal data.');
+const openConnections = new Set<SQLite.SQLiteDatabase>();
 
-  const directory = databaseDirectory();
-  directory.create({ idempotent: true, intermediates: true });
-  const database = await SQLite.openDatabaseAsync(databaseName, { useNewConnection: true }, directory.uri);
-  try {
-    const cipher = await database.getFirstAsync<{ cipher_version?: string }>('PRAGMA cipher_version');
-    if (!cipher?.cipher_version) {
-      throw new Error('SQLCipher is unavailable in this native build. Refusing plaintext database access.');
-    }
-    await database.execAsync(`PRAGMA key = "x'${keyHex}'";`);
-    await database.getFirstAsync<{ tableCount: number }>('SELECT COUNT(*) AS tableCount FROM sqlite_master');
-    return database;
-  } catch (error) {
-    await database.closeAsync().catch(() => undefined);
-    throw error;
+export async function openEncryptedDatabase(
+  databaseName = MAIN_DATABASE,
+  suppliedKeyHex?: string,
+  keyAlias = DEVICE_KEY_ALIAS,
+): Promise<SQLite.SQLiteDatabase> {
+  // SQLCipher must be proved on a memory-only connection before SQLite sees
+  // any persistent financial database path. Expo Go/negative builds may have
+  // ordinary SQLite, where PRAGMA key can be silently ignored.
+  return await openOnlyAfterCipherProbe(
+    () => SQLite.openDatabaseAsync(':memory:', { useNewConnection: true }),
+    async (connection) => {
+      const result = await connection.getFirstAsync<{ cipher_version?: string }>('PRAGMA cipher_version');
+      return Boolean(result?.cipher_version);
+    },
+    async () => {
+      const keyHex = suppliedKeyHex ?? await getOrCreateDeviceKeyHex(databaseName, keyAlias);
+      if (!HEX.test(keyHex)) throw new Error('Database key must be 32 bytes of hexadecimal data.');
+
+      const directory = databaseDirectory();
+      directory.create({ idempotent: true, intermediates: true });
+      const database = await SQLite.openDatabaseAsync(databaseName, { useNewConnection: true }, directory.uri);
+      try {
+        const cipher = await database.getFirstAsync<{ cipher_version?: string }>('PRAGMA cipher_version');
+        if (!cipher?.cipher_version) {
+          await database.closeAsync();
+          if (new File(directory, databaseName).exists) new File(directory, databaseName).delete();
+          throw new Error('SQLCipher is unavailable in this native build. Refusing plaintext database access.');
+        }
+        await database.execAsync(`PRAGMA key = "x'${keyHex}'";`);
+        await database.getFirstAsync<{ tableCount: number }>('SELECT COUNT(*) AS tableCount FROM sqlite_master');
+        openConnections.add(database);
+        const originalClose = database.closeAsync.bind(database);
+        database.closeAsync = async () => {
+          try { await originalClose(); } finally { openConnections.delete(database); }
+        };
+        return database;
+      } catch (error) {
+        await database.closeAsync().catch(() => undefined);
+        throw error;
+      }
+    },
+  );
+}
+
+export async function closeAllEncryptedDatabases(): Promise<void> {
+  const connections = [...openConnections];
+  for (const database of connections) {
+    await database.execAsync('PRAGMA wal_checkpoint(TRUNCATE);').catch(() => undefined);
+    await database.execAsync('PRAGMA journal_mode=DELETE;').catch(() => undefined);
+    await database.closeAsync();
   }
 }
 
@@ -68,8 +104,12 @@ export interface NativeStorageProofResult {
 }
 
 export async function runNativeStorageProof(): Promise<NativeStorageProofResult> {
-  const keyHex = await getOrCreateDeviceKeyHex();
-  let database = await openEncryptedDatabase(MAIN_DATABASE, keyHex);
+  await ensureDatabaseCatalog();
+  const active = await openActiveDatabase();
+  const { database: firstDatabase, generation } = active;
+  let database = firstDatabase;
+  const keyHex = await SecureStore.getItemAsync(generation.keyAlias);
+  if (!keyHex) throw new Error('The active database key is unavailable.');
   const databasePath = database.databasePath;
   const cipher = await database.getFirstAsync<{ cipher_version?: string }>('PRAGMA cipher_version');
   await database.execAsync(`
@@ -87,7 +127,7 @@ export async function runNativeStorageProof(): Promise<NativeStorageProofResult>
   );
   await database.closeAsync();
 
-  database = await openEncryptedDatabase(MAIN_DATABASE, keyHex);
+  database = await openEncryptedDatabase(generation.databaseName, keyHex, generation.keyAlias);
   const persisted = await database.getFirstAsync<{ note: string; attachment: Uint8Array }>(
     'SELECT note, attachment FROM proof_records WHERE id = ?',
     'synthetic-proof',
@@ -101,7 +141,7 @@ export async function runNativeStorageProof(): Promise<NativeStorageProofResult>
   if (incorrectKey === keyHex) throw new Error('Unexpected random key collision.');
   let wrongKeyRejected = false;
   try {
-    const wrongDatabase = await openEncryptedDatabase(MAIN_DATABASE, incorrectKey);
+    const wrongDatabase = await openEncryptedDatabase(generation.databaseName, incorrectKey, generation.keyAlias);
     await wrongDatabase.closeAsync();
   } catch {
     wrongKeyRejected = true;
@@ -114,7 +154,7 @@ export async function runNativeStorageProof(): Promise<NativeStorageProofResult>
     databaseReopened: true,
     rowAndAttachmentPersisted: true,
     wrongKeyRejected: true,
-    databaseName: MAIN_DATABASE,
+    databaseName: generation.databaseName,
     databasePath,
   };
 }

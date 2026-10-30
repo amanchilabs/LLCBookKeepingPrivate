@@ -1,6 +1,7 @@
 import type { ExpoConfig } from 'expo/config';
+import { nativeBuildPolicy } from './apps/mobile/native-build-policy.cjs';
 
-const sqlCipherEnabled = process.env.LLCB_SQLCIPHER !== 'false';
+const buildPolicy = nativeBuildPolicy(process.env);
 
 const config: ExpoConfig = {
   name: 'LLCBookKeepingPrivate',
@@ -25,12 +26,15 @@ const config: ExpoConfig = {
     output: 'single',
   },
   plugins: [
-    ['expo-sqlite', { useSQLCipher: sqlCipherEnabled }],
-    ['expo-secure-store', { configureAndroidBackup: true }],
+    ['expo-sqlite', { useSQLCipher: buildPolicy.sqlCipherEnabled }],
+    ['expo-secure-store', { configureAndroidBackup: false }],
     'react-native-quick-crypto',
+    './plugins/with-ios-backup-exclusion.cjs',
+    './plugins/with-android-backup-exclusions.cjs',
   ],
   extra: {
-    sqlCipherRequired: true,
+    sqlCipherRequired: buildPolicy.sqlCipherEnabled,
+    securityNegativeBuild: buildPolicy.securityNegativeBuild,
     securityProofBuild: true,
   },
 };

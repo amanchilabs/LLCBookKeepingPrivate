@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { capabilitiesFor, SYNTHETIC_PREVIEW_NOTICE } from './apps/mobile/preview-capabilities';
-import { restoreEncryptedBackupFromFile, runPortableBackupProof, shareEncryptedBackup } from './packages/backup/src/native-portable-backup';
+import { recoverDatabaseRestoreAtStartup } from './packages/backup/src/native-restore-store';
+import { restoreEncryptedBackupFromFile, runBackupKdfBenchmark, runPortableBackupProof, runRestoreFailureInjectionProof, shareEncryptedBackup } from './packages/backup/src/native-portable-backup';
 import { runNativeStorageProof, type NativeStorageProofResult } from './packages/storage-native/src/encrypted-database';
 
 type PreviewTab = 'Overview' | 'Members' | 'Transactions' | 'Loans' | 'Reports';
@@ -113,6 +114,11 @@ function NativeProofScreen() {
   const [storageResult, setStorageResult] = useState<NativeStorageProofResult | null>(null);
   const [passphrase, setPassphrase] = useState('SyntheticProofPassphrase2026');
   const [backupResult, setBackupResult] = useState<string | null>(null);
+  useEffect(() => {
+    recoverDatabaseRestoreAtStartup()
+      .then((result) => setMessage(`Startup restore recovery: ${result}. Run native checks on this development build.`))
+      .catch((error: unknown) => setMessage(error instanceof Error ? `Startup storage recovery failed closed: ${error.message}` : 'Startup storage recovery failed closed.'));
+  }, []);
   const run = async (task: () => Promise<void>) => {
     setBusy(true);
     setMessage('Running native proof…');
@@ -125,6 +131,13 @@ function NativeProofScreen() {
     const result = await runPortableBackupProof(setMessage);
     setBackupResult(Object.entries(result).map(([name, value]) => `${name}: ${value ? 'PASS' : 'FAIL'}`).join('\n'));
   });
+  const runRestoreRecovery = () => run(async () => {
+    const results = await runRestoreFailureInjectionProof(setMessage);
+    setBackupResult(results.join('\n'));
+  });
+  const runKdfBenchmark = () => run(async () => {
+    setBackupResult(await runBackupKdfBenchmark());
+  });
 
   return <SafeAreaView style={styles.nativeSafeArea}><ScrollView style={styles.nativeRoot} contentContainerStyle={styles.nativeContent}>
     <Text style={styles.nativeBrand}>LLCBookKeepingPrivate</Text>
@@ -135,15 +148,17 @@ function NativeProofScreen() {
       <Pressable accessibilityRole="button" disabled={busy} onPress={runStorage} style={[styles.nativeButton, busy && styles.buttonDisabled]}><Text style={styles.nativeButtonText}>Run SQLCipher + key-storage proof</Text></Pressable>
       {storageResult && <View style={styles.resultBox}><Text style={styles.resultText}>SQLCipher: {storageResult.cipherVersion}{'\n'}Secure key stored: PASS{'\n'}Database reopened: PASS{'\n'}Record + attachment persisted: PASS{'\n'}Wrong key rejected: PASS{'\n'}Database: {storageResult.databaseName}{'\n'}Path: {storageResult.databasePath}</Text></View>}
     </View>
-    <View style={styles.nativePanel}><Text style={styles.nativeSectionTitle}>Encrypted portable backup</Text><Text style={styles.nativeBody}>AES-256-GCM, random 16-byte salt, 12-byte nonce, PBKDF2-HMAC-SHA-256 at 600,000 iterations, and authenticated format metadata. The proof imports into a separate encrypted database with a new local key.</Text>
+    <View style={styles.nativePanel}><Text style={styles.nativeSectionTitle}>Encrypted portable backup</Text><Text style={styles.nativeBody}>AES-256-GCM, random 16-byte salt, 12-byte nonce, PBKDF2-HMAC-SHA-256 at 600,000 iterations, and authenticated format metadata. Restore builds and validates a separate SQLCipher database with a new local key, then switches an encrypted catalog pointer in a durable SQLite transaction.</Text>
       <TextInput accessibilityLabel="Backup passphrase" secureTextEntry value={passphrase} onChangeText={setPassphrase} style={styles.passphraseInput} autoCapitalize="none" />
       <View style={styles.nativeButtonRow}><Pressable accessibilityRole="button" disabled={busy} onPress={() => run(() => shareEncryptedBackup(passphrase))} style={[styles.nativeButton, busy && styles.buttonDisabled]}><Text style={styles.nativeButtonText}>Export encrypted proof backup</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={() => run(() => restoreEncryptedBackupFromFile(passphrase))} style={[styles.secondaryButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Restore backup file</Text></Pressable></View>
       <Pressable accessibilityRole="button" disabled={busy} onPress={runBackup} style={[styles.secondaryButton, styles.fullWidthButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Run in-memory restore and tamper proofs</Text></Pressable>
+      <Pressable accessibilityRole="button" disabled={busy} onPress={runRestoreRecovery} style={[styles.secondaryButton, styles.fullWidthButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Inject restore interruptions and recover</Text></Pressable>
+      <Pressable accessibilityRole="button" disabled={busy} onPress={runKdfBenchmark} style={[styles.secondaryButton, styles.fullWidthButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Measure native backup KDF</Text></Pressable>
       {backupResult && <View style={styles.resultBox}><Text style={styles.resultText}>{backupResult}</Text></View>}
     </View>
     {busy && <ActivityIndicator color="#47765b" style={styles.spinner} />}
     <Text accessibilityLiveRegion="polite" style={styles.nativeStatus}>{message}</Text>
-    <Text style={styles.nativeFootnote}>This proof validates a limited synthetic-data slice. iOS-to-Android restore passed on simulators; Android-to-iOS restore, physical-device behavior, and production readiness remain unverified.</Text>
+    <Text style={styles.nativeFootnote}>This proof validates a limited synthetic-data slice. Run file-based restore in both platform directions. Simulator/emulator results are not physical-device evidence; production readiness remains unverified.</Text>
   </ScrollView></SafeAreaView>;
 }
 

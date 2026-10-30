@@ -13,11 +13,27 @@ export const BACKUP_MAX_BYTES = 8 * 1024 * 1024;
 export const BACKUP_SALT_BYTES = 16;
 export const BACKUP_NONCE_BYTES = 12;
 export const BACKUP_TAG_BYTES = 16;
+export const BACKUP_PASSPHRASE_MIN_CHARACTERS = 12;
+export const BACKUP_PASSPHRASE_MAX_UTF8_BYTES = 1024;
 
 const MAGIC = new Uint8Array([0x4c, 0x4c, 0x43, 0x42, 0x4b, 0x55, 0x50, 0x00]);
-const VERSION = 1;
+// Version 2 binds the SQL schema version and a canonical record manifest to
+// each restore generation. Version 1 remains intentionally unsupported here.
+const VERSION = 2;
 const HEADER_BYTES = 24;
 const PAYLOAD_PREFIX_BYTES = HEADER_BYTES + BACKUP_SALT_BYTES + BACKUP_NONCE_BYTES;
+
+export function validateBackupPassphrase(passphrase: string): Uint8Array {
+  if (passphrase.length < BACKUP_PASSPHRASE_MIN_CHARACTERS) {
+    throw new Error(`Backup passphrase must be at least ${BACKUP_PASSPHRASE_MIN_CHARACTERS} characters.`);
+  }
+  const encoded = new TextEncoder().encode(passphrase);
+  if (encoded.length > BACKUP_PASSPHRASE_MAX_UTF8_BYTES) {
+    encoded.fill(0);
+    throw new Error('Backup passphrase exceeds the 1,024-byte limit.');
+  }
+  return encoded;
+}
 
 function header(ciphertextLength: number): Uint8Array {
   const result = new Uint8Array(HEADER_BYTES);

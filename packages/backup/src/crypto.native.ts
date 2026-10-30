@@ -1,16 +1,11 @@
 import * as Crypto from 'expo-crypto';
 import { aesDecryptAsync, aesEncryptAsync, AESEncryptionKey, AESSealedData } from 'expo-crypto';
 import QuickCrypto from 'react-native-quick-crypto';
-import { authenticatedMetadata, BACKUP_ITERATIONS, BACKUP_MAX_BYTES, decodeBackupEnvelope, encodeBackupEnvelope, type BackupEnvelope } from './format';
+import { authenticatedMetadata, BACKUP_ITERATIONS, BACKUP_MAX_BYTES, decodeBackupEnvelope, encodeBackupEnvelope, validateBackupPassphrase, type BackupEnvelope } from './format';
 
 const utf8 = new TextEncoder();
-const MIN_PASSPHRASE_CHARACTERS = 12;
-
 async function deriveKey(passphrase: string, salt: Uint8Array): Promise<AESEncryptionKey> {
-  if (passphrase.length < MIN_PASSPHRASE_CHARACTERS) {
-    throw new Error(`Backup passphrase must be at least ${MIN_PASSPHRASE_CHARACTERS} characters.`);
-  }
-  const password = utf8.encode(passphrase);
+  const password = validateBackupPassphrase(passphrase);
   const keyBytes = await new Promise<Uint8Array>((resolve, reject) => {
     QuickCrypto.pbkdf2(password, salt, BACKUP_ITERATIONS, 32, 'sha256', (error, derivedKey) => {
       if (error || !derivedKey) {
@@ -52,5 +47,30 @@ export async function decryptBackupPayload(backup: Uint8Array, passphrase: strin
     return plaintext;
   } catch {
     throw new Error('Backup authentication failed. The passphrase may be incorrect or the file may be damaged.');
+  }
+}
+
+/** Measures PBKDF2 only; it uses a synthetic passphrase and never logs key material. */
+export async function benchmarkBackupKdf(samples = 5): Promise<number[]> {
+  if (!Number.isInteger(samples) || samples < 1 || samples > 20) throw new Error('KDF benchmark sample count is invalid.');
+  const password = utf8.encode('SyntheticBenchmarkPassphrase2026');
+  try {
+    const measurements: number[] = [];
+    for (let index = 0; index < samples; index += 1) {
+      const salt = await Crypto.getRandomBytesAsync(16);
+      const started = performance.now();
+      const derived = await new Promise<Uint8Array>((resolve, reject) => {
+        QuickCrypto.pbkdf2(password, salt, BACKUP_ITERATIONS, 32, 'sha256', (error, key) => {
+          if (error || !key) reject(error ?? new Error('PBKDF2 benchmark returned no key.'));
+          else resolve(Uint8Array.from(key));
+        });
+      });
+      measurements.push(performance.now() - started);
+      derived.fill(0);
+      salt.fill(0);
+    }
+    return measurements;
+  } finally {
+    password.fill(0);
   }
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decodeBackupEnvelope, encodeBackupEnvelope } from '../src/format';
+import { decodeBackupEnvelope, encodeBackupEnvelope, validateBackupPassphrase } from '../src/format';
 
 describe('portable backup envelope', () => {
   it('round-trips its versioned authenticated header and ciphertext fields', () => {
@@ -25,5 +25,11 @@ describe('portable backup envelope', () => {
     const unknown = valid.slice();
     unknown[8] = 99;
     expect(() => decodeBackupEnvelope(unknown)).toThrow();
+  });
+
+  it('bounds passphrase size before invoking the native KDF', () => {
+    expect(validateBackupPassphrase('SyntheticPassphrase2026').length).toBeGreaterThan(0);
+    expect(() => validateBackupPassphrase('short')).toThrow('at least 12 characters');
+    expect(() => validateBackupPassphrase('x'.repeat(1025))).toThrow('1,024-byte limit');
   });
 });
