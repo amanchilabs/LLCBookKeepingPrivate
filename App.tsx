@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { capabilitiesFor, SYNTHETIC_PREVIEW_NOTICE } from './apps/mobile/preview-capabilities';
-import { recoverDatabaseRestoreAtStartup } from './packages/backup/src/native-restore-store';
+import { recoverDatabaseRestoreAtStartup } from './packages/storage-native/src/storage-access';
 import { restoreEncryptedBackupFromFile, runBackupKdfBenchmark, runPortableBackupProof, runRestoreFailureInjectionProof, shareEncryptedBackup } from './packages/backup/src/native-portable-backup';
-import { runNativeStorageProof, type NativeStorageProofResult } from './packages/storage-native/src/encrypted-database';
+import { runNativeStorageProof, type NativeStorageProofResult } from './packages/storage-native/src/native-storage-proof';
 
 type PreviewTab = 'Overview' | 'Members' | 'Transactions' | 'Loans' | 'Reports';
 

@@ -3,7 +3,6 @@ import * as SQLite from 'expo-sqlite';
 import * as SecureStore from 'expo-secure-store';
 import { Directory, Paths } from 'expo-file-system';
 import type { RestoreStore } from './restore-coordinator';
-import { recoverInterruptedRestore } from './restore-coordinator';
 import {
   activateRestoreGeneration,
   deleteInactiveGeneration,
@@ -221,12 +220,4 @@ export function validateRestoredProofSnapshot(value: unknown): RestoredProofSnap
   }
   if (totalAttachmentBytes > 6 * 1024 * 1024) throw new Error('Backup attachments exceed the combined restore limit.');
   return canonicalSnapshot(candidate as RestoredProofSnapshot);
-}
-
-export async function recoverDatabaseRestoreAtStartup(): Promise<string> {
-  await ensureDatabaseCatalog();
-  // Recovery runs before another handle can address either generation.
-  await closeAllEncryptedDatabases();
-  const result = await recoverInterruptedRestore(new NativeRestoreStore());
-  return result;
 }

@@ -3,7 +3,6 @@ import * as SecureStore from 'expo-secure-store';
 import * as SQLite from 'expo-sqlite';
 import { Directory, File, Paths } from 'expo-file-system';
 import { openOnlyAfterCipherProbe } from './fail-closed-open';
-import { ensureDatabaseCatalog, openActiveDatabase } from './database-catalog';
 
 export const MAIN_DATABASE = 'llc-local.db';
 const DEVICE_KEY_ALIAS = 'llcbookkeepingprivate.database-key.v1';
@@ -91,70 +90,4 @@ export async function closeAllEncryptedDatabases(): Promise<void> {
     await database.execAsync('PRAGMA journal_mode=DELETE;').catch(() => undefined);
     await database.closeAsync();
   }
-}
-
-export interface NativeStorageProofResult {
-  cipherVersion: string;
-  secureKeyStored: true;
-  databaseReopened: true;
-  rowAndAttachmentPersisted: true;
-  wrongKeyRejected: true;
-  databaseName: string;
-  databasePath: string;
-}
-
-export async function runNativeStorageProof(): Promise<NativeStorageProofResult> {
-  await ensureDatabaseCatalog();
-  const active = await openActiveDatabase();
-  const { database: firstDatabase, generation } = active;
-  let database = firstDatabase;
-  const keyHex = await SecureStore.getItemAsync(generation.keyAlias);
-  if (!keyHex) throw new Error('The active database key is unavailable.');
-  const databasePath = database.databasePath;
-  const cipher = await database.getFirstAsync<{ cipher_version?: string }>('PRAGMA cipher_version');
-  await database.execAsync(`
-    CREATE TABLE IF NOT EXISTS proof_records (
-      id TEXT PRIMARY KEY NOT NULL,
-      note TEXT NOT NULL,
-      attachment BLOB NOT NULL
-    );
-  `);
-  await database.runAsync(
-    'INSERT OR REPLACE INTO proof_records (id, note, attachment) VALUES (?, ?, ?)',
-    'synthetic-proof',
-    'Synthetic storage proof record',
-    new Uint8Array([76, 76, 67, 45, 80, 82, 79, 79, 70]),
-  );
-  await database.closeAsync();
-
-  database = await openEncryptedDatabase(generation.databaseName, keyHex, generation.keyAlias);
-  const persisted = await database.getFirstAsync<{ note: string; attachment: Uint8Array }>(
-    'SELECT note, attachment FROM proof_records WHERE id = ?',
-    'synthetic-proof',
-  );
-  await database.closeAsync();
-  if (persisted?.note !== 'Synthetic storage proof record' || persisted.attachment.length !== 9) {
-    throw new Error('Encrypted database did not preserve its proof record across connections.');
-  }
-
-  const incorrectKey = toHex(await Crypto.getRandomBytesAsync(32));
-  if (incorrectKey === keyHex) throw new Error('Unexpected random key collision.');
-  let wrongKeyRejected = false;
-  try {
-    const wrongDatabase = await openEncryptedDatabase(generation.databaseName, incorrectKey, generation.keyAlias);
-    await wrongDatabase.closeAsync();
-  } catch {
-    wrongKeyRejected = true;
-  }
-  if (!wrongKeyRejected) throw new Error('An incorrect SQLCipher key opened the database.');
-
-  return {
-    cipherVersion: cipher?.cipher_version ?? 'unknown',
-    secureKeyStored: true,
-    databaseReopened: true,
-    rowAndAttachmentPersisted: true,
-    wrongKeyRejected: true,
-    databaseName: generation.databaseName,
-    databasePath,
-  };
 }

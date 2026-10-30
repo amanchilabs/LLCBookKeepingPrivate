@@ -169,12 +169,3 @@ export async function deleteInactiveGeneration(generationId: string): Promise<vo
   await SecureStore.deleteItemAsync(generation.keyAlias);
   await withCatalog(async (database) => database.runAsync('DELETE FROM restore_generations WHERE id = ?', generationId));
 }
-
-export async function openActiveDatabase(): Promise<{ database: SQLite.SQLiteDatabase; generation: DatabaseGeneration }> {
-  await ensureDatabaseCatalog();
-  const activation = await readDatabaseActivation();
-  if (activation.journal) throw new Error('An interrupted restore must be recovered before opening financial storage.');
-  const keyHex = await SecureStore.getItemAsync(activation.active.keyAlias);
-  if (!keyHex) throw new Error('The active database key is missing; restore from an encrypted backup.');
-  return { database: await openEncryptedDatabase(activation.active.databaseName, keyHex, activation.active.keyAlias), generation: activation.active };
-}

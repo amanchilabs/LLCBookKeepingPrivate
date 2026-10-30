@@ -4,10 +4,9 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
 import { benchmarkBackupKdf, decryptBackupPayload, encryptBackupPayload } from './crypto';
 import { BACKUP_MAX_BYTES } from './format';
-import { NativeRestoreStore, recoverDatabaseRestoreAtStartup, validateRestoredProofSnapshot, type RestoredProofSnapshot } from './native-restore-store';
-import { recoverInterruptedRestore, restoreCandidate } from './restore-coordinator';
-import { openActiveDatabase } from '../../storage-native/src/database-catalog';
-import { closeAllEncryptedDatabases } from '../../storage-native/src/encrypted-database';
+import { NativeRestoreStore, validateRestoredProofSnapshot, type RestoredProofSnapshot } from './native-restore-store';
+import { restoreCandidate } from './restore-coordinator';
+import { recoverDatabaseRestoreAtStartup, withActiveDatabase, withStorageTransition } from '../../storage-native/src/storage-access';
 
 const utf8 = new TextEncoder();
 const PROOF_PASSPHRASE = 'SyntheticProofPassphrase2026';
@@ -26,9 +25,7 @@ function toHex(bytes: Uint8Array): string {
 }
 
 async function loadProofPayload(): Promise<Uint8Array> {
-  await recoverDatabaseRestoreAtStartup();
-  const { database } = await openActiveDatabase();
-  try {
+  return await withActiveDatabase(async (database) => {
     const row = await database.getFirstAsync<{ id: string; note: string; attachment: Uint8Array }>(
       'SELECT id, note, attachment FROM proof_records WHERE id = ?', 'synthetic-proof',
     );
@@ -39,9 +36,7 @@ async function loadProofPayload(): Promise<Uint8Array> {
       records: [{ id: row.id, note: row.note, attachmentHex: toHex(row.attachment) }],
     };
     return utf8.encode(JSON.stringify(payload));
-  } finally {
-    await database.closeAsync();
-  }
+  });
 }
 
 export async function shareEncryptedBackup(passphrase: string): Promise<void> {
@@ -83,10 +78,7 @@ export async function restoreEncryptedBackupFromFile(passphrase: string): Promis
   try {
     plaintext = await decryptBackupPayload(encrypted, passphrase);
     const payload = validateRestoredProofSnapshot(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(plaintext)) as unknown);
-    await recoverDatabaseRestoreAtStartup();
-    await closeAllEncryptedDatabases();
-    const result = await restoreCandidate(new NativeRestoreStore(), payload);
-    await new NativeRestoreStore().verifyGeneration(result.activeGeneration);
+    await withStorageTransition(async () => await restoreCandidate(new NativeRestoreStore(), payload));
   } finally {
     plaintext?.fill(0);
     encrypted.fill(0);
@@ -129,11 +121,9 @@ export async function runPortableBackupProof(onProgress?: (step: string) => void
     try { await decryptBackupPayload(truncated, PROOF_PASSPHRASE); } catch { truncationRejected = true; }
     if (!wrongPassphraseRejected || !tamperingRejected || !truncationRejected) throw new Error('Backup authentication failed to reject a negative case.');
 
-    const source = await openActiveDatabase();
-    const original = await source.database.getFirstAsync<{ note: string; attachment: Uint8Array }>(
+    const original = await withActiveDatabase((database) => database.getFirstAsync<{ note: string; attachment: Uint8Array }>(
       'SELECT note, attachment FROM proof_records WHERE id = ?', 'synthetic-proof',
-    );
-    await source.database.closeAsync();
+    ));
     if (!original) throw new Error('Synthetic source record is unavailable.');
     const decryptedForReadback = await decryptBackupPayload(encrypted, PROOF_PASSPHRASE);
     let decoded: RestoredProofSnapshot;
@@ -145,18 +135,12 @@ export async function runPortableBackupProof(onProgress?: (step: string) => void
     if (decoded.records.length !== 1 || decoded.records[0].id !== 'synthetic-proof') throw new Error('Authenticated backup payload did not match its source fixture.');
 
     progress('Activating a new-key database generation and verifying its attachment…');
-    const stateBefore = await openActiveDatabase();
-    const oldGeneration = stateBefore.generation.id;
-    await stateBefore.database.closeAsync();
-    const result = await restoreCandidate(new NativeRestoreStore(), decoded);
+    const oldGeneration = await withActiveDatabase((_database, generation) => Promise.resolve(generation.id));
+    const result = await withStorageTransition(async () => await restoreCandidate(new NativeRestoreStore(), decoded));
     if (result.activeGeneration === oldGeneration) throw new Error('Restore reused the original database generation.');
-    const restoredStore = new NativeRestoreStore();
-    await restoredStore.verifyGeneration(result.activeGeneration);
-    const current = await openActiveDatabase();
-    const restored = await current.database.getFirstAsync<{ note: string; attachment: Uint8Array }>(
+    const restored = await withActiveDatabase((database) => database.getFirstAsync<{ note: string; attachment: Uint8Array }>(
       'SELECT note, attachment FROM proof_records WHERE id = ?', 'synthetic-proof',
-    );
-    await current.database.closeAsync();
+    ));
     if (restored?.note !== original.note || restored.attachment.length !== PROOF_ATTACHMENT.length
       || restored.attachment.some((byte, index) => byte !== original.attachment[index])) {
       throw new Error('The active restored generation did not reproduce the synthetic record and attachment.');
@@ -200,12 +184,14 @@ export async function runRestoreFailureInjectionProof(onProgress?: (step: string
   const results: string[] = [];
   for (const failurePoint of failurePoints) {
     onProgress?.(`Injecting interruption at ${failurePoint}…`);
-    const active = await openActiveDatabase();
-    const oldId = active.generation.id;
-    const previous = await active.database.getFirstAsync<{ note: string }>(
-      'SELECT note FROM proof_records WHERE id = ?', 'synthetic-proof',
-    );
-    await active.database.closeAsync();
+    const before = await withActiveDatabase(async (database, generation) => ({
+      generationId: generation.id,
+      record: await database.getFirstAsync<{ note: string; attachment: Uint8Array }>(
+        'SELECT note, attachment FROM proof_records WHERE id = ?', 'synthetic-proof',
+      ),
+    }));
+    const oldId = before.generationId;
+    const previous = before.record;
     if (!previous) throw new Error('Synthetic active record is missing.');
     const payload: RestoredProofSnapshot = {
       formatVersion: 1,
@@ -220,22 +206,24 @@ export async function runRestoreFailureInjectionProof(onProgress?: (step: string
       }
     });
     try {
-      await restoreCandidate(store, payload);
+      await withStorageTransition(async () => await restoreCandidate(store, payload));
       throw new Error(`Failure injection ${failurePoint} was not reached.`);
     } catch (error) {
       if (!(error instanceof Error) || !error.message.includes(`simulated termination at ${failurePoint}`)) throw error;
     }
-    await recoverInterruptedRestore(store);
-    const recovered = await openActiveDatabase();
-    const row = await recovered.database.getFirstAsync<{ note: string }>(
-      'SELECT note FROM proof_records WHERE id = ?', 'synthetic-proof',
-    );
-    await recovered.database.closeAsync();
-    if (!row || (recovered.generation.id !== oldId && row.note !== payload.records[0].note)
-      || (recovered.generation.id === oldId && row.note !== previous.note)) {
+    const recovered = await withActiveDatabase(async (database, generation) => ({
+      generationId: generation.id,
+      record: await database.getFirstAsync<{ note: string; attachment: Uint8Array }>(
+        'SELECT note, attachment FROM proof_records WHERE id = ?', 'synthetic-proof',
+      ),
+    }));
+    const row = recovered.record;
+    const expectedNote = recovered.generationId === oldId ? previous.note : payload.records[0].note;
+    if (!row || row.note !== expectedNote || row.attachment.length !== PROOF_ATTACHMENT.length
+      || row.attachment.some((byte, index) => byte !== PROOF_ATTACHMENT[index])) {
       throw new Error(`Interrupted restore at ${failurePoint} produced partial or mixed state.`);
     }
-    results.push(`${failurePoint}: PASS (${recovered.generation.id === oldId ? 'original' : 'complete candidate'})`);
+    results.push(`${failurePoint}: PASS (${recovered.generationId === oldId ? 'original' : 'complete candidate'})`);
   }
   return results;
 }
