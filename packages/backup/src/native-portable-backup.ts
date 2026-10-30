@@ -124,9 +124,28 @@ export async function restoreEncryptedBackupFromFile(passphrase: string): Promis
     const encrypted = await file.bytes();
     const plaintext = await decryptBackupPayload(encrypted, passphrase);
     try {
+      const payload = parsePayload(plaintext);
       const target = createRestoreTarget();
       const keyHex = await restoreDeviceKey(target.databaseName, target.keyAlias);
+      const sourceKey = await SecureStore.getItemAsync('llcbookkeepingprivate.database-key.v1');
+      if (sourceKey !== null && sourceKey === keyHex) throw new Error('Restore reused the source device database key.');
       await restoreProofPayload(plaintext, target.databaseName, keyHex);
+      const database = await openEncryptedDatabase(target.databaseName, keyHex);
+      try {
+        for (const row of payload.records) {
+          const restored = await database.getFirstAsync<{ note: string; attachment: Uint8Array }>(
+            'SELECT note, attachment FROM proof_records WHERE id = ?',
+            row.id,
+          );
+          const expectedAttachment = fromHex(row.attachmentHex);
+          if (!restored || restored.note !== row.note || restored.attachment.length !== expectedAttachment.length
+            || restored.attachment.some((byte, index) => byte !== expectedAttachment[index])) {
+            throw new Error('Restored record or attachment did not match the selected backup.');
+          }
+        }
+      } finally {
+        await database.closeAsync();
+      }
     } finally {
       plaintext.fill(0);
       encrypted.fill(0);

@@ -10,7 +10,7 @@
 
 **Spec:** docs/architecture/ADR-0001-native-local-storage-and-portable-backup.md and docs/security/dependency-inventory.md
 
-**Execution status (2026-10-30):** Implemented the Expo scaffold, synthetic-only Web preview, a small pure TypeScript domain slice, the versioned backup envelope, native SQLCipher/SecureStore proof, and native in-memory backup proof. Twelve automated tests pass. The iOS 26.5 Simulator proof passed. Android emulator booted, but its first Gradle build failed with `No space left on device`; no Android application runtime proof exists. File-based fresh-install restore, cross-platform restore, SQLCipher-disabled native build, physical-device tests, and release readiness remain pending. Do not treat this plan as completed for those items and do not start the full bookkeeping MVP yet.
+**Execution status (2026-10-30):** Implemented the Expo scaffold, synthetic-only Web preview, a small pure TypeScript domain slice, the versioned backup envelope, native SQLCipher/SecureStore proof, and native in-memory backup proof. Twelve automated tests pass. The iOS 26.5 Simulator and Android API 36 Pixel 8 AVD native proofs passed; Android's first Gradle attempt exhausted disk space, but a retry built and installed successfully. An iOS-created backup restored and was verified on a freshly reinstalled Android build. Android-to-iOS restore, fresh-install restore on iOS, SQLCipher-disabled native build, physical-device tests, and release readiness remain pending. Do not treat this plan as completed for those items and do not start the full bookkeeping MVP yet.
 
 ## Global Constraints
 

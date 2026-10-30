@@ -143,7 +143,7 @@ function NativeProofScreen() {
     </View>
     {busy && <ActivityIndicator color="#47765b" style={styles.spinner} />}
     <Text accessibilityLiveRegion="polite" style={styles.nativeStatus}>{message}</Text>
-    <Text style={styles.nativeFootnote}>This proof validates a limited synthetic-data slice. It does not establish production readiness or cross-device compatibility until both platforms are tested.</Text>
+    <Text style={styles.nativeFootnote}>This proof validates a limited synthetic-data slice. iOS-to-Android restore passed on simulators; Android-to-iOS restore, physical-device behavior, and production readiness remain unverified.</Text>
   </ScrollView></SafeAreaView>;
 }
 

@@ -1,6 +1,6 @@
 # ADR-0001: Native Local Storage and Portable Backup
 
-- Status: approved architecture direction; iOS simulator storage and in-memory backup proofs passed. Android native runtime, file-based restore, physical-device behavior, and cross-platform compatibility remain pending.
+- Status: approved architecture direction; iOS Simulator and Android emulator SQLCipher/in-memory backup proofs passed. iOS-to-Android file restore passed on simulators/emulator, including Android reinstall; Android-to-iOS restore, physical-device behavior, and full compatibility remain pending.
 - Date: 2026-10-30.
 - Scope: the first native storage, attachment, and encrypted-backup validation slice only.
 - Repository: `veerrajuamanchi/LLCBookKeepingPrivate` is public. Do not put secrets or real financial records in it.
@@ -59,9 +59,9 @@ Proof format version 1 is a bounded single-buffer format, not yet a release form
 5. The synthetic proof payload is a UTF-8 JSON record containing one record and a hex-encoded attachment fixture. This is a proof-only serializer, not the V1 data schema; no local SecureStore key, absolute path, or executable content is included. Full backup must add schema-versioned table allowlists, attachment hashes, migrations, and size limits.
 6. Export writes only encrypted bytes to an app-cache file and invokes the native system share sheet after user action. Restore uses the native document picker, reads only the encrypted artifact into cache, and decrypts in memory. App-created encrypted cache files are deleted in `finally`; plaintext buffers are zeroed best-effort. Share destinations, provider caches, crash snapshots, and runtime memory are outside that deletion guarantee. Production restore staging/swap journaling is not implemented by this proof.
 
-The portable format contains logical data, not the device-keyed SQLCipher file. A restore therefore needs only the backup file and passphrase, creates a fresh local SQLCipher key in SecureStore, and rebuilds database rows. Interoperability is not claimed until a backup created by an iOS native build restores on Android and vice versa.
+The portable format contains logical data, not the device-keyed SQLCipher file. A restore therefore needs only the backup file and passphrase, creates a fresh local SQLCipher key in SecureStore, and rebuilds database rows. An iOS-created file was restored and read back on an Android API 36 emulator, including after reinstalling the Android development build. The reverse Android-to-iOS direction is pending because the iOS Simulator Files provider did not expose the downloaded file. Full cross-platform interoperability is not claimed.
 
-The iOS Simulator proof passed SQLCipher 4.17.0 detection, SecureStore key persistence, encrypted record/BLOB reopen, wrong-key rejection, host SQLite refusal, process restart, and in-memory backup authentication/restore/preservation checks. The Android API 36 emulator booted, but the first Gradle build stopped with `No space left on device`; no Android app runtime proof is claimed. See [native proof results](../security/native-proof-results.md) for the dated result matrix.
+The iOS Simulator and Android API 36 emulator native development builds passed SQLCipher 4.17.0 detection, SecureStore key persistence, encrypted record/BLOB reopen, wrong-key rejection, host SQLite refusal, process restart, and in-memory backup authentication/restore/preservation checks. The Android first Gradle build stopped with `No space left on device`, but a retry built, installed, and passed the emulator checks. An iOS-created portable file also restored and was read back on Android, including after an Android app reinstall. Android-to-iOS file restore and physical-device behavior remain pending. See [native proof results](../security/native-proof-results.md) for the dated result matrix.
 
 Production data may exceed the proof's memory limits. Before release, either establish safe, tested limits or design a chunked authenticated format with independent per-chunk nonces, authenticated ordering, truncation detection, and bounded memory. Do not silently raise the 8 MiB limit.
 
@@ -74,6 +74,8 @@ Production data may exceed the proof's memory limits. Before release, either est
 - The proof's loan policy is an accounting-engine test only; it does not select a contractual rate, compute tax treatment, or assert deductibility.
 
 ### Restore, migration, and failure handling
+
+The bullets below describe the production target strategy, not completed implementation. This proof only parses the bounded proof payload, creates a separate encrypted database with a new local key, writes rows, reopens that database, and reads back each record and attachment. It does not replace an active books database, implement a durable restore journal, or validate a production migration/recovery flow.
 
 - All schema migrations have ordered identifiers and execute in a transaction after SQLCipher/key verification. A migration failure leaves the source database untouched and records only a redacted audit event.
 - Restore validates header bounds before KDF work, validates the GCM tag before payload parsing, validates schema and attachment hashes before staging, and writes to a separately named encrypted staging database protected by a newly generated key.
@@ -114,7 +116,7 @@ Production data may exceed the proof's memory limits. Before release, either est
 - Exact iOS backup exclusion, Android data-extraction rules, file protection, crash/log redaction, memory cleanup, biometric/PIN behavior, and device transfer must be verified on physical devices.
 - App Store privacy disclosures, export-control questions, and encryption declarations require review against the actual release build. No registration, exemption, tax correctness, or legal compliance is assumed.
 - `npm audit --omit=dev` reports 8 transitive dependency advisories (5 low, 3 high), including `deepmerge` prototype poisoning and Zod memory-exhaustion reports through Expo config/CLI paths. The forced audit fix would downgrade Expo to 51; resolve through a compatible SDK update and assess binary reachability before release.
-- The first Android Gradle build exhausted the available disk while indexing native headers. Android SQLCipher, SecureStore, Quick Crypto, backup compatibility, and offline behavior have not been demonstrated.
+- The first Android Gradle build exhausted the available disk while indexing native headers; a retry succeeded and emulator proofs passed. SQLCipher-disabled failure behavior, cross-platform backup compatibility, and offline behavior remain unverified.
 
 ## Evidence links
 
