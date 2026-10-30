@@ -9,6 +9,7 @@ const config: ExpoConfig = {
   version: '0.1.0',
   scheme: 'llcbookkeepingprivate',
   orientation: 'portrait',
+  icon: './assets/branding/exports/app-icon.png',
   updates: {
     enabled: false,
     checkAutomatically: 'NEVER',
@@ -20,6 +21,11 @@ const config: ExpoConfig = {
   android: {
     package: 'com.amanchilabs.llcbookkeepingprivate',
     allowBackup: false,
+    adaptiveIcon: {
+      foregroundImage: './assets/branding/exports/android-foreground.png',
+      backgroundImage: './assets/branding/exports/android-background.png',
+      monochromeImage: './assets/branding/exports/android-monochrome.png',
+    },
   },
   web: {
     bundler: 'metro',

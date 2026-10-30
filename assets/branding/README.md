@@ -21,6 +21,32 @@ Originals were copied from `/Users/veerrajuamanchi/Downloads/LLC` without modifi
 - F is the designated opaque, square store-art source. It exceeds 1024 KB and is not 512 × 512; no export has been derived yet.
 - All five PNGs are 8-bit, non-interlaced. The supplied files have been preserved byte-for-byte under `assets/branding/source/`.
 
-## Pending work
+## Technical exports and integration
 
-No application configuration or derived export has been changed yet. Technical resizing, the 512 × 512 sRGB RGBA Play export, app configuration, configuration checks, visual previews, and native install/build verification remain pending. Foreground safe-area correction and a clean monochrome source require an approved correction or direction before any material artwork change.
+`exports/` contains committed full-canvas Lanczos downsampling of B–F:
+
+- `app-icon.png`: B, 1024 × 1024 opaque RGB, default/iOS/legacy Android icon.
+- `android-foreground.png`: C, 1024 × 1024 RGBA.
+- `android-background.png`: D, 1024 × 1024 opaque RGB.
+- `android-monochrome.png`: E, 1024 × 1024 RGBA. Supplied RGB colors and alpha cutouts are preserved; Android themed icons use its alpha as a mask.
+- `google-play.png`: F, 512 × 512, 8-bit-per-channel RGBA, fully opaque, embedded sRGB ICC profile, below 1024 KB. Store listing upload is manual; this is not the Android launcher icon.
+
+See `exports/manifest.json` for export sizes and SHA-256 hashes. Untagged source RGB is interpreted as sRGB. No crop, padding, repositioning, recoloring, added shadow, or artwork repair is applied. Original SVG A remains an editable master and all six original hashes are checked before export.
+
+Reproduce with Python 3 and Pillow 11.3.0 in a separate virtual environment:
+
+```sh
+python3 -m venv /tmp/llcb-icon-tools
+/tmp/llcb-icon-tools/bin/pip install Pillow==11.3.0
+/tmp/llcb-icon-tools/bin/python scripts/branding/export-icons.py
+```
+
+`app.config.ts` references only committed repository-relative exports through `icon` and `android.adaptiveIcon`. Identifiers, display name, security/backup plugins, release configuration, and splash configuration are unchanged. Native projects are generated from config and remain ignored under the existing repository policy.
+
+## Visual evidence and limitations
+
+[Mask contact sheet](previews/mask-contact-sheet.png) contains illustrative circle, rounded-square, square, and alpha-tinted themed masks, plus the full-square iOS and Play exports. These are host-rendered previews, **not installed-device screenshots**. Actual launcher masks, scaling, motion, and tint vary. The themed preview uses the supplied alpha; it is not a repaired monochrome asset.
+
+The existing right/bottom safe-area overshoot and speckled monochrome cutouts remain. No material artwork correction was authorized or performed. These limitations prevent claiming universal adaptive-mask quality or a clean monochrome silhouette. Native build/install status and exact tested source SHAs are recorded in `verification.md`.
+
+Technical Play output follows [Google Play format specifications](https://developer.android.com/distribute/google-play/resources/icon-design-specifications); configuration follows [Expo icon properties](https://docs.expo.dev/versions/latest/config/app/). No store acceptance or release readiness is claimed.

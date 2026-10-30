@@ -1,0 +1,42 @@
+{
+  "app-icon.png": {
+    "source": "LLC_Apple_default_icon_1024_1024.png",
+    "width": 1024,
+    "height": 1024,
+    "mode": "RGB",
+    "bytes": 856669,
+    "sha256": "296866e7a3761ad7214e77adac7ff4ae8d7ba619baf33da2de91dee06e902734"
+  },
+  "android-foreground.png": {
+    "source": "LLC_Android_foreground_transparent_1024_1024.png",
+    "width": 1024,
+    "height": 1024,
+    "mode": "RGBA",
+    "bytes": 429834,
+    "sha256": "a48f18c1d98b93eac6b917787917261ee38dd881e7031c6e195401225ce74ff8"
+  },
+  "android-background.png": {
+    "source": "LLC_Android_smooth_blue_background_1024_1024.png",
+    "width": 1024,
+    "height": 1024,
+    "mode": "RGB",
+    "bytes": 742088,
+    "sha256": "426e6c64cac31a4ee2dbd8a263a7daedde30d58cad17c999e60251eab2acbb0a"
+  },
+  "android-monochrome.png": {
+    "source": "LLC_Android_monochrome_foreground.png",
+    "width": 1024,
+    "height": 1024,
+    "mode": "RGBA",
+    "bytes": 290524,
+    "sha256": "c5b0e66c8f79fbe012bc0bbc32690c30810b5f529122ce335692cf1bcd270811"
+  },
+  "google-play.png": {
+    "source": "LLC Document Security Icon.png",
+    "width": 512,
+    "height": 512,
+    "mode": "RGBA",
+    "bytes": 262317,
+    "sha256": "ed986a49307c8474c2dfe309f78f3b6a01995ab6ee306ecdbfe97439532a1a11"
+  }
+}
