@@ -1,6 +1,6 @@
 # Encrypted database restore state machine
 
-Status: implemented for the synthetic proof database; simulator-injected failure checks passed on iOS. It is not a production financial database restore certification.
+Status: implemented for the synthetic proof database; application storage access now uses a shared gate and scoped leases. Native process-kill validation is pending. This is not a production financial database restore certification.
 
 ## State and storage
 
@@ -29,10 +29,10 @@ An interruption before activation leaves the old generation active; an incomplet
 
 ## Connection and file lifecycle
 
-- The current proof uses short-lived handles and an in-process registry so restore can checkpoint and close them before switching/deleting generations. The current mobile shell has no concurrent ledger writer.
-- There is not yet a production-wide transaction gate that blocks arbitrary app callers from opening or writing the active database during restore. A production database manager must own all SQLite handles, serialize writes, drain transactions, and reject writes for the duration of activation. This is an architecture blocker before real financial data.
+- Ordinary active-database operations use `withActiveDatabase`, a shared coordinator, and callback-scoped leases. Restore and startup recovery take the exclusive barrier, stop new operations, drain admitted operations, close registered handles, validate one active generation, and only then reopen access. Raw SQLite opening is confined to storage/catalog/restore internals.
+- This barrier is unit-tested, including started statements, stale lease rejection, concurrent operation draining, key-error locking, and retry. Actual native concurrent save/read/export/attachment operations during restore have not been exercised on the current source SHA.
 - Database, catalog, WAL, SHM, and rollback-journal files live inside the app-private database directory. The generation activation avoids renaming an open main database file. WAL is checkpointed and journal mode is set to DELETE before candidate close and cleanup.
-- The simulator failure harness throws at named durable boundaries, then invokes the startup recovery path, which closes/reopens SQLite handles and verifies persisted state. It is native SQLite/catalog evidence, but does not forcibly kill the OS process at each boundary. Hard process termination at every checkpoint remains pending.
+- Earlier report evidence described ten simulator-injected exceptions, but did not preserve the exact tested source SHA. It is historical and is not evidence for current source SHA `78cf3096e17e7b3a531b1ccd3c4032cb948f97ad`. A controlled external process-kill harness, new-process recovery checks, and recovery-retry interruptions remain pending.
 - If app termination occurs while SQLite itself is committing a transaction, recovery relies on SQLite's transaction journal. This behavior still needs device and power-loss testing.
 
 ## File and plaintext handling
@@ -44,6 +44,6 @@ An interruption before activation leaves the old generation active; an incomplet
 
 ## Failure-injection results
 
-- Pure TypeScript coordinator tests inject exceptions before and after candidate staging, activation, verification, journal finalization, rollback, and cleanup. They restart the coordinator over durable fake-store state and assert original-or-complete-candidate only.
-- iOS Simulator native test executed 10 injected boundaries: after candidate close; after registration; before and after the activation transaction; before and after candidate reopen/verification; before and after journal clear; and before and after old-generation deletion. Every run recovered to the complete original or complete candidate, including BLOB checksum checks. These were native simulator database tests with injected exceptions, not physical-device tests or hard process kills.
-- Android native failure injection is pending because this host could not complete the Android build: two attempts failed with `No space left on device`; a subsequent Expo launch attempt also failed its ADB boot/property query. No Android restore result is claimed for this branch.
+- Pure TypeScript coordinator tests passed at the current tested source SHA and assert barrier ordering and lease behavior. They do not simulate an OS process termination.
+- Native exception-injection evidence is historical without a verified source SHA and is not credited to the current build.
+- Current-branch Android and iOS debug builds passed. No native storage/restore proof screen was completed: the shared Android emulator was concurrently used by another app, and the iOS simulator/Metro launch encountered host `ENOSPC`. No current native recovery result is claimed.

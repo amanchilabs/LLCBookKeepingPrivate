@@ -1,115 +1,178 @@
-# Architecture, Security, and Backup Validation Report
+# Native Storage and Backup Validation Report
 
-Status: **incomplete; synthetic-data only.** This report records current branch work and explicitly distinguishes earlier prerequisite evidence. It is not a security review approval or production-readiness claim.
+Status: **incomplete; synthetic data only.** This report records the bounded
+continuation results and the remaining validation gates. It is not security,
+financial-data, or release approval.
 
-Updated: 2026-10-30. All records and attachments used in tests are synthetic.
+Updated: 2026-10-30. All fixtures are synthetic.
 
-## Dependency base and reproducibility
+## Tested source and current checkpoint
 
-- The dependent branch is based on prerequisite `feature/native-security-backup-poc-20261030` at SHA `8379b710302c9231299363e5a745dc939068d357`; it is not based on main. The public remote is `https://github.com/veerrajuamanchi/LLCBookKeepingPrivate.git`.
-- Current toolchain: Node `24.22.2`, npm `11.6.2`, Expo SDK `58.0.21`, TypeScript `6.0.3`, Vitest `5.0.5`; exact direct package versions are in the lockfile and [dependency inventory](dependency-inventory.md).
-- A clean-clone reproduction from the pushed current branch, installation, native regeneration/build, and automated checks is recorded below after it is performed. No ignored files may be copied into that clone.
+- Validation branch: `feature/native-validation-20261030-939a045`.
+- Native builds and the full automated suite below tested source SHA
+  `78cf3096e17e7b3a531b1ccd3c4032cb948f97ad`.
+- The branch starts at verified prerequisite
+  `feature/restore-security-validation-20261030`, SHA
+  `939a045f6d738c0c7c9158056946882e3c3fd215`.
+- Documentation-only changes after the native build do not receive those
+  build claims. Their new commit SHA is only a checkpoint for this report.
+- Toolchain: Node 24.22.2, npm 11.6.2, Expo 58.0.21, React Native 0.88.1,
+  Xcode 26.6, CocoaPods 1.17.0, Android SDK platform/build-tools 37, NDK
+  27.1.12297006, Gradle 9.4.1, and the installed Java 25 runtime.
 
-## Checks actually executed on this branch
+## Current-commit builds
 
-- `npm ci`: passed earlier in the branch worktree from the committed lockfile; 555 packages installed, 556 audited. Current branch has package-lock unchanged from the prerequisite SHA.
-- `npm test`: passed, 30 tests (preview 2, fail-closed/build policy 3, domain 8, backup format/coordinator 17).
-- `npx tsc --noEmit`: passed.
-- `npx expo install --check`: passed, dependencies up to date.
-- Native build policy direct probe using Node 24: default enables SQLCipher; `LLCB_SECURITY_NEGATIVE_SQLITE=1` disables it; setting that flag with `EAS_BUILD_PROFILE=production` throws. `packages/storage-native/test/fail-closed-open.test.ts` proves the cipher probe occurs before persistent storage open and fails if absent. No native negative-build binary/runtime test was completed.
-- `swiftc -frontend -parse ios/LLCBookKeepingPrivate/AppDelegate.swift` and isolated `swiftc -typecheck` of the generated backup-exclusion helper: passed after the plugin fix. Xcode Simulator build initially failed on two generated helper type errors (`URL` mutability and missing `try`). Both were corrected in `plugins/with-ios-backup-exclusion.cjs` and regenerated into ignored `ios/` source. A post-fix full build was deferred after available disk dropped to 1.9 GiB; therefore current-branch iOS app compile remains pending. `pod install` itself succeeded with 112 pods before the first compile.
-- `git diff --check`: passed at the report update checkpoint (rerun before commit).
-- npm audits were run at `2026-10-30T18:19:36Z` UTC using Node `24.22.2` / npm `11.6.2`; both full and production-omitted audit commands exited 1. Exact JSON is in `audits/`. Two underlying advisories remain open; details and exploit paths are in [the advisory assessment](audits/npm-audit-2026-10-30.md). No forced downgrade, override, or suppression was used.
-
-## Native and platform evidence matrix
-
-| Validation | Current dependent branch result | Device type / exact path |
+| Platform | Result and exact configuration | Artifact/evidence |
 | --- | --- | --- |
-| SQLCipher enabled, SecureStore key, persistence, wrong-key rejection, host SQLite cannot read database | Earlier prerequisite native build passed on both platforms. On this branch, iOS Simulator hot-reloaded the new restore/catalog code and reran SQLCipher/catalog checks; Android was not rebuilt. | iOS 26.5 iPhone 17 Simulator; Android API 36 Pixel 8 AVD evidence is prerequisite-only. No physical devices. |
-| SQLCipher disabled, no plaintext fallback | Automated ordering test and build-policy tests pass. Native negative build and on-device storage-path scan pending. | Unit tests only. |
-| Current branch restore activation and recovery | Passed 10/10 named failure injection boundaries using actual SQLCipher generation/catalog databases and synthetic attachment BLOBs. Each injected exception was followed by recovery in the same simulator process. | iOS 26.5 iPhone 17 Simulator. Not a hard kill or device power-loss test. |
-| Native backup KDF latency | PBKDF2-HMAC-SHA-256, 600,000 iterations, 5 samples; median 45.3 ms, p95 53.1 ms. Measures KDF only; no peak-memory measurement. | iPhone 17 Simulator. Android and physical low-end targets pending. |
-| Portable v2 artifact, both platform directions | Not tested. Previous prerequisite branch tested an older v1 iOS-created artifact on Android and attempted Android-to-iOS through a picker; v1 is no longer accepted and does not satisfy current v2 compatibility. | Current v2 crypto and file restore need actual artifact transfer and independent compatibility check on both platform builds. |
-| Fresh-install restore on both platforms | Current v2: pending. Previous Android fresh reinstall used v1 only. | Simulator/emulator route pending. |
-| Interrupted restore and full process restart | Native exception recovery above passed; actual forced process termination after each durable transition pending. | Simulator-only injected exceptions. |
-| SQLCipher build and restore on Android current branch | Pending. Two build attempts failed `No space left on device`; later Expo Android launch reported ADB boot/property query timeout. | Pixel 8 API 36 emulator present; no usable current-branch app result. |
-| iOS backup exclusion | Expo prebuild generated AppDelegate code with a launch-time directory exclusion and fail-closed precondition. First Xcode compile caught two Swift type errors in the helper; the config plugin was corrected and generated Swift regenerated. A post-fix full build was not run because available disk fell to 1.9 GiB, below the 1.4 GiB Pods install plus Xcode build outputs. No device inspection. | Generated-source fix; full compile/runtime pending. |
-| Android OS backup/device-transfer exclusions | Generated manifest/XML were inspected: `allowBackup=false`, full backup excludes root/file/database/sharedpref/external, Android 12+ cloud and device transfer excludes same domains. No current branch Android build or OEM transfer test. | Generated configuration only. Android docs note device-transfer behavior can vary by implementation. |
-| No-Metro offline operation / release network configuration | App config sets updates disabled, no OTA package/backend, and no app fetch/WebSocket/upload call was found. Development manifest still contains INTERNET. Standalone/release-like build and external-network-isolated run pending. | Source/config review only. |
-| Plaintext temporary files, logs, exports, sharing | Code path review: import requests no picker cache copy and bounds before decrypt; decrypted payload is in memory and best-effort zero-filled; export stages encrypted bytes only and deletes app cache file after share returns. Full filesystem/log/crash/export/share-destination audit pending. | Code inspection only; no forensic scan. |
-| Biometric/key failure and recovery | No biometric/PIN gate exists. Existing DB with missing key fails closed. User-initiated restore from an independently selected backup is intended to create a new generation key, but recovery UX when current catalog key itself is unavailable is not implemented. | Architecture/code review. |
+| Android | **Build passed.** `:app:assembleDebug`, default Expo configuration (SQLCipher on; no negative-build flag; not a production/release build), API 37 compile SDK / API 36 target, all four configured ABIs. Build completed in 14m24s. | Debug APK SHA-256 `e6ff3637e0d19520607ac8e9f88edbb6a9f8c2cc0682d1f50d121a9daf7ae43d`; temporary artifact `/tmp/LLCBookKeepingPrivate-android-debug-78cf309.apk`. |
+| iOS | **Build passed.** Xcode Debug, `iphonesimulator26.5`, destination LLCBookKeepingPrivate iPhone 17 Simulator (`D48E279D-DFAC-440C-A125-CA614E8A1D29`), `CODE_SIGNING_ALLOWED=NO`, default Expo configuration (SQLCipher on). CocoaPods installed 112 pods. | App executable SHA-256 `dbde9b942354aa5ef025692fd8f8e2a6cae88b6f1ba9be21f3c12493b9bf5a82`; temporary app `/tmp/LLCBookKeepingPrivate-ios-debug-78cf309.app`. |
 
-## Restore state machine and failure injection
+These are full native debug builds at the tested SHA. They do not establish a
+signed release build, store packaging, or the SQLCipher-disabled behavior.
 
-The candidate is a distinct SQLCipher database generation with a distinct random local key. Input authentication and structural limits are checked before staging. Candidate rows, attachment BLOBs, schema version, row count, and canonical hash are validated before closing; catalog activation pointer and `{previous,candidate}` journal are committed together. Candidate is reopened and revalidated before journal clear. Only then is the old generation deleted. Startup recovery finalizes a valid candidate or rolls back to the preserved original if the candidate is invalid. See [restore-state-machine.md](restore-state-machine.md) for connection, WAL, journal, and cleanup behavior.
+## Automated checks at the tested SHA
 
-On the iOS Simulator, injected exceptions at all ten boundaries produced either the entire original or entire candidate record+attachment. This simulated exceptions and called recovery without terminating the process; hard process termination/power loss was not tested. Orphan inactive generations can remain if interruption occurs before activation or during cleanup; the active generation remains whole. The shell has no production writer barrier, so arbitrary concurrent write lifecycle is an architecture blocker.
+- `npm test`: passed, 38 tests (preview 2; security/config/storage 13; domain
+  8; backup 15).
+- `npm run typecheck`: passed.
+- `git diff --check`: passed before the source checkpoint.
+- Storage unit tests cover serialized generic operations, draining before a
+  transition, stale database-lease rejection, wait-for-started-statements,
+  locking after key-access errors, and retry after a valid active generation.
+  Error-classification tests cover temporary lock, cancelled authentication,
+  unavailable/corrupt key, and generic key-store failure. These are unit tests,
+  not native concurrent save/read/export/attachment tests.
 
-## Cross-platform restore matrix
+## Native runtime and recovery evidence
 
-| Artifact / path | Format | Result |
-| --- | --- | --- |
-| iOS-generated v1 proof -> Android Downloads picker -> fresh Android install | Previous prerequisite branch format v1 | Passed then; does not establish v2 compatibility and the old format is unsupported by current parser. |
-| Android-generated v1 proof -> iOS Files picker | Previous prerequisite branch format v1 | Import did not complete because simulator Files provider showed unavailable Recents; picker UX failure does not answer crypto compatibility. |
-| Android-generated v2 file -> iOS native restore | Current format v2 | Pending. |
-| iOS-generated v2 file -> Android native restore | Current format v2 | Pending. |
-| iOS fresh-install v2 restore | Current format v2 | Pending. |
-| Android fresh-install v2 restore | Current format v2 | Pending. |
+- Android debug APK installed on the available API 36 emulator and Metro
+  generated a current-branch bundle. That emulator was concurrently running a
+  separate DermaPrivate development session and returned to that app. I did
+  not terminate or clear the shared emulator. No Android storage-proof screen
+  or restore result is claimed.
+- iOS app installed on the dedicated simulator and Metro bundled the current
+  source. The simulator ran out of host disk during the launch attempt; Metro
+  reported `ENOSPC` writing Expo's device metadata. No successful in-app
+  recovery, storage proof, or restore result is claimed.
+- Exception-injection tests remain distinct from process-kill tests. The
+  earlier report described ten iOS Simulator exception boundaries, but it did
+  not preserve the exact source SHA used. That historical result is not
+  credited to this tested SHA. The full automated suite passed at this SHA;
+  native exception recovery was not rerun here.
+- No controlled external process-termination harness has been added. Durable
+  activation/journal/key-persistence transitions, interrupted recovery retry,
+  and record/attachment-hash checks across a new process remain pending.
+  Nothing here is power-loss durability evidence.
 
-No current v2 cross-platform compatibility claim is made. Required test should separately run byte-level crypto vectors over the same artifact on each native crypto implementation, then file-based picker/import on each platform. Picker/provider behavior must be reported separately from authentication/format compatibility.
+## Storage coordination and inaccessible-key handling
 
-## Privacy and encryption compliance inventory
+The source now routes ordinary active-database callbacks through a shared
+coordinator and lease. Restore/recovery closes admission, drains admitted work,
+closes registered connections, validates a single active generation before
+resuming, and rejects stale leases. A failed key-access classification can
+lock new access until explicit retry.
 
-- No account, server, analytics, ads, crash reporting, remote config, bank connection, payment processing, or AI dependency/service is configured. Expo updates are disabled. `expo-updates-interface` is present through development client support; `expo-updates` is absent. Developer-run package/native builds use network to fetch dependencies and SDK artifacts.
-- Expo FileSystem has network-capable APIs, but only local file methods are called. DocumentPicker and Sharing are explicit user actions; provider/recipient behavior is not controlled by the app.
-- Android development manifest contains INTERNET. Release manifest/entitlement review is pending. No-Metro offline test is pending.
-- iOS backup exclusion is configured but not compiled/runtime verified. Android generated exclusions are not device/OEM verified. OS transfer settings are not a substitute for the encrypted user backup.
-- Apple documents `isExcludedFromBackup` as a resource attribute that file operations can reset and as guidance rather than an absolute backup guarantee; directory exclusion and behavior after SQLite writes need device verification. Android Auto Backup rules distinguish cloud and device-to-device transfer and are OS/target dependent. See [Apple exclusion behavior](https://developer.apple.com/documentation/foundation/optimizing-your-app-s-data-for-icloud-backup) and [Android Auto Backup rules](https://developer.android.com/identity/data/autobackup).
-- Live SQLCipher data protection does not cover all memory, logs, screenshots, user exports, share destinations, app/provider caches, compromised devices, or inaccessible key recovery. No absolute privacy claim is made.
-- App Store privacy disclosures and applicable encryption export requirements need review against the actual release artifact. No store declaration, exemption, registration, or compliance conclusion is asserted.
-- Biometric/PIN access, key reset/loss flow, crash-log review, temporary-file forensics, database file-protection class, and external sharing disclosures remain open.
+When a database file exists but its SecureStore key is missing or malformed,
+the code refuses to create a replacement key. The app has a locked/recovery
+state, explains that no server or escrow exists, and requires explicit
+confirmation before authenticated portable-backup replacement. On the
+unusable-catalog path it archives local files before preparing a replacement
+catalog. Without a usable old key or a valid independent backup and passphrase,
+the existing encrypted data cannot be recovered.
 
-## Clean-clone reproduction
+Evidence at this SHA is source review and unit tests only. Native concurrent
+save/read/export/attachment behavior, authentication/keychain failures,
+preservation of actual local files, confirmed recovery, and no-key/no-backup
+UI outcomes were not exercised because the native app could not be run
+reliably. Do not treat those code paths as validated behavior.
 
-From `/tmp/llcb-clean-clone`, cloned from the pushed remote branch at `17259e23a90b6c36a587c74f11b6fcf0ee38f38e` without copying any ignored files:
+## Current backup-format matrix
 
-- `npm ci` with Node `24.22.2` and npm `11.6.2`: passed; 555 packages installed, 556 audited. npm reported the same 8 advisory entries (5 low, 3 high) described above.
-- `expo prebuild --clean --no-install`: passed and regenerated both `ios/` and `android/` using committed Expo config and config plugins. Generated iOS AppDelegate contains the fixed backup-exclusion helper. Android manifest and backup-rule resources were regenerated with `allowBackup=false` and cloud/device-transfer exclusions.
-- Android manifest/full-backup/data-extraction XML parsed successfully. `swiftc -frontend -parse` passed on generated AppDelegate. These are generation/syntax checks, not native app builds.
-- `npm test`: passed, 30 tests (2 preview, 5 security-config/storage, 8 domain, 15 backup). `npm run typecheck`: passed. `npm run doctor`: passed.
-- `git status` remained clean after generation; `ios/`, `android/`, and `node_modules/` are ignored. No required native manual edits were found outside config/plugins.
-- Native build: not run from the clone because only 1.4 GiB remained after installation/regeneration. In the implementation worktree, current-branch Android Gradle attempts failed with `No space left on device`; the current-branch iOS build installed Pods but its first compile found two plugin-generated Swift errors. Those source errors were corrected and regenerated, and the isolated helper typechecked, but a post-fix full native build could not fit. No current-branch Android app build or post-fix iOS app build is claimed.
+The current envelope header is version 2; the synthetic proof payload schema
+still identifies itself as payload/schema version 1. They are separate
+version fields. Existing unit tests cover envelope parsing, fixed header
+parameters, bounds, bad magic, truncation, and unsupported versions. They do
+not exercise the native AES/PBKDF implementation against files on both
+platforms.
 
-External prerequisites: macOS, Node 24.22.2/npm 11.6.2, Xcode 26.6 and an installed iOS simulator runtime, CocoaPods 1.17.0, Android SDK/NDK and compatible Java/Gradle, sufficient disk for native dependencies/build outputs, and Apple signing identity only for physical-device installation. No secrets are committed.
+| Test | Current result |
+| --- | --- |
+| iOS-created v2 file restored on Android | Not run |
+| Android-created v2 file restored on iOS | Not run |
+| Fresh-install restore on iOS | Not run |
+| Fresh-install restore on Android | Not run |
+| Wrong passphrase, tampering, truncation, unsupported version as native file tests | Not run; only envelope-level automated cases are current |
+| Missing old local key and existing-data preservation after rejected restore | Not run natively |
+| Picker/provider UX on both platforms | Not run; must remain distinct from file-format/crypto evidence |
 
-## Blockers
+The earlier v1 artifact result is not counted toward v2 portability.
 
-### A. Architecture blockers
+## Negative encryption and clean-clone builds
 
-- No application-wide storage/write gate serializes writes and closes all handles across restore.
-- No hard process-kill/power-loss transition test or native SQLCipher-disabled build.
-- Actual current-v2 cross-platform and fresh-install artifact restores are untested.
-- Current catalog-key-loss recovery path is not available in an already damaged installation.
-- iOS directory exclusion has not compiled/runtime verified; no full temporary-file/log/share audit.
-- Android current-branch build, KDF measurements, and release-like offline validation are pending.
+- Automated policy tests verify SQLCipher is on by default, a separate
+  `LLCB_SECURITY_NEGATIVE_SQLITE=1` build disables it, and that flag is rejected
+  for the production profile. The SQLCipher-disabled native app was not built,
+  installed, or scanned for plaintext DB/WAL/SHM/journal files.
+- A current-SHA clean-clone build was not run. Earlier clone evidence at
+  `17259e23a90b6c36a587c74f11b6fcf0ee38f38e` is not evidence for this SHA.
+  Re-run clean-clone iOS and Android builds without copying ignored files.
+- External prerequisites include macOS, Node 24/npm 11, Xcode 26.6 and an iOS
+  26.5 simulator runtime, CocoaPods, Android SDK/build tools/NDK, compatible
+  Java/Gradle, and sufficient disk. Physical installation additionally needs
+  Apple signing credentials; none are required for the simulator compile
+  reported above.
 
-### B. Blockers to using real financial data
+## Dependency advisory disposition
 
-- Restore transaction coordinator and failure-preservation behavior are still proof-only; arbitrary writers and real schemas/migrations/attachments are unsupported.
-- No verified recovery if local catalog key is inaccessible, no biometric/PIN experience, and no full attachment storage design.
-- Dependency advisories remain open in Expo config/CLI build paths.
-- No physical-device validation of key storage, backup exclusions, KDF latency, or device transfer.
-- No forensic audit of plaintext temporary files, OS/provider copies, logs, and exports.
+The package lockfile did not change in this continuation. The committed audit
+snapshot uses Node 24.22.2/npm 11.6.2 and reports two unique upstream
+advisories through Expo's build/development graph:
 
-### C. Store-release blockers
+- `deepmerge@4.3.1`, `GHSA-gcqx-w48m-w2h4`, reached through `expo@58.0.21` and
+  `@expo/config@58.0.9`. The advisory lists no patched release. This is
+  configuration/build-time exposure; app financial requests do not call it.
+- `zod@3.25.76`, `GHSA-mrhx-c7xc-m3w5`, reached through Expo CLI 58.1.17.
+  The fix is Zod 4.6.6, outside the CLI's declared Zod 3 range. The described
+  input is development-server DevTools plugin output, not a shipped financial
+  record path.
 
-- Physical iOS and Android release-like build/install/offline testing and platform privacy behavior.
-- Store privacy disclosures and encryption export review against actual binaries.
-- Dependency advisory remediation or reviewed mitigation with release evidence.
-- Device security, crash/log redaction, app lock, backup/restore interruption, migration, and accessibility/release QA.
+Full package paths, inputs, mitigation limits, and original advisory links are
+in [the audit assessment](audits/npm-audit-2026-10-30.md). Findings remain
+open. No downgrade, override, suppression, or residual risk acceptance was
+made. The audit was not rerun in this continuation; reassess before release.
 
-## Recommendation
+## Deferred hardware and release checks
 
-**Do not begin the full bookkeeping MVP yet.** Continue this validation slice: the current iOS Simulator recovery proof is useful, but current-branch Android build, SQLCipher-disabled native behavior, cross-platform v2 file restore, clean-clone reproduction, and writer/key-loss architecture are still unresolved. Synthetic-data preview work may continue only if it does not add real data intake or imply native security validation.
+Physical-device KDF latency, Keychain/Keystore behavior, key loss and restore,
+backup/transfer and OEM behavior, signed release install, privacy disclosures,
+and store review remain pending. A simulator KDF benchmark is not backup
+password-security validation and is not repeated or relied on in this report.
 
-When devices become available, use the [physical-device validation script](physical-device-test-script.md). No physical-device results are claimed here.
+### Gates
+
+**A. Before synthetic-data bookkeeping implementation:** run current-SHA native
+runtime proof on isolated iOS and Android targets; complete native concurrent
+access, missing-key, v2 file interoperability/fresh-install, SQLCipher-negative,
+and clean-clone builds; and run the controlled process-kill/recovery matrix.
+
+**B. Before using real financial data:** additionally complete physical-device
+key and transfer checks, production schema/migration and attachment design,
+plaintext/log/export review, and compatible remediation or separately reviewed
+mitigation for open advisories. No real-data use is approved by this report.
+
+**C. Before store release:** additionally build and install signed release
+artifacts, verify offline behavior and backup policy on supported OS/OEM paths,
+complete accessibility/privacy/export-control/store disclosures, and close the
+security and dependency review. No release readiness is implied.
+
+## Environment blocker
+
+After both native builds and simulator launch attempts, the workspace volume
+had 185 MiB free. The current iOS launch hit `ENOSPC`; continuing process-kill,
+negative-build, or clean-clone work safely requires at least 5 GiB available on
+that volume. The next environment action is to approve targeted cleanup of
+reproducible user-level build caches or provide a volume with at least 5 GiB
+free. No unrelated workspace, broad user cache, backup, or simulator contents
+were deleted. Current generated native projects, CocoaPods, and node_modules
+are ignored build inputs. The APK and iOS app bundle listed above are temporary
+files outside Git; they are not required application assets.
