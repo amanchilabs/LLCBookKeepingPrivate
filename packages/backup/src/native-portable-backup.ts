@@ -6,7 +6,12 @@ import { benchmarkBackupKdf, decryptBackupPayload, encryptBackupPayload } from '
 import { BACKUP_MAX_BYTES } from './format';
 import { NativeRestoreStore, validateRestoredProofSnapshot, type RestoredProofSnapshot } from './native-restore-store';
 import { restoreCandidate } from './restore-coordinator';
-import { recoverDatabaseRestoreAtStartup, withActiveDatabase, withStorageTransition } from '../../storage-native/src/storage-access';
+import {
+  recoverDatabaseRestoreAtStartup,
+  withActiveDatabase,
+  withPortableBackupRestoreTransition,
+  withStorageTransition,
+} from '../../storage-native/src/storage-access';
 
 const utf8 = new TextEncoder();
 const PROOF_PASSPHRASE = 'SyntheticProofPassphrase2026';
@@ -58,13 +63,14 @@ export async function shareEncryptedBackup(passphrase: string): Promise<void> {
   }
 }
 
-export async function restoreEncryptedBackupFromFile(passphrase: string): Promise<void> {
+export async function restoreEncryptedBackupFromFile(passphrase: string, replacementConfirmed = false): Promise<boolean> {
+  if (!replacementConfirmed) throw new Error('Confirm local data replacement before choosing a backup.');
   const selection = await DocumentPicker.getDocumentAsync({
     type: 'application/octet-stream',
     copyToCacheDirectory: false,
     multiple: false,
   });
-  if (selection.canceled) return;
+  if (selection.canceled) return false;
   const selected = selection.assets[0];
   if (!selected) throw new Error('No backup file was selected.');
   if (selected.size !== undefined && selected.size > BACKUP_MAX_BYTES) {
@@ -78,7 +84,11 @@ export async function restoreEncryptedBackupFromFile(passphrase: string): Promis
   try {
     plaintext = await decryptBackupPayload(encrypted, passphrase);
     const payload = validateRestoredProofSnapshot(JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(plaintext)) as unknown);
-    await withStorageTransition(async () => await restoreCandidate(new NativeRestoreStore(), payload));
+    await withPortableBackupRestoreTransition(
+      async () => await restoreCandidate(new NativeRestoreStore(), payload),
+      replacementConfirmed,
+    );
+    return true;
   } finally {
     plaintext?.fill(0);
     encrypted.fill(0);

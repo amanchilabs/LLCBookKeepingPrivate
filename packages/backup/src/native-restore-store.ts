@@ -14,7 +14,8 @@ import {
   rollbackRestoreActivation,
   type DatabaseGeneration,
 } from '../../storage-native/src/database-catalog';
-import { closeAllEncryptedDatabases, openEncryptedDatabase } from '../../storage-native/src/encrypted-database';
+import { closeAllEncryptedDatabases, openEncryptedDatabase, readStoredDeviceKeyHex } from '../../storage-native/src/encrypted-database';
+import { resolveStoredDatabaseKey, SecureKeyAccessError } from '../../storage-native/src/secure-key-access';
 
 export interface RestoredProofRecord {
   id: string;
@@ -172,8 +173,8 @@ export class NativeRestoreStore implements RestoreStore<RestoredProofSnapshot> {
   async verifyGeneration(generationId: string): Promise<void> {
     this.checkpoint('before-candidate-reopen');
     const generation = await getDatabaseGeneration(generationId);
-    const key = await SecureStore.getItemAsync(generation.keyAlias);
-    if (!key) throw new Error('Restore candidate encryption key is unavailable.');
+    const key = resolveStoredDatabaseKey(await readStoredDeviceKeyHex(generation.keyAlias), true);
+    if (!key) throw new SecureKeyAccessError('key-missing');
     const database = await openEncryptedDatabase(generation.databaseName, key, generation.keyAlias);
     try {
       await checkDatabase(database);

@@ -71,6 +71,11 @@ export class StorageAccessCoordinator {
     return result;
   }
 
+  /** Stop new work and lock only after all already-acquired operations settle. */
+  lock(error: Error): void {
+    void this.withExclusiveTransition(async () => { throw error; }).catch(() => undefined);
+  }
+
   private async acquireOperation(): Promise<void> {
     while (true) {
       if (this.state === 'ready') {

@@ -1,6 +1,5 @@
 import * as Crypto from 'expo-crypto';
-import * as SecureStore from 'expo-secure-store';
-import { openEncryptedDatabase } from './encrypted-database';
+import { openEncryptedDatabase, readStoredDeviceKeyHex } from './encrypted-database';
 import { withActiveDatabase, withStorageTransition } from './storage-access';
 
 const PROOF_ATTACHMENT = new Uint8Array([76, 76, 67, 45, 80, 82, 79, 79, 70]);
@@ -48,7 +47,7 @@ export async function runNativeStorageProof(): Promise<NativeStorageProofResult>
 
   let wrongKeyRejected = false;
   await withStorageTransition(async () => {
-    const keyHex = await SecureStore.getItemAsync(written.generation.keyAlias);
+    const keyHex = await readStoredDeviceKeyHex(written.generation.keyAlias);
     if (!keyHex) throw new Error('The active database key is unavailable.');
     const incorrectKey = toHex(await Crypto.getRandomBytesAsync(32));
     if (incorrectKey === keyHex) throw new Error('Unexpected random key collision.');

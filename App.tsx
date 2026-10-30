@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
+import { ActivityIndicator, Alert, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { capabilitiesFor, SYNTHETIC_PREVIEW_NOTICE } from './apps/mobile/preview-capabilities';
-import { recoverDatabaseRestoreAtStartup } from './packages/storage-native/src/storage-access';
+import { recoverDatabaseRestoreAtStartup, retryDatabaseRestoreRecovery } from './packages/storage-native/src/storage-access';
 import { restoreEncryptedBackupFromFile, runBackupKdfBenchmark, runPortableBackupProof, runRestoreFailureInjectionProof, shareEncryptedBackup } from './packages/backup/src/native-portable-backup';
 import { runNativeStorageProof, type NativeStorageProofResult } from './packages/storage-native/src/native-storage-proof';
+import { SecureKeyAccessError } from './packages/storage-native/src/secure-key-access';
 
 type PreviewTab = 'Overview' | 'Members' | 'Transactions' | 'Loans' | 'Reports';
 
@@ -110,21 +111,75 @@ function accentColor(accent: string) {
 
 function NativeProofScreen() {
   const [busy, setBusy] = useState(false);
+  const [storageStatus, setStorageStatus] = useState<'recovering' | 'ready' | 'locked'>('recovering');
   const [message, setMessage] = useState('Run the native checks on an iOS or Android development build.');
   const [storageResult, setStorageResult] = useState<NativeStorageProofResult | null>(null);
   const [passphrase, setPassphrase] = useState('SyntheticProofPassphrase2026');
   const [backupResult, setBackupResult] = useState<string | null>(null);
   useEffect(() => {
     recoverDatabaseRestoreAtStartup()
-      .then((result) => setMessage(`Startup restore recovery: ${result}. Run native checks on this development build.`))
-      .catch((error: unknown) => setMessage(error instanceof Error ? `Startup storage recovery failed closed: ${error.message}` : 'Startup storage recovery failed closed.'));
+      .then((result) => {
+        setStorageStatus('ready');
+        setMessage(`Startup restore recovery: ${result}. Run native checks on this development build.`);
+      })
+      .catch((error: unknown) => {
+        setStorageStatus('locked');
+        setMessage(error instanceof Error ? error.message : 'Local storage is locked pending recovery.');
+      });
   }, []);
   const run = async (task: () => Promise<void>) => {
     setBusy(true);
     setMessage('Running native proof…');
     try { await task(); setMessage('Proof finished. Review each result below.'); }
-    catch (error) { setMessage(error instanceof Error ? error.message : 'Native proof failed.'); }
+    catch (error) {
+      if (error instanceof SecureKeyAccessError) {
+        setStorageStatus('locked');
+        setMessage(error.message);
+      } else {
+        setMessage(error instanceof Error ? error.message : 'Native proof failed.');
+      }
+    }
     finally { setBusy(false); }
+  };
+  const retryRecovery = () => {
+    setStorageStatus('recovering');
+    void run(async () => {
+      try {
+        const result = await retryDatabaseRestoreRecovery();
+        setStorageStatus('ready');
+        setMessage(`Local storage recovery completed: ${result}.`);
+      } catch (error) {
+        setStorageStatus('locked');
+        throw error;
+      }
+    });
+  };
+  const confirmPortableRestore = () => {
+    Alert.alert(
+      'Replace local data from backup?',
+      'The selected encrypted backup will become the active local database after it is authenticated and verified. The prior active generation may be removed after verification. If the old catalog key is unavailable, its database files are kept in a local recovery archive.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Choose encrypted backup',
+          style: 'destructive',
+          onPress: () => {
+            const wasLocked = storageStatus !== 'ready';
+            setStorageStatus('recovering');
+            void run(async () => {
+              try {
+                const restored = await restoreEncryptedBackupFromFile(passphrase, true);
+                setStorageStatus(restored || !wasLocked ? 'ready' : 'locked');
+                setMessage(restored ? 'Portable backup restored and the active generation was verified.' : 'Backup selection was cancelled; local data was unchanged.');
+              } catch (error) {
+                setStorageStatus(error instanceof SecureKeyAccessError || wasLocked ? 'locked' : 'ready');
+                throw error;
+              }
+            });
+          },
+        },
+      ],
+    );
   };
   const runStorage = () => run(async () => setStorageResult(await runNativeStorageProof()));
   const runBackup = () => run(async () => {
@@ -144,18 +199,29 @@ function NativeProofScreen() {
     <Text style={styles.nativeTitle}>Native security proof</Text>
     <Text style={styles.nativeSubtitle}>Synthetic records only. Run this screen in iOS and Android development builds; Expo Go is not supported.</Text>
     <View style={styles.nativeNotice}><Text style={styles.nativeNoticeText}>The browser preview cannot validate SQLCipher, platform key storage, or device security.</Text></View>
+    {storageStatus === 'recovering' && <View style={styles.nativePanel}><ActivityIndicator color="#47765b" /><Text style={styles.nativeStatus}>Checking restore journal and active database before enabling storage…</Text></View>}
+    {storageStatus === 'locked' && <View style={styles.nativePanel}>
+      <Text style={styles.nativeSectionTitle}>Local storage is locked</Text>
+      <Text style={styles.nativeBody}>{message}</Text>
+      <Text style={styles.nativeBody}>Existing encrypted files have not been replaced. You can retry device key access or restore a separately encrypted portable backup without the old database key. Without a usable local key or a valid backup and its passphrase, the encrypted local data cannot be recovered. There is no recovery server or key escrow.</Text>
+      <Pressable accessibilityRole="button" disabled={busy} onPress={retryRecovery} style={[styles.secondaryButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Retry local key access</Text></Pressable>
+      <TextInput accessibilityLabel="Backup passphrase" secureTextEntry value={passphrase} onChangeText={setPassphrase} style={styles.passphraseInput} autoCapitalize="none" />
+      <Pressable accessibilityRole="button" disabled={busy} onPress={confirmPortableRestore} style={[styles.nativeButton, busy && styles.buttonDisabled]}><Text style={styles.nativeButtonText}>Restore encrypted backup</Text></Pressable>
+    </View>}
+    {storageStatus === 'ready' && <>
     <View style={styles.nativePanel}><Text style={styles.nativeSectionTitle}>Encrypted local database</Text><Text style={styles.nativeBody}>Creates a 32-byte random device key, stores it with SecureStore, checks SQLCipher availability, writes a synthetic record and attachment, reopens the database, then verifies a wrong key fails.</Text>
       <Pressable accessibilityRole="button" disabled={busy} onPress={runStorage} style={[styles.nativeButton, busy && styles.buttonDisabled]}><Text style={styles.nativeButtonText}>Run SQLCipher + key-storage proof</Text></Pressable>
       {storageResult && <View style={styles.resultBox}><Text style={styles.resultText}>SQLCipher: {storageResult.cipherVersion}{'\n'}Secure key stored: PASS{'\n'}Database reopened: PASS{'\n'}Record + attachment persisted: PASS{'\n'}Wrong key rejected: PASS{'\n'}Database: {storageResult.databaseName}{'\n'}Path: {storageResult.databasePath}</Text></View>}
     </View>
     <View style={styles.nativePanel}><Text style={styles.nativeSectionTitle}>Encrypted portable backup</Text><Text style={styles.nativeBody}>AES-256-GCM, random 16-byte salt, 12-byte nonce, PBKDF2-HMAC-SHA-256 at 600,000 iterations, and authenticated format metadata. Restore builds and validates a separate SQLCipher database with a new local key, then switches an encrypted catalog pointer in a durable SQLite transaction.</Text>
       <TextInput accessibilityLabel="Backup passphrase" secureTextEntry value={passphrase} onChangeText={setPassphrase} style={styles.passphraseInput} autoCapitalize="none" />
-      <View style={styles.nativeButtonRow}><Pressable accessibilityRole="button" disabled={busy} onPress={() => run(() => shareEncryptedBackup(passphrase))} style={[styles.nativeButton, busy && styles.buttonDisabled]}><Text style={styles.nativeButtonText}>Export encrypted proof backup</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={() => run(() => restoreEncryptedBackupFromFile(passphrase))} style={[styles.secondaryButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Restore backup file</Text></Pressable></View>
+      <View style={styles.nativeButtonRow}><Pressable accessibilityRole="button" disabled={busy} onPress={() => run(() => shareEncryptedBackup(passphrase))} style={[styles.nativeButton, busy && styles.buttonDisabled]}><Text style={styles.nativeButtonText}>Export encrypted proof backup</Text></Pressable><Pressable accessibilityRole="button" disabled={busy} onPress={confirmPortableRestore} style={[styles.secondaryButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Restore backup file</Text></Pressable></View>
       <Pressable accessibilityRole="button" disabled={busy} onPress={runBackup} style={[styles.secondaryButton, styles.fullWidthButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Run in-memory restore and tamper proofs</Text></Pressable>
       <Pressable accessibilityRole="button" disabled={busy} onPress={runRestoreRecovery} style={[styles.secondaryButton, styles.fullWidthButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Inject restore interruptions and recover</Text></Pressable>
       <Pressable accessibilityRole="button" disabled={busy} onPress={runKdfBenchmark} style={[styles.secondaryButton, styles.fullWidthButton, busy && styles.buttonDisabled]}><Text style={styles.secondaryButtonText}>Measure native backup KDF</Text></Pressable>
       {backupResult && <View style={styles.resultBox}><Text style={styles.resultText}>{backupResult}</Text></View>}
     </View>
+    </>}
     {busy && <ActivityIndicator color="#47765b" style={styles.spinner} />}
     <Text accessibilityLiveRegion="polite" style={styles.nativeStatus}>{message}</Text>
     <Text style={styles.nativeFootnote}>This proof validates a limited synthetic-data slice. Run file-based restore in both platform directions. Simulator/emulator results are not physical-device evidence; production readiness remains unverified.</Text>

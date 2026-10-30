@@ -3,9 +3,10 @@ import * as SecureStore from 'expo-secure-store';
 import * as SQLite from 'expo-sqlite';
 import { Directory, File, Paths } from 'expo-file-system';
 import { openOnlyAfterCipherProbe } from './fail-closed-open';
+import { classifySecureKeyAccessError, resolveStoredDatabaseKey, SecureKeyAccessError } from './secure-key-access';
 
 export const MAIN_DATABASE = 'llc-local.db';
-const DEVICE_KEY_ALIAS = 'llcbookkeepingprivate.database-key.v1';
+export const MAIN_DATABASE_KEY_ALIAS = 'llcbookkeepingprivate.database-key.v1';
 const HEX = /^[0-9a-f]{64}$/;
 
 function databaseDirectory(): Directory {
@@ -16,25 +17,32 @@ function toHex(bytes: Uint8Array): string {
   return Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
 }
 
-export async function getOrCreateDeviceKeyHex(databaseName = MAIN_DATABASE, keyAlias = DEVICE_KEY_ALIAS): Promise<string> {
+export async function getOrCreateDeviceKeyHex(databaseName = MAIN_DATABASE, keyAlias = MAIN_DATABASE_KEY_ALIAS): Promise<string> {
   const directory = databaseDirectory();
   directory.create({ idempotent: true, intermediates: true });
-  const existing = await SecureStore.getItemAsync(keyAlias);
-  if (existing !== null) {
-    if (!HEX.test(existing)) throw new Error('Stored database key is malformed; refusing to open the local database.');
-    return existing;
-  }
-  if (new File(directory, databaseName).exists) {
-    throw new Error('Encrypted database exists but its local key is missing. Restore from an encrypted backup; a replacement key was not created.');
-  }
+  const databaseFile = new File(directory, databaseName);
+  const existing = resolveStoredDatabaseKey(await readStoredDeviceKeyHex(keyAlias), databaseFile.exists);
+  if (existing !== null) return existing;
 
   const generated = toHex(await Crypto.getRandomBytesAsync(32));
-  await SecureStore.setItemAsync(keyAlias, generated, {
-    keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
-  });
-  const persisted = await SecureStore.getItemAsync(keyAlias);
-  if (persisted !== generated) throw new Error('Secure key storage did not persist the generated database key.');
+  try {
+    await SecureStore.setItemAsync(keyAlias, generated, {
+      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    });
+  } catch (error) {
+    throw classifySecureKeyAccessError(error);
+  }
+  const persisted = await readStoredDeviceKeyHex(keyAlias);
+  if (persisted !== generated) throw new SecureKeyAccessError('key-store-failure');
   return generated;
+}
+
+export async function readStoredDeviceKeyHex(keyAlias: string): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(keyAlias);
+  } catch (error) {
+    throw classifySecureKeyAccessError(error);
+  }
 }
 
 const openConnections = new Set<SQLite.SQLiteDatabase>();
@@ -42,7 +50,7 @@ const openConnections = new Set<SQLite.SQLiteDatabase>();
 export async function openEncryptedDatabase(
   databaseName = MAIN_DATABASE,
   suppliedKeyHex?: string,
-  keyAlias = DEVICE_KEY_ALIAS,
+  keyAlias = MAIN_DATABASE_KEY_ALIAS,
 ): Promise<SQLite.SQLiteDatabase> {
   // SQLCipher must be proved on a memory-only connection before SQLite sees
   // any persistent financial database path. Expo Go/negative builds may have

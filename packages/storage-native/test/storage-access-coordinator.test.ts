@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createDatabaseLease } from '../src/database-lease';
+import { canReplaceStorageWithPortableBackup, classifySecureKeyAccessError, resolveStoredDatabaseKey, SecureKeyAccessError } from '../src/secure-key-access';
 import { StorageAccessCoordinator } from '../src/storage-access-coordinator';
 
 function deferred<T = void>() {
@@ -9,6 +10,34 @@ function deferred<T = void>() {
 }
 
 describe('application-wide storage access coordinator', () => {
+  it('classifies supported SecureStore authentication and key-access failures without exposing native messages', () => {
+    expect(classifySecureKeyAccessError({ code: 'ERR_KEY_CHAIN', message: 'User interaction is not allowed.' }).state)
+      .toBe('temporarily-locked');
+    expect(classifySecureKeyAccessError({ code: 'ERR_AUTHENTICATION', message: 'User canceled the authentication' }).state)
+      .toBe('authentication-cancelled');
+    expect(classifySecureKeyAccessError({ code: 'ERR_DECRYPT', message: 'Could not decrypt stored value' }).state)
+      .toBe('key-unavailable-or-corrupt');
+    expect(classifySecureKeyAccessError({ code: 'ERR_KEY_STORE', message: 'Key store access error' }).state)
+      .toBe('key-store-failure');
+    expect(classifySecureKeyAccessError({ code: 'ERR_UNEXPECTED', message: 'sensitive native detail' }).message)
+      .not.toContain('sensitive native detail');
+  });
+
+  it('refuses to create a replacement key when an encrypted database file already exists', () => {
+    expect(() => resolveStoredDatabaseKey(null, true)).toThrow('Existing encrypted files were preserved');
+    expect(resolveStoredDatabaseKey(null, false)).toBeNull();
+    expect(() => resolveStoredDatabaseKey('not-a-32-byte-key', true)).toThrow('Stored key data is malformed');
+  });
+
+  it('allows confirmed backup recovery only for missing or unusable stored catalog material', () => {
+    expect(canReplaceStorageWithPortableBackup(new SecureKeyAccessError('key-missing'))).toBe(true);
+    expect(canReplaceStorageWithPortableBackup(new SecureKeyAccessError('catalog-missing'))).toBe(true);
+    expect(canReplaceStorageWithPortableBackup(new SecureKeyAccessError('malformed-key'))).toBe(true);
+    expect(canReplaceStorageWithPortableBackup(new SecureKeyAccessError('temporarily-locked'))).toBe(false);
+    expect(canReplaceStorageWithPortableBackup(new SecureKeyAccessError('authentication-cancelled'))).toBe(false);
+    expect(canReplaceStorageWithPortableBackup(new Error('SQLCipher rejected the database'))).toBe(false);
+  });
+
   it('rejects database work through a stale lease after its callback ends', async () => {
     const rawDatabase = {
       databasePath: '/synthetic/database.db',
@@ -120,5 +149,25 @@ describe('application-wide storage access coordinator', () => {
 
     await expect(access.withExclusiveTransition(async () => 'verified original')).resolves.toBe('verified original');
     await expect(access.withOperation(async () => 'active generation')).resolves.toBe('active generation');
+  });
+
+  it('locks new access after a key error and waits for current operations to settle', async () => {
+    const access = new StorageAccessCoordinator({ initiallyReady: true });
+    const finishCurrent = deferred();
+    const errorRecorded = deferred();
+    const current = access.withOperation(async () => {
+      access.lock(new Error('key access unavailable'));
+      errorRecorded.resolve();
+      await finishCurrent.promise;
+      return 'settled';
+    });
+    await errorRecorded.promise;
+    const queued = access.withOperation(async () => 'must not run');
+
+    finishCurrent.resolve();
+    await expect(current).resolves.toBe('settled');
+    await expect(queued).rejects.toThrow('key access unavailable');
+    await expect(access.withExclusiveTransition(async () => 'active generation verified')).resolves.toBe('active generation verified');
+    await expect(access.withOperation(async () => 'ready')).resolves.toBe('ready');
   });
 });

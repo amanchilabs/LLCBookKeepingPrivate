@@ -1,11 +1,13 @@
 import * as SQLite from 'expo-sqlite';
-import { Directory, Paths } from 'expo-file-system';
+import { Directory, File, Paths } from 'expo-file-system';
 import * as SecureStore from 'expo-secure-store';
 import { closeAllEncryptedDatabases, getOrCreateDeviceKeyHex, MAIN_DATABASE, openEncryptedDatabase } from './encrypted-database';
+import { SecureKeyAccessError } from './secure-key-access';
 
 export const CATALOG_DATABASE = 'llc-database-catalog.db';
 export const CATALOG_KEY_ALIAS = 'llcbookkeepingprivate.catalog-key.v1';
 export const INITIAL_GENERATION = 'initial';
+export const PORTABLE_RESTORE_REQUIRED_MARKER = '.portable-backup-restore-required';
 
 export interface DatabaseGeneration {
   id: string;
@@ -59,6 +61,11 @@ export async function getDatabaseGeneration(id: string): Promise<DatabaseGenerat
 /** Create the encrypted catalog and register a legacy proof database on first use. */
 export async function ensureDatabaseCatalog(): Promise<DatabaseActivation> {
   await closeAllEncryptedDatabases();
+  const directory = databaseDirectory();
+  if (directory.exists && !new File(directory, CATALOG_DATABASE).exists
+    && directory.list().some((entry) => entry.name !== PORTABLE_RESTORE_REQUIRED_MARKER)) {
+    throw new SecureKeyAccessError('catalog-missing');
+  }
   await getOrCreateDeviceKeyHex(CATALOG_DATABASE, CATALOG_KEY_ALIAS);
   await withCatalog(async (database) => {
     await database.execAsync(`
