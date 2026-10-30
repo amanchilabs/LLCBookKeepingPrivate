@@ -16,6 +16,11 @@ No existing security/backup/release blocker is resolved by this work.
 
 ## Environment
 
+**Reconciliation:** [current environment audit](environment-reconciliation.md)
+corrects the Java diagnosis below: Homebrew JDKs 17.0.15 and 24.0.1 exist but
+default discovery fails. Expo SDK 58 requires Xcode 26.4+, beyond the lower-level
+React Native helper minimum. Original build outcomes below are unchanged.
+
 Initial disk check: 77,547,756 KiB available (73.96 GiB), exceeding the prior
 5 GiB minimum estimate. No cleanup or user-data deletion was performed.
 Node 24.3.0; npm 11.4.2; Python 3.11 with Pillow 11.3.0 in an isolated temporary
