@@ -17,6 +17,26 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     .reduce((sum, activity) => sum + activity.amountCents, 0n);
   const distributionsCents = capitalInPeriod.filter((activity) => activity.kind === 'distribution')
     .reduce((sum, activity) => sum + activity.amountCents, 0n);
+  const paymentEventsInPeriod = snapshot.guaranteedPaymentCashEvents
+    .filter((event) => event.date >= fromDate && event.date <= throughDate);
+  const servicesCashNetCents = paymentEventsInPeriod
+    .filter((event) => event.classification === 'services')
+    .reduce((sum, event) => sum + event.amountCents, 0n);
+  const capitalUseCashNetCents = paymentEventsInPeriod
+    .filter((event) => event.classification === 'use-of-capital')
+    .reduce((sum, event) => sum + event.amountCents, 0n);
+  const servicesPaidCents = paymentEventsInPeriod
+    .filter((event) => event.classification === 'services' && event.kind === 'payment')
+    .reduce((sum, event) => sum + event.amountCents, 0n);
+  const servicesReturnedCents = paymentEventsInPeriod
+    .filter((event) => event.classification === 'services' && event.kind === 'reversal')
+    .reduce((sum, event) => sum - event.amountCents, 0n);
+  const capitalUsePaidCents = paymentEventsInPeriod
+    .filter((event) => event.classification === 'use-of-capital' && event.kind === 'payment')
+    .reduce((sum, event) => sum + event.amountCents, 0n);
+  const capitalUseReturnedCents = paymentEventsInPeriod
+    .filter((event) => event.classification === 'use-of-capital' && event.kind === 'reversal')
+    .reduce((sum, event) => sum - event.amountCents, 0n);
 
   const refresh = async () => {
     if (!snapshot.business) return;
@@ -64,6 +84,17 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       {capitalInPeriod.some((activity) => activity.requiresCpaReview)
         ? <Text style={uiStyles.helper}>Property contribution valuation is flagged for CPA review. Book capital does not establish tax-basis capital or outside basis.</Text>
         : <Text style={uiStyles.helper}>Book capital does not establish tax-basis capital or outside basis.</Text>}
+    </Panel>
+    <Panel>
+      <Text style={uiStyles.sectionTitle}>Guaranteed payment workpapers · cash dates</Text>
+      <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate}. Only actual payments and returned funds appear here; unpaid obligations stay off the cash-basis P&L.</Text>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Services actually paid</Text><Money cents={servicesPaidCents} /></View>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Services returned</Text><Money cents={servicesReturnedCents} /></View>
+      <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net services cash expense</Text><Money cents={servicesCashNetCents} /></View>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Use-of-capital payments</Text><Money cents={capitalUsePaidCents} /></View>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Use-of-capital returns</Text><Money cents={capitalUseReturnedCents} /></View>
+      <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net use-of-capital cash expense</Text><Money cents={capitalUseCashNetCents} /></View>
+      <Text style={uiStyles.helper}>Separate book categories only. CPA review is required for tax classification, deductibility, and capitalization. This workpaper is not a tax form.</Text>
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Available from persisted books</Text>

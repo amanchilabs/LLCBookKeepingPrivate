@@ -67,7 +67,8 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
   };
 
   const beginCorrection = (transaction: TransactionRecord) => {
-    if ((transaction.kind !== 'income' && transaction.kind !== 'expense') || transaction.originalTransactionId) return;
+    if ((transaction.kind !== 'income' && transaction.kind !== 'expense')
+      || transaction.originalTransactionId || transaction.isGuaranteedPayment) return;
     setError(null);
     setNotice(null);
     setCorrecting(transaction);
@@ -206,11 +207,14 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
 }
 
 function TransactionRow({ transaction, onCorrect }: { transaction: TransactionRecord; onCorrect: () => void }) {
-  const canCorrect = (transaction.kind === 'income' || transaction.kind === 'expense') && !transaction.originalTransactionId;
+  const canCorrect = (transaction.kind === 'income' || transaction.kind === 'expense')
+    && !transaction.originalTransactionId && !transaction.isGuaranteedPayment;
   const roleLabel = transaction.correctionRole === 'reversal'
     ? 'Reversal'
     : transaction.correctionRole === 'replacement'
       ? 'Replacement'
+      : transaction.isGuaranteedPayment && transaction.originalTransactionId === transaction.id
+        ? 'Original · reversed'
       : transaction.originalTransactionId
         ? 'Original · corrected'
         : transaction.kind === 'opening-balance'

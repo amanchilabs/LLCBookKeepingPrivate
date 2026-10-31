@@ -5,15 +5,21 @@ import {
   createCashAccountInDatabase,
   correctCashTransactionInDatabase,
   ensureBookkeepingSchema,
+  createGuaranteedPaymentObligationInDatabase,
   getBookkeepingSnapshotFromDatabase,
+  recordGuaranteedPaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
+  reverseGuaranteedPaymentInDatabase,
   replaceMembersInDatabase,
   type BookkeepingSnapshot,
   type CashAccountInput,
   type CashBasisReport,
   type CorrectCashTransactionInput,
   type CashTransactionInput,
+  type CreateGuaranteedPaymentObligationInput,
+  type RecordGuaranteedPaymentInput,
+  type ReverseGuaranteedPaymentInput,
   type MemberCapitalActivityInput,
   type ReplaceMembersInput,
 } from './bookkeeping-store';
@@ -28,6 +34,8 @@ function emptySnapshot(): BookkeepingSnapshot {
     transactions: [],
     capitalActivities: [],
     memberCapitalSummaries: [],
+    guaranteedPaymentInstallments: [],
+    guaranteedPaymentCashEvents: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }
@@ -53,6 +61,18 @@ export async function recordCashTransaction(input: CashTransactionInput): Promis
 
 export async function recordMemberCapitalActivity(input: MemberCapitalActivityInput): Promise<void> {
   await useActiveBooks((database) => recordMemberCapitalActivityInDatabase(database, input));
+}
+
+export async function createGuaranteedPaymentObligation(input: CreateGuaranteedPaymentObligationInput): Promise<void> {
+  await useActiveBooks((database) => createGuaranteedPaymentObligationInDatabase(database, input));
+}
+
+export async function recordGuaranteedPayment(input: RecordGuaranteedPaymentInput): Promise<void> {
+  await useActiveBooks((database) => recordGuaranteedPaymentInDatabase(database, input));
+}
+
+export async function reverseGuaranteedPayment(input: ReverseGuaranteedPaymentInput): Promise<void> {
+  await useActiveBooks((database) => reverseGuaranteedPaymentInDatabase(database, input));
 }
 
 export async function correctCashTransaction(input: CorrectCashTransactionInput): Promise<void> {

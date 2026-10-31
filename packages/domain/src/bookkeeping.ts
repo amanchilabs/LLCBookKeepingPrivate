@@ -16,6 +16,8 @@ export interface BusinessSetupInput {
   ownershipConfirmed: boolean;
 }
 
+export type GuaranteedPaymentRecurrence = 'one-time' | 'monthly' | 'quarterly';
+
 export const SUGGESTED_MEMBER_INTERESTS_BASIS_POINTS = [4_000, 2_000, 2_000, 2_000] as const;
 
 export function parseOwnershipPercent(text: string): number {
@@ -41,6 +43,36 @@ function assertValidCalendarDate(value: string, field: string): void {
   if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
     throw new Error(`Enter a valid date for ${field}.`);
   }
+}
+
+export function guaranteedPaymentDueDates(
+  firstDueDate: string,
+  recurrence: GuaranteedPaymentRecurrence,
+  installmentCount: number,
+): string[] {
+  assertValidCalendarDate(firstDueDate, 'first guaranteed payment due date');
+  if (!Number.isInteger(installmentCount) || installmentCount < 1 || installmentCount > 120) {
+    throw new Error('Guaranteed payment schedules must contain between 1 and 120 installments.');
+  }
+  if (recurrence === 'one-time') {
+    if (installmentCount !== 1) throw new Error('A one-time guaranteed payment must have one installment.');
+    return [firstDueDate];
+  }
+  if (recurrence !== 'monthly' && recurrence !== 'quarterly') {
+    throw new Error('Choose one-time, monthly, or quarterly recurrence.');
+  }
+  if (installmentCount < 2) throw new Error('A recurring guaranteed payment must have at least two installments.');
+
+  const [anchorYear, anchorMonth, anchorDay] = firstDueDate.split('-').map(Number);
+  const monthStep = recurrence === 'monthly' ? 1 : 3;
+  return Array.from({ length: installmentCount }, (_, index) => {
+    const monthIndex = anchorMonth - 1 + index * monthStep;
+    const year = anchorYear + Math.floor(monthIndex / 12);
+    const month = (monthIndex % 12) + 1;
+    const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    const day = Math.min(anchorDay, lastDay);
+    return `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  });
 }
 
 export function assertOwnershipTotals(members: readonly MemberInterestInput[]): void {

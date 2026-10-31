@@ -10,6 +10,9 @@ import {
   correctCashTransactionInDatabase,
   ensureBookkeepingSchema,
   getBookkeepingSnapshotFromDatabase,
+  createGuaranteedPaymentObligationInDatabase,
+  recordGuaranteedPaymentInDatabase,
+  reverseGuaranteedPaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
   replaceMembersInDatabase,
@@ -271,6 +274,209 @@ describe('bookkeeping repository SQL contract', () => {
     expect(database.database.prepare("SELECT COUNT(*) AS count FROM accounts WHERE kind = 'equity' AND code LIKE 'member-capital:%'").get().count).toBe(0);
     database.close();
   });
+
+  it('keeps obligations off the books, allocates partial payments by cash date, and reopens balances after a dated reversal', async () => {
+    const path = databasePath();
+    let database = new TestDatabase(path);
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Operating checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 125_000n,
+      openingTransactionId: 'opening-1', openingJournalEntryId: 'opening-entry-1',
+    });
+    await createCashAccountInDatabase(database, {
+      id: 'refund-bank', businessId: 'business-1', name: 'Refund checking', kind: 'bank', openingBalanceCents: 0n,
+    });
+    await createCashAccountInDatabase(database, {
+      id: 'cash-small', businessId: 'business-1', name: 'Cash on hand', kind: 'cash', openingDate: '2024-01-01',
+      openingBalanceCents: 500n, openingTransactionId: 'cash-opening', openingJournalEntryId: 'cash-opening-entry',
+    });
+    await createGuaranteedPaymentObligationInDatabase(database, {
+      id: 'services-obligation', businessId: 'business-1', memberId: 'member-1',
+      classification: 'services', recurrence: 'monthly', firstDueDate: '2026-12-31',
+      installmentCount: 2, installmentAmountCents: 10_000n, description: 'Monthly service commitment',
+    });
+    await createGuaranteedPaymentObligationInDatabase(database, {
+      id: 'capital-obligation', businessId: 'business-1', memberId: 'member-1',
+      classification: 'use-of-capital', recurrence: 'one-time', firstDueDate: '2026-12-31',
+      installmentCount: 1, installmentAmountCents: 7_500n, description: 'One-time capital commitment',
+    });
+
+    let snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(125_000n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n });
+    expect(snapshot.guaranteedPaymentInstallments.map((installment) => [installment.dueDate, installment.outstandingAmountCents])).toEqual([
+      ['2026-12-31', 7_500n], ['2026-12-31', 10_000n], ['2027-01-31', 10_000n],
+    ]);
+    expect(snapshot.guaranteedPaymentCashEvents).toEqual([]);
+    await expect(recordGuaranteedPaymentInDatabase(database, {
+      id: 'overallocated-payment', transactionId: 'overallocated-transaction', journalEntryId: 'overallocated-entry',
+      businessId: 'business-1', memberId: 'member-1', date: '2027-01-05', cashAccountId: 'bank-1',
+      description: 'Over-allocated payment', allocations: [
+        { installmentId: 'services-obligation:installment:1', amountCents: 10_001n },
+      ],
+    })).rejects.toThrow('cannot exceed the installment balance');
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM guaranteed_payment_payments').get().count).toBe(0);
+
+    await createGuaranteedPaymentObligationInDatabase(database, {
+      id: 'large-obligation', businessId: 'business-1', memberId: 'member-1',
+      classification: 'services', recurrence: 'one-time', firstDueDate: '2027-01-05',
+      installmentCount: 1, installmentAmountCents: 501n, description: 'Beyond available cash',
+    });
+    const beforeLateFailure = {
+      entries: database.database.prepare('SELECT COUNT(*) AS count FROM journal_entries').get().count,
+      transactions: database.database.prepare('SELECT COUNT(*) AS count FROM transactions').get().count,
+    };
+    await expect(recordGuaranteedPaymentInDatabase(database, {
+      id: 'cash-short-payment', transactionId: 'cash-short-transaction', journalEntryId: 'cash-short-entry',
+      businessId: 'business-1', memberId: 'member-1', date: '2027-01-05', cashAccountId: 'cash-small',
+      description: 'Payment exceeds available cash', allocations: [
+        { installmentId: 'large-obligation:installment:1', amountCents: 501n },
+      ],
+    })).rejects.toThrow('cash account balance would become negative');
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM journal_entries').get().count).toBe(beforeLateFailure.entries);
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM transactions').get().count).toBe(beforeLateFailure.transactions);
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM guaranteed_payment_payments').get().count).toBe(0);
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM guaranteed_payment_allocations').get().count).toBe(0);
+
+    await recordGuaranteedPaymentInDatabase(database, {
+      id: 'payment-1', transactionId: 'payment-transaction-1', journalEntryId: 'payment-entry-1',
+      businessId: 'business-1', memberId: 'member-1', date: '2027-01-05', cashAccountId: 'bank-1',
+      description: 'Partial service payment', allocations: [
+        { installmentId: 'services-obligation:installment:1', amountCents: 4_000n },
+        { installmentId: 'services-obligation:installment:2', amountCents: 2_000n },
+      ],
+    });
+    await recordGuaranteedPaymentInDatabase(database, {
+      id: 'payment-2', transactionId: 'payment-transaction-2', journalEntryId: 'payment-entry-2',
+      businessId: 'business-1', memberId: 'member-1', date: '2027-01-20', cashAccountId: 'bank-1',
+      description: 'Second partial service payment', allocations: [
+        { installmentId: 'services-obligation:installment:1', amountCents: 4_000n },
+      ],
+    });
+    await recordGuaranteedPaymentInDatabase(database, {
+      id: 'payment-capital', transactionId: 'payment-transaction-capital', journalEntryId: 'payment-entry-capital',
+      businessId: 'business-1', memberId: 'member-1', date: '2027-01-10', cashAccountId: 'bank-1',
+      description: 'Actual use-of-capital payment', allocations: [
+        { installmentId: 'capital-obligation:installment:1', amountCents: 2_500n },
+      ],
+    });
+    expect(await cashBasisReportFromDatabase(database, 'business-1', '2026-12-31', '2026-12-31'))
+      .toMatchObject({ expenseCents: 0n, netIncomeCents: 0n });
+    expect(await cashBasisReportFromDatabase(database, 'business-1', '2027-01-01', '2027-01-31'))
+      .toMatchObject({ expenseCents: 12_500n, netIncomeCents: -12_500n });
+
+    await reverseGuaranteedPaymentInDatabase(database, {
+      id: 'payment-reversal-1', paymentId: 'payment-1', reversalTransactionId: 'payment-reversal-transaction-1',
+      reversalJournalEntryId: 'payment-reversal-entry-1', date: '2027-02-01',
+      returnCashAccountId: 'refund-bank', reason: 'Synthetic cash refund',
+    });
+    await expect(reverseGuaranteedPaymentInDatabase(database, {
+      id: 'payment-reversal-duplicate', paymentId: 'payment-1', reversalTransactionId: 'payment-reversal-transaction-2',
+      reversalJournalEntryId: 'payment-reversal-entry-2', date: '2027-02-02',
+      returnCashAccountId: 'refund-bank', reason: 'Duplicate reversal',
+    })).rejects.toThrow('already been reversed');
+    await expect(correctCashTransactionInDatabase(database, {
+      correctionId: 'incorrect-gp-correction', originalTransactionId: 'payment-transaction-2',
+      reversalTransactionId: 'incorrect-gp-reversal', reversalJournalEntryId: 'incorrect-gp-reversal-entry',
+      replacement: {
+        id: 'incorrect-gp-replacement', journalEntryId: 'incorrect-gp-replacement-entry', businessId: 'business-1',
+        date: '2027-01-20', kind: 'expense', accountId: 'bank-1', categoryAccountId: 'expense-rent',
+        amountCents: 1_000n, description: 'Replacement',
+      },
+    })).rejects.toThrow('Use the guaranteed payment reversal workflow');
+    database.close();
+
+    database = new TestDatabase(path);
+    snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(112_500n);
+    expect(snapshot.accounts.find((account) => account.id === 'refund-bank').balanceCents).toBe(6_000n);
+    expect(snapshot.cashBasis.expenseCents).toBe(6_500n);
+    expect(snapshot.guaranteedPaymentInstallments.map((installment) => installment.outstandingAmountCents)).toEqual([
+      5_000n, 6_000n, 501n, 10_000n,
+    ]);
+    expect(snapshot.guaranteedPaymentCashEvents.map((event) => [event.kind, event.amountCents, event.date])).toEqual([
+      ['payment', 6_000n, '2027-01-05'], ['payment', 2_500n, '2027-01-10'],
+      ['payment', 4_000n, '2027-01-20'], ['reversal', -6_000n, '2027-02-01'],
+    ]);
+    expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal').cashAccountName).toBe('Refund checking');
+    expect(snapshot.transactions.filter((transaction) => transaction.isGuaranteedPayment)).toHaveLength(4);
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'payment-transaction-1')).toMatchObject({
+      originalTransactionId: 'payment-transaction-1', isGuaranteedPayment: true,
+    });
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'payment-reversal-transaction-1')).toMatchObject({
+      originalTransactionId: 'payment-transaction-1', correctionRole: 'reversal', isGuaranteedPayment: true,
+      accountId: 'refund-bank', accountName: 'Refund checking',
+    });
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'payment-transaction-capital').category)
+      .toBe('Guaranteed payments · use of capital');
+    expect(await cashBasisReportFromDatabase(database, 'business-1', '2027-02-01', '2027-02-01'))
+      .toMatchObject({ expenseCents: -6_000n, netIncomeCents: 6_000n });
+    const unbalanced = database.database.prepare(`
+      SELECT je.id FROM journal_entries je JOIN journal_lines jl ON jl.journal_entry_id = je.id
+      WHERE je.business_id = 'business-1' GROUP BY je.id
+      HAVING SUM(CAST(jl.debit_minor AS INTEGER)) != SUM(CAST(jl.credit_minor AS INTEGER))
+    `).all();
+    expect(unbalanced).toEqual([]);
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+  it('migrates v3 payment reversals and backfills the original cash account', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 10_000n,
+      openingTransactionId: 'opening-1', openingJournalEntryId: 'opening-entry-1',
+    });
+    await createGuaranteedPaymentObligationInDatabase(database, {
+      id: 'obligation-1', businessId: 'business-1', memberId: 'member-1', classification: 'services',
+      recurrence: 'one-time', firstDueDate: '2024-01-02', installmentCount: 1,
+      installmentAmountCents: 5_000n, description: 'One-time service payment',
+    });
+    await recordGuaranteedPaymentInDatabase(database, {
+      id: 'payment-1', transactionId: 'payment-transaction-1', journalEntryId: 'payment-entry-1',
+      businessId: 'business-1', memberId: 'member-1', date: '2024-01-02', cashAccountId: 'bank-1',
+      description: 'Actual service payment',
+      allocations: [{ installmentId: 'obligation-1:installment:1', amountCents: 5_000n }],
+    });
+    await reverseGuaranteedPaymentInDatabase(database, {
+      id: 'reversal-1', paymentId: 'payment-1', reversalTransactionId: 'reversal-transaction-1',
+      reversalJournalEntryId: 'reversal-entry-1', date: '2024-01-03', returnCashAccountId: 'bank-1', reason: 'Cash returned',
+    });
+
+    database.database.exec(`
+      ALTER TABLE guaranteed_payment_reversals RENAME TO guaranteed_payment_reversals_v4;
+      CREATE TABLE guaranteed_payment_reversals (
+        id TEXT PRIMARY KEY NOT NULL,
+        payment_id TEXT NOT NULL UNIQUE REFERENCES guaranteed_payment_payments(id),
+        reversal_transaction_id TEXT NOT NULL UNIQUE REFERENCES transactions(id),
+        reversal_journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
+        reversal_date TEXT NOT NULL,
+        reason TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      INSERT INTO guaranteed_payment_reversals
+        (id, payment_id, reversal_transaction_id, reversal_journal_entry_id, reversal_date, reason, created_at)
+      SELECT id, payment_id, reversal_transaction_id, reversal_journal_entry_id, reversal_date, reason, created_at
+      FROM guaranteed_payment_reversals_v4;
+      DROP TABLE guaranteed_payment_reversals_v4;
+      UPDATE bookkeeping_schema SET version = 3 WHERE singleton = 1;
+    `);
+
+    await ensureBookkeepingSchema(database);
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(4);
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(10_000n);
+    expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal')).toMatchObject({
+      cashAccountName: 'Checking', reason: 'Cash returned', amountCents: -5_000n,
+    });
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
   it('persists business, member interests, account, opening balance, income, and expense across reopen', async () => {
     const path = databasePath();
     let database = new TestDatabase(path);

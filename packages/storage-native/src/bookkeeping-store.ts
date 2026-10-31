@@ -5,6 +5,8 @@ import {
   cashCapitalContributionLines,
   cashExpenseLines,
   cashIncomeLines,
+  guaranteedPaymentDueDates,
+  type GuaranteedPaymentRecurrence,
   memberDistributionLines,
   openingBalanceLines,
   propertyCapitalContributionLines,
@@ -15,7 +17,7 @@ import {
 import { assertBalancedEntry, type JournalLine } from '../../domain/src/journal';
 import { formatUsd } from '../../domain/src/money';
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 4;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -108,6 +110,75 @@ export interface MemberCapitalSummary {
   bookCapitalActivityCents: bigint;
 }
 
+export type GuaranteedPaymentClassification = 'services' | 'use-of-capital';
+
+export interface CreateGuaranteedPaymentObligationInput {
+  id: string;
+  businessId: string;
+  memberId: string;
+  classification: GuaranteedPaymentClassification;
+  recurrence: GuaranteedPaymentRecurrence;
+  firstDueDate: string;
+  installmentCount: number;
+  installmentAmountCents: bigint;
+  description: string;
+}
+
+export interface GuaranteedPaymentAllocationInput {
+  installmentId: string;
+  amountCents: bigint;
+}
+
+export interface RecordGuaranteedPaymentInput {
+  id: string;
+  transactionId: string;
+  journalEntryId: string;
+  businessId: string;
+  memberId: string;
+  date: string;
+  cashAccountId: string;
+  description: string;
+  allocations: readonly GuaranteedPaymentAllocationInput[];
+}
+
+export interface ReverseGuaranteedPaymentInput {
+  id: string;
+  paymentId: string;
+  reversalTransactionId: string;
+  reversalJournalEntryId: string;
+  date: string;
+  returnCashAccountId: string;
+  reason: string;
+}
+
+export interface GuaranteedPaymentInstallmentRecord {
+  id: string;
+  obligationId: string;
+  memberId: string;
+  memberName: string;
+  classification: GuaranteedPaymentClassification;
+  description: string;
+  dueDate: string;
+  scheduledAmountCents: bigint;
+  paidAmountCents: bigint;
+  outstandingAmountCents: bigint;
+}
+
+export interface GuaranteedPaymentCashEvent {
+  id: string;
+  paymentId: string;
+  transactionId: string;
+  memberId: string;
+  memberName: string;
+  classification: GuaranteedPaymentClassification;
+  date: string;
+  kind: 'payment' | 'reversal';
+  amountCents: bigint;
+  cashAccountName: string;
+  description: string;
+  reason: string | null;
+}
+
 type JournalEntryKind = 'opening-balance' | 'income' | 'expense' | 'reversal'
   | 'cash-contribution' | 'property-contribution' | 'member-distribution';
 
@@ -149,6 +220,7 @@ export interface TransactionRecord {
   description: string;
   originalTransactionId: string | null;
   correctionRole: 'reversal' | 'replacement' | null;
+  isGuaranteedPayment: boolean;
 }
 
 export interface CashBasisTotals {
@@ -165,6 +237,8 @@ export interface BookkeepingSnapshot {
   transactions: TransactionRecord[];
   capitalActivities: MemberCapitalActivityRecord[];
   memberCapitalSummaries: MemberCapitalSummary[];
+  guaranteedPaymentInstallments: GuaranteedPaymentInstallmentRecord[];
+  guaranteedPaymentCashEvents: GuaranteedPaymentCashEvent[];
   cashBasis: CashBasisTotals;
 }
 
@@ -195,8 +269,9 @@ interface DbAccount {
   isSystem: number;
 }
 
-interface DbTransaction extends Omit<TransactionRecord, 'amountCents'> {
+interface DbTransaction extends Omit<TransactionRecord, 'amountCents' | 'isGuaranteedPayment'> {
   amountCents: string;
+  isGuaranteedPayment: number;
 }
 
 interface DbJournalLine {
@@ -347,7 +422,15 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
     `);
     version = 1;
   }
-  if (version < 2) await migrateBookkeepingV1ToV2(database);
+  if (version < 2) {
+    await migrateBookkeepingV1ToV2(database);
+    version = 2;
+  }
+  if (version < 3) {
+    await migrateBookkeepingV2ToV3(database);
+    version = 3;
+  }
+  if (version < 4) await migrateBookkeepingV3ToV4(database);
 }
 
 async function migrateBookkeepingV1ToV2(database: Database): Promise<void> {
@@ -431,6 +514,118 @@ async function migrateBookkeepingV1ToV2(database: Database): Promise<void> {
     }
   } finally {
     await database.execAsync('PRAGMA foreign_keys = ON;');
+  }
+}
+
+async function migrateBookkeepingV2ToV3(database: Database): Promise<void> {
+  await database.execAsync('BEGIN IMMEDIATE;');
+  try {
+    await database.execAsync(`
+      CREATE TABLE guaranteed_payment_obligations (
+        id TEXT PRIMARY KEY NOT NULL,
+        business_id TEXT NOT NULL REFERENCES businesses(id),
+        member_id TEXT NOT NULL REFERENCES members(id),
+        classification TEXT NOT NULL CHECK (classification IN ('services', 'use-of-capital')),
+        recurrence TEXT NOT NULL CHECK (recurrence IN ('one-time', 'monthly', 'quarterly')),
+        first_due_date TEXT NOT NULL,
+        installment_count INTEGER NOT NULL CHECK (installment_count BETWEEN 1 AND 120),
+        installment_amount_minor TEXT NOT NULL CHECK (CAST(installment_amount_minor AS INTEGER) > 0),
+        description TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX guaranteed_payment_obligations_member
+        ON guaranteed_payment_obligations (business_id, member_id, first_due_date);
+      CREATE TABLE guaranteed_payment_installments (
+        id TEXT PRIMARY KEY NOT NULL,
+        obligation_id TEXT NOT NULL REFERENCES guaranteed_payment_obligations(id),
+        due_date TEXT NOT NULL,
+        amount_minor TEXT NOT NULL CHECK (CAST(amount_minor AS INTEGER) > 0),
+        installment_number INTEGER NOT NULL CHECK (installment_number BETWEEN 1 AND 120),
+        created_at TEXT NOT NULL,
+        UNIQUE (obligation_id, installment_number),
+        UNIQUE (obligation_id, due_date)
+      );
+      CREATE INDEX guaranteed_payment_installments_due
+        ON guaranteed_payment_installments (due_date, obligation_id);
+      CREATE TABLE guaranteed_payment_payments (
+        id TEXT PRIMARY KEY NOT NULL,
+        business_id TEXT NOT NULL REFERENCES businesses(id),
+        member_id TEXT NOT NULL REFERENCES members(id),
+        classification TEXT NOT NULL CHECK (classification IN ('services', 'use-of-capital')),
+        transaction_id TEXT NOT NULL UNIQUE REFERENCES transactions(id),
+        payment_date TEXT NOT NULL,
+        cash_account_id TEXT NOT NULL REFERENCES accounts(id),
+        amount_minor TEXT NOT NULL CHECK (CAST(amount_minor AS INTEGER) > 0),
+        description TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX guaranteed_payment_payments_member_date
+        ON guaranteed_payment_payments (business_id, member_id, payment_date);
+      CREATE TABLE guaranteed_payment_allocations (
+        payment_id TEXT NOT NULL REFERENCES guaranteed_payment_payments(id),
+        installment_id TEXT NOT NULL REFERENCES guaranteed_payment_installments(id),
+        amount_minor TEXT NOT NULL CHECK (CAST(amount_minor AS INTEGER) > 0),
+        created_at TEXT NOT NULL,
+        PRIMARY KEY (payment_id, installment_id)
+      );
+      CREATE INDEX guaranteed_payment_allocations_installment
+        ON guaranteed_payment_allocations (installment_id, payment_id);
+      CREATE TABLE guaranteed_payment_reversals (
+        id TEXT PRIMARY KEY NOT NULL,
+        payment_id TEXT NOT NULL UNIQUE REFERENCES guaranteed_payment_payments(id),
+        reversal_transaction_id TEXT NOT NULL UNIQUE REFERENCES transactions(id),
+        reversal_journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
+        reversal_date TEXT NOT NULL,
+        reason TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      UPDATE bookkeeping_schema SET version = 3 WHERE singleton = 1;
+    `);
+    const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+      'PRAGMA foreign_key_check',
+    );
+    if (violations.length > 0) throw new Error('The guaranteed payment migration found invalid record references.');
+    await database.execAsync('COMMIT;');
+  } catch (error) {
+    await database.execAsync('ROLLBACK;').catch(() => undefined);
+    throw error;
+  }
+}
+
+async function migrateBookkeepingV3ToV4(database: Database): Promise<void> {
+  await database.execAsync('BEGIN IMMEDIATE;');
+  try {
+    await database.execAsync(`
+      ALTER TABLE guaranteed_payment_reversals RENAME TO guaranteed_payment_reversals_v3;
+      CREATE TABLE guaranteed_payment_reversals (
+        id TEXT PRIMARY KEY NOT NULL,
+        payment_id TEXT NOT NULL UNIQUE REFERENCES guaranteed_payment_payments(id),
+        reversal_transaction_id TEXT NOT NULL UNIQUE REFERENCES transactions(id),
+        reversal_journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
+        return_cash_account_id TEXT NOT NULL REFERENCES accounts(id),
+        reversal_date TEXT NOT NULL,
+        reason TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      INSERT INTO guaranteed_payment_reversals
+        (id, payment_id, reversal_transaction_id, reversal_journal_entry_id,
+         return_cash_account_id, reversal_date, reason, created_at)
+      SELECT reversal.id, reversal.payment_id, reversal.reversal_transaction_id,
+             reversal.reversal_journal_entry_id, payment.cash_account_id,
+             reversal.reversal_date, reversal.reason, reversal.created_at
+      FROM guaranteed_payment_reversals_v3 reversal
+      JOIN guaranteed_payment_payments payment ON payment.id = reversal.payment_id;
+      DROP TABLE guaranteed_payment_reversals_v3;
+      UPDATE bookkeeping_schema SET version = 4 WHERE singleton = 1;
+    `);
+    const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+      'PRAGMA foreign_key_check',
+    );
+    if (violations.length > 0) throw new Error('The guaranteed payment reversal migration found invalid record references.');
+    await database.execAsync('COMMIT;');
+  } catch (error) {
+    await database.execAsync('ROLLBACK;').catch(() => undefined);
+    throw error;
   }
 }
 
@@ -521,6 +716,30 @@ async function ensureMemberCapitalAccount(database: Database, businessId: string
     `INSERT INTO accounts (id, business_id, code, name, kind, category, created_at)
      VALUES (?, ?, ?, ?, 'equity', 'Member capital', ?)`,
     id, businessId, id, `Member capital · ${member.name} · ${member.id.slice(0, 8)}`, new Date().toISOString(),
+  );
+  return id;
+}
+
+async function ensureGuaranteedPaymentExpenseAccount(
+  database: Database,
+  businessId: string,
+  classification: GuaranteedPaymentClassification,
+): Promise<string> {
+  const suffix = classification === 'services' ? 'services' : 'capital';
+  const id = `guaranteed-payment-${suffix}:${businessId}`;
+  const existing = await database.getFirstAsync<{ kind: string }>(
+    'SELECT kind FROM accounts WHERE id = ? AND business_id = ?', id, businessId,
+  );
+  if (existing) {
+    if (existing.kind !== 'expense') throw new Error('The guaranteed payment category has an invalid account type.');
+    return id;
+  }
+  const code = classification === 'services' ? 'GP-SERVICES' : 'GP-CAPITAL';
+  const name = classification === 'services' ? 'Guaranteed payments · services' : 'Guaranteed payments · use of capital';
+  await database.runAsync(
+    `INSERT INTO accounts (id, business_id, code, name, kind, category, is_system, created_at)
+     VALUES (?, ?, ?, ?, 'expense', 'Guaranteed payment', 1, ?)`,
+    id, businessId, code, name, new Date().toISOString(),
   );
   return id;
 }
@@ -736,6 +955,220 @@ export async function recordMemberCapitalActivityInDatabase(
 }
 
 /** @internal SQL-level entry point used by repository tests. */
+export async function createGuaranteedPaymentObligationInDatabase(
+  database: Database,
+  input: CreateGuaranteedPaymentObligationInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  if (!input.id.trim()) throw new Error('Guaranteed payment obligation identifier is required.');
+  if (input.installmentAmountCents <= 0n) throw new Error('Guaranteed payment installments must be positive.');
+  if (!input.description.trim()) throw new Error('Enter a guaranteed payment obligation description.');
+  const dueDates = guaranteedPaymentDueDates(input.firstDueDate, input.recurrence, input.installmentCount);
+  const business = await requireBusiness(database, input.businessId);
+  if (input.firstDueDate < business.bookkeepingStartDate) {
+    throw new Error('The first guaranteed payment due date cannot precede the bookkeeping start date.');
+  }
+
+  await inSqlTransaction(database, async () => {
+    await requireMemberAtDate(database, input.businessId, input.memberId, input.firstDueDate);
+    const createdAt = new Date().toISOString();
+    await database.runAsync(
+      `INSERT INTO guaranteed_payment_obligations
+       (id, business_id, member_id, classification, recurrence, first_due_date, installment_count,
+        installment_amount_minor, description, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      input.id, input.businessId, input.memberId, input.classification, input.recurrence,
+      input.firstDueDate, input.installmentCount, input.installmentAmountCents.toString(),
+      input.description.trim(), createdAt,
+    );
+    for (const [index, dueDate] of dueDates.entries()) {
+      await database.runAsync(
+        `INSERT INTO guaranteed_payment_installments
+         (id, obligation_id, due_date, amount_minor, installment_number, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        `${input.id}:installment:${index + 1}`, input.id, dueDate,
+        input.installmentAmountCents.toString(), index + 1, createdAt,
+      );
+    }
+  });
+}
+
+async function outstandingInstallmentAmount(database: Database, installmentId: string, scheduledCents: bigint): Promise<bigint> {
+  const allocations = await database.getAllAsync<{ amountMinor: string }>(
+    `SELECT allocation.amount_minor AS amountMinor
+     FROM guaranteed_payment_allocations allocation
+     JOIN guaranteed_payment_payments payment ON payment.id = allocation.payment_id
+     LEFT JOIN guaranteed_payment_reversals reversal ON reversal.payment_id = payment.id
+     WHERE allocation.installment_id = ? AND reversal.id IS NULL`, installmentId,
+  );
+  const paidCents = allocations.reduce((sum, allocation) => sum + BigInt(allocation.amountMinor), 0n);
+  return scheduledCents - paidCents;
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function recordGuaranteedPaymentInDatabase(
+  database: Database,
+  input: RecordGuaranteedPaymentInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  if (!input.id.trim() || !input.transactionId.trim() || !input.journalEntryId.trim()) {
+    throw new Error('Guaranteed payment identifiers are required.');
+  }
+  if (!input.description.trim()) throw new Error('Enter a guaranteed payment description.');
+  requireDate(input.date, 'guaranteed payment date');
+  if (input.allocations.length === 0) throw new Error('Allocate the payment to at least one installment.');
+  const allocationIds = new Set<string>();
+  let amountCents = 0n;
+  for (const allocation of input.allocations) {
+    if (!allocation.installmentId.trim()) throw new Error('Choose an installment for every payment allocation.');
+    if (allocationIds.has(allocation.installmentId)) throw new Error('Allocate each installment only once per payment.');
+    allocationIds.add(allocation.installmentId);
+    if (allocation.amountCents <= 0n) throw new Error('Payment allocation amounts must be positive.');
+    amountCents += allocation.amountCents;
+  }
+  const business = await requireBusiness(database, input.businessId);
+  if (input.date < business.bookkeepingStartDate) throw new Error('Payment date cannot precede the bookkeeping start date.');
+  await requireCashAccount(database, input.businessId, input.cashAccountId);
+
+  await inSqlTransaction(database, async () => {
+    let classification: GuaranteedPaymentClassification | null = null;
+    for (const allocation of input.allocations) {
+      const installment = await database.getFirstAsync<{
+        installmentId: string;
+        obligationId: string;
+        businessId: string;
+        memberId: string;
+        classification: GuaranteedPaymentClassification;
+        dueDate: string;
+        amountMinor: string;
+      }>(
+        `SELECT installment.id AS installmentId, obligation.id AS obligationId,
+                obligation.business_id AS businessId, obligation.member_id AS memberId,
+                obligation.classification, installment.due_date AS dueDate,
+                installment.amount_minor AS amountMinor
+         FROM guaranteed_payment_installments installment
+         JOIN guaranteed_payment_obligations obligation ON obligation.id = installment.obligation_id
+         WHERE installment.id = ?`, allocation.installmentId,
+      );
+      if (!installment || installment.businessId !== input.businessId || installment.memberId !== input.memberId) {
+        throw new Error('Choose an outstanding installment for this LLC member.');
+      }
+      if (classification !== null && classification !== installment.classification) {
+        throw new Error('A payment can allocate to installments with only one guaranteed payment classification.');
+      }
+      classification = installment.classification;
+      const outstanding = await outstandingInstallmentAmount(database, installment.installmentId, BigInt(installment.amountMinor));
+      if (outstanding <= 0n) throw new Error('This installment is already fully paid.');
+      if (allocation.amountCents > outstanding) throw new Error('A payment allocation cannot exceed the installment balance.');
+    }
+    const categoryAccountId = await ensureGuaranteedPaymentExpenseAccount(database, input.businessId, classification!);
+    const lines = cashExpenseLines(input.cashAccountId, categoryAccountId, amountCents);
+    await insertJournalEntry(
+      database, input.businessId, input.journalEntryId, input.date, 'expense', input.description, lines,
+    );
+    await insertTransaction(database, {
+      id: input.transactionId, journalEntryId: input.journalEntryId, businessId: input.businessId,
+      date: input.date, kind: 'expense', accountId: input.cashAccountId, categoryAccountId,
+      amountCents: -amountCents, description: input.description,
+    });
+    const createdAt = new Date().toISOString();
+    await database.runAsync(
+      `INSERT INTO guaranteed_payment_payments
+       (id, business_id, member_id, classification, transaction_id, payment_date, cash_account_id,
+        amount_minor, description, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      input.id, input.businessId, input.memberId, classification, input.transactionId,
+      input.date, input.cashAccountId, amountCents.toString(), input.description.trim(), createdAt,
+    );
+    for (const allocation of input.allocations) {
+      await database.runAsync(
+        `INSERT INTO guaranteed_payment_allocations (payment_id, installment_id, amount_minor, created_at)
+         VALUES (?, ?, ?, ?)`,
+        input.id, allocation.installmentId, allocation.amountCents.toString(), createdAt,
+      );
+    }
+    await ensureCashAccountNeverNegative(database, input.businessId, input.cashAccountId);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function reverseGuaranteedPaymentInDatabase(
+  database: Database,
+  input: ReverseGuaranteedPaymentInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  if (!input.id.trim() || !input.reversalTransactionId.trim() || !input.reversalJournalEntryId.trim()) {
+    throw new Error('Guaranteed payment reversal identifiers are required.');
+  }
+  if (!input.returnCashAccountId.trim()) throw new Error('Choose the bank or cash account that received the returned funds.');
+  if (!input.reason.trim()) throw new Error('Enter a reason for the payment reversal.');
+  requireDate(input.date, 'guaranteed payment reversal date');
+
+  await inSqlTransaction(database, async () => {
+    const payment = await database.getFirstAsync<{
+      id: string;
+      businessId: string;
+      transactionId: string;
+      date: string;
+      accountId: string;
+      categoryAccountId: string;
+      amountMinor: string;
+      description: string;
+    }>(
+      `SELECT payment.id, payment.business_id AS businessId, payment.transaction_id AS transactionId,
+              payment.payment_date AS date, t.account_id AS accountId,
+              t.category_account_id AS categoryAccountId,
+              payment.amount_minor AS amountMinor, payment.description
+       FROM guaranteed_payment_payments payment
+       JOIN transactions t ON t.id = payment.transaction_id
+       WHERE payment.id = ?`, input.paymentId,
+    );
+    if (!payment) throw new Error('Choose a guaranteed payment to reverse.');
+    if (input.date < payment.date) throw new Error('A payment reversal date cannot precede the payment date.');
+    const business = await requireBusiness(database, payment.businessId);
+    if (input.date < business.bookkeepingStartDate) throw new Error('Reversal date cannot precede the bookkeeping start date.');
+    await requireCashAccount(database, payment.businessId, input.returnCashAccountId);
+    const existing = await database.getFirstAsync<{ id: string }>(
+      'SELECT id FROM guaranteed_payment_reversals WHERE payment_id = ?', payment.id,
+    );
+    if (existing) throw new Error('This guaranteed payment has already been reversed.');
+    const originalLines = await database.getAllAsync<{ accountId: string; debitMinor: string; creditMinor: string }>(
+      `SELECT account_id AS accountId, debit_minor AS debitMinor, credit_minor AS creditMinor
+       FROM journal_lines WHERE journal_entry_id = (SELECT journal_entry_id FROM transactions WHERE id = ?)`, payment.transactionId,
+    );
+    const reversalDescription = `Reversal of: ${payment.description}`;
+    const reversalLines = reverseLines(originalLines.map((line) => ({
+      account: line.accountId === payment.accountId ? input.returnCashAccountId : line.accountId,
+      debitCents: BigInt(line.debitMinor),
+      creditCents: BigInt(line.creditMinor),
+    })));
+    await insertJournalEntry(
+      database, payment.businessId, input.reversalJournalEntryId, input.date, 'reversal', reversalDescription, reversalLines,
+    );
+    await insertTransaction(database, {
+      id: input.reversalTransactionId,
+      journalEntryId: input.reversalJournalEntryId,
+      businessId: payment.businessId,
+      date: input.date,
+      kind: 'reversal',
+      accountId: input.returnCashAccountId,
+      categoryAccountId: payment.categoryAccountId,
+      amountCents: BigInt(payment.amountMinor),
+      description: reversalDescription,
+    });
+    await database.runAsync(
+      `INSERT INTO guaranteed_payment_reversals
+       (id, payment_id, reversal_transaction_id, reversal_journal_entry_id, return_cash_account_id,
+        reversal_date, reason, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      input.id, input.paymentId, input.reversalTransactionId, input.reversalJournalEntryId,
+      input.returnCashAccountId, input.date, input.reason.trim(), new Date().toISOString(),
+    );
+    await ensureCashAccountNeverNegative(database, payment.businessId, input.returnCashAccountId);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
 export async function correctCashTransactionInDatabase(database: Database, input: CorrectCashTransactionInput): Promise<void> {
   await ensureBookkeepingSchema(database);
   const replacement = input.replacement;
@@ -763,6 +1196,10 @@ export async function correctCashTransactionInDatabase(database: Database, input
               category_account_id AS categoryAccountId, amount_minor AS amountMinor, description
        FROM transactions WHERE id = ? AND business_id = ?`, input.originalTransactionId, replacement.businessId,
     );
+    const guaranteedPayment = await database.getFirstAsync<{ id: string }>(
+      'SELECT id FROM guaranteed_payment_payments WHERE transaction_id = ?', input.originalTransactionId,
+    );
+    if (guaranteedPayment) throw new Error('Use the guaranteed payment reversal workflow to correct this payment.');
     if (!original || (original.kind !== 'income' && original.kind !== 'expense')) {
       throw new Error('Choose an original income or expense transaction to correct.');
     }
@@ -953,17 +1390,28 @@ async function readTransactions(database: Database, businessId: string): Promise
             t.account_id AS accountId, a.name AS accountName,
             t.category_account_id AS categoryAccountId, c.name AS category,
             t.amount_minor AS amountCents, t.description,
-            COALESCE(original.original_transaction_id, correction.original_transaction_id) AS originalTransactionId,
-            role.role AS correctionRole
+            COALESCE(original.original_transaction_id, correction.original_transaction_id,
+                     guaranteedPaymentOriginal.transaction_id,
+                     CASE WHEN paymentReversal.id IS NOT NULL THEN guaranteedPayment.transaction_id END) AS originalTransactionId,
+            CASE WHEN guaranteedPaymentReversal.id IS NOT NULL THEN 'reversal' ELSE role.role END AS correctionRole,
+            CASE WHEN guaranteedPayment.id IS NOT NULL OR guaranteedPaymentOriginal.id IS NOT NULL THEN 1 ELSE 0 END AS isGuaranteedPayment
      FROM transactions t
      JOIN accounts a ON a.id = t.account_id
      JOIN accounts c ON c.id = t.category_account_id
      LEFT JOIN transaction_correction_roles role ON role.transaction_id = t.id
      LEFT JOIN transaction_corrections original ON original.original_transaction_id = t.id
      LEFT JOIN transaction_corrections correction ON correction.id = role.correction_id
+     LEFT JOIN guaranteed_payment_payments guaranteedPayment ON guaranteedPayment.transaction_id = t.id
+     LEFT JOIN guaranteed_payment_reversals paymentReversal ON paymentReversal.payment_id = guaranteedPayment.id
+     LEFT JOIN guaranteed_payment_reversals guaranteedPaymentReversal ON guaranteedPaymentReversal.reversal_transaction_id = t.id
+     LEFT JOIN guaranteed_payment_payments guaranteedPaymentOriginal ON guaranteedPaymentOriginal.id = guaranteedPaymentReversal.payment_id
      WHERE t.business_id = ? ORDER BY t.entry_date DESC, t.created_at DESC, t.id`, businessId,
   );
-  return rows.map((row) => ({ ...row, amountCents: BigInt(row.amountCents) }));
+  return rows.map((row) => ({
+    ...row,
+    amountCents: BigInt(row.amountCents),
+    isGuaranteedPayment: row.isGuaranteedPayment === 1,
+  }));
 }
 
 async function readCapitalActivities(database: Database, businessId: string): Promise<MemberCapitalActivityRecord[]> {
@@ -1038,6 +1486,133 @@ async function readMemberCapitalSummaries(database: Database, businessId: string
   return [...summaries.values()];
 }
 
+async function readGuaranteedPaymentInstallments(database: Database, businessId: string): Promise<GuaranteedPaymentInstallmentRecord[]> {
+  const rows = await database.getAllAsync<{
+    id: string;
+    obligationId: string;
+    memberId: string;
+    memberName: string;
+    classification: GuaranteedPaymentClassification;
+    description: string;
+    dueDate: string;
+    scheduledAmountCents: string;
+    allocationAmountCents: string | null;
+    reversedPaymentId: string | null;
+  }>(
+    `SELECT installment.id, obligation.id AS obligationId, obligation.member_id AS memberId,
+            member.name AS memberName, obligation.classification, obligation.description,
+            installment.due_date AS dueDate, installment.amount_minor AS scheduledAmountCents,
+            allocation.amount_minor AS allocationAmountCents, reversal.payment_id AS reversedPaymentId
+     FROM guaranteed_payment_installments installment
+     JOIN guaranteed_payment_obligations obligation ON obligation.id = installment.obligation_id
+     JOIN members member ON member.id = obligation.member_id
+     LEFT JOIN guaranteed_payment_allocations allocation ON allocation.installment_id = installment.id
+     LEFT JOIN guaranteed_payment_reversals reversal ON reversal.payment_id = allocation.payment_id
+     WHERE obligation.business_id = ?
+     ORDER BY installment.due_date, obligation.id, installment.installment_number, allocation.created_at`, businessId,
+  );
+  const installments = new Map<string, GuaranteedPaymentInstallmentRecord>();
+  for (const row of rows) {
+    let installment = installments.get(row.id);
+    if (!installment) {
+      installment = {
+        id: row.id,
+        obligationId: row.obligationId,
+        memberId: row.memberId,
+        memberName: row.memberName,
+        classification: row.classification,
+        description: row.description,
+        dueDate: row.dueDate,
+        scheduledAmountCents: BigInt(row.scheduledAmountCents),
+        paidAmountCents: 0n,
+        outstandingAmountCents: BigInt(row.scheduledAmountCents),
+      };
+      installments.set(row.id, installment);
+    }
+    if (row.allocationAmountCents !== null && row.reversedPaymentId === null) {
+      installment.paidAmountCents += BigInt(row.allocationAmountCents);
+      installment.outstandingAmountCents -= BigInt(row.allocationAmountCents);
+    }
+  }
+  return [...installments.values()];
+}
+
+async function readGuaranteedPaymentCashEvents(database: Database, businessId: string): Promise<GuaranteedPaymentCashEvent[]> {
+  const payments = await database.getAllAsync<{
+    id: string;
+    transactionId: string;
+    memberId: string;
+    memberName: string;
+    classification: GuaranteedPaymentClassification;
+    date: string;
+    amountCents: string;
+    cashAccountName: string;
+    description: string;
+  }>(
+    `SELECT payment.id, payment.transaction_id AS transactionId, payment.member_id AS memberId,
+            member.name AS memberName, payment.classification, payment.payment_date AS date,
+            payment.amount_minor AS amountCents, cash.name AS cashAccountName, payment.description
+     FROM guaranteed_payment_payments payment
+     JOIN members member ON member.id = payment.member_id
+     JOIN accounts cash ON cash.id = payment.cash_account_id
+     WHERE payment.business_id = ?`, businessId,
+  );
+  const reversals = await database.getAllAsync<{
+    id: string;
+    paymentId: string;
+    transactionId: string;
+    memberId: string;
+    memberName: string;
+    classification: GuaranteedPaymentClassification;
+    date: string;
+    amountCents: string;
+    cashAccountName: string;
+    description: string;
+    reason: string;
+  }>(
+    `SELECT reversal.id, reversal.payment_id AS paymentId,
+            reversal.reversal_transaction_id AS transactionId, payment.member_id AS memberId,
+            member.name AS memberName, payment.classification, reversal.reversal_date AS date,
+            payment.amount_minor AS amountCents, returnedCash.name AS cashAccountName,
+            payment.description, reversal.reason
+     FROM guaranteed_payment_reversals reversal
+     JOIN guaranteed_payment_payments payment ON payment.id = reversal.payment_id
+     JOIN members member ON member.id = payment.member_id
+     JOIN accounts returnedCash ON returnedCash.id = reversal.return_cash_account_id
+     WHERE payment.business_id = ?`, businessId,
+  );
+  return [
+    ...payments.map((payment): GuaranteedPaymentCashEvent => ({
+      id: payment.id,
+      paymentId: payment.id,
+      transactionId: payment.transactionId,
+      memberId: payment.memberId,
+      memberName: payment.memberName,
+      classification: payment.classification,
+      date: payment.date,
+      kind: 'payment',
+      amountCents: BigInt(payment.amountCents),
+      cashAccountName: payment.cashAccountName,
+      description: payment.description,
+      reason: null,
+    })),
+    ...reversals.map((reversal): GuaranteedPaymentCashEvent => ({
+      id: reversal.id,
+      paymentId: reversal.paymentId,
+      transactionId: reversal.transactionId,
+      memberId: reversal.memberId,
+      memberName: reversal.memberName,
+      classification: reversal.classification,
+      date: reversal.date,
+      kind: 'reversal',
+      amountCents: -BigInt(reversal.amountCents),
+      cashAccountName: reversal.cashAccountName,
+      description: reversal.description,
+      reason: reversal.reason,
+    })),
+  ].sort((left, right) => left.date.localeCompare(right.date) || left.id.localeCompare(right.id));
+}
+
 async function cashBasisForPeriod(database: Database, businessId: string, fromDate?: string, throughDate?: string): Promise<CashBasisTotals> {
   const conditions = ['je.business_id = ?', "a.kind IN ('income', 'expense')"];
   const parameters: Array<string> = [businessId];
@@ -1078,15 +1653,21 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
   const business = await readBusiness(database, businessId);
   if (!business) return {
     business: null, members: [], memberHistory: [], accounts: [], transactions: [], capitalActivities: [],
-    memberCapitalSummaries: [], cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
+    memberCapitalSummaries: [], guaranteedPaymentInstallments: [], guaranteedPaymentCashEvents: [],
+    cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
   const { members, history } = await readMembers(database, business.id);
   const accounts = await readAccounts(database, business.id);
   const transactions = await readTransactions(database, business.id);
   const capitalActivities = await readCapitalActivities(database, business.id);
   const memberCapitalSummaries = await readMemberCapitalSummaries(database, business.id);
+  const guaranteedPaymentInstallments = await readGuaranteedPaymentInstallments(database, business.id);
+  const guaranteedPaymentCashEvents = await readGuaranteedPaymentCashEvents(database, business.id);
   const cashBasis = await cashBasisForPeriod(database, business.id);
-  return { business, members, memberHistory: history, accounts, transactions, capitalActivities, memberCapitalSummaries, cashBasis };
+  return {
+    business, members, memberHistory: history, accounts, transactions, capitalActivities, memberCapitalSummaries,
+    guaranteedPaymentInstallments, guaranteedPaymentCashEvents, cashBasis,
+  };
 }
 
 export function transactionsCsv(snapshot: BookkeepingSnapshot): string {

@@ -5,6 +5,7 @@ import {
   cashCapitalContributionLines,
   cashExpenseLines,
   cashIncomeLines,
+  guaranteedPaymentDueDates,
   memberDistributionLines,
   openingBalanceLines,
   parseOwnershipPercent,
@@ -30,6 +31,23 @@ const fourMemberSetup: BusinessSetupInput = {
 };
 
 describe('bookkeeping setup and cash posting rules', () => {
+  it('generates finite one-time, monthly, and quarterly due dates from the original anchor day', () => {
+    expect(guaranteedPaymentDueDates('2024-01-31', 'one-time', 1)).toEqual(['2024-01-31']);
+    expect(guaranteedPaymentDueDates('2024-01-31', 'monthly', 4)).toEqual([
+      '2024-01-31', '2024-02-29', '2024-03-31', '2024-04-30',
+    ]);
+    expect(guaranteedPaymentDueDates('2023-11-30', 'quarterly', 3)).toEqual([
+      '2023-11-30', '2024-02-29', '2024-05-30',
+    ]);
+  });
+
+  it('rejects invalid guaranteed payment recurrence schedules', () => {
+    expect(() => guaranteedPaymentDueDates('2024-02-30', 'monthly', 2)).toThrow('valid date');
+    expect(() => guaranteedPaymentDueDates('2024-01-01', 'one-time', 2)).toThrow('one installment');
+    expect(() => guaranteedPaymentDueDates('2024-01-01', 'monthly', 1)).toThrow('at least two');
+    expect(() => guaranteedPaymentDueDates('2024-01-01', 'quarterly', 121)).toThrow('120');
+  });
+
   it('accepts the suggested four-member ownership split only when explicitly confirmed', () => {
     expect(assertValidBusinessSetup(fourMemberSetup)).toBeUndefined();
     expect(assertOwnershipTotals(fourMemberSetup.members)).toBeUndefined();
