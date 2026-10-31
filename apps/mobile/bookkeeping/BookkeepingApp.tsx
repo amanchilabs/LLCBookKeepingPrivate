@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, type ComponentType } from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { getBookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-service';
 import type { BookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-store';
 import { AccountsScreen } from './AccountsScreen';
@@ -9,6 +9,7 @@ import { MembersScreen } from './MembersScreen';
 import { ReportsScreen } from './ReportsScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { TransactionsScreen } from './TransactionsScreen';
+import { contentTopInset } from './layout';
 import { Button, Loading, palette } from './ui';
 
 type BookkeepingTab = 'Dashboard' | 'Transactions' | 'Accounts' | 'Members' | 'Reports' | 'Settings';
@@ -31,6 +32,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showSecurityProof, setShowSecurityProof] = useState(false);
+  const rootStyle = [styles.root, { paddingTop: contentTopInset(Platform.OS, StatusBar.currentHeight) }];
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -47,7 +49,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   useEffect(() => { void refresh(); }, [refresh]);
 
   if (showSecurityProof) {
-    return <SafeAreaView style={styles.root}>
+    return <SafeAreaView style={rootStyle}>
       <View style={styles.proofBar}>
         <Text style={styles.brand}>Storage and recovery tools</Text>
         <Pressable accessibilityRole="button" onPress={() => { setShowSecurityProof(false); void refresh(); }} style={styles.backButton}>
@@ -58,10 +60,10 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
     </SafeAreaView>;
   }
 
-  if (loading) return <SafeAreaView style={styles.root}><Loading /></SafeAreaView>;
+  if (loading) return <SafeAreaView style={rootStyle}><Loading /></SafeAreaView>;
 
   if (loadError) {
-    return <SafeAreaView style={styles.root}>
+    return <SafeAreaView style={rootStyle}>
       <View style={styles.lockedContent}>
         <Text style={styles.brand}>LLCBookKeepingPrivate</Text>
         <Text style={styles.lockedTitle}>Local books are unavailable</Text>
@@ -74,7 +76,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   }
 
   if (!snapshot.business) {
-    return <SafeAreaView style={styles.root}>
+    return <SafeAreaView style={rootStyle}>
       <View style={styles.setupHeader}><Text style={styles.brand}>LLCBookKeepingPrivate</Text><Text style={styles.privacyLabel}>PRIVATE · ON DEVICE</Text></View>
       <BusinessSetupScreen onCreated={refresh} />
       <Pressable accessibilityRole="button" onPress={() => setShowSecurityProof(true)} style={styles.setupTools}>
@@ -83,7 +85,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
     </SafeAreaView>;
   }
 
-  return <SafeAreaView style={styles.root}>
+  return <SafeAreaView style={rootStyle}>
     <View style={styles.appHeader}>
       <View style={styles.headerLine}>
         <View style={styles.headerMain}>

@@ -10,10 +10,11 @@
     "start:android": "EXPO_NO_TELEMETRY=1 expo run:android",
     "prebuild": "EXPO_NO_TELEMETRY=1 expo prebuild",
     "test:preview": "vitest run apps/mobile/preview-capabilities.test.ts",
+    "test:bookkeeping-ui": "vitest run apps/mobile/bookkeeping",
     "test:security-config": "vitest run apps/mobile/native-build-policy.test.ts packages/storage-native/test",
     "test:domain": "vitest run packages/domain/test",
     "test:backup": "vitest run packages/backup/test",
-    "test": "npm run test:preview && npm run test:security-config && npm run test:domain && npm run test:backup",
+    "test": "npm run test:preview && npm run test:bookkeeping-ui && npm run test:security-config && npm run test:domain && npm run test:backup",
     "typecheck": "tsc --noEmit",
     "doctor": "EXPO_NO_TELEMETRY=1 expo install --check",
     "config:public": "EXPO_NO_TELEMETRY=1 expo config --type public"
