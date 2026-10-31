@@ -2,9 +2,12 @@ import type { DatabaseLease } from './database-lease';
 import {
   assertOwnershipTotals,
   assertValidBusinessSetup,
+  cashCapitalContributionLines,
   cashExpenseLines,
   cashIncomeLines,
+  memberDistributionLines,
   openingBalanceLines,
+  propertyCapitalContributionLines,
   reverseLines,
   type BusinessSetupInput,
   type MemberInterestInput,
@@ -12,7 +15,7 @@ import {
 import { assertBalancedEntry, type JournalLine } from '../../domain/src/journal';
 import { formatUsd } from '../../domain/src/money';
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -67,6 +70,47 @@ export interface ReplaceMembersInput {
   members: readonly MemberInterestInput[];
 }
 
+export type MemberCapitalActivityKind = 'cash-contribution' | 'property-contribution' | 'distribution';
+
+export interface MemberCapitalActivityInput {
+  id: string;
+  journalEntryId: string;
+  businessId: string;
+  memberId: string;
+  date: string;
+  kind: MemberCapitalActivityKind;
+  amountCents: bigint;
+  description: string;
+  cashAccountId?: string;
+  propertyDescription?: string;
+}
+
+export interface MemberCapitalActivityRecord {
+  id: string;
+  journalEntryId: string;
+  memberId: string;
+  memberName: string;
+  date: string;
+  kind: MemberCapitalActivityKind;
+  amountCents: bigint;
+  description: string;
+  cashAccountName: string | null;
+  propertyDescription: string | null;
+  requiresCpaReview: boolean;
+}
+
+export interface MemberCapitalSummary {
+  memberId: string;
+  memberName: string;
+  cashContributionsCents: bigint;
+  propertyContributionsCents: bigint;
+  distributionsCents: bigint;
+  bookCapitalActivityCents: bigint;
+}
+
+type JournalEntryKind = 'opening-balance' | 'income' | 'expense' | 'reversal'
+  | 'cash-contribution' | 'property-contribution' | 'member-distribution';
+
 export interface BusinessRecord {
   id: string;
   name: string;
@@ -86,7 +130,7 @@ export interface AccountRecord {
   businessId: string;
   code: string;
   name: string;
-  kind: 'bank' | 'cash' | 'equity' | 'income' | 'expense';
+  kind: 'bank' | 'cash' | 'asset' | 'equity' | 'income' | 'expense';
   category: string;
   isSystem: boolean;
   balanceCents: bigint;
@@ -119,6 +163,8 @@ export interface BookkeepingSnapshot {
   memberHistory: MemberRecord[];
   accounts: AccountRecord[];
   transactions: TransactionRecord[];
+  capitalActivities: MemberCapitalActivityRecord[];
+  memberCapitalSummaries: MemberCapitalSummary[];
   cashBasis: CashBasisTotals;
 }
 
@@ -202,8 +248,10 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
   const current = await database.getFirstAsync<{ version: number }>(
     'SELECT version FROM bookkeeping_schema WHERE singleton = 1',
   );
-  if ((current?.version ?? 0) >= SCHEMA_VERSION) return;
-  await database.execAsync(`
+  let version = current?.version ?? 0;
+  if (version >= SCHEMA_VERSION) return;
+  if (version < 1) {
+    await database.execAsync(`
     CREATE TABLE IF NOT EXISTS businesses (
       id TEXT PRIMARY KEY NOT NULL,
       name TEXT NOT NULL,
@@ -295,8 +343,95 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
       correction_id TEXT NOT NULL REFERENCES transaction_corrections(id),
       role TEXT NOT NULL CHECK (role IN ('reversal', 'replacement'))
     );
-    UPDATE bookkeeping_schema SET version = ${SCHEMA_VERSION} WHERE singleton = 1;
-  `);
+      UPDATE bookkeeping_schema SET version = 1 WHERE singleton = 1;
+    `);
+    version = 1;
+  }
+  if (version < 2) await migrateBookkeepingV1ToV2(database);
+}
+
+async function migrateBookkeepingV1ToV2(database: Database): Promise<void> {
+  await database.execAsync('PRAGMA foreign_keys = OFF;');
+  try {
+    await database.execAsync('BEGIN IMMEDIATE;');
+    try {
+      await database.execAsync(`
+        CREATE TABLE accounts_v2 (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          code TEXT NOT NULL,
+          name TEXT NOT NULL,
+          kind TEXT NOT NULL CHECK (kind IN ('bank', 'cash', 'asset', 'equity', 'income', 'expense')),
+          category TEXT NOT NULL,
+          is_system INTEGER NOT NULL DEFAULT 0 CHECK (is_system IN (0, 1)),
+          is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+          created_at TEXT NOT NULL,
+          UNIQUE (business_id, code),
+          UNIQUE (business_id, name)
+        );
+        INSERT INTO accounts_v2
+          (id, business_id, code, name, kind, category, is_system, is_active, created_at)
+        SELECT id, business_id, code, name, kind, category, is_system, is_active, created_at FROM accounts;
+        DROP TABLE accounts;
+        ALTER TABLE accounts_v2 RENAME TO accounts;
+
+        CREATE TABLE journal_entries_v2 (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          entry_date TEXT NOT NULL,
+          entry_type TEXT NOT NULL CHECK (entry_type IN (
+            'opening-balance', 'income', 'expense', 'reversal',
+            'cash-contribution', 'property-contribution', 'member-distribution'
+          )),
+          description TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+        INSERT INTO journal_entries_v2 (id, business_id, entry_date, entry_type, description, created_at)
+        SELECT id, business_id, entry_date, entry_type, description, created_at FROM journal_entries;
+        DROP TABLE journal_entries;
+        ALTER TABLE journal_entries_v2 RENAME TO journal_entries;
+        CREATE INDEX journal_entries_business_date ON journal_entries (business_id, entry_date);
+
+        CREATE TABLE member_capital_activity (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          member_id TEXT NOT NULL REFERENCES members(id),
+          journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
+          activity_date TEXT NOT NULL,
+          activity_kind TEXT NOT NULL CHECK (activity_kind IN ('cash-contribution', 'property-contribution', 'distribution')),
+          amount_minor TEXT NOT NULL,
+          cash_account_id TEXT REFERENCES accounts(id),
+          property_asset_account_id TEXT REFERENCES accounts(id),
+          property_description TEXT,
+          description TEXT NOT NULL,
+          requires_cpa_review INTEGER NOT NULL CHECK (requires_cpa_review IN (0, 1)),
+          created_at TEXT NOT NULL,
+          CHECK (
+            (activity_kind IN ('cash-contribution', 'distribution')
+              AND cash_account_id IS NOT NULL AND property_asset_account_id IS NULL AND property_description IS NULL
+              AND requires_cpa_review = 0)
+            OR
+            (activity_kind = 'property-contribution'
+              AND cash_account_id IS NULL AND property_asset_account_id IS NOT NULL AND property_description IS NOT NULL
+              AND requires_cpa_review = 1)
+          )
+        );
+        CREATE INDEX member_capital_activity_member_date
+          ON member_capital_activity (business_id, member_id, activity_date, created_at);
+        UPDATE bookkeeping_schema SET version = 2 WHERE singleton = 1;
+      `);
+      const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+        'PRAGMA foreign_key_check',
+      );
+      if (violations.length > 0) throw new Error('The bookkeeping schema migration found invalid record references.');
+      await database.execAsync('COMMIT;');
+    } catch (error) {
+      await database.execAsync('ROLLBACK;').catch(() => undefined);
+      throw error;
+    }
+  } finally {
+    await database.execAsync('PRAGMA foreign_keys = ON;');
+  }
 }
 
 /** @internal SQL-level entry point used by repository tests. */
@@ -355,6 +490,41 @@ async function requireCashAccount(database: Database, businessId: string, accoun
   return account.kind;
 }
 
+async function requireMemberAtDate(database: Database, businessId: string, memberId: string, date: string): Promise<{ id: string; name: string }> {
+  const member = await database.getFirstAsync<{ id: string; name: string }>(
+    `SELECT m.id, m.name FROM members m
+     JOIN member_interest_history h ON h.member_id = m.id
+     WHERE m.id = ? AND m.business_id = ? AND h.effective_from <= ?
+       AND (h.effective_to IS NULL OR h.effective_to >= ?)
+     LIMIT 1`, memberId, businessId, date, date,
+  );
+  if (!member) throw new Error('Choose a member whose LLC interest is active on the activity date.');
+  return member;
+}
+
+async function ensureMemberCapitalAccount(database: Database, businessId: string, member: { id: string; name: string }): Promise<string> {
+  const id = `member-capital:${member.id}`;
+  const existing = await database.getFirstAsync<{ businessId: string; kind: string }>(
+    'SELECT business_id AS businessId, kind FROM accounts WHERE id = ?', id,
+  );
+  if (existing) {
+    if (existing.businessId !== businessId || existing.kind !== 'equity') {
+      throw new Error('The member capital account has an invalid business or account type.');
+    }
+    await database.runAsync(
+      'UPDATE accounts SET name = ? WHERE id = ?',
+      `Member capital · ${member.name} · ${member.id.slice(0, 8)}`, id,
+    );
+    return id;
+  }
+  await database.runAsync(
+    `INSERT INTO accounts (id, business_id, code, name, kind, category, created_at)
+     VALUES (?, ?, ?, ?, 'equity', 'Member capital', ?)`,
+    id, businessId, id, `Member capital · ${member.name} · ${member.id.slice(0, 8)}`, new Date().toISOString(),
+  );
+  return id;
+}
+
 async function ensureCashAccountNeverNegative(database: Database, businessId: string, accountId: string): Promise<void> {
   const account = await database.getFirstAsync<{ kind: string }>(
     'SELECT kind FROM accounts WHERE id = ? AND business_id = ?', accountId, businessId,
@@ -404,7 +574,7 @@ async function insertJournalEntry(
   businessId: string,
   journalEntryId: string,
   date: string,
-  kind: 'opening-balance' | 'income' | 'expense' | 'reversal',
+  kind: JournalEntryKind,
   description: string,
   lines: readonly JournalLine[],
 ): Promise<void> {
@@ -501,6 +671,67 @@ export async function recordCashTransactionInDatabase(database: Database, input:
     const signedAmount = input.kind === 'income' ? input.amountCents : -input.amountCents;
     await insertTransaction(database, { ...input, amountCents: signedAmount });
     await ensureCashAccountNeverNegative(database, input.businessId, input.accountId);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function recordMemberCapitalActivityInDatabase(
+  database: Database,
+  input: MemberCapitalActivityInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  if (!input.id.trim()) throw new Error('Capital activity identifier is required.');
+  if (input.amountCents <= 0n) throw new Error('Capital activity amounts must be positive.');
+  if (!input.description.trim()) throw new Error('Enter a capital activity description.');
+  requireDate(input.date, 'capital activity date');
+  const business = await requireBusiness(database, input.businessId);
+  if (input.date < business.bookkeepingStartDate) throw new Error('Capital activity date cannot precede the bookkeeping start date.');
+  if (input.kind === 'property-contribution' && !input.propertyDescription?.trim()) {
+    throw new Error('Describe the property contribution for CPA review.');
+  }
+  if (input.kind !== 'property-contribution' && !input.cashAccountId) {
+    throw new Error('Choose a bank or cash account for this capital activity.');
+  }
+
+  await inSqlTransaction(database, async () => {
+    const member = await requireMemberAtDate(database, input.businessId, input.memberId, input.date);
+    const capitalAccountId = await ensureMemberCapitalAccount(database, input.businessId, member);
+    let cashAccountId: string | null = null;
+    let propertyAssetAccountId: string | null = null;
+    let propertyDescription: string | null = null;
+    let lines: JournalLine[];
+
+    if (input.kind === 'property-contribution') {
+      propertyDescription = input.propertyDescription!.trim();
+      propertyAssetAccountId = `member-property:${input.id}`;
+      await database.runAsync(
+        `INSERT INTO accounts (id, business_id, code, name, kind, category, created_at)
+         VALUES (?, ?, ?, ?, 'asset', 'Contributed property', ?)`,
+        propertyAssetAccountId, input.businessId, propertyAssetAccountId,
+        `Contributed property · ${propertyDescription} · ${input.id.slice(0, 8)}`, new Date().toISOString(),
+      );
+      lines = propertyCapitalContributionLines(propertyAssetAccountId, capitalAccountId, input.amountCents);
+    } else {
+      cashAccountId = input.cashAccountId!;
+      await requireCashAccount(database, input.businessId, cashAccountId);
+      lines = input.kind === 'cash-contribution'
+        ? cashCapitalContributionLines(cashAccountId, capitalAccountId, input.amountCents)
+        : memberDistributionLines(capitalAccountId, cashAccountId, input.amountCents);
+    }
+
+    const entryType = input.kind === 'distribution' ? 'member-distribution' : input.kind;
+    await insertJournalEntry(database, input.businessId, input.journalEntryId, input.date, entryType, input.description, lines);
+    await database.runAsync(
+      `INSERT INTO member_capital_activity
+       (id, business_id, member_id, journal_entry_id, activity_date, activity_kind, amount_minor,
+        cash_account_id, property_asset_account_id, property_description, description,
+        requires_cpa_review, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      input.id, input.businessId, member.id, input.journalEntryId, input.date, input.kind,
+      input.amountCents.toString(), cashAccountId, propertyAssetAccountId, propertyDescription,
+      input.description.trim(), input.kind === 'property-contribution' ? 1 : 0, new Date().toISOString(),
+    );
+    if (cashAccountId) await ensureCashAccountNeverNegative(database, input.businessId, cashAccountId);
   });
 }
 
@@ -735,6 +966,78 @@ async function readTransactions(database: Database, businessId: string): Promise
   return rows.map((row) => ({ ...row, amountCents: BigInt(row.amountCents) }));
 }
 
+async function readCapitalActivities(database: Database, businessId: string): Promise<MemberCapitalActivityRecord[]> {
+  const rows = await database.getAllAsync<{
+    id: string;
+    journalEntryId: string;
+    memberId: string;
+    memberName: string;
+    date: string;
+    kind: MemberCapitalActivityKind;
+    amountCents: string;
+    description: string;
+    cashAccountName: string | null;
+    propertyDescription: string | null;
+    requiresCpaReview: number;
+  }>(
+    `SELECT activity.id, activity.journal_entry_id AS journalEntryId,
+            activity.member_id AS memberId, member.name AS memberName,
+            activity.activity_date AS date, activity.activity_kind AS kind,
+            activity.amount_minor AS amountCents, activity.description,
+            cash.name AS cashAccountName, activity.property_description AS propertyDescription,
+            activity.requires_cpa_review AS requiresCpaReview
+     FROM member_capital_activity activity
+     JOIN members member ON member.id = activity.member_id
+     LEFT JOIN accounts cash ON cash.id = activity.cash_account_id
+     WHERE activity.business_id = ?
+     ORDER BY activity.activity_date, activity.created_at, activity.id`, businessId,
+  );
+  return rows.map((row) => ({
+    ...row,
+    amountCents: BigInt(row.amountCents),
+    requiresCpaReview: row.requiresCpaReview === 1,
+  }));
+}
+
+async function readMemberCapitalSummaries(database: Database, businessId: string): Promise<MemberCapitalSummary[]> {
+  const rows = await database.getAllAsync<{
+    memberId: string;
+    memberName: string;
+    kind: MemberCapitalActivityKind | null;
+    amountCents: string | null;
+  }>(
+    `SELECT member.id AS memberId, member.name AS memberName,
+            activity.activity_kind AS kind, activity.amount_minor AS amountCents
+     FROM members member
+     LEFT JOIN member_capital_activity activity
+       ON activity.member_id = member.id AND activity.business_id = member.business_id
+     WHERE member.business_id = ?
+     ORDER BY member.rowid, activity.activity_date, activity.created_at, activity.id`, businessId,
+  );
+  const summaries = new Map<string, MemberCapitalSummary>();
+  for (const row of rows) {
+    let summary = summaries.get(row.memberId);
+    if (!summary) {
+      summary = {
+        memberId: row.memberId,
+        memberName: row.memberName,
+        cashContributionsCents: 0n,
+        propertyContributionsCents: 0n,
+        distributionsCents: 0n,
+        bookCapitalActivityCents: 0n,
+      };
+      summaries.set(row.memberId, summary);
+    }
+    if (!row.kind || row.amountCents === null) continue;
+    const amount = BigInt(row.amountCents);
+    if (row.kind === 'cash-contribution') summary.cashContributionsCents += amount;
+    if (row.kind === 'property-contribution') summary.propertyContributionsCents += amount;
+    if (row.kind === 'distribution') summary.distributionsCents += amount;
+    summary.bookCapitalActivityCents += row.kind === 'distribution' ? -amount : amount;
+  }
+  return [...summaries.values()];
+}
+
 async function cashBasisForPeriod(database: Database, businessId: string, fromDate?: string, throughDate?: string): Promise<CashBasisTotals> {
   const conditions = ['je.business_id = ?', "a.kind IN ('income', 'expense')"];
   const parameters: Array<string> = [businessId];
@@ -773,12 +1076,17 @@ async function cashBasisForPeriod(database: Database, businessId: string, fromDa
 export async function getBookkeepingSnapshotFromDatabase(database: Database, businessId?: string): Promise<BookkeepingSnapshot | null> {
   await ensureBookkeepingSchema(database);
   const business = await readBusiness(database, businessId);
-  if (!business) return { business: null, members: [], memberHistory: [], accounts: [], transactions: [], cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n } };
+  if (!business) return {
+    business: null, members: [], memberHistory: [], accounts: [], transactions: [], capitalActivities: [],
+    memberCapitalSummaries: [], cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
+  };
   const { members, history } = await readMembers(database, business.id);
   const accounts = await readAccounts(database, business.id);
   const transactions = await readTransactions(database, business.id);
+  const capitalActivities = await readCapitalActivities(database, business.id);
+  const memberCapitalSummaries = await readMemberCapitalSummaries(database, business.id);
   const cashBasis = await cashBasisForPeriod(database, business.id);
-  return { business, members, memberHistory: history, accounts, transactions, cashBasis };
+  return { business, members, memberHistory: history, accounts, transactions, capitalActivities, memberCapitalSummaries, cashBasis };
 }
 
 export function transactionsCsv(snapshot: BookkeepingSnapshot): string {

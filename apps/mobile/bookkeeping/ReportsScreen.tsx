@@ -10,6 +10,13 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const [report, setReport] = useState<CashBasisReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const capitalInPeriod = snapshot.capitalActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate);
+  const cashContributionsCents = capitalInPeriod.filter((activity) => activity.kind === 'cash-contribution')
+    .reduce((sum, activity) => sum + activity.amountCents, 0n);
+  const propertyContributionsCents = capitalInPeriod.filter((activity) => activity.kind === 'property-contribution')
+    .reduce((sum, activity) => sum + activity.amountCents, 0n);
+  const distributionsCents = capitalInPeriod.filter((activity) => activity.kind === 'distribution')
+    .reduce((sum, activity) => sum + activity.amountCents, 0n);
 
   const refresh = async () => {
     if (!snapshot.business) return;
@@ -44,10 +51,25 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       </> : <Text style={uiStyles.helper}>Choose a date range to calculate the report from journal activity.</Text>}
     </Panel>
     <Panel>
+      <Text style={uiStyles.sectionTitle}>Member capital movement · selected dates</Text>
+      <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate} · book activity, not a tax basis report.</Text>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Cash contributions</Text><Money cents={cashContributionsCents} /></View>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Property contributions</Text><Money cents={propertyContributionsCents} /></View>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Member distributions</Text><Money cents={-distributionsCents} /></View>
+      <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net capital activity</Text><Money cents={cashContributionsCents + propertyContributionsCents - distributionsCents} /></View>
+      {snapshot.memberCapitalSummaries.map((summary) => <View key={summary.memberId} style={uiStyles.reportRow}>
+        <Text style={uiStyles.rowTitle}>{summary.memberName} · all-time book capital activity</Text>
+        <Money cents={summary.bookCapitalActivityCents} />
+      </View>)}
+      {capitalInPeriod.some((activity) => activity.requiresCpaReview)
+        ? <Text style={uiStyles.helper}>Property contribution valuation is flagged for CPA review. Book capital does not establish tax-basis capital or outside basis.</Text>
+        : <Text style={uiStyles.helper}>Book capital does not establish tax-basis capital or outside basis.</Text>}
+    </Panel>
+    <Panel>
       <Text style={uiStyles.sectionTitle}>Available from persisted books</Text>
       <Text style={uiStyles.rowDetail}>Account balances: {snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash').length} bank and cash accounts.</Text>
       <Text style={uiStyles.rowDetail}>Member interests: {snapshot.members.length} current members, with dated interest history.</Text>
-      <Text style={uiStyles.helper}>Trial Balance, General Ledger, Balance Sheet, member capital and tax-specific reports are not part of this first reporting slice.</Text>
+      <Text style={uiStyles.helper}>Trial Balance, General Ledger, Balance Sheet and tax-specific reports are still to come.</Text>
     </Panel>
   </Page>;
 }

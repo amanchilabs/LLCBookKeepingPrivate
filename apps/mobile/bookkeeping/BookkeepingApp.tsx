@@ -22,6 +22,8 @@ function emptySnapshot(): BookkeepingSnapshot {
     memberHistory: [],
     accounts: [],
     transactions: [],
+    capitalActivities: [],
+    memberCapitalSummaries: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }

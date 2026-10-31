@@ -117,6 +117,48 @@ export function cashExpenseLines(cashAccountId: string, expenseAccountId: string
   return lines;
 }
 
+export function cashCapitalContributionLines(
+  cashAccountId: string,
+  memberCapitalAccountId: string,
+  amountCents: bigint,
+): JournalLine[] {
+  assertPositiveAmount(amountCents);
+  const lines: JournalLine[] = [
+    { account: cashAccountId, debitCents: amountCents, creditCents: 0n },
+    { account: memberCapitalAccountId, debitCents: 0n, creditCents: amountCents },
+  ];
+  assertBalancedEntry(lines);
+  return lines;
+}
+
+export function propertyCapitalContributionLines(
+  propertyAssetAccountId: string,
+  memberCapitalAccountId: string,
+  amountCents: bigint,
+): JournalLine[] {
+  assertPositiveAmount(amountCents);
+  const lines: JournalLine[] = [
+    { account: propertyAssetAccountId, debitCents: amountCents, creditCents: 0n },
+    { account: memberCapitalAccountId, debitCents: 0n, creditCents: amountCents },
+  ];
+  assertBalancedEntry(lines);
+  return lines;
+}
+
+export function memberDistributionLines(
+  memberCapitalAccountId: string,
+  cashAccountId: string,
+  amountCents: bigint,
+): JournalLine[] {
+  assertPositiveAmount(amountCents);
+  const lines: JournalLine[] = [
+    { account: memberCapitalAccountId, debitCents: amountCents, creditCents: 0n },
+    { account: cashAccountId, debitCents: 0n, creditCents: amountCents },
+  ];
+  assertBalancedEntry(lines);
+  return lines;
+}
+
 export function reverseLines(lines: readonly JournalLine[]): JournalLine[] {
   assertBalancedEntry(lines);
   const reversed = lines.map((line) => ({

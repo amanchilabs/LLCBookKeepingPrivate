@@ -6,6 +6,7 @@ import {
   correctCashTransactionInDatabase,
   ensureBookkeepingSchema,
   getBookkeepingSnapshotFromDatabase,
+  recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
   replaceMembersInDatabase,
   type BookkeepingSnapshot,
@@ -13,6 +14,7 @@ import {
   type CashBasisReport,
   type CorrectCashTransactionInput,
   type CashTransactionInput,
+  type MemberCapitalActivityInput,
   type ReplaceMembersInput,
 } from './bookkeeping-store';
 import type { BusinessSetupInput } from '../../domain/src/bookkeeping';
@@ -24,6 +26,8 @@ function emptySnapshot(): BookkeepingSnapshot {
     memberHistory: [],
     accounts: [],
     transactions: [],
+    capitalActivities: [],
+    memberCapitalSummaries: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }
@@ -45,6 +49,10 @@ export async function createCashAccount(input: CashAccountInput): Promise<void> 
 
 export async function recordCashTransaction(input: CashTransactionInput): Promise<void> {
   await useActiveBooks((database) => recordCashTransactionInDatabase(database, input));
+}
+
+export async function recordMemberCapitalActivity(input: MemberCapitalActivityInput): Promise<void> {
+  await useActiveBooks((database) => recordMemberCapitalActivityInDatabase(database, input));
 }
 
 export async function correctCashTransaction(input: CorrectCashTransactionInput): Promise<void> {

@@ -2,10 +2,13 @@ import { describe, expect, it } from 'vitest';
 import {
   assertOwnershipTotals,
   assertValidBusinessSetup,
+  cashCapitalContributionLines,
   cashExpenseLines,
   cashIncomeLines,
+  memberDistributionLines,
   openingBalanceLines,
   parseOwnershipPercent,
+  propertyCapitalContributionLines,
   reverseLines,
   type BusinessSetupInput,
 } from '../src/bookkeeping';
@@ -91,6 +94,33 @@ describe('bookkeeping setup and cash posting rules', () => {
     assertBalancedEntry(income);
     assertBalancedEntry(expense);
     expect(() => cashIncomeLines('bank-1', 'income-services', 0n)).toThrow('positive');
+  });
+
+  it('posts member cash and property contributions to capital, not income', () => {
+    const cash = cashCapitalContributionLines('bank-1', 'capital-member-1', 25_000n);
+    const property = propertyCapitalContributionLines('asset-property-1', 'capital-member-1', 73_500n);
+    expect(cash).toEqual([
+      { account: 'bank-1', debitCents: 25_000n, creditCents: 0n },
+      { account: 'capital-member-1', debitCents: 0n, creditCents: 25_000n },
+    ]);
+    expect(property).toEqual([
+      { account: 'asset-property-1', debitCents: 73_500n, creditCents: 0n },
+      { account: 'capital-member-1', debitCents: 0n, creditCents: 73_500n },
+    ]);
+    assertBalancedEntry(cash);
+    assertBalancedEntry(property);
+    expect(() => cashCapitalContributionLines('bank-1', 'capital-member-1', 0n)).toThrow('positive');
+    expect(() => propertyCapitalContributionLines('asset-property-1', 'capital-member-1', -1n)).toThrow('positive');
+  });
+
+  it('posts member distributions against capital and cash, never expense', () => {
+    const distribution = memberDistributionLines('capital-member-1', 'bank-1', 4_250n);
+    expect(distribution).toEqual([
+      { account: 'capital-member-1', debitCents: 4_250n, creditCents: 0n },
+      { account: 'bank-1', debitCents: 0n, creditCents: 4_250n },
+    ]);
+    assertBalancedEntry(distribution);
+    expect(() => memberDistributionLines('capital-member-1', 'bank-1', 0n)).toThrow('positive');
   });
 
   it('reverses every journal line without modifying the original entry', () => {
