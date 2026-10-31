@@ -18,6 +18,15 @@ export interface BusinessSetupInput {
 
 export const SUGGESTED_MEMBER_INTERESTS_BASIS_POINTS = [4_000, 2_000, 2_000, 2_000] as const;
 
+export function parseOwnershipPercent(text: string): number {
+  const normalized = text.trim();
+  const match = /^(\d{1,3})(?:\.(\d{1,2}))?$/.exec(normalized);
+  if (!match) throw new Error('Enter a valid percentage with at most two decimal places.');
+  const basisPoints = Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0'));
+  if (basisPoints > 10_000) throw new Error('Each ownership interest must be between 0% and 100%.');
+  return basisPoints;
+}
+
 const FORMATION_JURISDICTIONS = new Set([
   'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA',
   'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',

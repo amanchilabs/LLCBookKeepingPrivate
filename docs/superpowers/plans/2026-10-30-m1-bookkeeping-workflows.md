@@ -2,6 +2,10 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+## Implementation checkpoint — 2026-10-30
+
+The first vertical slice is implemented. Domain and storage tests, typecheck, and the full host test suite passed. The synthetic setup, four-member confirmation, opening balance, income/expense posting, app close/reopen, correction, dashboard/account reconciliation, date-ranged P&L, and CSV share flow were exercised in the iOS simulator. Android UI acceptance and the production security/recovery gates remain open, so Milestone 1 is not accepted.
+
 **Goal:** Replace the native proof as the primary experience with persisted on-device LLC setup, member interests, accounts, balanced cash transactions, and reports.
 
 **Architecture:** Keep the existing SQLCipher database generation and lease as the only persistence boundary. Add versioned bookkeeping tables and a repository that posts every financial event and its journal lines atomically; keep money and posting rules in the domain package. Native navigation reads only repository snapshots, while the web preview remains synthetic.
@@ -28,18 +32,17 @@
 - Create: `packages/domain/src/bookkeeping.ts`
 - Test: `packages/domain/test/bookkeeping.test.ts`
 - Create: `packages/storage-native/src/bookkeeping-store.ts`
-- Test: `packages/storage-native/test/bookkeeping-store.test.ts`
+- Test: `packages/storage-native/test/bookkeeping-store.test.mjs`
 
 **Interfaces:**
 - Domain exports `BusinessSetup`, `MemberInterestInput`, `CashAccountInput`, `CashTransactionInput`, `assertValidBusinessSetup`, `assertOwnershipTotals`, `openingBalanceLines`, `cashIncomeLines`, `cashExpenseLines`, and `reverseLines`.
 - Store exports `ensureBookkeepingSchema`, `createBusiness`, `getBookkeepingSnapshot`, `createCashAccount`, `recordCashTransaction`, and `replaceMembers`.
 - Store operations use `withActiveDatabase`; every write and its journal lines are in one SQLite transaction.
 
-- [ ] Write failing tests for business/date validation, explicit ownership confirmation, 40/20/20/20 total, positive and negative opening balance posting, income/expense posting, and balanced reversal lines.
-- [ ] Verify the new tests fail because the domain and repository APIs do not exist.
-- [ ] Implement the minimum domain rules and versioned tables for businesses, members, dated ownership interests, accounts, transactions, journal entries, and journal lines.
-- [ ] Exercise the repository against in-memory SQLite and verify account/journal/P&L totals derive from persisted rows.
-- [ ] Run focused tests and typecheck; commit the domain and repository slice.
+- [x] Write tests for business/date validation, explicit ownership confirmation, 40/20/20/20 total, positive and negative opening balance posting, income/expense posting, and balanced reversal lines.
+- [x] Implement the minimum domain rules and versioned tables for businesses, members, dated ownership interests, accounts, transactions, journal entries, and journal lines.
+- [x] Exercise the repository against a temporary SQLite database and verify account/journal/P&L totals derive from persisted rows.
+- [x] Run focused tests and typecheck; commit the domain and repository slice.
 
 ### Task 2: Native business setup and member management
 
@@ -48,7 +51,7 @@
 - Create: `apps/mobile/bookkeeping/BusinessSetupScreen.tsx`
 - Create: `apps/mobile/bookkeeping/MembersScreen.tsx`
 - Modify: `App.tsx`
-- Test: `apps/mobile/bookkeeping/business-workflow.test.ts`
+- Tests: `packages/domain/test/bookkeeping.test.ts`, `packages/storage-native/test/bookkeeping-store.test.mjs`
 
 **Interfaces:**
 - Native `App` renders the bookkeeping navigation; web keeps the synthetic preview.
@@ -56,10 +59,10 @@
 - Creating a profile requires an explicit confirmation of the displayed interests.
 - Member interest changes are dated and append history; active percentages must total 100%.
 
-- [ ] Add failing tests for setup persistence, required ownership confirmation, exact active ownership totals, and preserved interest history.
-- [ ] Implement setup and Members screens connected to the repository snapshot and write APIs.
-- [ ] Verify screen components use labels, accessible roles, and error/loading/locked states.
-- [ ] Run focused tests and typecheck; commit the setup/member slice.
+- [x] Add tests for setup validation, required ownership confirmation, exact active ownership totals, and preserved interest history.
+- [x] Implement setup and Members screens connected to the repository snapshot and write APIs.
+- [x] Verify screens expose labeled controls, accessible roles, and error/loading/storage-unavailable states.
+- [x] Run focused tests and typecheck; commit the setup/member slice.
 
 ### Task 3: Accounts, opening balances, and cash transaction screens
 
@@ -67,7 +70,7 @@
 - Create: `apps/mobile/bookkeeping/AccountsScreen.tsx`
 - Create: `apps/mobile/bookkeeping/TransactionsScreen.tsx`
 - Modify: `apps/mobile/bookkeeping/BookkeepingApp.tsx`
-- Test: `apps/mobile/bookkeeping/account-transaction-workflow.test.ts`
+- Test: `packages/storage-native/test/bookkeeping-store.test.mjs`
 
 **Interfaces:**
 - Account screens create bank/cash accounts and record opening balances through the repository.
@@ -76,10 +79,10 @@
 - Corrections append a reversal and replacement linked to the original; the original rows remain immutable.
 - CSV export includes date, category, amount, account, and description for every posted event, including reversals.
 
-- [ ] Add failing workflow tests for opening balance, income, expense, close/reopen persistence, reversal/replacement, filters, and CSV output.
-- [ ] Implement account and transaction UI connected to encrypted writes and repository snapshots.
-- [ ] Verify journal lines balance and calculated account totals equal transaction cash movements.
-- [ ] Run focused tests and typecheck; commit the accounts/transactions slice.
+- [x] Add repository tests for opening balance, income, expense, persistence across close/reopen, reversal/replacement, and CSV output.
+- [x] Implement account and transaction UI connected to encrypted writes and repository snapshots.
+- [x] Verify journal lines balance and calculated account totals equal transaction cash movements.
+- [x] Run focused tests and typecheck; commit the accounts/transactions slice.
 
 ### Task 4: Persisted dashboard and cash-basis reports
 
@@ -87,17 +90,17 @@
 - Create: `apps/mobile/bookkeeping/DashboardScreen.tsx`
 - Create: `apps/mobile/bookkeeping/ReportsScreen.tsx`
 - Modify: `apps/mobile/bookkeeping/BookkeepingApp.tsx`
-- Test: `apps/mobile/bookkeeping/reconciliation.test.ts`
+- Tests: `packages/domain/test/bookkeeping.test.ts`, `packages/storage-native/test/bookkeeping-store.test.mjs`
 
 **Interfaces:**
 - Dashboard displays account balances and totals queried from journal lines.
 - Reports show cash-basis income, expenses, and net income for a selected date range.
 - The end-to-end synthetic workflow asserts dashboard, journal, report, and CSV reconciliation after a correction.
 
-- [ ] Add failing reconciliation tests for opening balance plus income, expense, reversal, and replacement.
-- [ ] Implement persisted dashboard and report queries and connect report navigation.
-- [ ] Run the full host suite and typecheck; document whether a dedicated native device workflow was demonstrated.
-- [ ] Commit and push the completed or clearly labeled WIP slice; leave the branch unmerged for review.
+- [x] Add reconciliation tests for opening balance plus income, expense, reversal, and replacement.
+- [x] Implement persisted dashboard and report queries and connect report navigation.
+- [x] Run the full host suite and typecheck; document that iOS simulator workflow was demonstrated and Android UI acceptance remains open.
+- [ ] Commit and push the remaining UI and documentation changes; leave the branch unmerged for review.
 
 ## Deferred from this implementation slice
 

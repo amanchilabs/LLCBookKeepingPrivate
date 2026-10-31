@@ -3,6 +3,7 @@ import {
   cashBasisReportFromDatabase,
   createBusinessInDatabase,
   createCashAccountInDatabase,
+  correctCashTransactionInDatabase,
   ensureBookkeepingSchema,
   getBookkeepingSnapshotFromDatabase,
   recordCashTransactionInDatabase,
@@ -10,6 +11,7 @@ import {
   type BookkeepingSnapshot,
   type CashAccountInput,
   type CashBasisReport,
+  type CorrectCashTransactionInput,
   type CashTransactionInput,
   type ReplaceMembersInput,
 } from './bookkeeping-store';
@@ -43,6 +45,10 @@ export async function createCashAccount(input: CashAccountInput): Promise<void> 
 
 export async function recordCashTransaction(input: CashTransactionInput): Promise<void> {
   await useActiveBooks((database) => recordCashTransactionInDatabase(database, input));
+}
+
+export async function correctCashTransaction(input: CorrectCashTransactionInput): Promise<void> {
+  await useActiveBooks((database) => correctCashTransactionInDatabase(database, input));
 }
 
 export async function replaceMembers(input: ReplaceMembersInput): Promise<void> {

@@ -52,6 +52,14 @@ export interface CashTransactionInput {
   description: string;
 }
 
+export interface CorrectCashTransactionInput {
+  correctionId: string;
+  originalTransactionId: string;
+  reversalTransactionId: string;
+  reversalJournalEntryId: string;
+  replacement: CashTransactionInput;
+}
+
 export interface ReplaceMembersInput {
   businessId: string;
   effectiveDate: string;
@@ -338,12 +346,44 @@ async function requireBusiness(database: Database, businessId: string): Promise<
   return business;
 }
 
-async function requireCashAccount(database: Database, businessId: string, accountId: string): Promise<void> {
-  const account = await database.getFirstAsync<{ id: string }>(
-    "SELECT id FROM accounts WHERE id = ? AND business_id = ? AND is_active = 1 AND kind IN ('bank', 'cash')",
+async function requireCashAccount(database: Database, businessId: string, accountId: string): Promise<'bank' | 'cash'> {
+  const account = await database.getFirstAsync<{ id: string; kind: 'bank' | 'cash' }>(
+    "SELECT id, kind FROM accounts WHERE id = ? AND business_id = ? AND is_active = 1 AND kind IN ('bank', 'cash')",
     accountId, businessId,
   );
   if (!account) throw new Error('Choose an active bank or cash account for this transaction.');
+  return account.kind;
+}
+
+async function ensureCashAccountNeverNegative(database: Database, businessId: string, accountId: string): Promise<void> {
+  const account = await database.getFirstAsync<{ kind: string }>(
+    'SELECT kind FROM accounts WHERE id = ? AND business_id = ?', accountId, businessId,
+  );
+  if (account?.kind !== 'cash') return;
+  const lines = await database.getAllAsync<{
+    entryDate: string;
+    debitMinor: string;
+    creditMinor: string;
+  }>(
+    `SELECT je.entry_date AS entryDate, jl.debit_minor AS debitMinor, jl.credit_minor AS creditMinor
+     FROM journal_lines jl JOIN journal_entries je ON je.id = jl.journal_entry_id
+     WHERE jl.account_id = ? AND je.business_id = ?
+     ORDER BY je.entry_date, je.created_at, jl.line_number`, accountId, businessId,
+  );
+  let balance = 0n;
+  let currentDate: string | undefined;
+  let dateChange = 0n;
+  for (const line of lines) {
+    if (currentDate !== undefined && line.entryDate !== currentDate) {
+      balance += dateChange;
+      if (balance < 0n) throw new Error('The cash account balance would become negative on a recorded date.');
+      dateChange = 0n;
+    }
+    currentDate = line.entryDate;
+    dateChange += BigInt(line.debitMinor) - BigInt(line.creditMinor);
+  }
+  balance += dateChange;
+  if (balance < 0n) throw new Error('The cash account balance would become negative on a recorded date.');
 }
 
 async function requireCategoryAccount(
@@ -460,6 +500,98 @@ export async function recordCashTransactionInDatabase(database: Database, input:
     await insertJournalEntry(database, input.businessId, input.journalEntryId, input.date, input.kind, input.description, lines);
     const signedAmount = input.kind === 'income' ? input.amountCents : -input.amountCents;
     await insertTransaction(database, { ...input, amountCents: signedAmount });
+    await ensureCashAccountNeverNegative(database, input.businessId, input.accountId);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function correctCashTransactionInDatabase(database: Database, input: CorrectCashTransactionInput): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  const replacement = input.replacement;
+  const business = await requireBusiness(database, replacement.businessId);
+  if (replacement.date < business.bookkeepingStartDate) throw new Error('Replacement date cannot precede the bookkeeping start date.');
+  if (replacement.amountCents <= 0n) throw new Error('Replacement amount must be positive.');
+  if (!replacement.description.trim()) throw new Error('Enter a replacement description.');
+  await requireCashAccount(database, replacement.businessId, replacement.accountId);
+  await requireCategoryAccount(database, replacement.businessId, replacement.categoryAccountId, replacement.kind);
+
+  await inSqlTransaction(database, async () => {
+    const original = await database.getFirstAsync<{
+      id: string;
+      businessId: string;
+      journalEntryId: string;
+      date: string;
+      kind: string;
+      accountId: string;
+      categoryAccountId: string;
+      amountMinor: string;
+      description: string;
+    }>(
+      `SELECT id, business_id AS businessId, journal_entry_id AS journalEntryId,
+              entry_date AS date, kind, account_id AS accountId,
+              category_account_id AS categoryAccountId, amount_minor AS amountMinor, description
+       FROM transactions WHERE id = ? AND business_id = ?`, input.originalTransactionId, replacement.businessId,
+    );
+    if (!original || (original.kind !== 'income' && original.kind !== 'expense')) {
+      throw new Error('Choose an original income or expense transaction to correct.');
+    }
+    const existingCorrection = await database.getFirstAsync<{ id: string }>(
+      'SELECT id FROM transaction_corrections WHERE original_transaction_id = ?', original.id,
+    );
+    if (existingCorrection) throw new Error('This transaction has already been corrected.');
+    const originalLines = await database.getAllAsync<{ accountId: string; debitMinor: string; creditMinor: string }>(
+      `SELECT account_id AS accountId, debit_minor AS debitMinor, credit_minor AS creditMinor
+       FROM journal_lines WHERE journal_entry_id = ? ORDER BY line_number`, original.journalEntryId,
+    );
+    const reversedLines = reverseLines(originalLines.map((line) => ({
+      account: line.accountId,
+      debitCents: BigInt(line.debitMinor),
+      creditCents: BigInt(line.creditMinor),
+    })));
+    const reversalDescription = `Reversal of: ${original.description}`;
+    await insertJournalEntry(
+      database, original.businessId, input.reversalJournalEntryId, original.date,
+      'reversal', reversalDescription, reversedLines,
+    );
+    await insertTransaction(database, {
+      id: input.reversalTransactionId,
+      journalEntryId: input.reversalJournalEntryId,
+      businessId: original.businessId,
+      date: original.date,
+      kind: 'reversal',
+      accountId: original.accountId,
+      categoryAccountId: original.categoryAccountId,
+      amountCents: -BigInt(original.amountMinor),
+      description: reversalDescription,
+    });
+
+    const replacementLines = replacement.kind === 'income'
+      ? cashIncomeLines(replacement.accountId, replacement.categoryAccountId, replacement.amountCents)
+      : cashExpenseLines(replacement.accountId, replacement.categoryAccountId, replacement.amountCents);
+    await insertJournalEntry(
+      database, replacement.businessId, replacement.journalEntryId, replacement.date,
+      replacement.kind, replacement.description, replacementLines,
+    );
+    const replacementSignedAmount = replacement.kind === 'income' ? replacement.amountCents : -replacement.amountCents;
+    await insertTransaction(database, { ...replacement, amountCents: replacementSignedAmount });
+
+    const createdAt = new Date().toISOString();
+    await database.runAsync(
+      `INSERT INTO transaction_corrections
+       (id, business_id, original_transaction_id, reversal_transaction_id, replacement_transaction_id, created_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      input.correctionId, original.businessId, original.id, input.reversalTransactionId, replacement.id, createdAt,
+    );
+    await database.runAsync(
+      `INSERT INTO transaction_correction_roles (transaction_id, correction_id, role) VALUES (?, ?, 'reversal')`,
+      input.reversalTransactionId, input.correctionId,
+    );
+    await database.runAsync(
+      `INSERT INTO transaction_correction_roles (transaction_id, correction_id, role) VALUES (?, ?, 'replacement')`,
+      replacement.id, input.correctionId,
+    );
+    await ensureCashAccountNeverNegative(database, original.businessId, original.accountId);
+    await ensureCashAccountNeverNegative(database, replacement.businessId, replacement.accountId);
   });
 }
 
@@ -554,7 +686,7 @@ async function readMembers(database: Database, businessId: string): Promise<{ me
     `SELECT m.id, m.name, h.ownership_basis_points AS ownershipBasisPoints,
             h.effective_from AS effectiveFrom, h.effective_to AS effectiveTo, m.retired_at AS retiredAt
      FROM members m JOIN member_interest_history h ON h.member_id = m.id
-     WHERE m.business_id = ? ORDER BY h.effective_from, m.created_at`, businessId,
+     WHERE m.business_id = ? ORDER BY m.rowid, h.effective_from`, businessId,
   );
   return {
     members: all.filter((member) => member.effectiveTo === null && member.retiredAt === null),
@@ -590,13 +722,14 @@ async function readTransactions(database: Database, businessId: string): Promise
             t.account_id AS accountId, a.name AS accountName,
             t.category_account_id AS categoryAccountId, c.name AS category,
             t.amount_minor AS amountCents, t.description,
-            original.original_transaction_id AS originalTransactionId,
+            COALESCE(original.original_transaction_id, correction.original_transaction_id) AS originalTransactionId,
             role.role AS correctionRole
      FROM transactions t
      JOIN accounts a ON a.id = t.account_id
      JOIN accounts c ON c.id = t.category_account_id
      LEFT JOIN transaction_correction_roles role ON role.transaction_id = t.id
      LEFT JOIN transaction_corrections original ON original.original_transaction_id = t.id
+     LEFT JOIN transaction_corrections correction ON correction.id = role.correction_id
      WHERE t.business_id = ? ORDER BY t.entry_date DESC, t.created_at DESC, t.id`, businessId,
   );
   return rows.map((row) => ({ ...row, amountCents: BigInt(row.amountCents) }));

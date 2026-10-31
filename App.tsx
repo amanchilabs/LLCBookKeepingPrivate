@@ -5,6 +5,7 @@ import { recoverDatabaseRestoreAtStartup, retryDatabaseRestoreRecovery } from '.
 import { restoreEncryptedBackupFromFile, runBackupKdfBenchmark, runPortableBackupProof, runRestoreFailureInjectionProof, shareEncryptedBackup } from './packages/backup/src/native-portable-backup';
 import { runNativeStorageProof, type NativeStorageProofResult } from './packages/storage-native/src/native-storage-proof';
 import { SecureKeyAccessError } from './packages/storage-native/src/secure-key-access';
+import { BookkeepingApp } from './apps/mobile/bookkeeping/BookkeepingApp';
 
 type PreviewTab = 'Overview' | 'Members' | 'Transactions' | 'Loans' | 'Reports';
 
@@ -230,7 +231,7 @@ function NativeProofScreen() {
 
 export default function App() {
   const capabilities = capabilitiesFor(Platform.OS === 'web' ? 'web' : Platform.OS === 'ios' ? 'ios' : 'android');
-  return capabilities.syntheticDataOnly ? <PreviewScreen /> : <NativeProofScreen />;
+  return capabilities.syntheticDataOnly ? <PreviewScreen /> : <BookkeepingApp SecurityProofScreen={NativeProofScreen} />;
 }
 
 const styles = StyleSheet.create({

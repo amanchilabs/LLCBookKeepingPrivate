@@ -5,6 +5,7 @@ import {
   cashExpenseLines,
   cashIncomeLines,
   openingBalanceLines,
+  parseOwnershipPercent,
   reverseLines,
   type BusinessSetupInput,
 } from '../src/bookkeeping';
@@ -50,6 +51,14 @@ describe('bookkeeping setup and cash posting rules', () => {
       ...member,
       name: index === 0 ? '  ' : member.name,
     })))).toThrow('name');
+  });
+
+  it('parses ownership percent text exactly into basis points', () => {
+    expect(parseOwnershipPercent('40')).toBe(4_000);
+    expect(parseOwnershipPercent('20.25')).toBe(2_025);
+    expect(() => parseOwnershipPercent('100.01')).toThrow('between 0% and 100%');
+    expect(() => parseOwnershipPercent('0.001')).toThrow('at most two decimal places');
+    expect(() => parseOwnershipPercent('-1')).toThrow('valid percentage');
   });
 
   it('posts positive and negative opening balances against opening balance equity', () => {
