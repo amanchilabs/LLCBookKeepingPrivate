@@ -2,14 +2,23 @@
 
 ## Current artifact
 
-- **Source commit:** `fb8c8a6301f40231062aa05ec96321b082d7f5e6` (`feature/member-capital-20261031-a91c`)
+- **Source commit:** `8bfd88924ac1adde11b1fc056058db2043e70080` (`feature/member-capital-20261031-a91c`)
 - **Build:** Android Release, version `0.1.0` / code `1`, min SDK 24, target SDK 36
 - **Artifact (local, ignored by Git):** `android/app/build/outputs/apk/release/app-release.apk`
-- **SHA-256:** `a49b962db1ffb12f1d5a4be56dc0878d1e88d46aec780d9c4cdb121d4feb256b`
-- **Size:** 134,697,741 bytes
+- **SHA-256:** `908dce7336ac1ac680ae22bc6cdd682c2ab9bf3b73199c487a294bb3cf52df3f`
+- **Size:** 134,710,913 bytes
 - **Signing:** APK Signature Scheme v2 verified. Signed with the local Android Debug certificate, SHA-256 `fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c`. This is for controlled synthetic-data beta testing only; it is not a production signing key.
 
-## Current checkpoint: reminder migration and workflow
+## Current checkpoint: local workspaces and sole-member policy
+
+- `./gradlew :app:assembleRelease` completed successfully from the source tree committed as `8bfd889`; APK Signature Scheme v2 verification succeeded.
+- Installed over the existing emulator app with `adb install -r`; synthetic Northstar books remained. The v12-to-v13 migration preserved the prior balances.
+- Created a second local LLC through the app UI with one owner at 100%, edited and saved the member, then force-stopped and relaunched to verify persistence.
+- Switched between Cedar Design LLC and Northstar Demo LLC. Each showed its own records; Northstar remained cash `$3,857.81`, income `$500.00`, expenses `$212.19` after relaunch.
+- Single-member Settings and Members screens showed owner-equity policy and no new guaranteed-payment entry controls. Detailed screenshots and regression results are in [Android workspace verification](../android-workspaces-20261031/README.md).
+- Only `emulator-5554` was connected; the Samsung physical device was not attached.
+
+## Previous checkpoint: reminder migration and workflow
 
 - `./gradlew :app:assembleRelease` completed successfully from the source tree committed as `fb8c8a6`, bundling the JavaScript into the APK. APK signature verification succeeded.
 - Installed over the existing emulator app with `adb install -r`; the synthetic local database remained present through the v11-to-v12 schema migration.
