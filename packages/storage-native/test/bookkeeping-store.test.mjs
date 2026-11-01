@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { parseCsvTable } from '../../domain/src/transaction-csv-import.ts';
 import {
   cashBasisReportFromDatabase,
   cashMovementReportFromDatabase,
@@ -28,6 +29,7 @@ import {
   reverseGuaranteedPaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
+  importCashTransactionsInDatabase,
   postRecurringTransactionInDatabase,
   recordSplitCashTransactionInDatabase,
   reopenAccountReconciliationInDatabase,
@@ -163,6 +165,69 @@ afterEach(() => {
 });
 
 describe('bookkeeping repository SQL contract', () => {
+  it('posts imported CSV rows as balanced journal entries and skips possible duplicates by default', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 125_000n,
+      openingTransactionId: 'opening-import', openingJournalEntryId: 'opening-import-journal',
+    });
+    const firstImport = await importCashTransactionsInDatabase(database, 'business-1', 'bank-1', [
+      { id: 'import-income', journalEntryId: 'import-income-entry', date: '2024-01-05',
+        amountCents: 40_000n, categoryAccountId: 'income-services', description: 'Synthetic imported income' },
+      { id: 'import-expense', journalEntryId: 'import-expense-entry', date: '2024-01-06',
+        amountCents: -7_500n, categoryAccountId: 'expense-rent', description: 'Synthetic imported rent' },
+    ], false);
+
+    expect(firstImport).toEqual({ importedCount: 2, skippedDuplicateCount: 0 });
+    const duplicateImport = await importCashTransactionsInDatabase(database, 'business-1', 'bank-1', [{
+      id: 'duplicate-import', journalEntryId: 'duplicate-import-entry', date: '2024-01-06',
+      amountCents: -7_500n, categoryAccountId: 'expense-rent', description: 'Synthetic imported rent',
+    }], false);
+    expect(duplicateImport).toEqual({ importedCount: 0, skippedDuplicateCount: 1 });
+    const includedDuplicate = await importCashTransactionsInDatabase(database, 'business-1', 'bank-1', [{
+      id: 'confirmed-duplicate-import', journalEntryId: 'confirmed-duplicate-import-entry', date: '2024-01-06',
+      amountCents: -7_500n, categoryAccountId: 'expense-rent', description: 'Synthetic imported rent',
+    }], true);
+    expect(includedDuplicate).toEqual({ importedCount: 1, skippedDuplicateCount: 0 });
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(150_000n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 40_000n, expenseCents: 15_000n, netIncomeCents: 25_000n });
+    expect(snapshot.transactions).toHaveLength(4);
+    const exportedRows = parseCsvTable(transactionsCsv(snapshot));
+    const exportedCashCents = exportedRows.slice(1).reduce((sum, row) =>
+      sum + BigInt(Math.round(Number(row[2]) * 100)), 0n);
+    expect(exportedCashCents).toBe(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents);
+    expect(database.database.prepare('SELECT je.id FROM journal_entries je JOIN journal_lines jl ON jl.journal_entry_id = je.id GROUP BY je.id HAVING SUM(CAST(jl.debit_minor AS INTEGER)) != SUM(CAST(jl.credit_minor AS INTEGER))').all()).toEqual([]);
+    database.close();
+  });
+
+  it('rolls back every imported row when any cash movement would violate balance rules', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'cash-1', businessId: 'business-1', name: 'Petty cash', kind: 'cash',
+      openingDate: '2024-01-01', openingBalanceCents: 10_000n,
+      openingTransactionId: 'opening-atomic-import', openingJournalEntryId: 'opening-atomic-import-entry',
+    });
+
+    await expect(importCashTransactionsInDatabase(database, 'business-1', 'cash-1', [
+      { id: 'atomic-income', journalEntryId: 'atomic-income-entry', date: '2024-01-02',
+        amountCents: 5_000n, categoryAccountId: 'income-services', description: 'Synthetic income' },
+      { id: 'atomic-expense', journalEntryId: 'atomic-expense-entry', date: '2024-01-03',
+        amountCents: -20_000n, categoryAccountId: 'expense-rent', description: 'Synthetic expense' },
+    ], false)).rejects.toThrow('cash account balance would become negative');
+    expect(database.database.prepare("SELECT COUNT(*) AS count FROM transactions WHERE id LIKE 'atomic-%'").get().count).toBe(0);
+    expect(database.database.prepare("SELECT COUNT(*) AS count FROM journal_entries WHERE id LIKE 'atomic-%'").get().count).toBe(0);
+    expect((await getBookkeepingSnapshotFromDatabase(database, 'business-1')).accounts
+      .find((account) => account.id === 'cash-1').balanceCents).toBe(10_000n);
+    database.close();
+  });
+
   it('neutralizes spreadsheet formulas in transaction CSV text while retaining signed amounts', () => {
     const csv = transactionsCsv({
       transactions: [{

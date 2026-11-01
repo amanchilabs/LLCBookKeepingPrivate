@@ -6,6 +6,7 @@ import { Text, View } from 'react-native';
 import { parseUsd } from '../../../packages/domain/src/money';
 import { RecurringTransactionsSection } from './RecurringTransactionsSection';
 import { transactionRoleLabel } from './transaction-role';
+import { TransactionCsvImportPanel } from './TransactionCsvImportPanel';
 import {
   correctCashTransaction,
   recordCashTransaction,
@@ -281,6 +282,7 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
     </Panel> : null}
 
     {snapshot.business ? <RecurringTransactionsSection snapshot={snapshot} onSaved={onSaved} /> : null}
+    {snapshot.business ? <TransactionCsvImportPanel snapshot={snapshot} onImported={onSaved} /> : null}
 
     <Panel>
       <Text style={uiStyles.sectionTitle}>Search and filter</Text>

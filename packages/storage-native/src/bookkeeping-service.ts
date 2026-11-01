@@ -22,6 +22,7 @@ import {
   recordLoanRepaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
+  importCashTransactionsInDatabase,
   recordSplitCashTransactionInDatabase,
   postRecurringTransactionInDatabase,
   recordTransferInDatabase,
@@ -44,6 +45,8 @@ import {
   type JournalBalanceReport,
   type CorrectCashTransactionInput,
   type CashTransactionInput,
+  type CashImportTransactionInput,
+  type CashImportResult,
   type SplitCashTransactionInput,
   type PostRecurringTransactionInput,
   type TransferInput,
@@ -121,6 +124,17 @@ export async function setRecurringTransactionActive(templateId: string, isActive
 
 export async function recordCashTransaction(input: CashTransactionInput): Promise<void> {
   await useActiveBooks((database) => recordCashTransactionInDatabase(database, input));
+}
+
+export async function importCashTransactions(input: {
+  businessId: string;
+  accountId: string;
+  rows: readonly CashImportTransactionInput[];
+  includePossibleDuplicates: boolean;
+}): Promise<CashImportResult> {
+  return await useActiveBooks((database) => importCashTransactionsInDatabase(
+    database, input.businessId, input.accountId, input.rows, input.includePossibleDuplicates,
+  ));
 }
 
 export async function recordSplitCashTransaction(input: SplitCashTransactionInput): Promise<void> {

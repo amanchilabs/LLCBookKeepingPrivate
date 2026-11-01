@@ -19,6 +19,7 @@ import { calculateUnpaidLoanInterestCents, type DatedAmount, type LoanDayCount }
 import { nextRecurringDate, type RecurringCadence } from '../../domain/src/recurring';
 import { formatUsd } from '../../domain/src/money';
 import { escapeCsvCell } from '../../domain/src/csv';
+import { cashImportDuplicateKey } from '../../domain/src/transaction-csv-import';
 
 const SCHEMA_VERSION = 11;
 
@@ -102,6 +103,20 @@ export interface CashTransactionInput {
   categoryAccountId: string;
   amountCents: bigint;
   description: string;
+}
+
+export interface CashImportTransactionInput {
+  id: string;
+  journalEntryId: string;
+  date: string;
+  amountCents: bigint;
+  categoryAccountId: string;
+  description: string;
+}
+
+export interface CashImportResult {
+  importedCount: number;
+  skippedDuplicateCount: number;
 }
 
 export interface CashTransactionSplitInput {
@@ -2019,6 +2034,79 @@ export async function recordCashTransactionInDatabase(database: Database, input:
     const signedAmount = input.kind === 'income' ? input.amountCents : -input.amountCents;
     await insertTransaction(database, { ...input, amountCents: signedAmount });
     await ensureCashAccountNeverNegative(database, input.businessId, input.accountId);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function importCashTransactionsInDatabase(
+  database: Database,
+  businessId: string,
+  accountId: string,
+  rows: readonly CashImportTransactionInput[],
+  includePossibleDuplicates: boolean,
+): Promise<CashImportResult> {
+  await ensureBookkeepingSchema(database);
+  const business = await requireBusiness(database, businessId);
+  if (rows.length === 0) throw new Error('Choose at least one valid transaction row to import.');
+
+  return await inSqlTransaction(database, async () => {
+    await requireCashAccount(database, businessId, accountId);
+    const existingRows = await database.getAllAsync<{
+      date: string; accountId: string; amountCents: string; categoryAccountId: string; description: string;
+    }>(
+      `SELECT entry_date AS date, account_id AS accountId, amount_minor AS amountCents,
+              category_account_id AS categoryAccountId, description
+       FROM transactions WHERE business_id = ? AND kind IN ('income', 'expense')`, businessId,
+    );
+    const seen = new Set(existingRows.map((row) => cashImportDuplicateKey(
+      row.date, row.accountId, BigInt(row.amountCents), row.categoryAccountId, row.description,
+    )));
+    const prepared: Array<{ row: CashImportTransactionInput; kind: 'income' | 'expense' }> = [];
+    let skippedDuplicateCount = 0;
+    const seenIds = new Set<string>();
+
+    for (const row of rows) {
+      requireDate(row.date, 'transaction date');
+      if (row.date < business.bookkeepingStartDate) {
+        throw new Error('Transaction date cannot precede the bookkeeping start date.');
+      }
+      if (!row.description.trim()) throw new Error('Enter a transaction description.');
+      if (row.amountCents === 0n) throw new Error('Transaction amounts must be non-zero.');
+      if (!row.id.trim() || !row.journalEntryId.trim() || seenIds.has(row.id) || seenIds.has(row.journalEntryId)) {
+        throw new Error('Imported transaction identifiers must be unique and non-empty.');
+      }
+      seenIds.add(row.id);
+      seenIds.add(row.journalEntryId);
+      const kind = row.amountCents > 0n ? 'income' : 'expense';
+      await requireCategoryAccount(database, businessId, row.categoryAccountId, kind);
+      const possibleDuplicate = seen.has(cashImportDuplicateKey(
+        row.date, accountId, row.amountCents, row.categoryAccountId, row.description,
+      ));
+      const duplicateKey = cashImportDuplicateKey(
+        row.date, accountId, row.amountCents, row.categoryAccountId, row.description,
+      );
+      seen.add(duplicateKey);
+      if (possibleDuplicate && !includePossibleDuplicates) {
+        skippedDuplicateCount += 1;
+      } else {
+        prepared.push({ row, kind });
+      }
+    }
+
+    for (const { row, kind } of prepared) {
+      const amountCents = row.amountCents < 0n ? -row.amountCents : row.amountCents;
+      const lines = kind === 'income'
+        ? cashIncomeLines(accountId, row.categoryAccountId, amountCents)
+        : cashExpenseLines(accountId, row.categoryAccountId, amountCents);
+      await insertJournalEntry(database, businessId, row.journalEntryId, row.date, kind, row.description, lines);
+      await insertTransaction(database, {
+        id: row.id, journalEntryId: row.journalEntryId, businessId, date: row.date, kind,
+        accountId, categoryAccountId: row.categoryAccountId, amountCents: row.amountCents,
+        description: row.description,
+      });
+    }
+    await ensureCashAccountNeverNegative(database, businessId, accountId);
+    return { importedCount: prepared.length, skippedDuplicateCount };
   });
 }
 
