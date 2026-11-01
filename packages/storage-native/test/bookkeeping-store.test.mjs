@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   cashBasisReportFromDatabase,
+  cashMovementReportFromDatabase,
   createBusinessInDatabase,
   createCashAccountInDatabase,
   createRecurringTransactionInDatabase,
@@ -162,6 +163,79 @@ afterEach(() => {
 });
 
 describe('bookkeeping repository SQL contract', () => {
+  it('neutralizes spreadsheet formulas in transaction CSV text while retaining signed amounts', () => {
+    const csv = transactionsCsv({
+      transactions: [{
+        date: '2024-01-10', transferRole: null, splitLines: null, amountCents: -1_250n,
+        kind: 'expense', category: '=SUM(1,1)', accountName: '\t@account', description: '-1+2',
+      }],
+    });
+
+    expect(csv.split('\r\n')).toEqual([
+      '"Date","Category","Amount","Account","Description"',
+      '"2024-01-10","\'=SUM(1,1)","-12.50","\'\t@account","\'-1+2"',
+    ]);
+  });
+
+  it('reconciles selected-period cash movement by account to journal balances and P&L', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 125_000n,
+      openingTransactionId: 'opening-checking', openingJournalEntryId: 'opening-checking-entry',
+    });
+    await createCashAccountInDatabase(database, {
+      id: 'bank-2', businessId: 'business-1', name: 'Savings', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 5_000n,
+      openingTransactionId: 'opening-savings', openingJournalEntryId: 'opening-savings-entry',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'income-1', journalEntryId: 'income-entry-1', businessId: 'business-1', date: '2024-01-05',
+      kind: 'income', accountId: 'bank-1', categoryAccountId: 'income-services', amountCents: 40_000n,
+      description: 'Synthetic client receipt',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'expense-1', journalEntryId: 'expense-entry-1', businessId: 'business-1', date: '2024-01-06',
+      kind: 'expense', accountId: 'bank-1', categoryAccountId: 'expense-rent', amountCents: 7_500n,
+      description: 'Synthetic rent',
+    });
+    await recordTransferInDatabase(database, {
+      transactionId: 'transfer-1', journalEntryId: 'transfer-entry-1', businessId: 'business-1', date: '2024-01-07',
+      sourceAccountId: 'bank-1', destinationAccountId: 'bank-2', amountCents: 10_000n,
+      description: 'Synthetic account transfer',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'outside-income', journalEntryId: 'outside-income-entry', businessId: 'business-1', date: '2024-01-08',
+      kind: 'income', accountId: 'bank-1', categoryAccountId: 'income-services', amountCents: 3_000n,
+      description: 'Outside selected period',
+    });
+
+    const report = await cashMovementReportFromDatabase(database, 'business-1', '2024-01-05', '2024-01-07');
+    expect(report).toEqual({
+      fromDate: '2024-01-05', throughDate: '2024-01-07',
+      beginningBalanceCents: 130_000n, inflowsCents: 50_000n, outflowsCents: 17_500n,
+      netMovementCents: 32_500n, endingBalanceCents: 162_500n,
+      accounts: [
+        { accountId: 'bank-1', accountName: 'Checking', kind: 'bank', beginningBalanceCents: 125_000n,
+          inflowsCents: 40_000n, outflowsCents: 17_500n, netMovementCents: 22_500n, endingBalanceCents: 147_500n },
+        { accountId: 'bank-2', accountName: 'Savings', kind: 'bank', beginningBalanceCents: 5_000n,
+          inflowsCents: 10_000n, outflowsCents: 0n, netMovementCents: 10_000n, endingBalanceCents: 15_000n },
+      ],
+    });
+    const trialBalance = await journalBalanceReportFromDatabase(database, 'business-1', '2024-01-07');
+    expect(report.accounts.map((line) => line.endingBalanceCents)).toEqual(
+      report.accounts.map((line) => trialBalance.trialBalance.find((account) => account.accountId === line.accountId).debitCents
+        - trialBalance.trialBalance.find((account) => account.accountId === line.accountId).creditCents),
+    );
+    expect(await cashBasisReportFromDatabase(database, 'business-1', '2024-01-05', '2024-01-07'))
+      .toMatchObject({ incomeCents: 40_000n, expenseCents: 7_500n, netIncomeCents: 32_500n });
+    await expect(cashMovementReportFromDatabase(database, 'business-1', '2024-02-01', '2024-01-01'))
+      .rejects.toThrow('start date must not follow its end date');
+    database.close();
+  });
+
   it('closes periods as an auditable posting lock and reopens only the latest closed interval', async () => {
     const database = new TestDatabase(databasePath());
     await ensureBookkeepingSchema(database);

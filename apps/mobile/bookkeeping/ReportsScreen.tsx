@@ -2,16 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { StyleSheet, Text, View } from 'react-native';
-import { getCashBasisReport, getGeneralLedgerReport, getJournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-service';
-import type { BookkeepingSnapshot, CashBasisReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
+import { getCashBasisReport, getCashMovementReport, getGeneralLedgerReport, getJournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-service';
+import type { BookkeepingSnapshot, CashBasisReport, CashMovementReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
 import { summarizeLoanBalance } from '../../../packages/domain/src/loan-interest';
-import { balanceSheetCsv, cashBasisCsv, generalLedgerCsv, guaranteedPaymentCashCsv, isValidDateRange, loanCashActivityCsv, memberCapitalMovementCsv, trialBalanceCsv } from './report-exports';
+import { balanceSheetCsv, cashBasisCsv, cashMovementCsv, generalLedgerCsv, guaranteedPaymentCashCsv, isValidDateRange, loanCashActivityCsv, memberCapitalMovementCsv, trialBalanceCsv } from './report-exports';
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const [fromDate, setFromDate] = useState(`${todayLocalDate().slice(0, 4)}-01-01`);
   const [throughDate, setThroughDate] = useState(todayLocalDate());
   const [report, setReport] = useState<CashBasisReport | null>(null);
+  const [cashMovementReport, setCashMovementReport] = useState<CashMovementReport | null>(null);
   const [journalReport, setJournalReport] = useState<JournalBalanceReport | null>(null);
   const [ledgerReport, setLedgerReport] = useState<GeneralLedgerReport | null>(null);
   const [ledgerAccountId, setLedgerAccountId] = useState('');
@@ -98,11 +99,13 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     setError(null);
     try {
       const cashReport = await getCashBasisReport(snapshot.business.id, fromDate, throughDate);
+      const movementReport = await getCashMovementReport(snapshot.business.id, fromDate, throughDate);
       const balanceReport = await getJournalBalanceReport(snapshot.business.id, throughDate);
       const generalLedger = selectedLedgerAccountId
         ? await getGeneralLedgerReport(snapshot.business.id, selectedLedgerAccountId, throughDate)
         : null;
       setReport(cashReport);
+      setCashMovementReport(movementReport);
       setJournalReport(balanceReport);
       setLedgerReport(generalLedger);
     } catch (reportError) {
@@ -168,6 +171,26 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <Button title={exporting ? 'Preparing CSV…' : 'Export P&L CSV'} secondary
           onPress={() => void exportCsv('profit-and-loss', cashBasisCsv(report))} disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Choose a date range to calculate the report from journal activity.</Text>}
+    </Panel>
+    <Panel>
+      <Text style={uiStyles.sectionTitle}>Cash movement · selected dates</Text>
+      {cashMovementReport && cashMovementReport.fromDate === fromDate && cashMovementReport.throughDate === throughDate ? <>
+        <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate}. Transfers appear in each account's cash movement and net to zero across all accounts.</Text>
+        {cashMovementReport.accounts.map((account) => <View key={account.accountId} style={uiStyles.loanCard}>
+          <Text style={uiStyles.rowTitle}>{account.accountName} · {account.kind === 'bank' ? 'bank' : 'cash'}</Text>
+          <View style={uiStyles.reportRow}><Text style={uiStyles.rowDetail}>Beginning balance</Text><Money cents={account.beginningBalanceCents} /></View>
+          <View style={uiStyles.reportRow}><Text style={uiStyles.rowDetail}>Inflows</Text><Money cents={account.inflowsCents} /></View>
+          <View style={uiStyles.reportRow}><Text style={uiStyles.rowDetail}>Outflows</Text><Money cents={account.outflowsCents} /></View>
+          <View style={uiStyles.reportRow}><Text style={uiStyles.rowDetail}>Net movement</Text><Money cents={account.netMovementCents} /></View>
+          <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Ending balance</Text><Money cents={account.endingBalanceCents} /></View>
+        </View>)}
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Total ending cash</Text><Money cents={cashMovementReport.endingBalanceCents} /></View>
+        <Text style={uiStyles.rowDetail}>Beginning {moneyLabel(cashMovementReport.beginningBalanceCents)} + net movement {moneyLabel(cashMovementReport.netMovementCents)} = ending {moneyLabel(cashMovementReport.endingBalanceCents)}.</Text>
+        <Button title={exporting ? 'Preparing CSV…' : 'Export cash movement CSV'} secondary
+          onPress={() => void exportCsv('cash-movement', cashMovementCsv(cashMovementReport))}
+          disabled={exporting || cashMovementReport.accounts.length === 0} />
+        {cashMovementReport.accounts.length === 0 ? <Text style={uiStyles.helper}>Add a bank or cash account to report cash movement.</Text> : null}
+      </> : <Text style={uiStyles.helper}>Update the report to calculate selected-period cash movement from journal lines.</Text>}
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Balance Sheet · book basis</Text>

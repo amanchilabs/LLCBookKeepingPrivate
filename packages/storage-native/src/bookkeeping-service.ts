@@ -1,6 +1,7 @@
 import { withActiveDatabase } from './storage-access';
 import {
   cashBasisReportFromDatabase,
+  cashMovementReportFromDatabase,
   completeAccountReconciliationInDatabase,
   createCategoryAccountInDatabase,
   createRecurringTransactionInDatabase,
@@ -38,6 +39,7 @@ import {
   type CategoryAccountInput,
   type CreateRecurringTransactionInput,
   type CashBasisReport,
+  type CashMovementReport,
   type GeneralLedgerReport,
   type JournalBalanceReport,
   type CorrectCashTransactionInput,
@@ -205,6 +207,14 @@ export async function getCashBasisReport(
   throughDate: string,
 ): Promise<CashBasisReport> {
   return await useActiveBooks((database) => cashBasisReportFromDatabase(database, businessId, fromDate, throughDate));
+}
+
+export async function getCashMovementReport(
+  businessId: string,
+  fromDate: string,
+  throughDate: string,
+): Promise<CashMovementReport> {
+  return await useActiveBooks((database) => cashMovementReportFromDatabase(database, businessId, fromDate, throughDate));
 }
 
 export async function getJournalBalanceReport(businessId: string, asOfDate: string): Promise<JournalBalanceReport> {

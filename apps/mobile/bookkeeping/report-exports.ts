@@ -1,5 +1,6 @@
 import type {
   CashBasisReport,
+  CashMovementReport,
   GeneralLedgerReport,
   GuaranteedPaymentCashEvent,
   JournalBalanceReport,
@@ -7,9 +8,9 @@ import type {
   LoanAgreementRecord,
   MemberCapitalActivityRecord,
 } from '../../../packages/storage-native/src/bookkeeping-store';
+import { escapeCsvCell } from '../../../packages/domain/src/csv';
 
-const csv = (rows: string[][]): string => rows.map((row) => row.map(escapeCsv).join(',')).join('\r\n');
-const escapeCsv = (value: string): string => `"${value.replaceAll('"', '""')}"`;
+const csv = (rows: string[][]): string => rows.map((row) => row.map(escapeCsvCell).join(',')).join('\r\n');
 const usd = (cents: bigint): string => {
   const absolute = cents < 0n ? -cents : cents;
   return `${cents < 0n ? '-' : ''}${absolute / 100n}.${(absolute % 100n).toString().padStart(2, '0')}`;
@@ -32,6 +33,25 @@ export function cashBasisCsv(report: CashBasisReport): string {
     [report.fromDate, report.throughDate, 'Cash basis', 'Operating expenses', usd(report.expenseCents)],
     [report.fromDate, report.throughDate, 'Cash basis', 'Net income', usd(report.netIncomeCents)],
   ]);
+}
+
+export function cashMovementCsv(report: CashMovementReport): string {
+  if (!isValidDateRange(report.fromDate, report.throughDate)) {
+    throw new Error('Enter a valid date range before exporting cash movement.');
+  }
+  const rows = report.accounts.map((account) => [
+    report.fromDate, report.throughDate, account.accountName, account.kind,
+    usd(account.beginningBalanceCents), usd(account.inflowsCents), usd(account.outflowsCents),
+    usd(account.netMovementCents), usd(account.endingBalanceCents),
+  ]);
+  rows.push([
+    report.fromDate, report.throughDate, 'TOTAL CASH', '', usd(report.beginningBalanceCents),
+    usd(report.inflowsCents), usd(report.outflowsCents), usd(report.netMovementCents), usd(report.endingBalanceCents),
+  ]);
+  return csv([[
+    'From date', 'Through date', 'Account', 'Account type', 'Beginning balance',
+    'Inflows', 'Outflows', 'Net movement', 'Ending balance',
+  ], ...rows]);
 }
 
 export function balanceSheetCsv(report: JournalBalanceReport): string {

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   balanceSheetCsv,
   cashBasisCsv,
+  cashMovementCsv,
   generalLedgerCsv,
   guaranteedPaymentCashCsv,
   isValidDateRange,
@@ -11,6 +12,7 @@ import {
 } from './report-exports';
 import type {
   CashBasisReport,
+  CashMovementReport,
   GeneralLedgerReport,
   GuaranteedPaymentCashEvent,
   JournalBalanceReport,
@@ -54,6 +56,18 @@ const ledger: GeneralLedgerReport = {
   totalDebitsCents: 10_000n, totalCreditsCents: 0n, endingBalanceCents: 10_000n,
 };
 
+const cashMovement: CashMovementReport = {
+  fromDate: '2026-03-01', throughDate: '2026-03-31',
+  beginningBalanceCents: 130_000n, inflowsCents: 50_000n, outflowsCents: 17_500n,
+  netMovementCents: 32_500n, endingBalanceCents: 162_500n,
+  accounts: [
+    { accountId: 'bank-1', accountName: 'Checking, main', kind: 'bank', beginningBalanceCents: 125_000n,
+      inflowsCents: 40_000n, outflowsCents: 17_500n, netMovementCents: 22_500n, endingBalanceCents: 147_500n },
+    { accountId: 'bank-2', accountName: 'Savings', kind: 'bank', beginningBalanceCents: 5_000n,
+      inflowsCents: 10_000n, outflowsCents: 0n, netMovementCents: 10_000n, endingBalanceCents: 15_000n },
+  ],
+};
+
 describe('CPA report CSV exports', () => {
   it('accepts only valid ISO dates in an ordered inclusive report range', () => {
     expect(isValidDateRange('2026-03-01', '2026-03-31')).toBe(true);
@@ -84,6 +98,25 @@ describe('CPA report CSV exports', () => {
       '"2026-10-31","Opening equity","equity","0.00","150.00"',
       '"2026-10-31","TOTALS","","150.00","150.00"',
     ]);
+  });
+
+  it('exports cash movement beginning, movement, and ending amounts that reconcile', () => {
+    expect(cashMovementCsv(cashMovement).split('\r\n')).toEqual([
+      '"From date","Through date","Account","Account type","Beginning balance","Inflows","Outflows","Net movement","Ending balance"',
+      '"2026-03-01","2026-03-31","Checking, main","bank","1250.00","400.00","175.00","225.00","1475.00"',
+      '"2026-03-01","2026-03-31","Savings","bank","50.00","100.00","0.00","100.00","150.00"',
+      '"2026-03-01","2026-03-31","TOTAL CASH","","1300.00","500.00","175.00","325.00","1625.00"',
+    ]);
+  });
+
+  it('neutralizes formula-like account names in cash movement CSV', () => {
+    const unsafeReport: CashMovementReport = {
+      ...cashMovement,
+      accounts: [{ ...cashMovement.accounts[0], accountName: ' =SUM(1,1)' }],
+    };
+    expect(cashMovementCsv(unsafeReport).split('\r\n')[1]).toBe(
+      `"2026-03-01","2026-03-31","' =SUM(1,1)","bank","1250.00","400.00","175.00","225.00","1475.00"`,
+    );
   });
 
   it('quotes delimiters in General Ledger descriptions and includes running balances', () => {

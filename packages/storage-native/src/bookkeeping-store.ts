@@ -18,6 +18,7 @@ import { accountTransferLines, assertBalancedEntry, loanAdvanceLines, loanRepaym
 import { calculateUnpaidLoanInterestCents, type DatedAmount, type LoanDayCount } from '../../domain/src/loan-interest';
 import { nextRecurringDate, type RecurringCadence } from '../../domain/src/recurring';
 import { formatUsd } from '../../domain/src/money';
+import { escapeCsvCell } from '../../domain/src/csv';
 
 const SCHEMA_VERSION = 11;
 
@@ -462,6 +463,28 @@ export interface BookkeepingSnapshot {
 export interface CashBasisReport extends CashBasisTotals {
   fromDate: string;
   throughDate: string;
+}
+
+export interface CashMovementAccountLine {
+  accountId: string;
+  accountName: string;
+  kind: 'bank' | 'cash';
+  beginningBalanceCents: bigint;
+  inflowsCents: bigint;
+  outflowsCents: bigint;
+  netMovementCents: bigint;
+  endingBalanceCents: bigint;
+}
+
+export interface CashMovementReport {
+  fromDate: string;
+  throughDate: string;
+  accounts: CashMovementAccountLine[];
+  beginningBalanceCents: bigint;
+  inflowsCents: bigint;
+  outflowsCents: bigint;
+  netMovementCents: bigint;
+  endingBalanceCents: bigint;
 }
 
 export interface TrialBalanceLine {
@@ -3517,7 +3540,6 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
 }
 
 export function transactionsCsv(snapshot: BookkeepingSnapshot): string {
-  const escape = (value: string) => `"${value.replaceAll('"', '""')}"`;
   const rows = snapshot.transactions.flatMap((transaction) => {
     const signedAmount = (amount: bigint) => amount < 0n ? `-${formatUsd(-amount)}` : formatUsd(amount);
     if (transaction.transferRole) {
@@ -3557,10 +3579,76 @@ export function transactionsCsv(snapshot: BookkeepingSnapshot): string {
     ]];
   });
   rows.unshift(['Date', 'Category', 'Amount', 'Account', 'Description']);
-  return rows.map((row) => row.map(escape).join(',')).join('\r\n');
+  return rows.map((row) => row.map(escapeCsvCell).join(',')).join('\r\n');
 }
 
 export async function cashBasisReportFromDatabase(database: Database, businessId: string, fromDate: string, throughDate: string): Promise<CashBasisReport> {
   const totals = await cashBasisForPeriod(database, businessId, fromDate, throughDate);
   return { ...totals, fromDate, throughDate };
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function cashMovementReportFromDatabase(
+  database: Database,
+  businessId: string,
+  fromDate: string,
+  throughDate: string,
+): Promise<CashMovementReport> {
+  requireDate(fromDate, 'report start date');
+  requireDate(throughDate, 'report end date');
+  if (fromDate > throughDate) throw new Error('Report start date must not follow its end date.');
+  await requireBusiness(database, businessId);
+  const accounts = await database.getAllAsync<{ accountId: string; accountName: string; kind: 'bank' | 'cash' }>(
+    `SELECT id AS accountId, name AS accountName, kind FROM accounts
+     WHERE business_id = ? AND kind IN ('bank', 'cash') ORDER BY code, name`, businessId,
+  );
+  const totalsByAccount = new Map(accounts.map((account) => [account.accountId, {
+    account, beginningBalanceCents: 0n, inflowsCents: 0n, outflowsCents: 0n,
+  }]));
+  const journalLines = await database.getAllAsync<{
+    accountId: string; entryDate: string; debitMinor: string; creditMinor: string;
+  }>(
+    `SELECT jl.account_id AS accountId, je.entry_date AS entryDate,
+            jl.debit_minor AS debitMinor, jl.credit_minor AS creditMinor
+     FROM journal_lines jl
+     JOIN journal_entries je ON je.id = jl.journal_entry_id
+     JOIN accounts account ON account.id = jl.account_id
+     WHERE je.business_id = ? AND account.kind IN ('bank', 'cash') AND je.entry_date <= ?
+     ORDER BY je.entry_date, je.created_at, jl.line_number, je.id`,
+    businessId, throughDate,
+  );
+  for (const line of journalLines) {
+    const totals = totalsByAccount.get(line.accountId);
+    if (!totals) continue;
+    const movementCents = BigInt(line.debitMinor) - BigInt(line.creditMinor);
+    if (line.entryDate < fromDate) {
+      totals.beginningBalanceCents += movementCents;
+    } else if (movementCents > 0n) {
+      totals.inflowsCents += movementCents;
+    } else {
+      totals.outflowsCents += -movementCents;
+    }
+  }
+  const accountLines: CashMovementAccountLine[] = accounts.map((account) => {
+    const totals = totalsByAccount.get(account.accountId)!;
+    const netMovementCents = totals.inflowsCents - totals.outflowsCents;
+    return {
+      ...account,
+      beginningBalanceCents: totals.beginningBalanceCents,
+      inflowsCents: totals.inflowsCents,
+      outflowsCents: totals.outflowsCents,
+      netMovementCents,
+      endingBalanceCents: totals.beginningBalanceCents + netMovementCents,
+    };
+  });
+  const sum = (key: 'beginningBalanceCents' | 'inflowsCents' | 'outflowsCents' | 'netMovementCents' | 'endingBalanceCents') =>
+    accountLines.reduce((total, account) => total + account[key], 0n);
+  return {
+    fromDate, throughDate, accounts: accountLines,
+    beginningBalanceCents: sum('beginningBalanceCents'),
+    inflowsCents: sum('inflowsCents'),
+    outflowsCents: sum('outflowsCents'),
+    netMovementCents: sum('netMovementCents'),
+    endingBalanceCents: sum('endingBalanceCents'),
+  };
 }

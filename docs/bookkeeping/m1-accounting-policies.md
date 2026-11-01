@@ -23,6 +23,7 @@ This first native workflow records synthetic test data in the existing encrypted
 - Trial Balance and Balance Sheet balances are cumulative journal balances through the selected date. Income less expenses is shown as current earnings within equity; generating these reports does not create closing entries. These book reports do not establish tax-basis capital or outside basis.
 - Corrections keep the original entry, post a reversing entry dated on the original transaction date, and post a replacement using the corrected date and details. This preserves the journal trail and moves the cash/P&L effect to the corrected period.
 - Cash account balances and cash-basis P&L are calculated from journal lines. CSV amounts are signed cash movements, including opening balances and reversals; a transfer exports both account legs so each account ledger reconciles and the transfer nets to zero.
+- The cash movement report uses debit less credit on bank/cash journal lines. It reports beginning balance, inflows, outflows, net movement, and ending balance per account for an inclusive date range; per-account ending balances reconcile to the cumulative journal balances, and internal transfers net to zero across accounts.
 
 ## Not represented in this slice
 
