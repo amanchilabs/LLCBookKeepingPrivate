@@ -10,6 +10,9 @@ import {
   createBusinessInDatabase,
   createCashAccountInDatabase,
   createRecurringTransactionInDatabase,
+  saveBookkeepingReminderInDatabase,
+  completeBookkeepingReminderInDatabase,
+  deleteBookkeepingReminderInDatabase,
   updateRecurringTransactionInDatabase,
   setRecurringTransactionActiveInDatabase,
   createLoanAgreementInDatabase,
@@ -165,6 +168,92 @@ afterEach(() => {
 });
 
 describe('bookkeeping repository SQL contract', () => {
+  it('migrates v11 books to reminder storage without changing existing account balances', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'migration-bank', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 45_600n,
+      openingTransactionId: 'migration-opening', openingJournalEntryId: 'migration-opening-journal',
+    });
+    await database.execAsync('DROP TABLE bookkeeping_reminders; UPDATE bookkeeping_schema SET version = 11;');
+
+    await ensureBookkeepingSchema(database);
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.accounts.find((account) => account.id === 'migration-bank').balanceCents).toBe(45_600n);
+    expect(snapshot.transactions.map((transaction) => transaction.id)).toEqual(['migration-opening']);
+    expect(snapshot.reminders).toEqual([]);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
+    database.close();
+  });
+
+  it('persists, edits, completes, reopens, and deletes local bookkeeping reminders', async () => {
+    const path = databasePath();
+    let database = new TestDatabase(path);
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'reminder-isolation-bank', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2026-01-01', openingBalanceCents: 45_600n,
+      openingTransactionId: 'reminder-isolation-opening', openingJournalEntryId: 'reminder-isolation-journal',
+    });
+    const baseline = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    await saveBookkeepingReminderInDatabase(database, {
+      id: 'reminder-1', businessId: 'business-1', dueDate: '2026-11-10',
+      title: 'Review October statement', details: 'Compare checking statement with uncleared activity.',
+    });
+
+    let snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.reminders).toEqual([expect.objectContaining({
+      id: 'reminder-1', dueDate: '2026-11-10', title: 'Review October statement',
+      details: 'Compare checking statement with uncleared activity.', isComplete: false, completedAt: null,
+    })]);
+    database.close();
+
+    database = new TestDatabase(path);
+    await ensureBookkeepingSchema(database);
+    await saveBookkeepingReminderInDatabase(database, {
+      id: 'reminder-1', businessId: 'business-1', dueDate: '2026-11-12',
+      title: 'Review November statement', details: 'Use the corrected statement date.',
+    });
+    await completeBookkeepingReminderInDatabase(database, 'business-1', 'reminder-1', true);
+    snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.reminders[0]).toMatchObject({
+      dueDate: '2026-11-12', title: 'Review November statement', isComplete: true,
+    });
+    expect(snapshot.reminders[0].completedAt).toEqual(expect.any(String));
+
+    await completeBookkeepingReminderInDatabase(database, 'business-1', 'reminder-1', false);
+    expect((await getBookkeepingSnapshotFromDatabase(database, 'business-1')).reminders[0])
+      .toMatchObject({ isComplete: false, completedAt: null });
+    await deleteBookkeepingReminderInDatabase(database, 'business-1', 'reminder-1');
+    snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.reminders).toEqual([]);
+    expect(snapshot.transactions).toEqual(baseline.transactions);
+    expect(snapshot.accounts.find((account) => account.id === 'reminder-isolation-bank').balanceCents)
+      .toBe(baseline.accounts.find((account) => account.id === 'reminder-isolation-bank').balanceCents);
+    expect(snapshot.cashBasis).toEqual(baseline.cashBasis);
+    database.close();
+  });
+
+  it('rejects invalid bookkeeping reminder dates and empty titles', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+
+    await expect(saveBookkeepingReminderInDatabase(database, {
+      id: 'bad-reminder-date', businessId: 'business-1', dueDate: '2026-02-30',
+      title: 'Invalid date', details: '',
+    })).rejects.toThrow('Enter a valid due date.');
+    await expect(saveBookkeepingReminderInDatabase(database, {
+      id: 'bad-reminder-title', businessId: 'business-1', dueDate: '2026-11-10',
+      title: '   ', details: '',
+    })).rejects.toThrow('Enter a reminder title.');
+    expect((await getBookkeepingSnapshotFromDatabase(database, 'business-1')).reminders).toEqual([]);
+    database.close();
+  });
+
   it('posts imported CSV rows as balanced journal entries and skips possible duplicates by default', async () => {
     const database = new TestDatabase(databasePath());
     await ensureBookkeepingSchema(database);
@@ -417,7 +506,7 @@ describe('bookkeeping repository SQL contract', () => {
       UPDATE bookkeeping_schema SET version = 9 WHERE singleton = 1;
     `);
     await ensureBookkeepingSchema(database);
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
     expect(database.database.prepare(`
       SELECT name FROM sqlite_master WHERE type = 'table' AND name IN (
         'recurring_transaction_templates', 'recurring_transaction_occurrences'
@@ -576,7 +665,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(124_000n);
     expect(snapshot.transactions.find((transaction) => transaction.id === 'expense-v8').splitLines).toEqual([
       { categoryAccountId: 'expense-rent', category: 'Rent', amountCents: 1_000n },
@@ -1057,7 +1146,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(10_000n);
     expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal')).toMatchObject({
       cashAccountName: 'Checking', reason: 'Cash returned', amountCents: -5_000n,
@@ -1184,7 +1273,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
     expect(snapshot.loanAgreements[0].dayCount).toBe('ACT/ACT ISDA');
     expect(snapshot.loanActivities.map((activity) => [activity.kind, activity.amountCents])).toEqual([
       ['advance', 25_000n], ['repayment', -10_022n],
@@ -1249,7 +1338,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
 
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(45_000n);
     expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 5_000n, netIncomeCents: -5_000n });
     expect(snapshot.transactions.map((transaction) => transaction.id).sort()).toEqual(['expense-migration', 'opening-migration']);

@@ -21,7 +21,7 @@ import { formatUsd } from '../../domain/src/money';
 import { escapeCsvCell } from '../../domain/src/csv';
 import { cashImportDuplicateKey } from '../../domain/src/transaction-csv-import';
 
-const SCHEMA_VERSION = 11;
+const SCHEMA_VERSION = 12;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -91,6 +91,25 @@ export interface RecurringTransactionRecord {
   isActive: boolean;
   lastPostedDate: string | null;
   lastTransactionId: string | null;
+}
+
+export interface BookkeepingReminderRecord {
+  id: string;
+  dueDate: string;
+  title: string;
+  details: string;
+  isComplete: boolean;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+}
+
+export interface SaveBookkeepingReminderInput {
+  id: string;
+  businessId: string;
+  dueDate: string;
+  title: string;
+  details: string;
 }
 
 export interface CashTransactionInput {
@@ -472,6 +491,7 @@ export interface BookkeepingSnapshot {
   accountingPeriodEvents: AccountingPeriodEvent[];
   closedThroughDate: string | null;
   recurringTransactions: RecurringTransactionRecord[];
+  reminders: BookkeepingReminderRecord[];
   cashBasis: CashBasisTotals;
 }
 
@@ -763,6 +783,39 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
   if (version < 9) await migrateBookkeepingV8ToV9(database);
   if (version < 10) await migrateBookkeepingV9ToV10(database);
   if (version < 11) await migrateBookkeepingV10ToV11(database);
+  if (version < 12) await migrateBookkeepingV11ToV12(database);
+}
+
+async function migrateBookkeepingV11ToV12(database: Database): Promise<void> {
+  await database.execAsync('BEGIN IMMEDIATE;');
+  try {
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS bookkeeping_reminders (
+        id TEXT PRIMARY KEY NOT NULL,
+        business_id TEXT NOT NULL REFERENCES businesses(id),
+        due_date TEXT NOT NULL,
+        title TEXT NOT NULL CHECK (length(trim(title)) BETWEEN 1 AND 120),
+        details TEXT NOT NULL DEFAULT '' CHECK (length(details) <= 500),
+        is_complete INTEGER NOT NULL DEFAULT 0 CHECK (is_complete IN (0, 1)),
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        completed_at TEXT,
+        CHECK ((is_complete = 0 AND completed_at IS NULL)
+          OR (is_complete = 1 AND completed_at IS NOT NULL))
+      );
+      CREATE INDEX IF NOT EXISTS bookkeeping_reminders_due
+        ON bookkeeping_reminders (business_id, is_complete, due_date, created_at);
+      UPDATE bookkeeping_schema SET version = 12 WHERE singleton = 1;
+    `);
+    const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+      'PRAGMA foreign_key_check',
+    );
+    if (violations.length > 0) throw new Error('The reminder migration found invalid record references.');
+    await database.execAsync('COMMIT;');
+  } catch (error) {
+    await database.execAsync('ROLLBACK;').catch(() => undefined);
+    throw error;
+  }
 }
 
 async function migrateBookkeepingV10ToV11(database: Database): Promise<void> {
@@ -1728,6 +1781,79 @@ export async function createRecurringTransactionInDatabase(
     input.amountCents.toString(), input.description.trim(), input.cadence, input.nextDate, anchorDay,
     new Date().toISOString(),
   );
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function saveBookkeepingReminderInDatabase(
+  database: Database,
+  input: SaveBookkeepingReminderInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  await requireBusiness(database, input.businessId);
+  const title = input.title.trim();
+  const details = input.details.trim();
+  if (!input.id.trim()) throw new Error('Reminder identifier is required.');
+  requireDate(input.dueDate, 'due date');
+  if (!title) throw new Error('Enter a reminder title.');
+  if (title.length > 120) throw new Error('Reminder titles must be 120 characters or fewer.');
+  if (details.length > 500) throw new Error('Reminder details must be 500 characters or fewer.');
+
+  await inSqlTransaction(database, async () => {
+    const existing = await database.getFirstAsync<{ businessId: string }>(
+      'SELECT business_id AS businessId FROM bookkeeping_reminders WHERE id = ?', input.id,
+    );
+    if (existing && existing.businessId !== input.businessId) {
+      throw new Error('This reminder belongs to another LLC.');
+    }
+    const updatedAt = new Date().toISOString();
+    if (existing) {
+      await database.runAsync(
+        `UPDATE bookkeeping_reminders
+         SET due_date = ?, title = ?, details = ?, updated_at = ?
+         WHERE id = ? AND business_id = ?`,
+        input.dueDate, title, details, updatedAt, input.id, input.businessId,
+      );
+    } else {
+      await database.runAsync(
+        `INSERT INTO bookkeeping_reminders
+         (id, business_id, due_date, title, details, is_complete, created_at, updated_at, completed_at)
+         VALUES (?, ?, ?, ?, ?, 0, ?, ?, NULL)`,
+        input.id, input.businessId, input.dueDate, title, details, updatedAt, updatedAt,
+      );
+    }
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function completeBookkeepingReminderInDatabase(
+  database: Database,
+  businessId: string,
+  reminderId: string,
+  isComplete: boolean,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  await requireBusiness(database, businessId);
+  const result = await database.runAsync(
+    `UPDATE bookkeeping_reminders SET is_complete = ?, completed_at = ?, updated_at = ?
+     WHERE id = ? AND business_id = ?`,
+    isComplete ? 1 : 0, isComplete ? new Date().toISOString() : null,
+    new Date().toISOString(), reminderId, businessId,
+  );
+  if (result.changes === 0) throw new Error('Bookkeeping reminder not found.');
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function deleteBookkeepingReminderInDatabase(
+  database: Database,
+  businessId: string,
+  reminderId: string,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  await requireBusiness(database, businessId);
+  const result = await database.runAsync(
+    'DELETE FROM bookkeeping_reminders WHERE id = ? AND business_id = ?', reminderId, businessId,
+  );
+  if (result.changes === 0) throw new Error('Bookkeeping reminder not found.');
 }
 
 /** @internal SQL-level entry point used by repository tests. Existing occurrences remain linked to their original journal entries. */
@@ -3064,6 +3190,16 @@ async function readRecurringTransactions(database: Database, businessId: string)
   }));
 }
 
+async function readBookkeepingReminders(database: Database, businessId: string): Promise<BookkeepingReminderRecord[]> {
+  const rows = await database.getAllAsync<Omit<BookkeepingReminderRecord, 'isComplete'> & { isComplete: number }>(
+    `SELECT id, due_date AS dueDate, title, details, is_complete AS isComplete,
+            created_at AS createdAt, updated_at AS updatedAt, completed_at AS completedAt
+     FROM bookkeeping_reminders WHERE business_id = ?
+     ORDER BY is_complete, due_date, created_at DESC, id`, businessId,
+  );
+  return rows.map((row) => ({ ...row, isComplete: row.isComplete === 1 }));
+}
+
 async function readTransactions(database: Database, businessId: string): Promise<TransactionRecord[]> {
   const rows = await database.getAllAsync<DbTransaction>(
     `SELECT t.id, t.journal_entry_id AS journalEntryId, t.entry_date AS date, t.kind,
@@ -3600,7 +3736,7 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
     business: null, members: [], memberHistory: [], accounts: [], transactions: [], capitalActivities: [],
     memberCapitalSummaries: [], guaranteedPaymentInstallments: [], guaranteedPaymentCashEvents: [],
     loanAgreements: [], loanActivities: [], accountReconciliations: [], accountReconciliationEvents: [], recurringTransactions: [],
-    accountingPeriodEvents: [], closedThroughDate: null,
+    accountingPeriodEvents: [], closedThroughDate: null, reminders: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
   const { members, history } = await readMembers(database, business.id);
@@ -3617,13 +3753,14 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
   const accountingPeriodEvents = await readAccountingPeriodEvents(database, business.id);
   const activePeriodClose = await currentActivePeriodClose(database, business.id);
   const recurringTransactions = await readRecurringTransactions(database, business.id);
+  const reminders = await readBookkeepingReminders(database, business.id);
   const cashBasis = await cashBasisForPeriod(database, business.id);
   return {
     business, members, memberHistory: history, accounts, transactions, capitalActivities, memberCapitalSummaries,
     guaranteedPaymentInstallments, guaranteedPaymentCashEvents, loanAgreements, loanActivities,
     accountReconciliations, accountReconciliationEvents, accountingPeriodEvents,
     closedThroughDate: activePeriodClose?.throughDate ?? null,
-    recurringTransactions, cashBasis,
+    recurringTransactions, reminders, cashBasis,
   };
 }
 

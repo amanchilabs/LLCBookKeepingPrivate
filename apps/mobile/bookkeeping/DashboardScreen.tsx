@@ -1,17 +1,18 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import type { BookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-store';
-import { Button, Heading, Money, Page, Panel, uiStyles } from './ui';
+import { Button, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function DashboardScreen({
   snapshot,
   onNavigate,
 }: {
   snapshot: BookkeepingSnapshot;
-  onNavigate: (screen: 'Transactions' | 'Accounts' | 'Members' | 'Reports') => void;
+  onNavigate: (screen: 'Transactions' | 'Accounts' | 'Members' | 'Reports' | 'Settings') => void;
 }) {
   const cashAccounts = snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash');
   const cashBalance = cashAccounts.reduce((sum, account) => sum + account.balanceCents, 0n);
+  const openReminders = snapshot.reminders.filter((reminder) => !reminder.isComplete);
   return <Page>
     <Heading title="Books at a glance" subtitle="All totals below come from the locally stored journal." />
     <Panel>
@@ -32,6 +33,23 @@ export function DashboardScreen({
         <Money cents={snapshot.cashBasis.expenseCents} />
       </Panel>
     </View>
+    <Panel>
+      <View style={uiStyles.headingRow}>
+        <View style={uiStyles.rowMain}>
+          <Text style={uiStyles.sectionTitle}>Reminders</Text>
+          <Text style={uiStyles.rowDetail}>Saved on this device; they never post journal entries.</Text>
+        </View>
+        <Button title="Manage" secondary onPress={() => onNavigate('Settings')} />
+      </View>
+      {openReminders.slice(0, 4).map((reminder) => <View key={reminder.id} style={uiStyles.rowItem}>
+        <View style={uiStyles.rowMain}>
+          <Text style={uiStyles.rowTitle}>{reminder.title}</Text>
+          <Text style={uiStyles.rowDetail}>{reminder.dueDate} · {reminder.dueDate < todayLocalDate() ? 'Overdue' : 'Upcoming'}</Text>
+        </View>
+      </View>)}
+      {openReminders.length === 0 ? <Text style={uiStyles.helper}>No open reminders.</Text> : null}
+      {openReminders.length > 4 ? <Text style={uiStyles.helper}>{openReminders.length - 4} more reminders are in Settings.</Text> : null}
+    </Panel>
     <Panel>
       <View style={uiStyles.headingRow}>
         <View style={uiStyles.rowMain}>

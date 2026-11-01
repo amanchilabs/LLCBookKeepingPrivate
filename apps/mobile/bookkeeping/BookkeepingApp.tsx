@@ -34,6 +34,7 @@ function emptySnapshot(): BookkeepingSnapshot {
     accountingPeriodEvents: [],
     closedThroughDate: null,
     recurringTransactions: [],
+    reminders: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }

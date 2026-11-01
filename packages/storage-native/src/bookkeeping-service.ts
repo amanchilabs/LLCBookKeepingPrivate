@@ -5,6 +5,9 @@ import {
   completeAccountReconciliationInDatabase,
   createCategoryAccountInDatabase,
   createRecurringTransactionInDatabase,
+  saveBookkeepingReminderInDatabase,
+  completeBookkeepingReminderInDatabase,
+  deleteBookkeepingReminderInDatabase,
   updateRecurringTransactionInDatabase,
   createAccountReconciliationInDatabase,
   closeAccountingPeriodInDatabase,
@@ -39,6 +42,7 @@ import {
   type CashAccountInput,
   type CategoryAccountInput,
   type CreateRecurringTransactionInput,
+  type SaveBookkeepingReminderInput,
   type CashBasisReport,
   type CashMovementReport,
   type GeneralLedgerReport,
@@ -79,6 +83,7 @@ function emptySnapshot(): BookkeepingSnapshot {
     accountingPeriodEvents: [],
     closedThroughDate: null,
     recurringTransactions: [],
+    reminders: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }
@@ -119,6 +124,26 @@ export async function setRecurringTransactionActive(templateId: string, isActive
     const snapshot = await getBookkeepingSnapshotFromDatabase(database);
     if (!snapshot?.business) throw new Error('Create an LLC before changing recurring transactions.');
     await setRecurringTransactionActiveInDatabase(database, snapshot.business.id, templateId, isActive);
+  });
+}
+
+export async function saveBookkeepingReminder(input: SaveBookkeepingReminderInput): Promise<void> {
+  await useActiveBooks((database) => saveBookkeepingReminderInDatabase(database, input));
+}
+
+export async function completeBookkeepingReminder(reminderId: string, isComplete: boolean): Promise<void> {
+  await useActiveBooks(async (database) => {
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database);
+    if (!snapshot?.business) throw new Error('Create an LLC before changing reminders.');
+    await completeBookkeepingReminderInDatabase(database, snapshot.business.id, reminderId, isComplete);
+  });
+}
+
+export async function deleteBookkeepingReminder(reminderId: string): Promise<void> {
+  await useActiveBooks(async (database) => {
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database);
+    if (!snapshot?.business) throw new Error('Create an LLC before deleting reminders.');
+    await deleteBookkeepingReminderInDatabase(database, snapshot.business.id, reminderId);
   });
 }
 

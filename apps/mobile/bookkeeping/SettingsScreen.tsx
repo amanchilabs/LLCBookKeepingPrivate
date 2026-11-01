@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Text, View } from 'react-native';
 import { closeAccountingPeriod, reopenAccountingPeriod } from '../../../packages/storage-native/src/bookkeeping-service';
 import type { BookkeepingSnapshot, BusinessRecord } from '../../../packages/storage-native/src/bookkeeping-store';
+import { RemindersSection } from './RemindersSection';
 import { Button, Field, FormError, Heading, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function SettingsScreen({
@@ -59,6 +60,7 @@ export function SettingsScreen({
       <Text style={uiStyles.rowDetail}>Formed in {business.formationState} on {business.formationDate}</Text>
       <Text style={uiStyles.rowDetail}>Books begin {business.bookkeepingStartDate}</Text>
     </Panel>
+    <RemindersSection businessId={business.id} reminders={snapshot.reminders} onSaved={onSaved} />
     <Panel>
       <Text style={uiStyles.sectionTitle}>Bookkeeping periods</Text>
       <Text style={uiStyles.rowDetail}>Closing locks new journal postings dated on or before the selected date. It does not create closing entries or change existing balances. Reopening records an audit event and unlocks the latest closed interval.</Text>
