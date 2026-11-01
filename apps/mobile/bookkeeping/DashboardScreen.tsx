@@ -33,6 +33,14 @@ export function DashboardScreen({
 
   return <Page>
     <Heading title="Books at a glance" subtitle="Balances and totals come from this LLC’s persisted journal." />
+    <Panel>
+      <Text style={uiStyles.sectionTitle}>Record an activity</Text>
+      <View style={uiStyles.row}>
+        <Button title="Record income" onPress={() => onRecordTransaction('income')} />
+        <Button title="Record expense" secondary onPress={() => onRecordTransaction('expense')} />
+        <Button title="Transfer" secondary onPress={() => onRecordTransaction('transfer')} />
+      </View>
+    </Panel>
     <Panel style={heroPanel}>
       <Text style={uiStyles.rowDetail}>Cash across bank and cash accounts</Text>
       <Money cents={cashBalance} size="large" />
@@ -48,15 +56,6 @@ export function DashboardScreen({
       <FinancialSummaryTile label="Cash-basis expenses" cents={snapshot.cashBasis.expenseCents} />
       <FinancialSummaryTile label="Net income" cents={snapshot.cashBasis.netIncomeCents} />
     </View>
-
-    <Panel>
-      <Text style={uiStyles.sectionTitle}>Record an activity</Text>
-      <View style={uiStyles.row}>
-        <Button title="Record income" onPress={() => onRecordTransaction('income')} />
-        <Button title="Record expense" secondary onPress={() => onRecordTransaction('expense')} />
-        <Button title="Transfer" secondary onPress={() => onRecordTransaction('transfer')} />
-      </View>
-    </Panel>
 
     <Panel>
       <View style={uiStyles.headingRow}>

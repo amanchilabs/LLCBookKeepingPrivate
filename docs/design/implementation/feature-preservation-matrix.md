@@ -9,7 +9,7 @@ Implemented in source on `feature/ux-modernization-20261101-2b4ad87`:
 - Shared warm-neutral/navy/emerald tokens; refreshed page/card/type/form/button/status/money primitives and minimum native touch sizing.
 - Six onboarding states, explicit ownership confirmation, optional first account, review and completion. When an account is included, business/member/account creation now shares one SQL transaction; the opening entry remains Opening Balance Equity.
 - Five primary tabs; global search action; Accounts and Settings under More; member-specific loan entry opens from a member row. Existing screen/service calls remain connected.
-- Dashboard now groups live account balances, cash-basis summaries, quick actions, recent transactions, members, reminders, and reports; quick actions route to the existing transaction form.
+- Dashboard now groups live account balances, cash-basis summaries, quick actions, recent transactions, members, reminders, and reports; quick actions route to the existing transaction form. The action card is above the balance summary so income and expense entry are visible without scrolling on the tested iPhone.
 - Transactions now offer selected-record detail and correction lineage, visible clear-filters action, and a deep link from dashboard quick actions. Posting and correction services are unchanged.
 - Transactions now has History, Recurring, and Import CSV sections; their existing local records/forms stay mounted while switching sections. Quick entry and correction return to History.
 - Members now separates member/ownership editing, capital activity/ledger, and guaranteed-payment/payment history into local workspace sections. Draft state and storage calls remain in the existing screen.
@@ -33,6 +33,7 @@ Automated verification on this checkpoint: `npm test` passed (157 tests); `npm r
 |---|---|---|
 | iOS build | PASS | XcodeBuildMCP build and launch succeeded on iPhone 17 simulator. |
 | iOS synthetic onboarding, transaction correction, reconciliation totals, relaunch persistence | PASS | Native UI; screenshots listed above; displayed values reconciled. |
+| iOS Dashboard quick expense entry | SIMULATOR PASS | Maestro confirmed the expense action is visible in the initial dashboard viewport and opens the existing Operating expense form; no transaction was posted by this navigation check. |
 | iOS Transactions History, Recurring, Import CSV | SIMULATOR PASS | Maestro switched each section and asserted its intended content; screenshots are in the external iOS gallery. Existing synthetic transaction records remained visible in History. |
 | iOS Reports, Members, Capital, Payments, Accounts, More, Settings, Loans | SIMULATOR CAPTURED | Native screens opened and captured; Maestro confirmed Members → Capital and Members → Payments render their intended sections, and Members → Loans opens the member-specific loan screen. Remaining advanced forms and accessibility states still need dedicated interaction checks. |
 | Android build/UI | NOT VERIFIED | `adb devices -l` returned no devices. Offline Gradle build was stopped at 173 MiB free disk; no APK was produced and the API 36 AVD was not booted. |
