@@ -18,7 +18,7 @@ export function MoreScreen({ onNavigate }: { onNavigate: (destination: AppDestin
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Your data stays in your control</Text>
-      <Text style={uiStyles.rowDetail}>There is no automatic cloud sync or bank connection. Export and backup actions are explicit and use the platform share or file flow.</Text>
+      <Text style={uiStyles.rowDetail}>No automatic cloud sync or bank connection is used. Export and backup actions require an explicit share or file destination.</Text>
     </Panel>
   </Page>;
 }

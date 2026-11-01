@@ -1,6 +1,6 @@
 # Feature Preservation Matrix
 
-This matrix records current source capabilities against proposed UX. “Current” means visible in the checked-in component and connected to service/store calls; it is not a simulator/device acceptance claim. The redesign must preserve behavior unless a separate product decision explicitly changes scope.
+This matrix records checked-in source capabilities against the approved UX. “Implemented” means visible in a component and connected to existing service/store calls; it is not simulator, physical-device, accessibility, or production acceptance. The redesign must preserve behavior unless a separate product decision explicitly changes scope.
 
 ## Implementation progress — UX branch checkpoint
 
@@ -9,8 +9,32 @@ Implemented in source on `feature/ux-modernization-20261101-2b4ad87`:
 - Shared warm-neutral/navy/emerald tokens; refreshed page/card/type/form/button/status/money primitives and minimum native touch sizing.
 - Six onboarding states, explicit ownership confirmation, optional first account, review and completion. When an account is included, business/member/account creation now shares one SQL transaction; the opening entry remains Opening Balance Equity.
 - Five primary tabs; global search action; Accounts and Settings under More; member-specific loan entry opens from a member row. Existing screen/service calls remain connected.
+- Dashboard now groups live account balances, cash-basis summaries, quick actions, recent transactions, members, reminders, and reports; quick actions route to the existing transaction form.
+- Transactions now offer selected-record detail and correction lineage, visible clear-filters action, and a deep link from dashboard quick actions. Posting and correction services are unchanged.
+- Members now separates member/ownership editing, capital activity/ledger, and guaranteed-payment/payment history into local workspace sections. Draft state and storage calls remain in the existing screen.
+- Reports now selects one persisted report at a time and keeps the reporting period controls shared across P&L, cash movement, book-basis reports, capital, payments, and loans. Export serializers and calculations are unchanged.
+- Settings and More copy no longer implies unverified encryption status.
 
-Automated baseline after this slice: `npm test` and `npm run typecheck` passed; 156 tests ran in the full suite. Native iOS/Android visual verification has not yet been recorded. The matrix below remains the preservation checklist; implementation status does not imply platform acceptance.
+Automated verification on this checkpoint: `npm test` passed (156 tests); `npm run typecheck` passed; `git diff --check` passed. Native iOS evidence is captured on the iPhone 17 simulator after a successful XcodeBuildMCP build. Synthetic Northstar Studio LLC data persisted through app termination and relaunch. Android remains unverified: `adb devices -l` reported no attached device. An offline API 36 Gradle build started but was stopped before completion when free disk space fell from 1.7 GiB to 173 MiB; no APK was produced and the AVD was not booted. Screenshots are outside Git at `~/Downloads/LLCBookKeepingPrivate/UX-Implementation-20261101/screenshots/ios/`. They include onboarding review/completion, account setup, dashboard before/after correction and relaunch, transaction form/history/audit lineage, members, capital, payments, Reports, More, Accounts, and Settings. The Expo development launcher bubble is visible in native captures and is not application chrome. iOS simulator verification is not physical-device or production acceptance.
+
+### Native iOS workflow verified on synthetic data
+
+- Created Northstar Studio LLC (CA; formed/books begin 2025-01-10), confirmed four members at 40/20/20/20, and created Operating checking with a $1,250 opening entry against Opening Balance Equity.
+- Posted $400 Design project revenue and a $75 initial expense, then used the correction screen to retain the original and post a $75 reversal plus a $90 Rent replacement.
+- Transaction history displayed five persisted records, including the original, reversal, and replacement. Dashboard showed $1,560 cash, $400 cash-basis income, $90 cash-basis expenses, and $310 net income.
+- Terminated and relaunched the app. The business, account balance, and report totals remained present.
+- The onboarding start-date/opening-date linkage bug reproduced during UI entry and was fixed: the opening date now falls back to the complete bookkeeping start date rather than retaining its first typed character. Review displayed the full 2025-01-10 date.
+- Bottom navigation labels were tightened to stay on one line at iPhone width. Dashboard → Accounts → More and More → Settings were exercised on the simulator.
+
+### Current platform status
+
+| Platform/workflow | Status | Evidence or gap |
+|---|---|---|
+| iOS build | PASS | XcodeBuildMCP build and launch succeeded on iPhone 17 simulator. |
+| iOS synthetic onboarding, transaction correction, reconciliation totals, relaunch persistence | PASS | Native UI; screenshots listed above; displayed values reconciled. |
+| iOS Reports, Members, Capital, Payments, Accounts, More, Settings | SIMULATOR CAPTURED | Native screens opened and captured; Maestro confirmed Members → Capital and Members → Payments render their intended sections, and Members → Loans opens the member-specific loan screen. Remaining advanced forms and accessibility states still need dedicated interaction checks. |
+| Android build/UI | NOT VERIFIED | `adb devices -l` returned no devices. Offline Gradle build was stopped at 173 MiB free disk; no APK was produced and the API 36 AVD was not booted. |
+| Physical-device beta | NOT VERIFIED | No physical-device run or signed beta is claimed. |
 
 | Capability | Current component / source | Persistence or calculation | Proposed UX | Preservation / gap |
 |---|---|---|---|---|

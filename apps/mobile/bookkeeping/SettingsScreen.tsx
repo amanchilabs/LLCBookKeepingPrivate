@@ -98,13 +98,13 @@ export function SettingsScreen({
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Privacy</Text>
-      <Text style={uiStyles.rowDetail}>Bookkeeping data remains in the encrypted on-device database. The mobile app has no bookkeeping backend, automatic cloud sync, bank connection, analytics, or advertising.</Text>
-      <Text style={uiStyles.helper}>CSV export and encrypted backup leave this device only after you explicitly choose an export or share destination.</Text>
+      <Text style={uiStyles.rowDetail}>Bookkeeping records are kept in this app’s local workspace. Mobile bookkeeping does not require registration and does not automatically sync to a cloud service or connect to a bank.</Text>
+      <Text style={uiStyles.helper}>CSV exports and portable backup files leave this device only after you explicitly choose a share or file destination.</Text>
     </Panel>
     <Panel>
-      <Text style={uiStyles.sectionTitle}>Storage and backup proof</Text>
-      <Text style={uiStyles.rowDetail}>The native SQLCipher, platform key-storage, recovery, and encrypted backup proof tools remain available here.</Text>
-      <Button title="Open native security and recovery tools" secondary onPress={onOpenSecurityProof} />
+      <Text style={uiStyles.sectionTitle}>Development storage and recovery tools</Text>
+      <Text style={uiStyles.rowDetail}>These native tools exercise storage and backup recovery paths with synthetic data. Their presence does not certify production security or release readiness.</Text>
+      <Button title="Open storage and recovery tools" secondary onPress={onOpenSecurityProof} />
     </Panel>
   </Page>;
 }

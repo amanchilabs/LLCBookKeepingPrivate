@@ -76,12 +76,12 @@ export function BottomTabBar<T extends string>({
       accessibilityState={{ selected: item === selected }}
       onPress={() => onSelect(item)}
       style={({ pressed }) => [styles.tab, item === selected && styles.tabSelected, pressed && styles.choicePressed]}
-    ><Text style={[styles.tabLabel, item === selected && styles.tabLabelSelected]}>{item}</Text></Pressable>)}
+    ><Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.82} style={[styles.tabLabel, item === selected && styles.tabLabelSelected]}>{item}</Text></Pressable>)}
   </View>;
 }
 
-export function Field({ label, helper, error, ...props }: TextInputProps & { label: string; helper?: string; error?: string }) {
-  return <View style={styles.field}>
+export function Field({ label, helper, error, wide = false, ...props }: TextInputProps & { label: string; helper?: string; error?: string; wide?: boolean }) {
+  return <View style={[styles.field, wide && styles.fieldWide]}>
     <Text style={styles.fieldLabel}>{label}</Text>
     <TextInput
       accessibilityLabel={label}
@@ -278,10 +278,13 @@ function formatMoneyLabel(cents: bigint): string {
 export const uiStyles = StyleSheet.create({
   helper: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 4 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'flex-start' },
+  fieldStack: { width: '100%', gap: 10, alignItems: 'stretch' },
   sectionTitle: { color: colors.navy, fontSize: 20, lineHeight: 26, fontWeight: '700' },
   rowItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderTopColor: colors.border, paddingVertical: 14 },
   rowMain: { flex: 1, minWidth: 0, gap: 4 },
   metricPanel: { flex: 1, minWidth: 145 },
+  transactionListItem: { gap: 8, borderTopWidth: 1, borderTopColor: colors.border, paddingVertical: 12 },
+  transactionSelect: { minHeight: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   reportRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, borderTopWidth: 1, borderTopColor: colors.border, paddingVertical: 12 },
   reportTotal: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderTopWidth: 2, borderTopColor: colors.emerald, paddingTop: 14, marginTop: 5 },
@@ -309,6 +312,7 @@ const styles = StyleSheet.create({
   input: { minHeight: Math.max(48, minimumTouchTarget(Platform.OS)), borderWidth: 1, borderColor: colors.border, borderRadius: designTokens.radius.control, backgroundColor: colors.surface, paddingHorizontal: 14, paddingVertical: 11, color: colors.navy, fontSize: 16 },
   inputError: { borderColor: colors.error },
   field: { flex: 1, minWidth: 0, marginBottom: 4 },
+  fieldWide: { flex: 0, width: '100%' },
   helper: { color: colors.muted, fontSize: 14, lineHeight: 20, marginTop: 4 },
   fieldError: { color: colors.error, fontSize: 14, lineHeight: 20, marginTop: 4 },
   button: { minHeight: Math.max(48, minimumTouchTarget(Platform.OS)), borderRadius: designTokens.radius.control, paddingHorizontal: 18, backgroundColor: colors.emerald, alignItems: 'center', justifyContent: 'center' },
@@ -345,6 +349,6 @@ const styles = StyleSheet.create({
   bottomBar: { minHeight: 64, flexDirection: 'row', alignItems: 'stretch', justifyContent: 'space-around', gap: 4, paddingHorizontal: 8, paddingTop: 7, paddingBottom: 5, backgroundColor: colors.surface, borderTopWidth: 1, borderTopColor: colors.border },
   tab: { flex: 1, minHeight: Math.max(48, minimumTouchTarget(Platform.OS)), alignItems: 'center', justifyContent: 'center', paddingHorizontal: 4, borderRadius: designTokens.radius.control },
   tabSelected: { backgroundColor: colors.emeraldTint },
-  tabLabel: { color: colors.muted, fontSize: 13, lineHeight: 18, fontWeight: '600', textAlign: 'center' },
+  tabLabel: { color: colors.muted, fontSize: 12, lineHeight: 18, fontWeight: '600', textAlign: 'center' },
   tabLabelSelected: { color: colors.emeraldDark, fontWeight: '700' },
 });

@@ -225,7 +225,6 @@ export function BusinessSetupScreen({ onCreated }: { onCreated: () => Promise<vo
         <Field label="Formation date" value={formationDate} onChangeText={setFormationDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
         <Field label="Bookkeeping start date" value={bookkeepingStartDate} onChangeText={(value) => {
           setBookkeepingStartDate(value);
-          if (!openingDate.trim()) setOpeningDate(value);
         }} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
       </Panel>
       <FormError message={error} />
@@ -243,9 +242,9 @@ export function BusinessSetupScreen({ onCreated }: { onCreated: () => Promise<vo
           setOwnershipConfirmed(false);
         }} /> : null}
         {members.map((member, index) => <Panel key={member.id} style={{ gap: 10 }}>
-          <View style={uiStyles.row}>
-            <Field label={`Member ${index + 1} name`} value={member.name} onChangeText={(value) => updateMember(index, { name: value })} placeholder="Full name" autoCapitalize="words" />
-            <Field label={`Member ${index + 1} ownership percentage`} value={member.percent} onChangeText={(value) => updateMember(index, { percent: value })} placeholder="20" keyboardType="decimal-pad" />
+          <View style={uiStyles.fieldStack}>
+            <Field wide label={`Member ${index + 1} name`} value={member.name} onChangeText={(value) => updateMember(index, { name: value })} placeholder="Full name" autoCapitalize="words" />
+            <Field wide label={`Member ${index + 1} ownership percentage`} value={member.percent} onChangeText={(value) => updateMember(index, { percent: value })} placeholder="20" keyboardType="decimal-pad" />
           </View>
           {members.length > 1 ? <Button title={`Remove member ${index + 1}`} secondary onPress={() => removeMember(index)} /> : null}
         </Panel>)}

@@ -50,6 +50,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   const [moreSection, setMoreSection] = useState<MoreSection | null>(null);
   const [showLoans, setShowLoans] = useState(false);
   const [loanMemberId, setLoanMemberId] = useState<string | undefined>();
+  const [pendingTransactionKind, setPendingTransactionKind] = useState<'income' | 'expense' | 'transfer' | null>(null);
   const [workspaces, setWorkspaces] = useState<BusinessRecord[]>([]);
   const rootStyle = [styles.root, { paddingTop: contentTopInset(Platform.OS, StatusBar.currentHeight) }];
 
@@ -85,6 +86,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
     }
     setShowSearch(false);
     setLoanMemberId(undefined);
+    setPendingTransactionKind(null);
     setShowLoans(destination === 'Loans');
     if (destination === 'Accounts' || destination === 'Settings') {
       setTab('More');
@@ -112,6 +114,15 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
     setShowLoans(false);
     setLoanMemberId(undefined);
     setMoreSection(null);
+    setPendingTransactionKind(null);
+  };
+
+  const startTransaction = (kind: 'income' | 'expense' | 'transfer') => {
+    setTab('Transactions');
+    setShowSearch(false);
+    setShowLoans(false);
+    setMoreSection(null);
+    setPendingTransactionKind(kind);
   };
 
   const changeWorkspace = async (businessId: string) => {
@@ -188,8 +199,9 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
         <RouteBack title="Search" onBack={() => setShowSearch(false)} />
         <SearchScreen snapshot={snapshot} onNavigate={navigateTo} />
       </> : null}
-      {!showSearch && tab === 'Dashboard' ? <DashboardScreen snapshot={snapshot} onNavigate={navigateTo} /> : null}
-      {!showSearch && tab === 'Transactions' ? <TransactionsScreen snapshot={snapshot} onSaved={refresh} /> : null}
+      {!showSearch && tab === 'Dashboard' ? <DashboardScreen snapshot={snapshot} onNavigate={navigateTo} onRecordTransaction={startTransaction} /> : null}
+      {!showSearch && tab === 'Transactions' ? <TransactionsScreen snapshot={snapshot} onSaved={refresh}
+        initialKind={pendingTransactionKind} onInitialKindHandled={() => setPendingTransactionKind(null)} /> : null}
       {!showSearch && tab === 'Members' && !showLoans ? <MembersScreen snapshot={snapshot} onSaved={refresh} onOpenMemberLoans={openMemberLoans} /> : null}
       {!showSearch && tab === 'Members' && showLoans ? <>
         <RouteBack title="Members" onBack={() => { setShowLoans(false); setLoanMemberId(undefined); }} />
