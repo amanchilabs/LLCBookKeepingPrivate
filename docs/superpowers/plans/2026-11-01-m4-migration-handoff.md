@@ -50,4 +50,4 @@
 - Create: `docs/development/M4-LOCAL-ASSET-MANIFEST.md`
 
 - [x] Record exact source checkpoint, branch preservation, tests, native build evidence, platform gaps, setup commands, and human actions.
-- [ ] Run final documentation diff checks, commit, push, and query the live remote branch SHA.
+- [x] Run final documentation diff checks, commit, push, and query the live remote branch SHA. Both pushed checkpoints matched live remote refs when verified.
