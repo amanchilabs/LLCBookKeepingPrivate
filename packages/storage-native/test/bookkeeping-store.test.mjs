@@ -12,6 +12,8 @@ import {
   ensureBookkeepingSchema,
   getBookkeepingSnapshotFromDatabase,
   createGuaranteedPaymentObligationInDatabase,
+  createAccountReconciliationInDatabase,
+  completeAccountReconciliationInDatabase,
   recordGuaranteedPaymentInDatabase,
   recordLoanAdvanceInDatabase,
   recordLoanRepaymentInDatabase,
@@ -19,7 +21,9 @@ import {
   reverseGuaranteedPaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
+  reopenAccountReconciliationInDatabase,
   replaceMembersInDatabase,
+  setAccountReconciliationItemClearedInDatabase,
   transactionsCsv,
 } from '../src/bookkeeping-store.ts';
 
@@ -475,7 +479,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(7);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(8);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(10_000n);
     expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal')).toMatchObject({
       cashAccountName: 'Checking', reason: 'Cash returned', amountCents: -5_000n,
@@ -602,7 +606,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(7);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(8);
     expect(snapshot.loanAgreements[0].dayCount).toBe('ACT/ACT ISDA');
     expect(snapshot.loanActivities.map((activity) => [activity.kind, activity.amountCents])).toEqual([
       ['advance', 25_000n], ['repayment', -10_022n],
@@ -667,7 +671,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
 
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(7);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(8);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(45_000n);
     expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 5_000n, netIncomeCents: -5_000n });
     expect(snapshot.transactions.map((transaction) => transaction.id).sort()).toEqual(['expense-migration', 'opening-migration']);
@@ -760,6 +764,113 @@ describe('bookkeeping repository SQL contract', () => {
       SELECT je.id FROM journal_entries je JOIN journal_lines jl ON jl.journal_entry_id = je.id
       GROUP BY je.id HAVING SUM(CAST(jl.debit_minor AS INTEGER)) != SUM(CAST(jl.credit_minor AS INTEGER))
     `).all()).toEqual([]);
+    database.close();
+  });
+
+  it('reconciles selected posted account movements and preserves statement history when reopened', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-reconciliation', openingJournalEntryId: 'opening-reconciliation-journal',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'income-reconciliation', journalEntryId: 'income-reconciliation-journal', businessId: 'business-1',
+      date: '2024-01-10', kind: 'income', accountId: 'bank-1', categoryAccountId: 'income-services',
+      amountCents: 20_000n, description: 'Synthetic cleared income',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'expense-reconciliation', journalEntryId: 'expense-reconciliation-journal', businessId: 'business-1',
+      date: '2024-01-12', kind: 'expense', accountId: 'bank-1', categoryAccountId: 'expense-rent',
+      amountCents: 5_000n, description: 'Synthetic outstanding rent',
+    });
+
+    await createAccountReconciliationInDatabase(database, {
+      id: 'reconciliation-1', businessId: 'business-1', accountId: 'bank-1',
+      periodStartDate: '2024-01-01', statementDate: '2024-01-31',
+      beginningBalanceCents: 100_000n, endingBalanceCents: 115_000n,
+    });
+    let snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    const reconciliation = snapshot.accountReconciliations.find((item) => item.id === 'reconciliation-1');
+    expect(reconciliation.activities.map(({ transactionId, amountCents, cleared }) => [transactionId, amountCents, cleared])).toEqual([
+      ['income-reconciliation', 20_000n, false],
+      ['expense-reconciliation', -5_000n, false],
+    ]);
+    await setAccountReconciliationItemClearedInDatabase(database, 'reconciliation-1', 'income-reconciliation', true);
+    await expect(completeAccountReconciliationInDatabase(database, 'reconciliation-1')).rejects.toThrow('difference must be zero');
+    await setAccountReconciliationItemClearedInDatabase(database, 'reconciliation-1', 'expense-reconciliation', true);
+    await completeAccountReconciliationInDatabase(database, 'reconciliation-1');
+
+    snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.accountReconciliations.find((item) => item.id === 'reconciliation-1')).toMatchObject({
+      status: 'completed', beginningBalanceCents: 100_000n, endingBalanceCents: 115_000n,
+      clearedMovementCents: 15_000n, differenceCents: 0n,
+    });
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(115_000n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 20_000n, expenseCents: 5_000n, netIncomeCents: 15_000n });
+    await expect(correctCashTransactionInDatabase(database, {
+      correctionId: 'blocked-reconciled-correction', originalTransactionId: 'income-reconciliation',
+      reversalTransactionId: 'blocked-reconciled-reversal', reversalJournalEntryId: 'blocked-reconciled-reversal-journal',
+      replacement: {
+        id: 'blocked-reconciled-replacement', journalEntryId: 'blocked-reconciled-replacement-journal',
+        businessId: 'business-1', date: '2024-01-10', kind: 'income', accountId: 'bank-1',
+        categoryAccountId: 'income-services', amountCents: 20_000n, description: 'Unchanged reconciliation',
+      },
+    })).rejects.toThrow('Reopen its reconciliation');
+
+    await reopenAccountReconciliationInDatabase(database, 'reconciliation-1');
+    snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.accountReconciliations.find((item) => item.id === 'reconciliation-1').status).toBe('draft');
+    expect(snapshot.accountReconciliationEvents.filter((event) => event.reconciliationId === 'reconciliation-1').map((event) => event.eventType)).toEqual([
+      'created', 'item-cleared', 'item-cleared', 'completed', 'reopened',
+    ]);
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
+  it('keeps transfer legs available to reconcile independently for each bank account', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-source', businessId: 'business-1', name: 'Source bank', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-source', openingJournalEntryId: 'opening-source-journal',
+    });
+    await createCashAccountInDatabase(database, {
+      id: 'bank-destination', businessId: 'business-1', name: 'Destination bank', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 50_000n,
+      openingTransactionId: 'opening-destination', openingJournalEntryId: 'opening-destination-journal',
+    });
+    await recordTransferInDatabase(database, {
+      transactionId: 'bank-transfer', journalEntryId: 'bank-transfer-journal', businessId: 'business-1',
+      date: '2024-01-15', sourceAccountId: 'bank-source', destinationAccountId: 'bank-destination',
+      amountCents: 20_000n, description: 'Synthetic interbank transfer',
+    });
+
+    await createAccountReconciliationInDatabase(database, {
+      id: 'source-reconciliation', businessId: 'business-1', accountId: 'bank-source',
+      periodStartDate: '2024-01-01', statementDate: '2024-01-31',
+      beginningBalanceCents: 100_000n, endingBalanceCents: 80_000n,
+    });
+    await setAccountReconciliationItemClearedInDatabase(database, 'source-reconciliation', 'bank-transfer', true);
+    await completeAccountReconciliationInDatabase(database, 'source-reconciliation');
+
+    await createAccountReconciliationInDatabase(database, {
+      id: 'destination-reconciliation', businessId: 'business-1', accountId: 'bank-destination',
+      periodStartDate: '2024-01-01', statementDate: '2024-01-31',
+      beginningBalanceCents: 50_000n, endingBalanceCents: 70_000n,
+    });
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    const destination = snapshot.accountReconciliations.find((item) => item.id === 'destination-reconciliation');
+    expect(destination.activities).toEqual([expect.objectContaining({
+      transactionId: 'bank-transfer', amountCents: 20_000n, cleared: false,
+    })]);
+    await setAccountReconciliationItemClearedInDatabase(database, 'destination-reconciliation', 'bank-transfer', true);
+    await completeAccountReconciliationInDatabase(database, 'destination-reconciliation');
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
     database.close();
   });
 

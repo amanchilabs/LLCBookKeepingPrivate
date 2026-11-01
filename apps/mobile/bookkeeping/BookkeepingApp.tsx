@@ -29,6 +29,8 @@ function emptySnapshot(): BookkeepingSnapshot {
     guaranteedPaymentCashEvents: [],
     loanAgreements: [],
     loanActivities: [],
+    accountReconciliations: [],
+    accountReconciliationEvents: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }

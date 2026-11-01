@@ -1,6 +1,8 @@
 import { withActiveDatabase } from './storage-access';
 import {
   cashBasisReportFromDatabase,
+  completeAccountReconciliationInDatabase,
+  createAccountReconciliationInDatabase,
   createBusinessInDatabase,
   createCashAccountInDatabase,
   correctCashTransactionInDatabase,
@@ -14,9 +16,12 @@ import {
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
   recordTransferInDatabase,
+  reopenAccountReconciliationInDatabase,
   reverseGuaranteedPaymentInDatabase,
+  setAccountReconciliationItemClearedInDatabase,
   replaceMembersInDatabase,
   type BookkeepingSnapshot,
+  type CreateAccountReconciliationInput,
   type CashAccountInput,
   type CashBasisReport,
   type CorrectCashTransactionInput,
@@ -46,6 +51,8 @@ function emptySnapshot(): BookkeepingSnapshot {
     guaranteedPaymentCashEvents: [],
     loanAgreements: [],
     loanActivities: [],
+    accountReconciliations: [],
+    accountReconciliationEvents: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }
@@ -71,6 +78,26 @@ export async function recordCashTransaction(input: CashTransactionInput): Promis
 
 export async function recordTransfer(input: TransferInput): Promise<void> {
   await useActiveBooks((database) => recordTransferInDatabase(database, input));
+}
+
+export async function createAccountReconciliation(input: CreateAccountReconciliationInput): Promise<void> {
+  await useActiveBooks((database) => createAccountReconciliationInDatabase(database, input));
+}
+
+export async function setAccountReconciliationItemCleared(
+  reconciliationId: string,
+  transactionId: string,
+  cleared: boolean,
+): Promise<void> {
+  await useActiveBooks((database) => setAccountReconciliationItemClearedInDatabase(database, reconciliationId, transactionId, cleared));
+}
+
+export async function completeAccountReconciliation(reconciliationId: string): Promise<void> {
+  await useActiveBooks((database) => completeAccountReconciliationInDatabase(database, reconciliationId));
+}
+
+export async function reopenAccountReconciliation(reconciliationId: string): Promise<void> {
+  await useActiveBooks((database) => reopenAccountReconciliationInDatabase(database, reconciliationId));
 }
 
 export async function recordMemberCapitalActivity(input: MemberCapitalActivityInput): Promise<void> {

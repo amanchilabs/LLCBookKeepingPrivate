@@ -15,6 +15,7 @@ This first native workflow records synthetic test data in the existing encrypted
 - Income is recorded when cash is received: debit the selected bank/cash account and credit an income category.
 - Operating expense is recorded when cash is paid: debit an expense category and credit the selected bank/cash account.
 - A transfer between two different active bank/cash accounts debits the destination and credits the source. It changes account balances but is excluded from income and expenses.
+- Bank reconciliation stores statement periods, beginning and ending balances, cleared-transaction selections, and audit events. Cleared movements come from journal lines. A statement completes only when beginning balance plus selected movements equals the statement ending balance; reconciliation does not post or edit journal entries. The next period carries forward the prior statement date and ending balance. Only the latest completed statement can be reopened.
 - The first categories are Sales and Services, Other Income, Office Supplies, Rent, Software and Hosting, Travel, Meals, and Other Operating Expense. These are bookkeeping categories, not tax advice or tax-return mappings.
 - A non-zero opening balance posts on its entered date as a balanced entry against Opening Balance Equity. A positive balance debits the cash account; a negative bank opening balance credits it. A zero-balance account has no opening journal entry.
 - A cash-on-hand account may not become negative on any recorded date. A bank account may show a negative balance to reflect an overdraft.

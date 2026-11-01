@@ -18,7 +18,7 @@ import { accountTransferLines, assertBalancedEntry, loanAdvanceLines, loanRepaym
 import { calculateUnpaidLoanInterestCents, type DatedAmount, type LoanDayCount } from '../../domain/src/loan-interest';
 import { formatUsd } from '../../domain/src/money';
 
-const SCHEMA_VERSION = 7;
+const SCHEMA_VERSION = 8;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -71,6 +71,46 @@ export interface TransferInput {
 
 export interface TransferTransactionInput extends Omit<CashTransactionInput, 'kind'> {
   kind: 'transfer';
+}
+
+export interface CreateAccountReconciliationInput {
+  id: string;
+  businessId: string;
+  accountId: string;
+  periodStartDate: string;
+  statementDate: string;
+  beginningBalanceCents: bigint;
+  endingBalanceCents: bigint;
+}
+
+export interface AccountReconciliationActivity {
+  transactionId: string;
+  date: string;
+  description: string;
+  amountCents: bigint;
+  cleared: boolean;
+}
+
+export interface AccountReconciliationRecord {
+  id: string;
+  accountId: string;
+  accountName: string;
+  periodStartDate: string;
+  statementDate: string;
+  beginningBalanceCents: bigint;
+  endingBalanceCents: bigint;
+  clearedMovementCents: bigint;
+  differenceCents: bigint;
+  status: 'draft' | 'completed';
+  activities: AccountReconciliationActivity[];
+}
+
+export interface AccountReconciliationEvent {
+  id: string;
+  reconciliationId: string;
+  eventType: 'created' | 'item-cleared' | 'item-uncleared' | 'completed' | 'reopened';
+  transactionId: string | null;
+  createdAt: string;
 }
 
 export interface CorrectCashTransactionInput {
@@ -324,6 +364,8 @@ export interface BookkeepingSnapshot {
   guaranteedPaymentCashEvents: GuaranteedPaymentCashEvent[];
   loanAgreements: LoanAgreementRecord[];
   loanActivities: LoanActivityRecord[];
+  accountReconciliations: AccountReconciliationRecord[];
+  accountReconciliationEvents: AccountReconciliationEvent[];
   cashBasis: CashBasisTotals;
 }
 
@@ -525,6 +567,59 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
   }
   if (version < 6) await migrateBookkeepingV5ToV6(database);
   if (version < 7) await migrateBookkeepingV6ToV7(database);
+  if (version < 8) await migrateBookkeepingV7ToV8(database);
+}
+
+async function migrateBookkeepingV7ToV8(database: Database): Promise<void> {
+  await database.execAsync('BEGIN IMMEDIATE;');
+  try {
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS account_reconciliations (
+        id TEXT PRIMARY KEY NOT NULL,
+        business_id TEXT NOT NULL REFERENCES businesses(id),
+        account_id TEXT NOT NULL REFERENCES accounts(id),
+        period_start_date TEXT NOT NULL,
+        statement_date TEXT NOT NULL,
+        beginning_minor TEXT NOT NULL,
+        ending_minor TEXT NOT NULL,
+        status TEXT NOT NULL CHECK (status IN ('draft', 'completed')),
+        created_at TEXT NOT NULL,
+        completed_at TEXT,
+        CHECK (statement_date > period_start_date),
+        UNIQUE (business_id, account_id, statement_date)
+      );
+      CREATE INDEX IF NOT EXISTS account_reconciliations_account_date
+        ON account_reconciliations (business_id, account_id, statement_date);
+      CREATE UNIQUE INDEX IF NOT EXISTS account_reconciliations_one_draft_per_account
+        ON account_reconciliations (account_id) WHERE status = 'draft';
+      CREATE TABLE IF NOT EXISTS account_reconciliation_items (
+        reconciliation_id TEXT NOT NULL REFERENCES account_reconciliations(id),
+        transaction_id TEXT NOT NULL REFERENCES transactions(id),
+        created_at TEXT NOT NULL,
+        PRIMARY KEY (reconciliation_id, transaction_id)
+      );
+      CREATE INDEX IF NOT EXISTS account_reconciliation_items_transaction
+        ON account_reconciliation_items (transaction_id);
+      CREATE TABLE IF NOT EXISTS account_reconciliation_events (
+        id TEXT PRIMARY KEY NOT NULL,
+        reconciliation_id TEXT NOT NULL REFERENCES account_reconciliations(id),
+        event_type TEXT NOT NULL CHECK (event_type IN ('created', 'item-cleared', 'item-uncleared', 'completed', 'reopened')),
+        transaction_id TEXT REFERENCES transactions(id),
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS account_reconciliation_events_history
+        ON account_reconciliation_events (reconciliation_id, created_at);
+      UPDATE bookkeeping_schema SET version = 8 WHERE singleton = 1;
+    `);
+    const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+      'PRAGMA foreign_key_check',
+    );
+    if (violations.length > 0) throw new Error('The reconciliation schema migration found invalid record references.');
+    await database.execAsync('COMMIT;');
+  } catch (error) {
+    await database.execAsync('ROLLBACK;').catch(() => undefined);
+    throw error;
+  }
 }
 
 async function migrateBookkeepingV6ToV7(database: Database): Promise<void> {
@@ -1493,6 +1588,222 @@ export async function recordTransferInDatabase(database: Database, input: Transf
 }
 
 /** @internal SQL-level entry point used by repository tests. */
+export async function createAccountReconciliationInDatabase(
+  database: Database,
+  input: CreateAccountReconciliationInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  if (!input.id.trim()) throw new Error('Reconciliation identifier is required.');
+  requireDate(input.periodStartDate, 'statement period start date');
+  requireDate(input.statementDate, 'statement date');
+  if (input.periodStartDate >= input.statementDate) throw new Error('The statement date must follow the period start date.');
+  const business = await requireBusiness(database, input.businessId);
+  if (input.periodStartDate < business.bookkeepingStartDate) throw new Error('The statement period cannot precede the bookkeeping start date.');
+  const account = await database.getFirstAsync<{ kind: string; isActive: number }>(
+    'SELECT kind, is_active AS isActive FROM accounts WHERE id = ? AND business_id = ?', input.accountId, input.businessId,
+  );
+  if (!account || account.kind !== 'bank' || account.isActive !== 1) {
+    throw new Error('Choose an active bank account to reconcile.');
+  }
+  const prior = await database.getFirstAsync<{ statementDate: string; endingMinor: string }>(
+    `SELECT statement_date AS statementDate, ending_minor AS endingMinor
+     FROM account_reconciliations
+     WHERE business_id = ? AND account_id = ? AND status = 'completed'
+     ORDER BY statement_date DESC LIMIT 1`, input.businessId, input.accountId,
+  );
+  if (prior && input.periodStartDate !== prior.statementDate) {
+    throw new Error('The next statement period must start on the prior statement date.');
+  }
+  if (prior && input.beginningBalanceCents !== BigInt(prior.endingMinor)) {
+    throw new Error('The next statement beginning balance must match the prior ending balance.');
+  }
+  const createdAt = new Date().toISOString();
+  await inSqlTransaction(database, async () => {
+    await database.runAsync(
+      `INSERT INTO account_reconciliations
+       (id, business_id, account_id, period_start_date, statement_date, beginning_minor, ending_minor, status, created_at, completed_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', ?, NULL)`,
+      input.id, input.businessId, input.accountId, input.periodStartDate, input.statementDate,
+      input.beginningBalanceCents.toString(), input.endingBalanceCents.toString(), createdAt,
+    );
+    await addAccountReconciliationEvent(database, input.id, 'created', null, createdAt);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function setAccountReconciliationItemClearedInDatabase(
+  database: Database,
+  reconciliationId: string,
+  transactionId: string,
+  cleared: boolean,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  await inSqlTransaction(database, async () => {
+    const reconciliation = await database.getFirstAsync<{
+      businessId: string; accountId: string; statementDate: string; periodStartDate: string; status: 'draft' | 'completed';
+    }>(
+      `SELECT business_id AS businessId, account_id AS accountId, statement_date AS statementDate,
+              period_start_date AS periodStartDate, status
+       FROM account_reconciliations WHERE id = ?`, reconciliationId,
+    );
+    if (!reconciliation) throw new Error('Choose an existing reconciliation.');
+    if (reconciliation.status !== 'draft') throw new Error('Reopen the reconciliation before changing cleared items.');
+    const activities = await readAccountReconciliationActivities(database, reconciliationId, reconciliation);
+    if (!activities.some((activity) => activity.transactionId === transactionId)) {
+      throw new Error('Choose a posted transaction for this bank account that is available to reconcile.');
+    }
+    const existing = await database.getFirstAsync<{ transactionId: string }>(
+      'SELECT transaction_id AS transactionId FROM account_reconciliation_items WHERE reconciliation_id = ? AND transaction_id = ?',
+      reconciliationId, transactionId,
+    );
+    if (cleared && !existing) {
+      const now = new Date().toISOString();
+      await database.runAsync(
+        'INSERT INTO account_reconciliation_items (reconciliation_id, transaction_id, created_at) VALUES (?, ?, ?)',
+        reconciliationId, transactionId, now,
+      );
+      await addAccountReconciliationEvent(database, reconciliationId, 'item-cleared', transactionId, now);
+    } else if (!cleared && existing) {
+      const now = new Date().toISOString();
+      await database.runAsync(
+        'DELETE FROM account_reconciliation_items WHERE reconciliation_id = ? AND transaction_id = ?',
+        reconciliationId, transactionId,
+      );
+      await addAccountReconciliationEvent(database, reconciliationId, 'item-uncleared', transactionId, now);
+    }
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function completeAccountReconciliationInDatabase(database: Database, reconciliationId: string): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  await inSqlTransaction(database, async () => {
+    const header = await readAccountReconciliationHeader(database, reconciliationId);
+    if (!header) throw new Error('Choose an existing reconciliation.');
+    if (header.status !== 'draft') throw new Error('This reconciliation is already completed.');
+    const activities = await readAccountReconciliationActivities(database, reconciliationId, header);
+    const cleared = activities.reduce((sum, activity) => activity.cleared ? sum + activity.amountCents : sum, 0n);
+    const difference = header.beginningBalanceCents + cleared - header.endingBalanceCents;
+    if (difference !== 0n) throw new Error('The reconciliation difference must be zero before completion.');
+    const now = new Date().toISOString();
+    await database.runAsync(
+      `UPDATE account_reconciliations SET status = 'completed', completed_at = ? WHERE id = ? AND status = 'draft'`,
+      now, reconciliationId,
+    );
+    await addAccountReconciliationEvent(database, reconciliationId, 'completed', null, now);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function reopenAccountReconciliationInDatabase(database: Database, reconciliationId: string): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  await inSqlTransaction(database, async () => {
+    const header = await readAccountReconciliationHeader(database, reconciliationId);
+    if (!header || header.status !== 'completed') throw new Error('Choose a completed reconciliation to reopen.');
+    const latest = await database.getFirstAsync<{ id: string }>(
+      `SELECT id FROM account_reconciliations WHERE business_id = ? AND account_id = ? AND status = 'completed'
+       ORDER BY statement_date DESC LIMIT 1`, header.businessId, header.accountId,
+    );
+    if (latest?.id !== reconciliationId) throw new Error('Only the latest completed statement can be reopened.');
+    const draft = await database.getFirstAsync<{ id: string }>(
+      `SELECT id FROM account_reconciliations WHERE account_id = ? AND status = 'draft'`, header.accountId,
+    );
+    if (draft) throw new Error('Complete or remove the active reconciliation before reopening another statement.');
+    const now = new Date().toISOString();
+    await database.runAsync(
+      `UPDATE account_reconciliations SET status = 'draft' WHERE id = ? AND status = 'completed'`, reconciliationId,
+    );
+    await addAccountReconciliationEvent(database, reconciliationId, 'reopened', null, now);
+  });
+}
+
+async function addAccountReconciliationEvent(
+  database: Database,
+  reconciliationId: string,
+  eventType: AccountReconciliationEvent['eventType'],
+  transactionId: string | null,
+  createdAt: string,
+): Promise<void> {
+  await database.runAsync(
+    `INSERT INTO account_reconciliation_events (id, reconciliation_id, event_type, transaction_id, created_at)
+     VALUES ('reconciliation-event:' || lower(hex(randomblob(16))), ?, ?, ?, ?)`,
+    reconciliationId, eventType, transactionId, createdAt,
+  );
+}
+
+interface AccountReconciliationHeader extends CreateAccountReconciliationInput {
+  status: 'draft' | 'completed';
+}
+
+async function readAccountReconciliationHeader(database: Database, reconciliationId: string): Promise<AccountReconciliationHeader | null> {
+  const row = await database.getFirstAsync<{
+    id: string; businessId: string; accountId: string; periodStartDate: string; statementDate: string;
+    beginningMinor: string; endingMinor: string; status: 'draft' | 'completed';
+  }>(
+    `SELECT id, business_id AS businessId, account_id AS accountId,
+            period_start_date AS periodStartDate, statement_date AS statementDate,
+            beginning_minor AS beginningMinor, ending_minor AS endingMinor, status
+     FROM account_reconciliations WHERE id = ?`, reconciliationId,
+  );
+  if (!row) return null;
+  return {
+    id: row.id, businessId: row.businessId, accountId: row.accountId,
+    periodStartDate: row.periodStartDate, statementDate: row.statementDate,
+    beginningBalanceCents: BigInt(row.beginningMinor), endingBalanceCents: BigInt(row.endingMinor), status: row.status,
+  };
+}
+
+async function readAccountReconciliationActivities(
+  database: Database,
+  reconciliationId: string,
+  header: Pick<AccountReconciliationHeader, 'businessId' | 'accountId' | 'periodStartDate' | 'statementDate'>,
+): Promise<AccountReconciliationActivity[]> {
+  const rows = await database.getAllAsync<{
+    transactionId: string; date: string; description: string; debitMinor: string; creditMinor: string; cleared: number;
+  }>(
+    `SELECT t.id AS transactionId, t.entry_date AS date, t.description,
+            jl.debit_minor AS debitMinor, jl.credit_minor AS creditMinor,
+            CASE WHEN currentItem.transaction_id IS NULL THEN 0 ELSE 1 END AS cleared
+     FROM transactions t
+     JOIN journal_entries je ON je.id = t.journal_entry_id
+     JOIN journal_lines jl ON jl.journal_entry_id = je.id AND jl.account_id = ?
+     LEFT JOIN account_reconciliation_items currentItem
+       ON currentItem.transaction_id = t.id AND currentItem.reconciliation_id = ?
+     WHERE t.business_id = ? AND t.entry_date <= ?
+       AND NOT (t.kind = 'opening-balance' AND t.entry_date <= ?)
+       AND NOT EXISTS (
+         SELECT 1 FROM account_reconciliation_items priorItem
+         JOIN account_reconciliations prior ON prior.id = priorItem.reconciliation_id
+         WHERE priorItem.transaction_id = t.id AND prior.account_id = ?
+           AND prior.status = 'completed' AND prior.id <> ?
+       )
+     ORDER BY t.entry_date, t.created_at, t.id`,
+    header.accountId, reconciliationId, header.businessId, header.statementDate,
+    header.periodStartDate, header.accountId, reconciliationId,
+  );
+  const activities = new Map<string, AccountReconciliationActivity>();
+  for (const row of rows) {
+    const current = activities.get(row.transactionId);
+    activities.set(row.transactionId, {
+      transactionId: row.transactionId, date: row.date, description: row.description,
+      amountCents: (current?.amountCents ?? 0n) + BigInt(row.debitMinor) - BigInt(row.creditMinor),
+      cleared: row.cleared === 1,
+    });
+  }
+  return [...activities.values()];
+}
+
+async function assertTransactionNotInCompletedReconciliation(database: Database, transactionId: string): Promise<void> {
+  const reconciliation = await database.getFirstAsync<{ id: string }>(
+    `SELECT reconciliation.id
+     FROM account_reconciliation_items item
+     JOIN account_reconciliations reconciliation ON reconciliation.id = item.reconciliation_id
+     WHERE item.transaction_id = ? AND reconciliation.status = 'completed' LIMIT 1`, transactionId,
+  );
+  if (reconciliation) throw new Error('Reopen its reconciliation before correcting a reconciled transaction.');
+}
+
+/** @internal SQL-level entry point used by repository tests. */
 export async function recordMemberCapitalActivityInDatabase(
   database: Database,
   input: MemberCapitalActivityInput,
@@ -1723,6 +2034,7 @@ export async function reverseGuaranteedPaymentInDatabase(
        WHERE payment.id = ?`, input.paymentId,
     );
     if (!payment) throw new Error('Choose a guaranteed payment to reverse.');
+    await assertTransactionNotInCompletedReconciliation(database, payment.transactionId);
     if (input.date < payment.date) throw new Error('A payment reversal date cannot precede the payment date.');
     const business = await requireBusiness(database, payment.businessId);
     if (input.date < business.bookkeepingStartDate) throw new Error('Reversal date cannot precede the bookkeeping start date.');
@@ -1808,6 +2120,7 @@ export async function correctCashTransactionInDatabase(database: Database, input
     if (!original || (original.kind !== 'income' && original.kind !== 'expense' && original.kind !== 'transfer')) {
       throw new Error('Choose an original income or expense transaction, or a transfer, to correct.');
     }
+    await assertTransactionNotInCompletedReconciliation(database, original.id);
     const existingCorrection = await database.getFirstAsync<{ id: string }>(
       'SELECT id FROM transaction_corrections WHERE original_transaction_id = ?', original.id,
     );
@@ -2312,6 +2625,53 @@ async function cashBasisForPeriod(database: Database, businessId: string, fromDa
   return { incomeCents, expenseCents, netIncomeCents: incomeCents - expenseCents };
 }
 
+async function readAccountReconciliations(database: Database, businessId: string): Promise<AccountReconciliationRecord[]> {
+  const rows = await database.getAllAsync<{
+    id: string; accountId: string; accountName: string; periodStartDate: string; statementDate: string;
+    beginningMinor: string; endingMinor: string; status: 'draft' | 'completed';
+  }>(
+    `SELECT reconciliation.id, reconciliation.account_id AS accountId, account.name AS accountName,
+            reconciliation.period_start_date AS periodStartDate, reconciliation.statement_date AS statementDate,
+            reconciliation.beginning_minor AS beginningMinor, reconciliation.ending_minor AS endingMinor,
+            reconciliation.status
+     FROM account_reconciliations reconciliation
+     JOIN accounts account ON account.id = reconciliation.account_id
+     WHERE reconciliation.business_id = ?
+     ORDER BY reconciliation.statement_date DESC, reconciliation.created_at DESC`, businessId,
+  );
+  const reconciliations: AccountReconciliationRecord[] = [];
+  for (const row of rows) {
+    const header: AccountReconciliationHeader = {
+      id: row.id, businessId, accountId: row.accountId, periodStartDate: row.periodStartDate,
+      statementDate: row.statementDate, beginningBalanceCents: BigInt(row.beginningMinor),
+      endingBalanceCents: BigInt(row.endingMinor), status: row.status,
+    };
+    const activities = await readAccountReconciliationActivities(database, row.id, header);
+    const clearedMovementCents = activities.reduce(
+      (sum, activity) => activity.cleared ? sum + activity.amountCents : sum, 0n,
+    );
+    reconciliations.push({
+      id: row.id, accountId: row.accountId, accountName: row.accountName,
+      periodStartDate: row.periodStartDate, statementDate: row.statementDate,
+      beginningBalanceCents: header.beginningBalanceCents, endingBalanceCents: header.endingBalanceCents,
+      clearedMovementCents,
+      differenceCents: header.beginningBalanceCents + clearedMovementCents - header.endingBalanceCents,
+      status: row.status, activities,
+    });
+  }
+  return reconciliations;
+}
+
+async function readAccountReconciliationEvents(database: Database, businessId: string): Promise<AccountReconciliationEvent[]> {
+  return await database.getAllAsync<AccountReconciliationEvent>(
+    `SELECT event.id, event.reconciliation_id AS reconciliationId, event.event_type AS eventType,
+            event.transaction_id AS transactionId, event.created_at AS createdAt
+     FROM account_reconciliation_events event
+     JOIN account_reconciliations reconciliation ON reconciliation.id = event.reconciliation_id
+     WHERE reconciliation.business_id = ? ORDER BY event.rowid`, businessId,
+  );
+}
+
 /** @internal SQL-level entry point used by repository tests. */
 export async function getBookkeepingSnapshotFromDatabase(database: Database, businessId?: string): Promise<BookkeepingSnapshot | null> {
   await ensureBookkeepingSchema(database);
@@ -2319,7 +2679,7 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
   if (!business) return {
     business: null, members: [], memberHistory: [], accounts: [], transactions: [], capitalActivities: [],
     memberCapitalSummaries: [], guaranteedPaymentInstallments: [], guaranteedPaymentCashEvents: [],
-    loanAgreements: [], loanActivities: [],
+    loanAgreements: [], loanActivities: [], accountReconciliations: [], accountReconciliationEvents: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
   const { members, history } = await readMembers(database, business.id);
@@ -2331,10 +2691,13 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
   const guaranteedPaymentCashEvents = await readGuaranteedPaymentCashEvents(database, business.id);
   const loanAgreements = await readLoanAgreements(database, business.id);
   const loanActivities = await readLoanActivities(database, business.id);
+  const accountReconciliations = await readAccountReconciliations(database, business.id);
+  const accountReconciliationEvents = await readAccountReconciliationEvents(database, business.id);
   const cashBasis = await cashBasisForPeriod(database, business.id);
   return {
     business, members, memberHistory: history, accounts, transactions, capitalActivities, memberCapitalSummaries,
-    guaranteedPaymentInstallments, guaranteedPaymentCashEvents, loanAgreements, loanActivities, cashBasis,
+    guaranteedPaymentInstallments, guaranteedPaymentCashEvents, loanAgreements, loanActivities,
+    accountReconciliations, accountReconciliationEvents, cashBasis,
   };
 }
 
