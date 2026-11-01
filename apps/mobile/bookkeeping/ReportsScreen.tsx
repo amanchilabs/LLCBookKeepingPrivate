@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { File, Paths } from 'expo-file-system';
+import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { StyleSheet, Text, View } from 'react-native';
 import { getCashBasisReport, getCashMovementReport, getGeneralLedgerReport, getJournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-service';
 import type { BookkeepingSnapshot, CashBasisReport, CashMovementReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
 import { summarizeLoanBalance } from '../../../packages/domain/src/loan-interest';
 import { balanceSheetCsv, cashBasisCsv, cashMovementCsv, generalLedgerCsv, guaranteedPaymentCashCsv, isValidDateRange, loanCashActivityCsv, memberCapitalMovementCsv, trialBalanceCsv } from './report-exports';
+import { buildReportPdfHtml, REPORT_PDF_PAGE_SIZE } from './report-pdf';
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
@@ -21,6 +23,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [exportingKind, setExportingKind] = useState<'csv' | 'pdf' | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
   const reportDateRangeValid = isValidDateRange(fromDate, throughDate);
@@ -130,6 +133,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
 
   const exportCsv = async (reportName: string, csv: string) => {
     setExporting(true);
+    setExportingKind('csv');
     setExportError(null);
     setExportNotice(null);
     try {
@@ -145,6 +149,39 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       setExportError(exportFailure instanceof Error ? exportFailure.message : 'The report CSV could not be exported.');
     } finally {
       setExporting(false);
+      setExportingKind(null);
+    }
+  };
+
+  const exportPdf = async (reportName: string, title: string, period: string, csv: string) => {
+    if (!snapshot.business) return;
+    setExporting(true);
+    setExportingKind('pdf');
+    setExportError(null);
+    setExportNotice(null);
+    try {
+      const html = buildReportPdfHtml({
+        title,
+        businessName: snapshot.business.name,
+        period,
+        csv,
+      });
+      const printOptions: Print.FilePrintOptions & { orientation: 'landscape' } = {
+        html,
+        ...REPORT_PDF_PAGE_SIZE,
+      };
+      const { uri } = await Print.printToFileAsync(printOptions);
+      await Sharing.shareAsync(uri, {
+        UTI: '.pdf',
+        mimeType: 'application/pdf',
+        dialogTitle: `Export ${reportName.replaceAll('-', ' ')} PDF`,
+      });
+      setExportNotice('PDF prepared. The system share sheet controls whether a copy leaves this device.');
+    } catch (exportFailure) {
+      setExportError(exportFailure instanceof Error ? exportFailure.message : 'The report PDF could not be exported.');
+    } finally {
+      setExporting(false);
+      setExportingKind(null);
     }
   };
 
@@ -168,8 +205,11 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Income</Text><Money cents={report.incomeCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Operating expenses</Text><Money cents={report.expenseCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net income</Text><Money cents={report.netIncomeCents} /></View>
-        <Button title={exporting ? 'Preparing CSV…' : 'Export P&L CSV'} secondary
+        <Button title={exportingKind === 'csv' ? 'Preparing CSV…' : 'Export P&L CSV'} secondary
           onPress={() => void exportCsv('profit-and-loss', cashBasisCsv(report))} disabled={exporting} />
+        <Button title={exportingKind === 'pdf' ? 'Preparing PDF…' : 'Export P&L PDF'} secondary
+          onPress={() => void exportPdf('profit-and-loss', 'Profit & Loss · Cash Basis', `${report.fromDate} through ${report.throughDate}`, cashBasisCsv(report))}
+          disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Choose a date range to calculate the report from journal activity.</Text>}
     </Panel>
     <Panel>
@@ -186,8 +226,11 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         </View>)}
         <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Total ending cash</Text><Money cents={cashMovementReport.endingBalanceCents} /></View>
         <Text style={uiStyles.rowDetail}>Beginning {moneyLabel(cashMovementReport.beginningBalanceCents)} + net movement {moneyLabel(cashMovementReport.netMovementCents)} = ending {moneyLabel(cashMovementReport.endingBalanceCents)}.</Text>
-        <Button title={exporting ? 'Preparing CSV…' : 'Export cash movement CSV'} secondary
+        <Button title={exportingKind === 'csv' ? 'Preparing CSV…' : 'Export cash movement CSV'} secondary
           onPress={() => void exportCsv('cash-movement', cashMovementCsv(cashMovementReport))}
+          disabled={exporting || cashMovementReport.accounts.length === 0} />
+        <Button title={exportingKind === 'pdf' ? 'Preparing PDF…' : 'Export cash movement PDF'} secondary
+          onPress={() => void exportPdf('cash-movement', 'Cash Movement', `${fromDate} through ${throughDate}`, cashMovementCsv(cashMovementReport))}
           disabled={exporting || cashMovementReport.accounts.length === 0} />
         {cashMovementReport.accounts.length === 0 ? <Text style={uiStyles.helper}>Add a bank or cash account to report cash movement.</Text> : null}
       </> : <Text style={uiStyles.helper}>Update the report to calculate selected-period cash movement from journal lines.</Text>}
@@ -214,8 +257,11 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportTotal}><Text style={uiStyles.rowTitle}>Total equity</Text><Money cents={journalReport.balanceSheet.totalEquityCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Assets − liabilities − equity</Text><Money cents={journalReport.balanceSheet.differenceCents} /></View>
         <Text style={uiStyles.helper}>Current income and expenses are included as current earnings. No closing entries are generated. Book balances do not establish tax basis or outside basis.</Text>
-        <Button title={exporting ? 'Preparing CSV…' : 'Export Balance Sheet CSV'} secondary
+        <Button title={exportingKind === 'csv' ? 'Preparing CSV…' : 'Export Balance Sheet CSV'} secondary
           onPress={() => void exportCsv('balance-sheet', balanceSheetCsv(journalReport))} disabled={exporting} />
+        <Button title={exportingKind === 'pdf' ? 'Preparing PDF…' : 'Export Balance Sheet PDF'} secondary
+          onPress={() => void exportPdf('balance-sheet', 'Balance Sheet · Book Basis', `Cumulative through ${journalReport.asOfDate}`, balanceSheetCsv(journalReport))}
+          disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Update the report to calculate journal balances.</Text>}
     </Panel>
     <Panel>
@@ -237,8 +283,11 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
           <View style={styles.trialBalanceAmount}><Money cents={journalReport.totalDebitsCents} /></View>
           <View style={styles.trialBalanceAmount}><Money cents={journalReport.totalCreditsCents} /></View>
         </View>
-        <Button title={exporting ? 'Preparing CSV…' : 'Export Trial Balance CSV'} secondary
+        <Button title={exportingKind === 'csv' ? 'Preparing CSV…' : 'Export Trial Balance CSV'} secondary
           onPress={() => void exportCsv('trial-balance', trialBalanceCsv(journalReport))} disabled={exporting} />
+        <Button title={exportingKind === 'pdf' ? 'Preparing PDF…' : 'Export Trial Balance PDF'} secondary
+          onPress={() => void exportPdf('trial-balance', 'Trial Balance', `Cumulative through ${journalReport.asOfDate}`, trialBalanceCsv(journalReport))}
+          disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Update the report to calculate journal balances.</Text>}
     </Panel>
     <Panel>
@@ -260,8 +309,11 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Total debits</Text><Money cents={ledgerReport.totalDebitsCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Total credits</Text><Money cents={ledgerReport.totalCreditsCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.rowTitle}>Ending balance · debit less credit</Text><Money cents={ledgerReport.endingBalanceCents} /></View>
-        <Button title={exporting ? 'Preparing CSV…' : 'Export General Ledger CSV'} secondary
+        <Button title={exportingKind === 'csv' ? 'Preparing CSV…' : 'Export General Ledger CSV'} secondary
           onPress={() => void exportCsv('general-ledger', generalLedgerCsv(ledgerReport))} disabled={exporting} />
+        <Button title={exportingKind === 'pdf' ? 'Preparing PDF…' : 'Export General Ledger PDF'} secondary
+          onPress={() => void exportPdf('general-ledger', `General Ledger · ${ledgerReport.accountName}`, `Cumulative through ${ledgerReport.asOfDate}`, generalLedgerCsv(ledgerReport))}
+          disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Update the report to calculate account activity.</Text>}
     </Panel>
     <Panel>
@@ -272,8 +324,11 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Property contributions</Text><Money cents={propertyContributionsCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Member distributions</Text><Money cents={-distributionsCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net capital activity</Text><Money cents={cashContributionsCents + propertyContributionsCents - distributionsCents} /></View>
-        <Button title={exporting ? 'Preparing CSV…' : 'Export capital movement CSV'} secondary
+        <Button title={exportingKind === 'csv' ? 'Preparing CSV…' : 'Export capital movement CSV'} secondary
           onPress={() => void exportCsv('member-capital-movement', memberCapitalMovementCsv(fromDate, throughDate, capitalInPeriod))}
+          disabled={exporting || capitalInPeriod.length === 0} />
+        <Button title={exportingKind === 'pdf' ? 'Preparing PDF…' : 'Export capital movement PDF'} secondary
+          onPress={() => void exportPdf('member-capital-movement', 'Member Capital Movement · Book Activity', `${fromDate} through ${throughDate}`, memberCapitalMovementCsv(fromDate, throughDate, capitalInPeriod))}
           disabled={exporting || capitalInPeriod.length === 0} />
         {capitalInPeriod.length === 0 ? <Text style={uiStyles.helper}>No member capital activity falls within these selected dates.</Text> : null}
       </> : <Text style={uiStyles.helper}>Enter a valid date range to calculate or export member capital activity.</Text>}
@@ -295,8 +350,11 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Use-of-capital payments</Text><Money cents={capitalUsePaidCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Use-of-capital returns</Text><Money cents={capitalUseReturnedCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net use-of-capital cash expense</Text><Money cents={capitalUseCashNetCents} /></View>
-        <Button title={exporting ? 'Preparing CSV…' : 'Export payment cash workpaper CSV'} secondary
+        <Button title={exportingKind === 'csv' ? 'Preparing CSV…' : 'Export payment cash workpaper CSV'} secondary
           onPress={() => void exportCsv('guaranteed-payment-cash', guaranteedPaymentCashCsv(fromDate, throughDate, paymentEventsInPeriod))}
+          disabled={exporting || paymentEventsInPeriod.length === 0} />
+        <Button title={exportingKind === 'pdf' ? 'Preparing PDF…' : 'Export payment cash workpaper PDF'} secondary
+          onPress={() => void exportPdf('guaranteed-payment-cash', 'Guaranteed Payment Cash Workpaper', `${fromDate} through ${throughDate}`, guaranteedPaymentCashCsv(fromDate, throughDate, paymentEventsInPeriod))}
           disabled={exporting || paymentEventsInPeriod.length === 0} />
         {paymentEventsInPeriod.length === 0 ? <Text style={uiStyles.helper}>No actual guaranteed-payment cash activity falls within these selected dates.</Text> : null}
         <Text style={uiStyles.helper}>This CSV contains only actual payment and reversal events. Unpaid obligations are omitted. Separate book categories only; CPA review is required for tax classification, deductibility, and capitalization. This is not a tax form.</Text>
@@ -309,8 +367,11 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Funded advances during period · not income</Text><Money cents={loanAdvancesInPeriodCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Principal repaid during period · not expense</Text><Money cents={loanPrincipalRepaidInPeriodCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Interest actually paid during period</Text><Money cents={loanInterestPaidInPeriodCents} /></View>
-        <Button title={exporting ? 'Preparing CSV…' : 'Export loan cash workpaper CSV'} secondary
+        <Button title={exportingKind === 'csv' ? 'Preparing CSV…' : 'Export loan cash workpaper CSV'} secondary
           onPress={() => void exportCsv('loan-cash-activity', loanCashActivityCsv(fromDate, throughDate, loanActivitiesInPeriod, snapshot.loanAgreements))}
+          disabled={exporting || loanActivitiesInPeriod.length === 0} />
+        <Button title={exportingKind === 'pdf' ? 'Preparing PDF…' : 'Export loan cash workpaper PDF'} secondary
+          onPress={() => void exportPdf('loan-cash-activity', 'Loan Cash Workpaper', `${fromDate} through ${throughDate} · balances as of ${throughDate}`, loanCashActivityCsv(fromDate, throughDate, loanActivitiesInPeriod, snapshot.loanAgreements))}
           disabled={exporting || loanActivitiesInPeriod.length === 0} />
         {loanActivitiesInPeriod.length === 0 ? <Text style={uiStyles.helper}>No loan cash activity falls within these selected dates.</Text> : null}
       </> : <Text style={uiStyles.helper}>Enter a valid date range to calculate loan activity totals.</Text>}
@@ -332,7 +393,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       <Text style={uiStyles.sectionTitle}>Available from persisted books</Text>
       <Text style={uiStyles.rowDetail}>Account balances: {snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash').length} bank and cash accounts.</Text>
       <Text style={uiStyles.rowDetail}>Member interests: {snapshot.members.length} current members, with dated interest history.</Text>
-      <Text style={uiStyles.helper}>P&L, Balance Sheet, Trial Balance, selected-account General Ledger, member capital, guaranteed-payment cash, and loan cash workpapers are available as CSV. PDF reports and tax-specific reports remain in progress.</Text>
+      <Text style={uiStyles.helper}>P&L, Balance Sheet, Trial Balance, selected-account General Ledger, member capital, guaranteed-payment cash, and loan cash workpapers are available as CSV and PDF. These are bookkeeping workpapers, not tax returns.</Text>
     </Panel>
   </Page>;
 }
