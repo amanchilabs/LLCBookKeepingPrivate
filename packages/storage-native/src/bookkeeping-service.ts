@@ -2,6 +2,7 @@ import { withActiveDatabase } from './storage-access';
 import {
   cashBasisReportFromDatabase,
   completeAccountReconciliationInDatabase,
+  createCategoryAccountInDatabase,
   createAccountReconciliationInDatabase,
   createBusinessInDatabase,
   createCashAccountInDatabase,
@@ -25,6 +26,7 @@ import {
   type BookkeepingSnapshot,
   type CreateAccountReconciliationInput,
   type CashAccountInput,
+  type CategoryAccountInput,
   type CashBasisReport,
   type GeneralLedgerReport,
   type JournalBalanceReport,
@@ -74,6 +76,10 @@ export async function createBusiness(input: BusinessSetupInput): Promise<void> {
 
 export async function createCashAccount(input: CashAccountInput): Promise<void> {
   await useActiveBooks((database) => createCashAccountInDatabase(database, input));
+}
+
+export async function createCategoryAccount(input: CategoryAccountInput): Promise<void> {
+  await useActiveBooks((database) => createCategoryAccountInDatabase(database, input));
 }
 
 export async function recordCashTransaction(input: CashTransactionInput): Promise<void> {

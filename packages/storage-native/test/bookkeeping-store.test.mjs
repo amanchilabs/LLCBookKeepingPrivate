@@ -155,6 +155,51 @@ afterEach(() => {
 });
 
 describe('bookkeeping repository SQL contract', () => {
+  it('adds custom income and expense accounts that can post balanced, reportable transactions', async () => {
+    const store = await import('../src/bookkeeping-store.ts');
+    expect(store.createCategoryAccountInDatabase).toBeTypeOf('function');
+
+    const database = new TestDatabase(databasePath());
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'checking-custom-categories', businessId: setup.id, name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 125_000n,
+      openingTransactionId: 'opening-custom-categories', openingJournalEntryId: 'opening-entry-custom-categories',
+    });
+    await store.createCategoryAccountInDatabase(database, {
+      id: 'income-consulting', businessId: setup.id, name: 'Consulting income', kind: 'income',
+    });
+    await store.createCategoryAccountInDatabase(database, {
+      id: 'expense-insurance', businessId: setup.id, name: 'Insurance', kind: 'expense',
+    });
+
+    await recordCashTransactionInDatabase(database, {
+      id: 'custom-income', journalEntryId: 'custom-income-entry', businessId: setup.id,
+      date: '2024-01-02', kind: 'income', accountId: 'checking-custom-categories',
+      categoryAccountId: 'income-consulting', amountCents: 5_000n, description: 'Consulting work',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'custom-expense', journalEntryId: 'custom-expense-entry', businessId: setup.id,
+      date: '2024-01-03', kind: 'expense', accountId: 'checking-custom-categories',
+      categoryAccountId: 'expense-insurance', amountCents: 2_500n, description: 'Policy premium',
+    });
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, setup.id);
+    expect(snapshot.accounts.find((account) => account.id === 'income-consulting'))
+      .toMatchObject({ code: '4001', name: 'Consulting income', kind: 'income' });
+    expect(snapshot.accounts.find((account) => account.id === 'expense-insurance'))
+      .toMatchObject({ code: '6001', name: 'Insurance', kind: 'expense' });
+    expect(snapshot.accounts.find((account) => account.id === 'checking-custom-categories').balanceCents).toBe(127_500n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 5_000n, expenseCents: 2_500n, netIncomeCents: 2_500n });
+
+    const balance = await journalBalanceReportFromDatabase(database, setup.id, '2024-01-03');
+    expect(balance.totalDebitsCents).toBe(balance.totalCreditsCents);
+    await expect(store.createCategoryAccountInDatabase(database, {
+      id: 'duplicate-insurance', businessId: setup.id, name: 'insurance', kind: 'expense',
+    })).rejects.toThrow('already exists');
+    database.close();
+  });
+
   it('migrates M1 version-1 journal rows to the expanded account and journal types without breaking references', async () => {
     const database = new TestDatabase(databasePath());
     await createLegacyV1Books(database);

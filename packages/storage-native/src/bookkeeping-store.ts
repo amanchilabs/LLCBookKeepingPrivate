@@ -46,6 +46,13 @@ export interface CashAccountInput {
   openingJournalEntryId?: string;
 }
 
+export interface CategoryAccountInput {
+  id: string;
+  businessId: string;
+  name: string;
+  kind: 'income' | 'expense';
+}
+
 export interface CashTransactionInput {
   id: string;
   journalEntryId: string;
@@ -1362,6 +1369,41 @@ export async function createCashAccountInDatabase(database: Database, input: Cas
         categoryAccountId: 'opening-equity', amountCents: opening, description,
       });
     }
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function createCategoryAccountInDatabase(database: Database, input: CategoryAccountInput): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  await requireBusiness(database, input.businessId);
+  const name = input.name.trim();
+  if (!input.id.trim() || !name) throw new Error('Enter a name for this income or expense account.');
+  if (input.kind !== 'income' && input.kind !== 'expense') {
+    throw new Error('Custom chart accounts must be income or expense accounts.');
+  }
+
+  await inSqlTransaction(database, async () => {
+    const existingName = await database.getFirstAsync<{ id: string }>(
+      'SELECT id FROM accounts WHERE business_id = ? AND lower(name) = lower(?)', input.businessId, name,
+    );
+    if (existingName) throw new Error('An account with this name already exists.');
+
+    const existingCodes = await database.getAllAsync<{ code: string }>(
+      'SELECT code FROM accounts WHERE business_id = ?', input.businessId,
+    );
+    const usedCodes = new Set(existingCodes.map((account) => account.code));
+    const firstCode = input.kind === 'income' ? 4_001 : 6_001;
+    const lastCode = input.kind === 'income' ? 4_999 : 6_999;
+    let codeNumber = firstCode;
+    while (codeNumber <= lastCode && usedCodes.has(String(codeNumber))) codeNumber += 1;
+    if (codeNumber > lastCode) throw new Error(`No ${input.kind} account codes remain in the available range.`);
+
+    await database.runAsync(
+      `INSERT INTO accounts (id, business_id, code, name, kind, category, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      input.id, input.businessId, String(codeNumber), name, input.kind,
+      input.kind === 'income' ? 'Custom income' : 'Custom expense', new Date().toISOString(),
+    );
   });
 }
 

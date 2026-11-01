@@ -5,6 +5,7 @@ import { parseUsd } from '../../../packages/domain/src/money';
 import { findDraftForAccount, selectBankAccountId } from './account-reconciliation-selection';
 import {
   completeAccountReconciliation,
+  createCategoryAccount,
   createAccountReconciliation,
   createCashAccount,
   reopenAccountReconciliation,
@@ -14,6 +15,7 @@ import type { AccountRecord, BookkeepingSnapshot } from '../../../packages/stora
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 type CashKind = 'bank' | 'cash';
+type CategoryKind = 'income' | 'expense';
 
 export function AccountsScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void> }) {
   const [name, setName] = useState('');
@@ -22,6 +24,10 @@ export function AccountsScreen({ snapshot, onSaved }: { snapshot: BookkeepingSna
   const [openingDate, setOpeningDate] = useState(todayLocalDate());
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categoryName, setCategoryName] = useState('');
+  const [categoryKind, setCategoryKind] = useState<CategoryKind>('expense');
+  const [categorySaving, setCategorySaving] = useState(false);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
   const [reconciliationAccountId, setReconciliationAccountId] = useState('');
   const [periodStartDate, setPeriodStartDate] = useState(snapshot.business?.bookkeepingStartDate ?? todayLocalDate());
   const [statementDate, setStatementDate] = useState(todayLocalDate());
@@ -72,6 +78,22 @@ export function AccountsScreen({ snapshot, onSaved }: { snapshot: BookkeepingSna
       setError(saveError instanceof Error ? saveError.message : 'The account could not be saved.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveCategory = async () => {
+    setCategorySaving(true);
+    setCategoryError(null);
+    try {
+      await createCategoryAccount({
+        id: Crypto.randomUUID(), businessId: snapshot.business!.id, name: categoryName, kind: categoryKind,
+      });
+      setCategoryName('');
+      await onSaved();
+    } catch (saveError) {
+      setCategoryError(saveError instanceof Error ? saveError.message : 'The chart account could not be saved.');
+    } finally {
+      setCategorySaving(false);
     }
   };
 
@@ -155,6 +177,23 @@ export function AccountsScreen({ snapshot, onSaved }: { snapshot: BookkeepingSna
       <Text style={uiStyles.sectionTitle}>Cash and bank balances</Text>
       {cashAccounts.length ? cashAccounts.map((account) => <AccountRow key={account.id} account={account} />)
         : <Text style={uiStyles.helper}>No bank or cash accounts yet. Create one above to start recording activity.</Text>}
+    </Panel>
+    <Panel>
+      <Text style={uiStyles.sectionTitle}>Income and expense accounts</Text>
+      <Text style={uiStyles.helper}>Add business categories for future transactions. Existing journal entries are not changed.</Text>
+      <Choice label="Account type" value={categoryKind} options={[
+        { value: 'income', title: 'Income' }, { value: 'expense', title: 'Expense' },
+      ]} onChange={setCategoryKind} />
+      <Field label="Account name" value={categoryName} onChangeText={setCategoryName} placeholder="e.g. Professional services" autoCapitalize="words" />
+      <FormError message={categoryError} />
+      <Button title="Add chart account" onPress={() => void saveCategory()} disabled={categorySaving} />
+      {snapshot.accounts.filter((account) => account.kind === 'income' || account.kind === 'expense').map((account) =>
+        <View key={account.id} style={uiStyles.rowItem}>
+          <View style={uiStyles.rowMain}>
+            <Text style={uiStyles.rowTitle}>{account.name}</Text>
+            <Text style={uiStyles.rowDetail}>{account.code} · {account.kind === 'income' ? 'Income' : 'Expense'}{account.isSystem ? ' · system' : ''}</Text>
+          </View>
+        </View>)}
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Manual bank reconciliation</Text>
