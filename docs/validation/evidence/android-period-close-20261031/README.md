@@ -4,8 +4,8 @@
 
 - Android emulator: `sdk_gphone64_arm64`, Android 16 / API 36, arm64-v8a.
 - Installed application: LLCBookKeepingPrivate debug development build.
-- APK SHA-256: `470e1cacfd1f5dbc27c2539fee9dd42698dbe50a0a325f7eb1d01978a8816522`.
-- The development client loaded this worktree's JavaScript through a local Metro server on port 8090. This is emulator evidence; it is not an offline launch or physical-device result.
+- Installed native debug-shell APK SHA-256: `470e1cacfd1f5dbc27c2539fee9dd42698dbe50a0a325f7eb1d01978a8816522`.
+- Metro served the JavaScript from source commit `1dc0060` through local port 8090. The installed debug shell alone is not an offline build. This is emulator evidence; it is not a physical-device result.
 - Synthetic workspace: Northstar Demo LLC. No real financial records were used.
 
 ## Workflow
