@@ -4,6 +4,8 @@
 
 **APK:** local ignored Release artifact `android/app/build/outputs/apk/release/app-release.apk`; SHA-256 `b70e589c64e11966344b679af8a5e5c0b1f98cd9d7d91e40c5d3b30e1feb830e`; version `0.1.0` / code `1`; v2 signature verified with the local Android Debug certificate.
 
+This hash identifies the APK used for the CSV acceptance at that checkpoint. The local APK path has since been rebuilt for reminders; its current artifact hash is recorded in [the latest Android beta evidence](../android-beta-release-20261031/README.md).
+
 **Device:** Android 16 / API 36 arm64 emulator `emulator-5554`. No physical Android device was attached. All records and CSV input were synthetic.
 
 ## Workflow and reconciliation
