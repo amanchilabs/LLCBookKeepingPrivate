@@ -3,9 +3,11 @@ import {
   balanceSheetCsv,
   cashBasisCsv,
   generalLedgerCsv,
+  isValidDateRange,
+  memberCapitalMovementCsv,
   trialBalanceCsv,
 } from './report-exports';
-import type { CashBasisReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
+import type { CashBasisReport, GeneralLedgerReport, JournalBalanceReport, MemberCapitalActivityRecord } from '../../../packages/storage-native/src/bookkeeping-store';
 
 const cashBasis: CashBasisReport = {
   fromDate: '2026-01-01', throughDate: '2026-10-31',
@@ -43,6 +45,14 @@ const ledger: GeneralLedgerReport = {
 };
 
 describe('CPA report CSV exports', () => {
+  it('accepts only valid ISO dates in an ordered inclusive report range', () => {
+    expect(isValidDateRange('2026-03-01', '2026-03-31')).toBe(true);
+    expect(isValidDateRange('2026-03-31', '2026-03-31')).toBe(true);
+    expect(isValidDateRange('', '2026-03-31')).toBe(false);
+    expect(isValidDateRange('2026-02-30', '2026-03-31')).toBe(false);
+    expect(isValidDateRange('2026-04-01', '2026-03-31')).toBe(false);
+  });
+
   it('exports a cash-basis P&L whose net equals income less expenses', () => {
     expect(cashBasisCsv(cashBasis).split('\r\n')).toEqual([
       '"From date","Through date","Basis","Line item","Amount"',
@@ -71,6 +81,39 @@ describe('CPA report CSV exports', () => {
       '"As of date","Account","Date","Journal entry","Description","Debit","Credit","Running balance"',
       '"2026-10-31","Checking, main","2026-10-02","entry-1","Owner said ""rent""","100.00","0.00","100.00"',
       '"2026-10-31","Checking, main","TOTALS","","","100.00","0.00","100.00"',
+    ]);
+  });
+
+  it('exports selected-period member capital and cash movements as signed book activity', () => {
+    const activities: MemberCapitalActivityRecord[] = [
+      {
+        id: 'capital-1', journalEntryId: 'journal-1', memberId: 'member-1', memberName: 'Jordan, Lee',
+        date: '2026-03-02', kind: 'cash-contribution', amountCents: 10_000n,
+        description: 'Initial cash', cashAccountName: 'Checking', propertyDescription: null, requiresCpaReview: false,
+      },
+      {
+        id: 'capital-2', journalEntryId: 'journal-2', memberId: 'member-1', memberName: 'Jordan, Lee',
+        date: '2026-03-04', kind: 'property-contribution', amountCents: 2_500n,
+        description: 'Used laptop', cashAccountName: null, propertyDescription: 'Laptop, 2024 model', requiresCpaReview: true,
+      },
+      {
+        id: 'capital-3', journalEntryId: 'journal-3', memberId: 'member-2', memberName: 'Casey',
+        date: '2026-03-05', kind: 'distribution', amountCents: 3_000n,
+        description: 'Member draw', cashAccountName: 'Checking', propertyDescription: null, requiresCpaReview: false,
+      },
+      {
+        id: 'capital-outside-range', journalEntryId: 'journal-4', memberId: 'member-2', memberName: 'Casey',
+        date: '2026-04-01', kind: 'cash-contribution', amountCents: 99_000n,
+        description: 'Outside range', cashAccountName: 'Checking', propertyDescription: null, requiresCpaReview: false,
+      },
+    ];
+
+    expect(memberCapitalMovementCsv('2026-03-01', '2026-03-31', activities).split('\r\n')).toEqual([
+      '"From date","Through date","Date","Journal entry","Member","Activity","Book capital movement","Cash movement","Cash account","Property description","Description","CPA review"',
+      '"2026-03-01","2026-03-31","2026-03-02","journal-1","Jordan, Lee","Cash contribution","100.00","100.00","Checking","","Initial cash","No"',
+      '"2026-03-01","2026-03-31","2026-03-04","journal-2","Jordan, Lee","Property contribution","25.00","0.00","","Laptop, 2024 model","Used laptop","Yes"',
+      '"2026-03-01","2026-03-31","2026-03-05","journal-3","Casey","Distribution","-30.00","-30.00","Checking","","Member draw","No"',
+      '"2026-03-01","2026-03-31","2026-03-31","","TOTAL","Selected-period totals","95.00","70.00","","","",""',
     ]);
   });
 });

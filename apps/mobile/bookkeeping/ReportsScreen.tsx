@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { getCashBasisReport, getGeneralLedgerReport, getJournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-service';
 import type { BookkeepingSnapshot, CashBasisReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
 import { summarizeLoanBalance } from '../../../packages/domain/src/loan-interest';
-import { balanceSheetCsv, cashBasisCsv, generalLedgerCsv, trialBalanceCsv } from './report-exports';
+import { balanceSheetCsv, cashBasisCsv, generalLedgerCsv, isValidDateRange, memberCapitalMovementCsv, trialBalanceCsv } from './report-exports';
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
@@ -22,7 +22,10 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
-  const capitalInPeriod = snapshot.capitalActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate);
+  const capitalDateRangeValid = isValidDateRange(fromDate, throughDate);
+  const capitalInPeriod = capitalDateRangeValid
+    ? snapshot.capitalActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate)
+    : [];
   const cashContributionsCents = capitalInPeriod.filter((activity) => activity.kind === 'cash-contribution')
     .reduce((sum, activity) => sum + activity.amountCents, 0n);
   const propertyContributionsCents = capitalInPeriod.filter((activity) => activity.kind === 'property-contribution')
@@ -56,7 +59,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     .reduce((sum, activity) => sum + activity.principalCents, 0n);
   const loanInterestPaidInPeriodCents = loanActivitiesInPeriod
     .reduce((sum, activity) => sum + activity.interestCents, 0n);
-  const loanSummaries = isValidDate(throughDate)
+  const loanSummaries = isValidDateRange(throughDate, throughDate)
     ? snapshot.loanAgreements.filter((loan) => loan.agreementDate <= throughDate).map((loan) => ({
       loan,
       summary: summarizeLoanBalance({
@@ -84,6 +87,10 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
 
   const refresh = async () => {
     if (!snapshot.business) return;
+    if (!isValidDateRange(fromDate, throughDate)) {
+      setError('Enter valid dates in YYYY-MM-DD format, with From date on or before Through date.');
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -147,7 +154,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <Field label="From date" value={fromDate} onChangeText={setFromDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
         <Field label="Through date" value={throughDate} onChangeText={setThroughDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
       </View>
-      <Button title={loading ? 'Calculating…' : 'Update report'} onPress={() => void refresh()} disabled={loading || ledgerLoading} />
+      <FormError message={capitalDateRangeValid ? null : 'Enter valid dates in YYYY-MM-DD format, with From date on or before Through date.'} />
+      <Button title={loading ? 'Calculating…' : 'Update report'} onPress={() => void refresh()} disabled={loading || ledgerLoading || !capitalDateRangeValid} />
       <FormError message={error} />
       {report ? <>
         <Text style={uiStyles.rowDetail}>{report.fromDate} through {report.throughDate}</Text>
@@ -212,7 +220,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       <Choice label="Account" value={selectedLedgerAccountId}
         options={snapshot.accounts.map((account) => ({ value: account.id, title: account.name }))}
         onChange={(accountId) => { setLedgerAccountId(accountId); setLedgerReport(null); setLedgerError(null); }} />
-      <Button title={ledgerLoading ? 'Calculating…' : 'Update ledger'} onPress={() => void refreshLedger()} disabled={ledgerLoading || loading || !selectedLedgerAccountId} />
+      <Button title={ledgerLoading ? 'Calculating…' : 'Update ledger'} onPress={() => void refreshLedger()} disabled={ledgerLoading || loading || !selectedLedgerAccountId || !isValidDateRange(throughDate, throughDate)} />
       <FormError message={ledgerError} />
       {ledgerReport ? <>
         <Text style={uiStyles.rowDetail}>{ledgerReport.accountName} · activity through {ledgerReport.asOfDate}</Text>
@@ -233,10 +241,16 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     <Panel>
       <Text style={uiStyles.sectionTitle}>Member capital movement · selected dates</Text>
       <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate} · book activity, not a tax basis report.</Text>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Cash contributions</Text><Money cents={cashContributionsCents} /></View>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Property contributions</Text><Money cents={propertyContributionsCents} /></View>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Member distributions</Text><Money cents={-distributionsCents} /></View>
-      <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net capital activity</Text><Money cents={cashContributionsCents + propertyContributionsCents - distributionsCents} /></View>
+      {capitalDateRangeValid ? <>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Cash contributions</Text><Money cents={cashContributionsCents} /></View>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Property contributions</Text><Money cents={propertyContributionsCents} /></View>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Member distributions</Text><Money cents={-distributionsCents} /></View>
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net capital activity</Text><Money cents={cashContributionsCents + propertyContributionsCents - distributionsCents} /></View>
+        <Button title={exporting ? 'Preparing CSV…' : 'Export capital movement CSV'} secondary
+          onPress={() => void exportCsv('member-capital-movement', memberCapitalMovementCsv(fromDate, throughDate, capitalInPeriod))}
+          disabled={exporting || capitalInPeriod.length === 0} />
+        {capitalInPeriod.length === 0 ? <Text style={uiStyles.helper}>No member capital activity falls within these selected dates.</Text> : null}
+      </> : <Text style={uiStyles.helper}>Enter a valid date range to calculate or export member capital activity.</Text>}
       {snapshot.memberCapitalSummaries.map((summary) => <View key={summary.memberId} style={uiStyles.reportRow}>
         <Text style={uiStyles.rowTitle}>{summary.memberName} · all-time book capital activity</Text>
         <Money cents={summary.bookCapitalActivityCents} />
@@ -262,7 +276,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Funded advances during period · not income</Text><Money cents={loanAdvancesInPeriodCents} /></View>
       <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Principal repaid during period · not expense</Text><Money cents={loanPrincipalRepaidInPeriodCents} /></View>
       <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Interest actually paid during period</Text><Money cents={loanInterestPaidInPeriodCents} /></View>
-      {isValidDate(throughDate) ? <>
+      {isValidDateRange(throughDate, throughDate) ? <>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Member loan principal outstanding</Text><Money cents={memberLoanPrincipalCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Third-party loan principal outstanding</Text><Money cents={thirdPartyLoanPrincipalCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Accrued interest remaining · estimate</Text><Money cents={loanInterestOutstandingCents} /></View>
@@ -288,12 +302,6 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
 const styles = StyleSheet.create({
   trialBalanceAmount: { width: 88, alignItems: 'flex-end' },
 });
-
-function isValidDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const parsed = new Date(`${value}T00:00:00.000Z`);
-  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
-}
 
 function moneyLabel(cents: bigint): string {
   const whole = cents / 100n;

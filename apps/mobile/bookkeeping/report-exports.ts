@@ -1,4 +1,9 @@
-import type { CashBasisReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
+import type {
+  CashBasisReport,
+  GeneralLedgerReport,
+  JournalBalanceReport,
+  MemberCapitalActivityRecord,
+} from '../../../packages/storage-native/src/bookkeeping-store';
 
 const csv = (rows: string[][]): string => rows.map((row) => row.map(escapeCsv).join(',')).join('\r\n');
 const escapeCsv = (value: string): string => `"${value.replaceAll('"', '""')}"`;
@@ -6,6 +11,16 @@ const usd = (cents: bigint): string => {
   const absolute = cents < 0n ? -cents : cents;
   return `${cents < 0n ? '-' : ''}${absolute / 100n}.${(absolute % 100n).toString().padStart(2, '0')}`;
 };
+
+export function isValidDateRange(fromDate: string, throughDate: string): boolean {
+  return isValidDate(fromDate) && isValidDate(throughDate) && fromDate <= throughDate;
+}
+
+function isValidDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
 
 export function cashBasisCsv(report: CashBasisReport): string {
   return csv([
@@ -50,4 +65,39 @@ export function generalLedgerCsv(report: GeneralLedgerReport): string {
     usd(report.totalDebitsCents), usd(report.totalCreditsCents), usd(report.endingBalanceCents),
   ]);
   return csv([['As of date', 'Account', 'Date', 'Journal entry', 'Description', 'Debit', 'Credit', 'Running balance'], ...rows]);
+}
+
+export function memberCapitalMovementCsv(
+  fromDate: string,
+  throughDate: string,
+  activities: readonly MemberCapitalActivityRecord[],
+): string {
+  const selected = activities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate);
+  let capitalMovementCents = 0n;
+  let cashMovementCents = 0n;
+  const rows = selected.map((activity) => {
+    const isDistribution = activity.kind === 'distribution';
+    const capitalCents = isDistribution ? -activity.amountCents : activity.amountCents;
+    const cashCents = activity.kind === 'cash-contribution'
+      ? activity.amountCents
+      : isDistribution ? -activity.amountCents : 0n;
+    capitalMovementCents += capitalCents;
+    cashMovementCents += cashCents;
+    const activityName = activity.kind === 'cash-contribution'
+      ? 'Cash contribution'
+      : activity.kind === 'property-contribution' ? 'Property contribution' : 'Distribution';
+    return [
+      fromDate, throughDate, activity.date, activity.journalEntryId, activity.memberName, activityName,
+      usd(capitalCents), usd(cashCents), activity.cashAccountName ?? '', activity.propertyDescription ?? '',
+      activity.description, activity.requiresCpaReview ? 'Yes' : 'No',
+    ];
+  });
+  rows.push([
+    fromDate, throughDate, throughDate, '', 'TOTAL', 'Selected-period totals',
+    usd(capitalMovementCents), usd(cashMovementCents), '', '', '', '',
+  ]);
+  return csv([[
+    'From date', 'Through date', 'Date', 'Journal entry', 'Member', 'Activity',
+    'Book capital movement', 'Cash movement', 'Cash account', 'Property description', 'Description', 'CPA review',
+  ], ...rows]);
 }
