@@ -6,6 +6,7 @@ import { Pressable, Text, View } from 'react-native';
 import { parseUsd } from '../../../packages/domain/src/money';
 import { RecurringTransactionsSection } from './RecurringTransactionsSection';
 import { transactionRoleLabel } from './transaction-role';
+import { transactionWorkspaceSections, type TransactionWorkspaceSection } from './transaction-workspace';
 import { TransactionCsvImportPanel } from './TransactionCsvImportPanel';
 import {
   correctCashTransaction,
@@ -60,6 +61,7 @@ export function TransactionsScreen({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  const [section, setSection] = useState<TransactionWorkspaceSection>('history');
 
   const categories = draft?.kind === 'transfer'
     ? cashAccounts
@@ -79,6 +81,7 @@ export function TransactionsScreen({
   }, [snapshot.transactions, kindFilter, accountFilter, categoryFilter, search]);
 
   const beginNew = (kind: EntryKind = 'income') => {
+    setSection('history');
     setError(null);
     setNotice(null);
     setCorrecting(null);
@@ -106,6 +109,7 @@ export function TransactionsScreen({
       || transaction.originalTransactionId || transaction.isGuaranteedPayment) return;
     setError(null);
     setNotice(null);
+    setSection('history');
     setCorrecting(transaction);
     setDraft({
       kind: transaction.kind,
@@ -232,6 +236,7 @@ export function TransactionsScreen({
 
   return <Page>
     <Heading title="Transactions" subtitle="Income, expenses, and account transfers post balanced entries to the encrypted journal." />
+    <Choice label="Transaction workspace" value={section} options={transactionWorkspaceSections} onChange={setSection} />
     <View style={uiStyles.row}>
       <Button title="＋ Income" onPress={() => beginNew('income')} />
       <Button title="＋ Expense" secondary onPress={() => beginNew('expense')} />
@@ -306,9 +311,14 @@ export function TransactionsScreen({
       </View>
     </Panel> : null}
 
-    {snapshot.business ? <RecurringTransactionsSection snapshot={snapshot} onSaved={onSaved} /> : null}
-    {snapshot.business ? <TransactionCsvImportPanel snapshot={snapshot} onImported={onSaved} /> : null}
+    <View style={section === 'recurring' ? undefined : hiddenSection}>
+      {snapshot.business ? <RecurringTransactionsSection snapshot={snapshot} onSaved={onSaved} /> : null}
+    </View>
+    <View style={section === 'import' ? undefined : hiddenSection}>
+      {snapshot.business ? <TransactionCsvImportPanel snapshot={snapshot} onImported={onSaved} /> : null}
+    </View>
 
+    <View style={section === 'history' ? undefined : hiddenSection}>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Search and filter</Text>
       <Field label="Search description, category, account, or date" value={search} onChangeText={setSearch} placeholder="Search transactions" />
@@ -361,6 +371,7 @@ export function TransactionsScreen({
         onCorrect={() => beginCorrection(transaction)}
       />) : <Text style={uiStyles.helper}>No transactions match these filters.</Text>}
     </Panel>
+    </View>
   </Page>;
 }
 
@@ -396,3 +407,4 @@ function formatPositiveCents(cents: bigint): string {
 }
 
 const detailPanel = { borderColor: '#B7D6C4', backgroundColor: '#FCFEFC' };
+const hiddenSection = { display: 'none' as const };
