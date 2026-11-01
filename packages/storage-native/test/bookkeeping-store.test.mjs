@@ -15,6 +15,7 @@ import {
   recordGuaranteedPaymentInDatabase,
   recordLoanAdvanceInDatabase,
   recordLoanRepaymentInDatabase,
+  recordTransferInDatabase,
   reverseGuaranteedPaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
@@ -474,7 +475,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(6);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(7);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(10_000n);
     expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal')).toMatchObject({
       cashAccountName: 'Checking', reason: 'Cash returned', amountCents: -5_000n,
@@ -601,13 +602,164 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(6);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(7);
     expect(snapshot.loanAgreements[0].dayCount).toBe('ACT/ACT ISDA');
     expect(snapshot.loanActivities.map((activity) => [activity.kind, activity.amountCents])).toEqual([
       ['advance', 25_000n], ['repayment', -10_022n],
     ]);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(139_978n);
     expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
+  it('migrates v6 journal tables to support transfers without changing persisted balances', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 50_000n,
+      openingTransactionId: 'opening-migration', openingJournalEntryId: 'opening-migration-journal',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'expense-migration', journalEntryId: 'expense-migration-journal', businessId: 'business-1',
+      date: '2024-01-03', kind: 'expense', accountId: 'bank-1', categoryAccountId: 'expense-rent',
+      amountCents: 5_000n, description: 'Synthetic rent before migration',
+    });
+    database.database.exec(`
+      PRAGMA foreign_keys = OFF;
+      BEGIN IMMEDIATE;
+      CREATE TABLE journal_entries_v6 (
+        id TEXT PRIMARY KEY NOT NULL,
+        business_id TEXT NOT NULL REFERENCES businesses(id),
+        entry_date TEXT NOT NULL,
+        entry_type TEXT NOT NULL CHECK (entry_type IN (
+          'opening-balance', 'income', 'expense', 'reversal', 'cash-contribution',
+          'property-contribution', 'member-distribution', 'loan-advance', 'loan-repayment'
+        )),
+        description TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      INSERT INTO journal_entries_v6 SELECT * FROM journal_entries;
+      CREATE TABLE transactions_v6 (
+        id TEXT PRIMARY KEY NOT NULL,
+        business_id TEXT NOT NULL REFERENCES businesses(id),
+        journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
+        entry_date TEXT NOT NULL,
+        kind TEXT NOT NULL CHECK (kind IN ('opening-balance', 'income', 'expense', 'reversal', 'loan-advance', 'loan-repayment')),
+        account_id TEXT NOT NULL REFERENCES accounts(id),
+        category_account_id TEXT NOT NULL REFERENCES accounts(id),
+        amount_minor TEXT NOT NULL,
+        description TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      INSERT INTO transactions_v6 SELECT * FROM transactions;
+      DROP TABLE transactions;
+      DROP TABLE journal_entries;
+      ALTER TABLE journal_entries_v6 RENAME TO journal_entries;
+      ALTER TABLE transactions_v6 RENAME TO transactions;
+      CREATE INDEX journal_entries_business_date ON journal_entries (business_id, entry_date);
+      CREATE INDEX transactions_business_date ON transactions (business_id, entry_date);
+      UPDATE bookkeeping_schema SET version = 6 WHERE singleton = 1;
+      COMMIT;
+      PRAGMA foreign_keys = ON;
+    `);
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(7);
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(45_000n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 5_000n, netIncomeCents: -5_000n });
+    expect(snapshot.transactions.map((transaction) => transaction.id).sort()).toEqual(['expense-migration', 'opening-migration']);
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    await createCashAccountInDatabase(database, { id: 'cash-after-migration', businessId: 'business-1', name: 'Savings', kind: 'cash' });
+    await recordTransferInDatabase(database, {
+      transactionId: 'transfer-after-migration', journalEntryId: 'transfer-after-migration-journal', businessId: 'business-1',
+      date: '2024-01-04', sourceAccountId: 'bank-1', destinationAccountId: 'cash-after-migration',
+      amountCents: 10_000n, description: 'Transfer after schema migration',
+    });
+    const afterTransfer = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(afterTransfer.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(35_000n);
+    expect(afterTransfer.accounts.find((account) => account.id === 'cash-after-migration').balanceCents).toBe(10_000n);
+    expect(afterTransfer.cashBasis).toEqual(snapshot.cashBasis);
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
+  it('posts a transfer between bank and cash accounts with zero P&L and two reconciled CSV legs', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 50_000n,
+      openingTransactionId: 'opening-transfer-transaction', openingJournalEntryId: 'opening-transfer-journal',
+    });
+    await createCashAccountInDatabase(database, {
+      id: 'cash-1', businessId: 'business-1', name: 'Savings', kind: 'cash',
+    });
+
+    await recordTransferInDatabase(database, {
+      transactionId: 'transfer-transaction-1', journalEntryId: 'transfer-journal-1',
+      businessId: 'business-1', date: '2024-01-05', sourceAccountId: 'bank-1', destinationAccountId: 'cash-1',
+      amountCents: 15_000n, description: 'Move funds to savings',
+    });
+    await expect(recordTransferInDatabase(database, {
+      transactionId: 'cash-overdraft-transfer', journalEntryId: 'cash-overdraft-journal', businessId: 'business-1',
+      date: '2024-01-04', sourceAccountId: 'cash-1', destinationAccountId: 'bank-1',
+      amountCents: 16_000n, description: 'Must roll back an overdrawn cash transfer',
+    })).rejects.toThrow('cash account balance would become negative');
+    await expect(recordTransferInDatabase(database, {
+      transactionId: 'same-account-transfer', journalEntryId: 'same-account-journal', businessId: 'business-1',
+      date: '2024-01-05', sourceAccountId: 'bank-1', destinationAccountId: 'bank-1',
+      amountCents: 1n, description: 'Must use two different accounts',
+    })).rejects.toThrow('different');
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM transactions').get().count).toBe(2);
+
+    await correctCashTransactionInDatabase(database, {
+      correctionId: 'transfer-correction-1', originalTransactionId: 'transfer-transaction-1',
+      reversalTransactionId: 'transfer-reversal-transaction-1', reversalJournalEntryId: 'transfer-reversal-journal-1',
+      replacement: {
+        id: 'transfer-replacement-transaction-1', journalEntryId: 'transfer-replacement-journal-1',
+        businessId: 'business-1', date: '2024-01-06', kind: 'transfer', accountId: 'bank-1', categoryAccountId: 'cash-1',
+        amountCents: 17_500n, description: 'Corrected move to savings',
+      },
+    });
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(32_500n);
+    expect(snapshot.accounts.find((account) => account.id === 'cash-1').balanceCents).toBe(17_500n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n });
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'transfer-transaction-1')).toMatchObject({
+      kind: 'transfer', transferRole: 'transfer', accountId: 'bank-1', categoryAccountId: 'cash-1',
+      amountCents: -15_000n, category: 'Savings',
+    });
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'transfer-reversal-transaction-1')).toMatchObject({
+      kind: 'reversal', transferRole: 'transfer-reversal', correctionRole: 'reversal', amountCents: 15_000n,
+    });
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'transfer-replacement-transaction-1')).toMatchObject({
+      kind: 'transfer', transferRole: 'transfer', correctionRole: 'replacement', amountCents: -17_500n,
+    });
+    expect(database.database.prepare(`
+      SELECT account_id AS account, debit_minor AS debit, credit_minor AS credit
+      FROM journal_lines WHERE journal_entry_id = 'transfer-journal-1' ORDER BY line_number
+    `).all()).toEqual([
+      { account: 'cash-1', debit: '15000', credit: '0' },
+      { account: 'bank-1', debit: '0', credit: '15000' },
+    ]);
+    const csvRows = transactionsCsv(snapshot).split('\r\n').filter((row) => row.includes('Transfer')).sort();
+    expect(csvRows).toEqual([
+      '"2024-01-05","Transfer out","-150.00","Checking","Move funds to savings"',
+      '"2024-01-05","Transfer in","150.00","Savings","Move funds to savings"',
+      '"2024-01-05","Transfer in","150.00","Checking","Reversal of: Move funds to savings"',
+      '"2024-01-05","Transfer out","-150.00","Savings","Reversal of: Move funds to savings"',
+      '"2024-01-06","Transfer out","-175.00","Checking","Corrected move to savings"',
+      '"2024-01-06","Transfer in","175.00","Savings","Corrected move to savings"',
+    ].sort());
+    expect(database.database.prepare(`
+      SELECT je.id FROM journal_entries je JOIN journal_lines jl ON jl.journal_entry_id = je.id
+      GROUP BY je.id HAVING SUM(CAST(jl.debit_minor AS INTEGER)) != SUM(CAST(jl.credit_minor AS INTEGER))
+    `).all()).toEqual([]);
     database.close();
   });
 

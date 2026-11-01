@@ -7,6 +7,7 @@ import { parseUsd } from '../../../packages/domain/src/money';
 import {
   correctCashTransaction,
   recordCashTransaction,
+  recordTransfer,
 } from '../../../packages/storage-native/src/bookkeeping-service';
 import {
   transactionsCsv,
@@ -16,7 +17,7 @@ import {
 } from '../../../packages/storage-native/src/bookkeeping-store';
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
-type EntryKind = 'income' | 'expense';
+type EntryKind = 'income' | 'expense' | 'transfer';
 type KindFilter = 'all' | EntryKind | 'loan-advance' | 'loan-repayment';
 interface TransactionDraft {
   kind: EntryKind;
@@ -39,12 +40,15 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const categories = snapshot.accounts.filter((account) => account.kind === (draft?.kind ?? 'income'));
+  const categories = draft?.kind === 'transfer'
+    ? cashAccounts
+    : snapshot.accounts.filter((account) => account.kind === (draft?.kind ?? 'income'));
   const filteredTransactions = useMemo(() => {
     const query = search.trim().toLowerCase();
     return snapshot.transactions.filter((transaction) => {
       const matchesKind = kindFilter === 'all' || transaction.kind === kindFilter;
-      const matchesAccount = accountFilter === 'all' || transaction.accountId === accountFilter;
+      const matchesAccount = accountFilter === 'all' || transaction.accountId === accountFilter
+        || (transaction.transferRole !== null && transaction.categoryAccountId === accountFilter);
       const matchesCategory = categoryFilter === 'all' || transaction.categoryAccountId === categoryFilter;
       const matchesSearch = !query || [transaction.description, transaction.category, transaction.accountName, transaction.date]
         .some((value) => value.toLowerCase().includes(query));
@@ -60,14 +64,16 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
       kind,
       date: todayLocalDate(),
       accountId: cashAccounts[0]?.id ?? '',
-      categoryAccountId: snapshot.accounts.find((account) => account.kind === kind)?.id ?? '',
+      categoryAccountId: kind === 'transfer'
+        ? cashAccounts.find((account) => account.id !== cashAccounts[0]?.id)?.id ?? ''
+        : snapshot.accounts.find((account) => account.kind === kind)?.id ?? '',
       amount: '',
       description: '',
     });
   };
 
   const beginCorrection = (transaction: TransactionRecord) => {
-    if ((transaction.kind !== 'income' && transaction.kind !== 'expense')
+    if ((transaction.kind !== 'income' && transaction.kind !== 'expense' && transaction.kind !== 'transfer')
       || transaction.originalTransactionId || transaction.isGuaranteedPayment) return;
     setError(null);
     setNotice(null);
@@ -90,7 +96,11 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
     try {
       const amountCents = parseUsd(draft.amount);
       if (amountCents <= 0n) throw new Error('Enter an amount greater than zero.');
-      if (!draft.accountId || !draft.categoryAccountId) throw new Error('Create a bank or cash account and choose a category first.');
+      if (!draft.accountId || !draft.categoryAccountId) {
+        throw new Error(draft.kind === 'transfer'
+          ? 'Create two bank or cash accounts and choose both accounts.'
+          : 'Create a bank or cash account and choose a category first.');
+      }
       if (correcting) {
         await correctCashTransaction({
           correctionId: Crypto.randomUUID(),
@@ -110,6 +120,18 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
           },
         });
         setNotice('The original remains in history. A reversal and replacement were posted.');
+      } else if (draft.kind === 'transfer') {
+        await recordTransfer({
+          transactionId: Crypto.randomUUID(),
+          journalEntryId: Crypto.randomUUID(),
+          businessId: snapshot.business!.id,
+          date: draft.date,
+          sourceAccountId: draft.accountId,
+          destinationAccountId: draft.categoryAccountId,
+          amountCents,
+          description: draft.description,
+        });
+        setNotice('Transfer posted between the selected cash or bank accounts; it does not change income or expenses.');
       } else {
         await recordCashTransaction({
           id: Crypto.randomUUID(),
@@ -153,24 +175,36 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
   const filterAccountOptions = [{ value: 'all', title: 'All accounts' }, ...accountOptions];
   const filterCategoryOptions = [{ value: 'all', title: 'All categories' }, ...snapshot.accounts
     .filter((account) => account.kind === 'income' || account.kind === 'expense')
+    .concat(cashAccounts)
     .map((account) => ({ value: account.id, title: account.name }))];
 
   return <Page>
-    <Heading title="Transactions" subtitle="Income and operating expenses post balanced cash-basis journal entries in the encrypted database." />
+    <Heading title="Transactions" subtitle="Income, expenses, and account transfers post balanced entries to the encrypted journal." />
     <View style={uiStyles.row}>
       <Button title="＋ Income" onPress={() => beginNew('income')} />
       <Button title="＋ Expense" secondary onPress={() => beginNew('expense')} />
+      <Button title="＋ Transfer" secondary onPress={() => beginNew('transfer')} />
     </View>
     {draft ? <Panel>
       <Text style={uiStyles.sectionTitle}>{correcting ? 'Reverse and replace transaction' : `Record ${draft.kind}`}</Text>
       {correcting ? <Text style={uiStyles.helper}>A reversal will be posted on the original date; the replacement uses the date below. The original entry remains visible for audit history.</Text> : null}
-      <Choice label="Transaction type" value={draft.kind} options={[{ value: 'income', title: 'Income' }, { value: 'expense', title: 'Operating expense' }]} onChange={(kind) => setDraft((current) => current ? {
+      <Choice label="Transaction type" value={draft.kind} options={[
+        { value: 'income', title: 'Income' }, { value: 'expense', title: 'Operating expense' }, { value: 'transfer', title: 'Account transfer' },
+      ]} onChange={(kind) => setDraft((current) => current ? {
         ...current,
         kind,
-        categoryAccountId: snapshot.accounts.find((account) => account.kind === kind)?.id ?? '',
+        categoryAccountId: kind === 'transfer'
+          ? cashAccounts.find((account) => account.id !== current.accountId)?.id ?? ''
+          : snapshot.accounts.find((account) => account.kind === kind)?.id ?? '',
       } : current)} />
-      <Choice label="Cash or bank account" value={draft.accountId} options={accountOptions} onChange={(accountId) => setDraft((current) => current ? { ...current, accountId } : current)} />
-      <Choice label="Category" value={draft.categoryAccountId} options={categoryOptions} onChange={(categoryAccountId) => setDraft((current) => current ? { ...current, categoryAccountId } : current)} />
+      <Choice label={draft.kind === 'transfer' ? 'From account' : 'Cash or bank account'} value={draft.accountId} options={accountOptions} onChange={(accountId) => setDraft((current) => current ? {
+        ...current,
+        accountId,
+        categoryAccountId: current.kind === 'transfer' && current.categoryAccountId === accountId
+          ? cashAccounts.find((account) => account.id !== accountId)?.id ?? ''
+          : current.categoryAccountId,
+      } : current)} />
+      <Choice label={draft.kind === 'transfer' ? 'To account' : 'Category'} value={draft.categoryAccountId} options={categoryOptions} onChange={(categoryAccountId) => setDraft((current) => current ? { ...current, categoryAccountId } : current)} />
       <View style={uiStyles.row}>
         <Field label="Transaction date" value={draft.date} onChangeText={(date) => setDraft((current) => current ? { ...current, date } : current)} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
         <Field label="Amount in USD" value={draft.amount} onChangeText={(amount) => setDraft((current) => current ? { ...current, amount } : current)} placeholder="0.00" keyboardType="decimal-pad" />
@@ -190,6 +224,7 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
         { value: 'all', title: 'All activity' },
         { value: 'income', title: 'Income' },
         { value: 'expense', title: 'Expenses' },
+        { value: 'transfer', title: 'Transfers' },
         { value: 'loan-advance', title: 'Loan advances' },
         { value: 'loan-repayment', title: 'Loan repayments' },
       ]} onChange={setKindFilter} />
@@ -198,7 +233,7 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
       <Button title="Export all transactions as CSV" secondary onPress={() => void exportCsv()} disabled={snapshot.transactions.length === 0} />
       <FormError message={error && !draft ? error : null} />
       {notice ? <Text accessibilityLiveRegion="polite" style={uiStyles.helper}>{notice}</Text> : null}
-      <Text style={uiStyles.helper}>{filteredTransactions.length} of {snapshot.transactions.length} persisted records shown. CSV totals use signed cash movements, including opening balances and reversals.</Text>
+      <Text style={uiStyles.helper}>{filteredTransactions.length} of {snapshot.transactions.length} persisted records shown. CSV expands transfers into signed source and destination movements.</Text>
       {filteredTransactions.length ? filteredTransactions.map((transaction) => <TransactionRow
         key={transaction.id}
         transaction={transaction}
@@ -209,9 +244,11 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
 }
 
 function TransactionRow({ transaction, onCorrect }: { transaction: TransactionRecord; onCorrect: () => void }) {
-  const canCorrect = (transaction.kind === 'income' || transaction.kind === 'expense')
+  const canCorrect = (transaction.kind === 'income' || transaction.kind === 'expense' || transaction.kind === 'transfer')
     && !transaction.originalTransactionId && !transaction.isGuaranteedPayment;
-  const roleLabel = transaction.correctionRole === 'reversal'
+  const roleLabel = transaction.transferRole === 'transfer-reversal'
+    ? 'Transfer reversal'
+    : transaction.correctionRole === 'reversal'
     ? 'Reversal'
     : transaction.correctionRole === 'replacement'
       ? 'Replacement'
@@ -223,8 +260,9 @@ function TransactionRow({ transaction, onCorrect }: { transaction: TransactionRe
           ? 'Opening balance'
           : transaction.kind === 'loan-advance'
             ? 'Loan advance'
-            : transaction.kind === 'loan-repayment'
+          : transaction.kind === 'loan-repayment'
               ? 'Loan repayment'
+          : transaction.kind === 'transfer' ? 'Transfer'
           : transaction.kind === 'income' ? 'Income' : 'Operating expense';
   return <View style={uiStyles.rowItem}>
     <View style={uiStyles.rowMain}>

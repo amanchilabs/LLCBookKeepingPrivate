@@ -14,11 +14,11 @@ import {
   type BusinessSetupInput,
   type MemberInterestInput,
 } from '../../domain/src/bookkeeping';
-import { assertBalancedEntry, loanAdvanceLines, loanRepaymentLines, type JournalLine } from '../../domain/src/journal';
+import { accountTransferLines, assertBalancedEntry, loanAdvanceLines, loanRepaymentLines, type JournalLine } from '../../domain/src/journal';
 import { calculateUnpaidLoanInterestCents, type DatedAmount, type LoanDayCount } from '../../domain/src/loan-interest';
 import { formatUsd } from '../../domain/src/money';
 
-const SCHEMA_VERSION = 6;
+const SCHEMA_VERSION = 7;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -58,12 +58,27 @@ export interface CashTransactionInput {
   description: string;
 }
 
+export interface TransferInput {
+  transactionId: string;
+  journalEntryId: string;
+  businessId: string;
+  date: string;
+  sourceAccountId: string;
+  destinationAccountId: string;
+  amountCents: bigint;
+  description: string;
+}
+
+export interface TransferTransactionInput extends Omit<CashTransactionInput, 'kind'> {
+  kind: 'transfer';
+}
+
 export interface CorrectCashTransactionInput {
   correctionId: string;
   originalTransactionId: string;
   reversalTransactionId: string;
   reversalJournalEntryId: string;
-  replacement: CashTransactionInput;
+  replacement: CashTransactionInput | TransferTransactionInput;
 }
 
 export interface ReplaceMembersInput {
@@ -246,7 +261,7 @@ export interface GuaranteedPaymentCashEvent {
   reason: string | null;
 }
 
-type JournalEntryKind = 'opening-balance' | 'income' | 'expense' | 'reversal'
+type JournalEntryKind = 'opening-balance' | 'income' | 'expense' | 'reversal' | 'transfer'
   | 'cash-contribution' | 'property-contribution' | 'member-distribution' | 'loan-advance' | 'loan-repayment';
 
 export interface BusinessRecord {
@@ -278,7 +293,7 @@ export interface TransactionRecord {
   id: string;
   journalEntryId: string;
   date: string;
-  kind: 'opening-balance' | 'income' | 'expense' | 'reversal' | 'loan-advance' | 'loan-repayment';
+  kind: 'opening-balance' | 'income' | 'expense' | 'reversal' | 'transfer' | 'loan-advance' | 'loan-repayment';
   accountId: string;
   accountName: string;
   categoryAccountId: string;
@@ -288,6 +303,7 @@ export interface TransactionRecord {
   originalTransactionId: string | null;
   correctionRole: 'reversal' | 'replacement' | null;
   isGuaranteedPayment: boolean;
+  transferRole: 'transfer' | 'transfer-reversal' | null;
 }
 
 export interface CashBasisTotals {
@@ -442,7 +458,7 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
       id TEXT PRIMARY KEY NOT NULL,
       business_id TEXT NOT NULL REFERENCES businesses(id),
       entry_date TEXT NOT NULL,
-      entry_type TEXT NOT NULL CHECK (entry_type IN ('opening-balance', 'income', 'expense', 'reversal', 'loan-advance', 'loan-repayment')),
+      entry_type TEXT NOT NULL CHECK (entry_type IN ('opening-balance', 'income', 'expense', 'reversal', 'transfer', 'loan-advance', 'loan-repayment')),
       description TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
@@ -466,7 +482,7 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
       business_id TEXT NOT NULL REFERENCES businesses(id),
       journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
       entry_date TEXT NOT NULL,
-      kind TEXT NOT NULL CHECK (kind IN ('opening-balance', 'income', 'expense', 'reversal', 'loan-advance', 'loan-repayment')),
+      kind TEXT NOT NULL CHECK (kind IN ('opening-balance', 'income', 'expense', 'reversal', 'transfer', 'loan-advance', 'loan-repayment')),
       account_id TEXT NOT NULL REFERENCES accounts(id),
       category_account_id TEXT NOT NULL REFERENCES accounts(id),
       amount_minor TEXT NOT NULL,
@@ -508,6 +524,69 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
     version = 5;
   }
   if (version < 6) await migrateBookkeepingV5ToV6(database);
+  if (version < 7) await migrateBookkeepingV6ToV7(database);
+}
+
+async function migrateBookkeepingV6ToV7(database: Database): Promise<void> {
+  await database.execAsync('PRAGMA foreign_keys = OFF;');
+  try {
+    await database.execAsync('BEGIN IMMEDIATE;');
+    try {
+      await database.execAsync(`
+        CREATE TABLE journal_entries_v7 (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          entry_date TEXT NOT NULL,
+          entry_type TEXT NOT NULL CHECK (entry_type IN (
+            'opening-balance', 'income', 'expense', 'reversal', 'transfer',
+            'cash-contribution', 'property-contribution', 'member-distribution',
+            'loan-advance', 'loan-repayment'
+          )),
+          description TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+        INSERT INTO journal_entries_v7 (id, business_id, entry_date, entry_type, description, created_at)
+        SELECT id, business_id, entry_date, entry_type, description, created_at FROM journal_entries;
+
+        CREATE TABLE transactions_v7 (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
+          entry_date TEXT NOT NULL,
+          kind TEXT NOT NULL CHECK (kind IN (
+            'opening-balance', 'income', 'expense', 'reversal', 'transfer', 'loan-advance', 'loan-repayment'
+          )),
+          account_id TEXT NOT NULL REFERENCES accounts(id),
+          category_account_id TEXT NOT NULL REFERENCES accounts(id),
+          amount_minor TEXT NOT NULL,
+          description TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+        INSERT INTO transactions_v7
+          (id, business_id, journal_entry_id, entry_date, kind, account_id, category_account_id, amount_minor, description, created_at)
+        SELECT id, business_id, journal_entry_id, entry_date, kind, account_id, category_account_id, amount_minor, description, created_at
+        FROM transactions;
+
+        DROP TABLE transactions;
+        DROP TABLE journal_entries;
+        ALTER TABLE journal_entries_v7 RENAME TO journal_entries;
+        ALTER TABLE transactions_v7 RENAME TO transactions;
+        CREATE INDEX journal_entries_business_date ON journal_entries (business_id, entry_date);
+        CREATE INDEX transactions_business_date ON transactions (business_id, entry_date);
+        UPDATE bookkeeping_schema SET version = 7 WHERE singleton = 1;
+      `);
+      const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+        'PRAGMA foreign_key_check',
+      );
+      if (violations.length > 0) throw new Error('The transfer schema migration found invalid record references.');
+      await database.execAsync('COMMIT;');
+    } catch (error) {
+      await database.execAsync('ROLLBACK;').catch(() => undefined);
+      throw error;
+    }
+  } finally {
+    await database.execAsync('PRAGMA foreign_keys = ON;');
+  }
 }
 
 async function migrateBookkeepingV1ToV2(database: Database): Promise<void> {
@@ -1390,6 +1469,30 @@ export async function recordCashTransactionInDatabase(database: Database, input:
 }
 
 /** @internal SQL-level entry point used by repository tests. */
+export async function recordTransferInDatabase(database: Database, input: TransferInput): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  const business = await requireBusiness(database, input.businessId);
+  if (input.date < business.bookkeepingStartDate) throw new Error('Transfer date cannot precede the bookkeeping start date.');
+  requireDate(input.date, 'transfer date');
+  if (!input.description.trim()) throw new Error('Enter a transfer description.');
+  if (input.amountCents <= 0n) throw new Error('Transfer amounts must be positive.');
+  if (input.sourceAccountId === input.destinationAccountId) throw new Error('Transfer accounts must be different.');
+  await requireCashAccount(database, input.businessId, input.sourceAccountId);
+  await requireCashAccount(database, input.businessId, input.destinationAccountId);
+  const lines = accountTransferLines(input.sourceAccountId, input.destinationAccountId, input.amountCents);
+  await inSqlTransaction(database, async () => {
+    await insertJournalEntry(database, input.businessId, input.journalEntryId, input.date, 'transfer', input.description, lines);
+    await insertTransaction(database, {
+      id: input.transactionId, journalEntryId: input.journalEntryId, businessId: input.businessId,
+      date: input.date, kind: 'transfer', accountId: input.sourceAccountId,
+      categoryAccountId: input.destinationAccountId, amountCents: -input.amountCents, description: input.description,
+    });
+    await ensureCashAccountNeverNegative(database, input.businessId, input.sourceAccountId);
+    await ensureCashAccountNeverNegative(database, input.businessId, input.destinationAccountId);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
 export async function recordMemberCapitalActivityInDatabase(
   database: Database,
   input: MemberCapitalActivityInput,
@@ -1672,8 +1775,14 @@ export async function correctCashTransactionInDatabase(database: Database, input
   if (replacement.date < business.bookkeepingStartDate) throw new Error('Replacement date cannot precede the bookkeeping start date.');
   if (replacement.amountCents <= 0n) throw new Error('Replacement amount must be positive.');
   if (!replacement.description.trim()) throw new Error('Enter a replacement description.');
-  await requireCashAccount(database, replacement.businessId, replacement.accountId);
-  await requireCategoryAccount(database, replacement.businessId, replacement.categoryAccountId, replacement.kind);
+  if (replacement.kind === 'transfer') {
+    if (replacement.accountId === replacement.categoryAccountId) throw new Error('Transfer accounts must be different.');
+    await requireCashAccount(database, replacement.businessId, replacement.accountId);
+    await requireCashAccount(database, replacement.businessId, replacement.categoryAccountId);
+  } else {
+    await requireCashAccount(database, replacement.businessId, replacement.accountId);
+    await requireCategoryAccount(database, replacement.businessId, replacement.categoryAccountId, replacement.kind);
+  }
 
   await inSqlTransaction(database, async () => {
     const original = await database.getFirstAsync<{
@@ -1696,8 +1805,8 @@ export async function correctCashTransactionInDatabase(database: Database, input
       'SELECT id FROM guaranteed_payment_payments WHERE transaction_id = ?', input.originalTransactionId,
     );
     if (guaranteedPayment) throw new Error('Use the guaranteed payment reversal workflow to correct this payment.');
-    if (!original || (original.kind !== 'income' && original.kind !== 'expense')) {
-      throw new Error('Choose an original income or expense transaction to correct.');
+    if (!original || (original.kind !== 'income' && original.kind !== 'expense' && original.kind !== 'transfer')) {
+      throw new Error('Choose an original income or expense transaction, or a transfer, to correct.');
     }
     const existingCorrection = await database.getFirstAsync<{ id: string }>(
       'SELECT id FROM transaction_corrections WHERE original_transaction_id = ?', original.id,
@@ -1729,9 +1838,11 @@ export async function correctCashTransactionInDatabase(database: Database, input
       description: reversalDescription,
     });
 
-    const replacementLines = replacement.kind === 'income'
-      ? cashIncomeLines(replacement.accountId, replacement.categoryAccountId, replacement.amountCents)
-      : cashExpenseLines(replacement.accountId, replacement.categoryAccountId, replacement.amountCents);
+    const replacementLines = replacement.kind === 'transfer'
+      ? accountTransferLines(replacement.accountId, replacement.categoryAccountId, replacement.amountCents)
+      : replacement.kind === 'income'
+        ? cashIncomeLines(replacement.accountId, replacement.categoryAccountId, replacement.amountCents)
+        : cashExpenseLines(replacement.accountId, replacement.categoryAccountId, replacement.amountCents);
     await insertJournalEntry(
       database, replacement.businessId, replacement.journalEntryId, replacement.date,
       replacement.kind, replacement.description, replacementLines,
@@ -1754,8 +1865,11 @@ export async function correctCashTransactionInDatabase(database: Database, input
       `INSERT INTO transaction_correction_roles (transaction_id, correction_id, role) VALUES (?, ?, 'replacement')`,
       replacement.id, input.correctionId,
     );
-    await ensureCashAccountNeverNegative(database, original.businessId, original.accountId);
-    await ensureCashAccountNeverNegative(database, replacement.businessId, replacement.accountId);
+    for (const accountId of new Set([
+      original.accountId, original.categoryAccountId, replacement.accountId, replacement.categoryAccountId,
+    ])) {
+      await ensureCashAccountNeverNegative(database, original.businessId, accountId);
+    }
   });
 }
 
@@ -1893,13 +2007,17 @@ async function readTransactions(database: Database, businessId: string): Promise
                      guaranteedPaymentOriginal.transaction_id,
                      CASE WHEN paymentReversal.id IS NOT NULL THEN guaranteedPayment.transaction_id END) AS originalTransactionId,
             CASE WHEN guaranteedPaymentReversal.id IS NOT NULL THEN 'reversal' ELSE role.role END AS correctionRole,
-            CASE WHEN guaranteedPayment.id IS NOT NULL OR guaranteedPaymentOriginal.id IS NOT NULL THEN 1 ELSE 0 END AS isGuaranteedPayment
+            CASE WHEN guaranteedPayment.id IS NOT NULL OR guaranteedPaymentOriginal.id IS NOT NULL THEN 1 ELSE 0 END AS isGuaranteedPayment,
+            CASE WHEN t.kind = 'transfer' THEN 'transfer'
+                 WHEN t.kind = 'reversal' AND correctionOriginal.kind = 'transfer' THEN 'transfer-reversal'
+                 ELSE NULL END AS transferRole
      FROM transactions t
      JOIN accounts a ON a.id = t.account_id
      JOIN accounts c ON c.id = t.category_account_id
      LEFT JOIN transaction_correction_roles role ON role.transaction_id = t.id
      LEFT JOIN transaction_corrections original ON original.original_transaction_id = t.id
      LEFT JOIN transaction_corrections correction ON correction.id = role.correction_id
+     LEFT JOIN transactions correctionOriginal ON correctionOriginal.id = correction.original_transaction_id
      LEFT JOIN guaranteed_payment_payments guaranteedPayment ON guaranteedPayment.transaction_id = t.id
      LEFT JOIN guaranteed_payment_reversals paymentReversal ON paymentReversal.payment_id = guaranteedPayment.id
      LEFT JOIN guaranteed_payment_reversals guaranteedPaymentReversal ON guaranteedPaymentReversal.reversal_transaction_id = t.id
@@ -2222,16 +2340,36 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
 
 export function transactionsCsv(snapshot: BookkeepingSnapshot): string {
   const escape = (value: string) => `"${value.replaceAll('"', '""')}"`;
-  const rows = [
-    ['Date', 'Category', 'Amount', 'Account', 'Description'],
-    ...snapshot.transactions.map((transaction) => [
+  const rows = snapshot.transactions.flatMap((transaction) => {
+    const signedAmount = (amount: bigint) => amount < 0n ? `-${formatUsd(-amount)}` : formatUsd(amount);
+    if (transaction.transferRole) {
+      const sourceIsOutflow = transaction.amountCents < 0n;
+      return [
+        [
+          transaction.date,
+          sourceIsOutflow ? 'Transfer out' : 'Transfer in',
+          signedAmount(transaction.amountCents),
+          transaction.accountName,
+          transaction.description,
+        ],
+        [
+          transaction.date,
+          sourceIsOutflow ? 'Transfer in' : 'Transfer out',
+          signedAmount(-transaction.amountCents),
+          transaction.category,
+          transaction.description,
+        ],
+      ];
+    }
+    return [[
       transaction.date,
       transaction.kind === 'reversal' ? `${transaction.category} · reversal` : transaction.category,
-      transaction.amountCents < 0n ? `-${formatUsd(-transaction.amountCents)}` : formatUsd(transaction.amountCents),
+      signedAmount(transaction.amountCents),
       transaction.accountName,
       transaction.description,
-    ]),
-  ];
+    ]];
+  });
+  rows.unshift(['Date', 'Category', 'Amount', 'Account', 'Description']);
   return rows.map((row) => row.map(escape).join(',')).join('\r\n');
 }
 

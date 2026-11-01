@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   assertBalancedEntry,
+  accountTransferLines,
   loanAdvanceLines,
   loanRepaymentLines,
   type JournalLine,
@@ -13,6 +14,15 @@ describe('journal posting invariant', () => {
       { account: 'cash', debitCents: 0n, creditCents: 1250n },
     ];
     expect(() => assertBalancedEntry(lines)).not.toThrow();
+  });
+
+  it('posts a balanced transfer between two cash accounts without income or expense lines', () => {
+    expect(accountTransferLines('checking', 'savings', 12_500n)).toEqual([
+      { account: 'savings', debitCents: 12_500n, creditCents: 0n },
+      { account: 'checking', debitCents: 0n, creditCents: 12_500n },
+    ]);
+    expect(() => accountTransferLines('checking', 'checking', 12_500n)).toThrow('different');
+    expect(() => accountTransferLines('checking', 'savings', 0n)).toThrow('positive');
   });
 
   it('rejects unbalanced or negative lines', () => {

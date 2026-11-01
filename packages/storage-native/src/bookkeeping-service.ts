@@ -13,6 +13,7 @@ import {
   recordLoanRepaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
+  recordTransferInDatabase,
   reverseGuaranteedPaymentInDatabase,
   replaceMembersInDatabase,
   type BookkeepingSnapshot,
@@ -20,6 +21,7 @@ import {
   type CashBasisReport,
   type CorrectCashTransactionInput,
   type CashTransactionInput,
+  type TransferInput,
   type CreateGuaranteedPaymentObligationInput,
   type CreateLoanAgreementInput,
   type RecordLoanAdvanceInput,
@@ -65,6 +67,10 @@ export async function createCashAccount(input: CashAccountInput): Promise<void> 
 
 export async function recordCashTransaction(input: CashTransactionInput): Promise<void> {
   await useActiveBooks((database) => recordCashTransactionInDatabase(database, input));
+}
+
+export async function recordTransfer(input: TransferInput): Promise<void> {
+  await useActiveBooks((database) => recordTransferInDatabase(database, input));
 }
 
 export async function recordMemberCapitalActivity(input: MemberCapitalActivityInput): Promise<void> {
