@@ -31,6 +31,7 @@ function emptySnapshot(): BookkeepingSnapshot {
     loanActivities: [],
     accountReconciliations: [],
     accountReconciliationEvents: [],
+    recurringTransactions: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }

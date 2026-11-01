@@ -16,9 +16,10 @@ import {
 } from '../../domain/src/bookkeeping';
 import { accountTransferLines, assertBalancedEntry, loanAdvanceLines, loanRepaymentLines, type JournalLine } from '../../domain/src/journal';
 import { calculateUnpaidLoanInterestCents, type DatedAmount, type LoanDayCount } from '../../domain/src/loan-interest';
+import { nextRecurringDate, type RecurringCadence } from '../../domain/src/recurring';
 import { formatUsd } from '../../domain/src/money';
 
-const SCHEMA_VERSION = 9;
+const SCHEMA_VERSION = 10;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -51,6 +52,43 @@ export interface CategoryAccountInput {
   businessId: string;
   name: string;
   kind: 'income' | 'expense';
+}
+
+export interface CreateRecurringTransactionInput {
+  id: string;
+  businessId: string;
+  kind: 'income' | 'expense';
+  accountId: string;
+  categoryAccountId: string;
+  amountCents: bigint;
+  description: string;
+  cadence: RecurringCadence;
+  nextDate: string;
+}
+
+export interface PostRecurringTransactionInput {
+  templateId: string;
+  businessId: string;
+  occurrenceId: string;
+  transactionId: string;
+  journalEntryId: string;
+  postingDate: string;
+}
+
+export interface RecurringTransactionRecord {
+  id: string;
+  kind: 'income' | 'expense';
+  accountId: string;
+  accountName: string;
+  categoryAccountId: string;
+  category: string;
+  amountCents: bigint;
+  description: string;
+  cadence: RecurringCadence;
+  nextDate: string;
+  isActive: boolean;
+  lastPostedDate: string | null;
+  lastTransactionId: string | null;
 }
 
 export interface CashTransactionInput {
@@ -362,6 +400,7 @@ export interface TransactionRecord {
   isGuaranteedPayment: boolean;
   transferRole: 'transfer' | 'transfer-reversal' | null;
   splitLines?: TransactionSplitRecord[];
+  recurringTemplateId?: string | null;
 }
 
 export interface TransactionSplitRecord {
@@ -390,6 +429,7 @@ export interface BookkeepingSnapshot {
   loanActivities: LoanActivityRecord[];
   accountReconciliations: AccountReconciliationRecord[];
   accountReconciliationEvents: AccountReconciliationEvent[];
+  recurringTransactions: RecurringTransactionRecord[];
   cashBasis: CashBasisTotals;
 }
 
@@ -647,6 +687,51 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
   if (version < 7) await migrateBookkeepingV6ToV7(database);
   if (version < 8) await migrateBookkeepingV7ToV8(database);
   if (version < 9) await migrateBookkeepingV8ToV9(database);
+  if (version < 10) await migrateBookkeepingV9ToV10(database);
+}
+
+async function migrateBookkeepingV9ToV10(database: Database): Promise<void> {
+  await database.execAsync('BEGIN IMMEDIATE;');
+  try {
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS recurring_transaction_templates (
+        id TEXT PRIMARY KEY NOT NULL,
+        business_id TEXT NOT NULL REFERENCES businesses(id),
+        kind TEXT NOT NULL CHECK (kind IN ('income', 'expense')),
+        account_id TEXT NOT NULL REFERENCES accounts(id),
+        category_account_id TEXT NOT NULL REFERENCES accounts(id),
+        amount_minor TEXT NOT NULL CHECK (CAST(amount_minor AS INTEGER) > 0),
+        description TEXT NOT NULL,
+        cadence TEXT NOT NULL CHECK (cadence IN ('weekly', 'monthly', 'quarterly', 'yearly')),
+        next_date TEXT NOT NULL,
+        anchor_day INTEGER NOT NULL CHECK (anchor_day BETWEEN 1 AND 31),
+        is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+        created_at TEXT NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS recurring_transaction_templates_due
+        ON recurring_transaction_templates (business_id, is_active, next_date);
+      CREATE TABLE IF NOT EXISTS recurring_transaction_occurrences (
+        id TEXT PRIMARY KEY NOT NULL,
+        template_id TEXT NOT NULL REFERENCES recurring_transaction_templates(id),
+        transaction_id TEXT NOT NULL UNIQUE REFERENCES transactions(id),
+        scheduled_date TEXT NOT NULL,
+        posted_date TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE (template_id, scheduled_date)
+      );
+      CREATE INDEX IF NOT EXISTS recurring_transaction_occurrences_history
+        ON recurring_transaction_occurrences (template_id, posted_date, created_at);
+      UPDATE bookkeeping_schema SET version = 10 WHERE singleton = 1;
+    `);
+    const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+      'PRAGMA foreign_key_check',
+    );
+    if (violations.length > 0) throw new Error('The recurring transaction migration found invalid record references.');
+    await database.execAsync('COMMIT;');
+  } catch (error) {
+    await database.execAsync('ROLLBACK;').catch(() => undefined);
+    throw error;
+  }
 }
 
 async function migrateBookkeepingV8ToV9(database: Database): Promise<void> {
@@ -1507,6 +1592,90 @@ export async function createCategoryAccountInDatabase(database: Database, input:
 }
 
 /** @internal SQL-level entry point used by repository tests. */
+export async function createRecurringTransactionInDatabase(
+  database: Database,
+  input: CreateRecurringTransactionInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  const business = await requireBusiness(database, input.businessId);
+  if (!input.id.trim()) throw new Error('Recurring transaction identifier is required.');
+  if (input.amountCents <= 0n) throw new Error('Recurring transaction amounts must be positive.');
+  if (!input.description.trim()) throw new Error('Enter a recurring transaction description.');
+  requireDate(input.nextDate, 'next recurring date');
+  if (input.nextDate < business.bookkeepingStartDate) {
+    throw new Error('The next recurring date cannot precede the bookkeeping start date.');
+  }
+  const anchorDay = Number(input.nextDate.slice(8, 10));
+  nextRecurringDate(input.nextDate, input.cadence, anchorDay);
+  await requireCashAccount(database, input.businessId, input.accountId);
+  await requireCategoryAccount(database, input.businessId, input.categoryAccountId, input.kind);
+  await database.runAsync(
+    `INSERT INTO recurring_transaction_templates
+     (id, business_id, kind, account_id, category_account_id, amount_minor, description,
+      cadence, next_date, anchor_day, is_active, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+    input.id, input.businessId, input.kind, input.accountId, input.categoryAccountId,
+    input.amountCents.toString(), input.description.trim(), input.cadence, input.nextDate, anchorDay,
+    new Date().toISOString(),
+  );
+}
+
+/** @internal SQL-level entry point used by repository tests. Existing occurrences remain linked to their original journal entries. */
+export async function updateRecurringTransactionInDatabase(
+  database: Database,
+  input: CreateRecurringTransactionInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  const business = await requireBusiness(database, input.businessId);
+  if (!input.id.trim()) throw new Error('Recurring transaction identifier is required.');
+  if (input.amountCents <= 0n) throw new Error('Recurring transaction amounts must be positive.');
+  if (!input.description.trim()) throw new Error('Enter a recurring transaction description.');
+  requireDate(input.nextDate, 'next recurring date');
+  if (input.nextDate < business.bookkeepingStartDate) {
+    throw new Error('The next recurring date cannot precede the bookkeeping start date.');
+  }
+  await requireCashAccount(database, input.businessId, input.accountId);
+  await requireCategoryAccount(database, input.businessId, input.categoryAccountId, input.kind);
+  const existing = await database.getFirstAsync<{ id: string; nextDate: string; anchorDay: number }>(
+    'SELECT id, next_date AS nextDate, anchor_day AS anchorDay FROM recurring_transaction_templates WHERE id = ? AND business_id = ?',
+    input.id, input.businessId,
+  );
+  if (!existing) throw new Error('Choose a recurring schedule in this LLC.');
+  const anchorDay = input.nextDate === existing.nextDate ? existing.anchorDay : Number(input.nextDate.slice(8, 10));
+  nextRecurringDate(input.nextDate, input.cadence, anchorDay);
+  const latestOccurrence = await database.getFirstAsync<{ scheduledDate: string | null }>(
+    'SELECT MAX(scheduled_date) AS scheduledDate FROM recurring_transaction_occurrences WHERE template_id = ?', input.id,
+  );
+  if (latestOccurrence?.scheduledDate && input.nextDate <= latestOccurrence.scheduledDate) {
+    throw new Error('The next scheduled date must follow its latest recorded occurrence.');
+  }
+  await database.runAsync(
+    `UPDATE recurring_transaction_templates
+     SET kind = ?, account_id = ?, category_account_id = ?, amount_minor = ?, description = ?,
+         cadence = ?, next_date = ?, anchor_day = ?
+     WHERE id = ? AND business_id = ?`,
+    input.kind, input.accountId, input.categoryAccountId, input.amountCents.toString(), input.description.trim(),
+    input.cadence, input.nextDate, anchorDay, input.id, input.businessId,
+  );
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function setRecurringTransactionActiveInDatabase(
+  database: Database,
+  businessId: string,
+  templateId: string,
+  isActive: boolean,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  await requireBusiness(database, businessId);
+  const result = await database.runAsync(
+    'UPDATE recurring_transaction_templates SET is_active = ? WHERE id = ? AND business_id = ?',
+    isActive ? 1 : 0, templateId, businessId,
+  );
+  if (result.changes !== 1) throw new Error('Choose a recurring transaction schedule in this LLC.');
+}
+
+/** @internal SQL-level entry point used by repository tests. */
 export async function createLoanAgreementInDatabase(database: Database, input: CreateLoanAgreementInput): Promise<void> {
   await ensureBookkeepingSchema(database);
   if (!input.id.trim()) throw new Error('Loan agreement identifier is required.');
@@ -1782,6 +1951,67 @@ export async function recordSplitCashTransactionInDatabase(
     });
     await insertTransactionSplits(database, input.id, input.splits);
     await ensureCashAccountNeverNegative(database, input.businessId, input.accountId);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. A user action posts exactly one due occurrence. */
+export async function postRecurringTransactionInDatabase(
+  database: Database,
+  input: PostRecurringTransactionInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  const business = await requireBusiness(database, input.businessId);
+  requireDate(input.postingDate, 'recurring transaction posting date');
+  if (input.postingDate < business.bookkeepingStartDate) {
+    throw new Error('Recurring transaction date cannot precede the bookkeeping start date.');
+  }
+  if (![input.occurrenceId, input.transactionId, input.journalEntryId].every((value) => value.trim())) {
+    throw new Error('Recurring transaction posting identifiers are required.');
+  }
+
+  await inSqlTransaction(database, async () => {
+    const template = await database.getFirstAsync<{
+      businessId: string; kind: 'income' | 'expense'; accountId: string; categoryAccountId: string;
+      amountMinor: string; description: string; cadence: RecurringCadence; nextDate: string; anchorDay: number; isActive: number;
+    }>(
+      `SELECT business_id AS businessId, kind, account_id AS accountId,
+              category_account_id AS categoryAccountId, amount_minor AS amountMinor,
+              description, cadence, next_date AS nextDate, anchor_day AS anchorDay, is_active AS isActive
+       FROM recurring_transaction_templates WHERE id = ? AND business_id = ?`,
+      input.templateId, input.businessId,
+    );
+    if (!template) throw new Error('Choose a recurring schedule in this LLC.');
+    if (template.isActive !== 1) throw new Error('Resume this recurring schedule before posting an occurrence.');
+    if (input.postingDate < template.nextDate) throw new Error(`The next recurring transaction is not due yet (due ${template.nextDate}).`);
+    const amountCents = BigInt(template.amountMinor);
+    await requireCashAccount(database, template.businessId, template.accountId);
+    await requireCategoryAccount(database, template.businessId, template.categoryAccountId, template.kind);
+    const lines = template.kind === 'income'
+      ? cashIncomeLines(template.accountId, template.categoryAccountId, amountCents)
+      : cashExpenseLines(template.accountId, template.categoryAccountId, amountCents);
+    await insertJournalEntry(
+      database, template.businessId, input.journalEntryId, input.postingDate, template.kind, template.description, lines,
+    );
+    const signedAmount = template.kind === 'income' ? amountCents : -amountCents;
+    await insertTransaction(database, {
+      id: input.transactionId, journalEntryId: input.journalEntryId, businessId: template.businessId,
+      date: input.postingDate, kind: template.kind, accountId: template.accountId,
+      categoryAccountId: template.categoryAccountId, amountCents: signedAmount, description: template.description,
+    });
+    await database.runAsync(
+      `INSERT INTO recurring_transaction_occurrences
+       (id, template_id, transaction_id, scheduled_date, posted_date, created_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      input.occurrenceId, input.templateId, input.transactionId, template.nextDate, input.postingDate, new Date().toISOString(),
+    );
+    const advancedDate = nextRecurringDate(template.nextDate, template.cadence, template.anchorDay);
+    const updated = await database.runAsync(
+      `UPDATE recurring_transaction_templates SET next_date = ?
+       WHERE id = ? AND business_id = ? AND next_date = ? AND is_active = 1`,
+      advancedDate, input.templateId, input.businessId, template.nextDate,
+    );
+    if (updated.changes !== 1) throw new Error('The recurring schedule changed before this occurrence could be posted.');
+    await ensureCashAccountNeverNegative(database, template.businessId, template.accountId);
   });
 }
 
@@ -2553,6 +2783,33 @@ async function readAccounts(database: Database, businessId: string): Promise<Acc
   }));
 }
 
+async function readRecurringTransactions(database: Database, businessId: string): Promise<RecurringTransactionRecord[]> {
+  const rows = await database.getAllAsync<{
+    id: string; kind: 'income' | 'expense'; accountId: string; accountName: string;
+    categoryAccountId: string; category: string; amountCents: string; description: string;
+    cadence: RecurringCadence; nextDate: string; isActive: number;
+    lastPostedDate: string | null; lastTransactionId: string | null;
+  }>(
+    `SELECT template.id, template.kind, template.account_id AS accountId, cash.name AS accountName,
+            template.category_account_id AS categoryAccountId, category.name AS category,
+            template.amount_minor AS amountCents, template.description, template.cadence,
+            template.next_date AS nextDate, template.is_active AS isActive,
+            (SELECT occurrence.posted_date FROM recurring_transaction_occurrences occurrence
+             WHERE occurrence.template_id = template.id ORDER BY occurrence.scheduled_date DESC LIMIT 1) AS lastPostedDate,
+            (SELECT occurrence.transaction_id FROM recurring_transaction_occurrences occurrence
+             WHERE occurrence.template_id = template.id ORDER BY occurrence.scheduled_date DESC LIMIT 1) AS lastTransactionId
+     FROM recurring_transaction_templates template
+     JOIN accounts cash ON cash.id = template.account_id
+     JOIN accounts category ON category.id = template.category_account_id
+     WHERE template.business_id = ? ORDER BY template.next_date, template.created_at, template.id`, businessId,
+  );
+  return rows.map((row) => ({
+    ...row,
+    amountCents: BigInt(row.amountCents),
+    isActive: row.isActive === 1,
+  }));
+}
+
 async function readTransactions(database: Database, businessId: string): Promise<TransactionRecord[]> {
   const rows = await database.getAllAsync<DbTransaction>(
     `SELECT t.id, t.journal_entry_id AS journalEntryId, t.entry_date AS date, t.kind,
@@ -2567,7 +2824,8 @@ async function readTransactions(database: Database, businessId: string): Promise
             CASE WHEN guaranteedPayment.id IS NOT NULL OR guaranteedPaymentOriginal.id IS NOT NULL THEN 1 ELSE 0 END AS isGuaranteedPayment,
             CASE WHEN t.kind = 'transfer' THEN 'transfer'
                  WHEN t.kind = 'reversal' AND correctionOriginal.kind = 'transfer' THEN 'transfer-reversal'
-                 ELSE NULL END AS transferRole
+                 ELSE NULL END AS transferRole,
+            recurring.template_id AS recurringTemplateId
      FROM transactions t
      JOIN accounts a ON a.id = t.account_id
      JOIN accounts c ON c.id = t.category_account_id
@@ -2579,6 +2837,7 @@ async function readTransactions(database: Database, businessId: string): Promise
      LEFT JOIN guaranteed_payment_reversals paymentReversal ON paymentReversal.payment_id = guaranteedPayment.id
      LEFT JOIN guaranteed_payment_reversals guaranteedPaymentReversal ON guaranteedPaymentReversal.reversal_transaction_id = t.id
      LEFT JOIN guaranteed_payment_payments guaranteedPaymentOriginal ON guaranteedPaymentOriginal.id = guaranteedPaymentReversal.payment_id
+     LEFT JOIN recurring_transaction_occurrences recurring ON recurring.transaction_id = t.id
      WHERE t.business_id = ? ORDER BY t.entry_date DESC, t.created_at DESC, t.id`, businessId,
   );
   const splitRows = await database.getAllAsync<{
@@ -2604,6 +2863,7 @@ async function readTransactions(database: Database, businessId: string): Promise
     ...row,
     amountCents: BigInt(row.amountCents),
     isGuaranteedPayment: row.isGuaranteedPayment === 1,
+    recurringTemplateId: row.recurringTemplateId,
     splitLines: splitsByTransaction.get(row.id) ?? (row.transferRole ? [] : [{
       categoryAccountId: row.categoryAccountId,
       category: row.category,
@@ -3069,7 +3329,7 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
   if (!business) return {
     business: null, members: [], memberHistory: [], accounts: [], transactions: [], capitalActivities: [],
     memberCapitalSummaries: [], guaranteedPaymentInstallments: [], guaranteedPaymentCashEvents: [],
-    loanAgreements: [], loanActivities: [], accountReconciliations: [], accountReconciliationEvents: [],
+    loanAgreements: [], loanActivities: [], accountReconciliations: [], accountReconciliationEvents: [], recurringTransactions: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
   const { members, history } = await readMembers(database, business.id);
@@ -3083,11 +3343,12 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
   const loanActivities = await readLoanActivities(database, business.id);
   const accountReconciliations = await readAccountReconciliations(database, business.id);
   const accountReconciliationEvents = await readAccountReconciliationEvents(database, business.id);
+  const recurringTransactions = await readRecurringTransactions(database, business.id);
   const cashBasis = await cashBasisForPeriod(database, business.id);
   return {
     business, members, memberHistory: history, accounts, transactions, capitalActivities, memberCapitalSummaries,
     guaranteedPaymentInstallments, guaranteedPaymentCashEvents, loanAgreements, loanActivities,
-    accountReconciliations, accountReconciliationEvents, cashBasis,
+    accountReconciliations, accountReconciliationEvents, recurringTransactions, cashBasis,
   };
 }
 

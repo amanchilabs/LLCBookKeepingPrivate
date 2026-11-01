@@ -7,6 +7,9 @@ import {
   cashBasisReportFromDatabase,
   createBusinessInDatabase,
   createCashAccountInDatabase,
+  createRecurringTransactionInDatabase,
+  updateRecurringTransactionInDatabase,
+  setRecurringTransactionActiveInDatabase,
   createLoanAgreementInDatabase,
   correctCashTransactionInDatabase,
   ensureBookkeepingSchema,
@@ -23,6 +26,7 @@ import {
   reverseGuaranteedPaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
+  postRecurringTransactionInDatabase,
   recordSplitCashTransactionInDatabase,
   reopenAccountReconciliationInDatabase,
   replaceMembersInDatabase,
@@ -156,6 +160,155 @@ afterEach(() => {
 });
 
 describe('bookkeeping repository SQL contract', () => {
+  it('upgrades version 9 databases with recurring schedule and occurrence history tables', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    database.database.exec(`
+      DROP TABLE recurring_transaction_occurrences;
+      DROP TABLE recurring_transaction_templates;
+      UPDATE bookkeeping_schema SET version = 9 WHERE singleton = 1;
+    `);
+    await ensureBookkeepingSchema(database);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
+    expect(database.database.prepare(`
+      SELECT name FROM sqlite_master WHERE type = 'table' AND name IN (
+        'recurring_transaction_templates', 'recurring_transaction_occurrences'
+      ) ORDER BY name
+    `).all().map((row) => row.name)).toEqual([
+      'recurring_transaction_occurrences', 'recurring_transaction_templates',
+    ]);
+    database.close();
+  });
+
+  it('requires manual recurring posts, advances anchored due dates, and reconciles each occurrence', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-recurring', openingJournalEntryId: 'opening-recurring-journal',
+    });
+    await createRecurringTransactionInDatabase(database, {
+      id: 'monthly-rent', businessId: 'business-1', kind: 'expense',
+      accountId: 'bank-1', categoryAccountId: 'expense-rent', amountCents: 10_000n,
+      description: 'Synthetic monthly rent', cadence: 'monthly', nextDate: '2024-01-31',
+    });
+
+    await expect(postRecurringTransactionInDatabase(database, {
+      templateId: 'monthly-rent', businessId: 'business-1', occurrenceId: 'rent-early-occurrence',
+      transactionId: 'rent-early', journalEntryId: 'rent-early-journal', postingDate: '2024-01-30',
+    })).rejects.toThrow('not due yet');
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM transactions').get().count).toBe(1);
+
+    await postRecurringTransactionInDatabase(database, {
+      templateId: 'monthly-rent', businessId: 'business-1', occurrenceId: 'rent-occurrence-1',
+      transactionId: 'rent-transaction-1', journalEntryId: 'rent-journal-1', postingDate: '2024-02-01',
+    });
+    let snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.recurringTransactions[0]).toMatchObject({
+      id: 'monthly-rent', nextDate: '2024-02-29', lastPostedDate: '2024-02-01',
+      lastTransactionId: 'rent-transaction-1', isActive: true,
+    });
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'rent-transaction-1')).toMatchObject({
+      date: '2024-02-01', amountCents: -10_000n, recurringTemplateId: 'monthly-rent',
+    });
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(90_000n);
+    expect(snapshot.cashBasis.expenseCents).toBe(10_000n);
+    await expect(postRecurringTransactionInDatabase(database, {
+      templateId: 'monthly-rent', businessId: 'business-1', occurrenceId: 'rent-early-occurrence-2',
+      transactionId: 'rent-early-2', journalEntryId: 'rent-early-journal-2', postingDate: '2024-02-28',
+    })).rejects.toThrow('not due yet');
+
+    await postRecurringTransactionInDatabase(database, {
+      templateId: 'monthly-rent', businessId: 'business-1', occurrenceId: 'rent-occurrence-2',
+      transactionId: 'rent-transaction-2', journalEntryId: 'rent-journal-2', postingDate: '2024-03-01',
+    });
+    snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.recurringTransactions[0]).toMatchObject({ nextDate: '2024-03-31', lastPostedDate: '2024-03-01' });
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(80_000n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 20_000n, netIncomeCents: -20_000n });
+    expect(snapshot.transactions.filter((transaction) => transaction.recurringTemplateId === 'monthly-rent')).toHaveLength(2);
+    expect(database.database.prepare(`
+      SELECT je.id FROM journal_entries je JOIN journal_lines jl ON jl.journal_entry_id = je.id
+      GROUP BY je.id HAVING SUM(CAST(jl.debit_minor AS INTEGER)) != SUM(CAST(jl.credit_minor AS INTEGER))
+    `).all()).toEqual([]);
+    database.close();
+  });
+
+  it('rolls back an overdrawn recurring occurrence without advancing the schedule', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'cash',
+      openingDate: '2024-01-01', openingBalanceCents: 500n,
+      openingTransactionId: 'opening-recurring-overdraw', openingJournalEntryId: 'opening-recurring-overdraw-journal',
+    });
+    await createRecurringTransactionInDatabase(database, {
+      id: 'overdrawn-template', businessId: 'business-1', kind: 'expense',
+      accountId: 'bank-1', categoryAccountId: 'expense-rent', amountCents: 750n,
+      description: 'Synthetic unaffordable rent', cadence: 'monthly', nextDate: '2024-01-01',
+    });
+    await expect(postRecurringTransactionInDatabase(database, {
+      templateId: 'overdrawn-template', businessId: 'business-1', occurrenceId: 'overdrawn-occurrence',
+      transactionId: 'overdrawn-transaction', journalEntryId: 'overdrawn-journal', postingDate: '2024-01-01',
+    })).rejects.toThrow('balance would become negative');
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.recurringTransactions[0].nextDate).toBe('2024-01-01');
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(500n);
+    expect(snapshot.transactions).toHaveLength(1);
+    expect(database.database.prepare(`SELECT COUNT(*) AS count FROM recurring_transaction_occurrences`).get().count).toBe(0);
+    database.close();
+  });
+
+  it('edits future schedule details without changing posted history or the month-end anchor', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-recurring-edit', openingJournalEntryId: 'opening-recurring-edit-journal',
+    });
+    const original = {
+      id: 'editable-rent', businessId: 'business-1', kind: 'expense',
+      accountId: 'bank-1', categoryAccountId: 'expense-rent', amountCents: 10_000n,
+      description: 'Original rent amount', cadence: 'monthly', nextDate: '2024-01-31',
+    };
+    await createRecurringTransactionInDatabase(database, original);
+    await postRecurringTransactionInDatabase(database, {
+      templateId: original.id, businessId: original.businessId, occurrenceId: 'editable-rent-occurrence-1',
+      transactionId: 'editable-rent-transaction-1', journalEntryId: 'editable-rent-journal-1', postingDate: '2024-01-31',
+    });
+
+    await updateRecurringTransactionInDatabase(database, {
+      ...original, amountCents: 12_000n, description: 'Updated rent amount', nextDate: '2024-02-29',
+    });
+    await setRecurringTransactionActiveInDatabase(database, original.businessId, original.id, false);
+    await expect(postRecurringTransactionInDatabase(database, {
+      templateId: original.id, businessId: original.businessId, occurrenceId: 'paused-rent-occurrence',
+      transactionId: 'paused-rent-transaction', journalEntryId: 'paused-rent-journal', postingDate: '2024-03-01',
+    })).rejects.toThrow('Resume this recurring schedule');
+    await setRecurringTransactionActiveInDatabase(database, original.businessId, original.id, true);
+    await postRecurringTransactionInDatabase(database, {
+      templateId: original.id, businessId: original.businessId, occurrenceId: 'editable-rent-occurrence-2',
+      transactionId: 'editable-rent-transaction-2', journalEntryId: 'editable-rent-journal-2', postingDate: '2024-03-01',
+    });
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, original.businessId);
+    expect(snapshot.recurringTransactions[0]).toMatchObject({
+      amountCents: 12_000n, description: 'Updated rent amount', nextDate: '2024-03-31', isActive: true,
+    });
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'editable-rent-transaction-1').description)
+      .toBe('Original rent amount');
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'editable-rent-transaction-2').description)
+      .toBe('Updated rent amount');
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(78_000n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 22_000n, netIncomeCents: -22_000n });
+    database.close();
+  });
+
   it('upgrades v8 transaction records to split-capable storage without changing legacy balances', async () => {
     const database = new TestDatabase(databasePath());
     await ensureBookkeepingSchema(database);
@@ -174,7 +327,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(9);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(124_000n);
     expect(snapshot.transactions.find((transaction) => transaction.id === 'expense-v8').splitLines).toEqual([
       { categoryAccountId: 'expense-rent', category: 'Rent', amountCents: 1_000n },
@@ -655,7 +808,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(9);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(10_000n);
     expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal')).toMatchObject({
       cashAccountName: 'Checking', reason: 'Cash returned', amountCents: -5_000n,
@@ -782,7 +935,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(9);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
     expect(snapshot.loanAgreements[0].dayCount).toBe('ACT/ACT ISDA');
     expect(snapshot.loanActivities.map((activity) => [activity.kind, activity.amountCents])).toEqual([
       ['advance', 25_000n], ['repayment', -10_022n],
@@ -847,7 +1000,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
 
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(9);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(45_000n);
     expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 5_000n, netIncomeCents: -5_000n });
     expect(snapshot.transactions.map((transaction) => transaction.id).sort()).toEqual(['expense-migration', 'opening-migration']);

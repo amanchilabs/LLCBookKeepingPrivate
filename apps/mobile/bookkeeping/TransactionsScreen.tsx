@@ -4,6 +4,8 @@ import * as Sharing from 'expo-sharing';
 import React, { useMemo, useState } from 'react';
 import { Text, View } from 'react-native';
 import { parseUsd } from '../../../packages/domain/src/money';
+import { RecurringTransactionsSection } from './RecurringTransactionsSection';
+import { transactionRoleLabel } from './transaction-role';
 import {
   correctCashTransaction,
   recordCashTransaction,
@@ -278,6 +280,8 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
       </View>
     </Panel> : null}
 
+    {snapshot.business ? <RecurringTransactionsSection snapshot={snapshot} onSaved={onSaved} /> : null}
+
     <Panel>
       <Text style={uiStyles.sectionTitle}>Search and filter</Text>
       <Field label="Search description, category, account, or date" value={search} onChangeText={setSearch} placeholder="Search transactions" />
@@ -307,24 +311,7 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
 function TransactionRow({ transaction, onCorrect }: { transaction: TransactionRecord; onCorrect: () => void }) {
   const canCorrect = (transaction.kind === 'income' || transaction.kind === 'expense' || transaction.kind === 'transfer')
     && !transaction.originalTransactionId && !transaction.isGuaranteedPayment;
-  const roleLabel = transaction.transferRole === 'transfer-reversal'
-    ? 'Transfer reversal'
-    : transaction.correctionRole === 'reversal'
-    ? 'Reversal'
-    : transaction.correctionRole === 'replacement'
-      ? 'Replacement'
-      : transaction.isGuaranteedPayment && transaction.originalTransactionId === transaction.id
-        ? 'Original · reversed'
-      : transaction.originalTransactionId
-        ? 'Original · corrected'
-        : transaction.kind === 'opening-balance'
-          ? 'Opening balance'
-          : transaction.kind === 'loan-advance'
-            ? 'Loan advance'
-          : transaction.kind === 'loan-repayment'
-              ? 'Loan repayment'
-          : transaction.kind === 'transfer' ? 'Transfer'
-          : transaction.kind === 'income' ? 'Income' : 'Operating expense';
+  const roleLabel = transactionRoleLabel(transaction);
   return <View style={uiStyles.rowItem}>
     <View style={uiStyles.rowMain}>
       <Text style={uiStyles.rowTitle}>{transaction.description}</Text>

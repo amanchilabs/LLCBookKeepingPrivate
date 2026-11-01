@@ -3,6 +3,8 @@ import {
   cashBasisReportFromDatabase,
   completeAccountReconciliationInDatabase,
   createCategoryAccountInDatabase,
+  createRecurringTransactionInDatabase,
+  updateRecurringTransactionInDatabase,
   createAccountReconciliationInDatabase,
   createBusinessInDatabase,
   createCashAccountInDatabase,
@@ -19,21 +21,25 @@ import {
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
   recordSplitCashTransactionInDatabase,
+  postRecurringTransactionInDatabase,
   recordTransferInDatabase,
   reopenAccountReconciliationInDatabase,
   reverseGuaranteedPaymentInDatabase,
   setAccountReconciliationItemClearedInDatabase,
+  setRecurringTransactionActiveInDatabase,
   replaceMembersInDatabase,
   type BookkeepingSnapshot,
   type CreateAccountReconciliationInput,
   type CashAccountInput,
   type CategoryAccountInput,
+  type CreateRecurringTransactionInput,
   type CashBasisReport,
   type GeneralLedgerReport,
   type JournalBalanceReport,
   type CorrectCashTransactionInput,
   type CashTransactionInput,
   type SplitCashTransactionInput,
+  type PostRecurringTransactionInput,
   type TransferInput,
   type CreateGuaranteedPaymentObligationInput,
   type CreateLoanAgreementInput,
@@ -61,6 +67,7 @@ function emptySnapshot(): BookkeepingSnapshot {
     loanActivities: [],
     accountReconciliations: [],
     accountReconciliationEvents: [],
+    recurringTransactions: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }
@@ -82,6 +89,26 @@ export async function createCashAccount(input: CashAccountInput): Promise<void> 
 
 export async function createCategoryAccount(input: CategoryAccountInput): Promise<void> {
   await useActiveBooks((database) => createCategoryAccountInDatabase(database, input));
+}
+
+export async function createRecurringTransaction(input: CreateRecurringTransactionInput): Promise<void> {
+  await useActiveBooks((database) => createRecurringTransactionInDatabase(database, input));
+}
+
+export async function updateRecurringTransaction(input: CreateRecurringTransactionInput): Promise<void> {
+  await useActiveBooks((database) => updateRecurringTransactionInDatabase(database, input));
+}
+
+export async function postRecurringTransaction(input: PostRecurringTransactionInput): Promise<void> {
+  await useActiveBooks((database) => postRecurringTransactionInDatabase(database, input));
+}
+
+export async function setRecurringTransactionActive(templateId: string, isActive: boolean): Promise<void> {
+  await useActiveBooks(async (database) => {
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database);
+    if (!snapshot?.business) throw new Error('Create an LLC before changing recurring transactions.');
+    await setRecurringTransactionActiveInDatabase(database, snapshot.business.id, templateId, isActive);
+  });
 }
 
 export async function recordCashTransaction(input: CashTransactionInput): Promise<void> {
