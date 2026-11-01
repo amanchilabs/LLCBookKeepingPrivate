@@ -2,14 +2,23 @@
 
 ## Current artifact
 
-- **Source commit:** `8bfd88924ac1adde11b1fc056058db2043e70080` (`feature/member-capital-20261031-a91c`)
+- **Source commit:** `e14ec35325c30c9efa110a05329a2d333da5afbf` (`feature/member-capital-20261031-a91c`)
 - **Build:** Android Release, version `0.1.0` / code `1`, min SDK 24, target SDK 36
 - **Artifact (local, ignored by Git):** `android/app/build/outputs/apk/release/app-release.apk`
-- **SHA-256:** `908dce7336ac1ac680ae22bc6cdd682c2ab9bf3b73199c487a294bb3cf52df3f`
-- **Size:** 134,710,913 bytes
+- **SHA-256:** `068cf9f334b19ea3ba29be2dc801f9d91cdf222fea612878559425d7010a9846`
+- **Size:** 134,720,005 bytes
 - **Signing:** APK Signature Scheme v2 verified. Signed with the local Android Debug certificate, SHA-256 `fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c`. This is for controlled synthetic-data beta testing only; it is not a production signing key.
 
-## Current checkpoint: local workspaces and sole-member policy
+## Current checkpoint: cross-record search
+
+- `./gradlew :app:assembleRelease` completed successfully from the source tree committed as `e14ec35`; APK Signature Scheme v2 verification succeeded.
+- Installed over the existing emulator app with `adb install -r` and launched without Metro.
+- Searched Northstar records for `Rent`; the account and two expense results appeared and opened their Accounts and Transactions sections.
+- Switched to Cedar Design LLC and searched for `Northstar`; there were no matches, confirming results use the active LLC snapshot. Northstar was restored as the active workspace afterward.
+- Screenshots and precise evidence are in [Android cross-record search verification](../android-search-20261031/README.md).
+- Only `emulator-5554` was connected; the Samsung physical device was not attached.
+
+## Previous checkpoint: local workspaces and sole-member policy
 
 - `./gradlew :app:assembleRelease` completed successfully from the source tree committed as `8bfd889`; APK Signature Scheme v2 verification succeeded.
 - Installed over the existing emulator app with `adb install -r`; synthetic Northstar books remained. The v12-to-v13 migration preserved the prior balances.
