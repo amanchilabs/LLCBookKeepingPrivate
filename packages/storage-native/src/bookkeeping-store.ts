@@ -14,10 +14,11 @@ import {
   type BusinessSetupInput,
   type MemberInterestInput,
 } from '../../domain/src/bookkeeping';
-import { assertBalancedEntry, type JournalLine } from '../../domain/src/journal';
+import { assertBalancedEntry, loanAdvanceLines, loanRepaymentLines, type JournalLine } from '../../domain/src/journal';
+import { calculateUnpaidLoanInterestCents, type DatedAmount, type LoanDayCount } from '../../domain/src/loan-interest';
 import { formatUsd } from '../../domain/src/money';
 
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 6;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -111,6 +112,72 @@ export interface MemberCapitalSummary {
 }
 
 export type GuaranteedPaymentClassification = 'services' | 'use-of-capital';
+export type LoanLenderType = 'member' | 'third-party';
+export type { LoanDayCount } from '../../domain/src/loan-interest';
+
+export interface CreateLoanAgreementInput {
+  id: string;
+  businessId: string;
+  lenderType: LoanLenderType;
+  memberId?: string;
+  lenderName?: string;
+  agreementDate: string;
+  commitmentCents: bigint;
+  annualRateBasisPoints: number;
+  dayCount: LoanDayCount;
+  description: string;
+}
+
+export interface RecordLoanAdvanceInput {
+  id: string;
+  transactionId: string;
+  journalEntryId: string;
+  loanId: string;
+  date: string;
+  cashAccountId: string;
+  amountCents: bigint;
+  description: string;
+}
+
+export interface RecordLoanRepaymentInput {
+  id: string;
+  transactionId: string;
+  journalEntryId: string;
+  loanId: string;
+  date: string;
+  cashAccountId: string;
+  principalCents: bigint;
+  interestCents: bigint;
+  description: string;
+}
+
+export interface LoanAgreementRecord {
+  id: string;
+  lenderType: LoanLenderType;
+  memberId: string | null;
+  lenderName: string;
+  agreementDate: string;
+  commitmentCents: bigint;
+  annualRateBasisPoints: number;
+  dayCount: LoanDayCount;
+  description: string;
+  liabilityAccountId: string;
+}
+
+export interface LoanActivityRecord {
+  id: string;
+  loanId: string;
+  transactionId: string;
+  journalEntryId: string;
+  date: string;
+  kind: 'advance' | 'repayment';
+  cashAccountId: string;
+  cashAccountName: string;
+  amountCents: bigint;
+  principalCents: bigint;
+  interestCents: bigint;
+  description: string;
+}
 
 export interface CreateGuaranteedPaymentObligationInput {
   id: string;
@@ -180,7 +247,7 @@ export interface GuaranteedPaymentCashEvent {
 }
 
 type JournalEntryKind = 'opening-balance' | 'income' | 'expense' | 'reversal'
-  | 'cash-contribution' | 'property-contribution' | 'member-distribution';
+  | 'cash-contribution' | 'property-contribution' | 'member-distribution' | 'loan-advance' | 'loan-repayment';
 
 export interface BusinessRecord {
   id: string;
@@ -201,7 +268,7 @@ export interface AccountRecord {
   businessId: string;
   code: string;
   name: string;
-  kind: 'bank' | 'cash' | 'asset' | 'equity' | 'income' | 'expense';
+  kind: 'bank' | 'cash' | 'asset' | 'liability' | 'equity' | 'income' | 'expense';
   category: string;
   isSystem: boolean;
   balanceCents: bigint;
@@ -211,7 +278,7 @@ export interface TransactionRecord {
   id: string;
   journalEntryId: string;
   date: string;
-  kind: 'opening-balance' | 'income' | 'expense' | 'reversal';
+  kind: 'opening-balance' | 'income' | 'expense' | 'reversal' | 'loan-advance' | 'loan-repayment';
   accountId: string;
   accountName: string;
   categoryAccountId: string;
@@ -239,6 +306,8 @@ export interface BookkeepingSnapshot {
   memberCapitalSummaries: MemberCapitalSummary[];
   guaranteedPaymentInstallments: GuaranteedPaymentInstallmentRecord[];
   guaranteedPaymentCashEvents: GuaranteedPaymentCashEvent[];
+  loanAgreements: LoanAgreementRecord[];
+  loanActivities: LoanActivityRecord[];
   cashBasis: CashBasisTotals;
 }
 
@@ -361,7 +430,7 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
       business_id TEXT NOT NULL REFERENCES businesses(id),
       code TEXT NOT NULL,
       name TEXT NOT NULL,
-      kind TEXT NOT NULL CHECK (kind IN ('bank', 'cash', 'equity', 'income', 'expense')),
+      kind TEXT NOT NULL CHECK (kind IN ('bank', 'cash', 'asset', 'liability', 'equity', 'income', 'expense')),
       category TEXT NOT NULL,
       is_system INTEGER NOT NULL DEFAULT 0 CHECK (is_system IN (0, 1)),
       is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
@@ -373,7 +442,7 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
       id TEXT PRIMARY KEY NOT NULL,
       business_id TEXT NOT NULL REFERENCES businesses(id),
       entry_date TEXT NOT NULL,
-      entry_type TEXT NOT NULL CHECK (entry_type IN ('opening-balance', 'income', 'expense', 'reversal')),
+      entry_type TEXT NOT NULL CHECK (entry_type IN ('opening-balance', 'income', 'expense', 'reversal', 'loan-advance', 'loan-repayment')),
       description TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
@@ -397,7 +466,7 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
       business_id TEXT NOT NULL REFERENCES businesses(id),
       journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
       entry_date TEXT NOT NULL,
-      kind TEXT NOT NULL CHECK (kind IN ('opening-balance', 'income', 'expense', 'reversal')),
+      kind TEXT NOT NULL CHECK (kind IN ('opening-balance', 'income', 'expense', 'reversal', 'loan-advance', 'loan-repayment')),
       account_id TEXT NOT NULL REFERENCES accounts(id),
       category_account_id TEXT NOT NULL REFERENCES accounts(id),
       amount_minor TEXT NOT NULL,
@@ -430,7 +499,15 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
     await migrateBookkeepingV2ToV3(database);
     version = 3;
   }
-  if (version < 4) await migrateBookkeepingV3ToV4(database);
+  if (version < 4) {
+    await migrateBookkeepingV3ToV4(database);
+    version = 4;
+  }
+  if (version < 5) {
+    await migrateBookkeepingV4ToV5(database);
+    version = 5;
+  }
+  if (version < 6) await migrateBookkeepingV5ToV6(database);
 }
 
 async function migrateBookkeepingV1ToV2(database: Database): Promise<void> {
@@ -629,6 +706,176 @@ async function migrateBookkeepingV3ToV4(database: Database): Promise<void> {
   }
 }
 
+async function migrateBookkeepingV4ToV5(database: Database): Promise<void> {
+  await database.execAsync('PRAGMA foreign_keys = OFF;');
+  try {
+    await database.execAsync('BEGIN IMMEDIATE;');
+    try {
+      await database.execAsync(`
+        CREATE TABLE accounts_v5 (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          code TEXT NOT NULL,
+          name TEXT NOT NULL,
+          kind TEXT NOT NULL CHECK (kind IN ('bank', 'cash', 'asset', 'liability', 'equity', 'income', 'expense')),
+          category TEXT NOT NULL,
+          is_system INTEGER NOT NULL DEFAULT 0 CHECK (is_system IN (0, 1)),
+          is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+          created_at TEXT NOT NULL,
+          UNIQUE (business_id, code),
+          UNIQUE (business_id, name)
+        );
+        INSERT INTO accounts_v5
+          (id, business_id, code, name, kind, category, is_system, is_active, created_at)
+        SELECT id, business_id, code, name, kind, category, is_system, is_active, created_at FROM accounts;
+        DROP TABLE accounts;
+        ALTER TABLE accounts_v5 RENAME TO accounts;
+
+        CREATE TABLE journal_entries_v5 (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          entry_date TEXT NOT NULL,
+          entry_type TEXT NOT NULL CHECK (entry_type IN (
+            'opening-balance', 'income', 'expense', 'reversal',
+            'cash-contribution', 'property-contribution', 'member-distribution', 'loan-advance', 'loan-repayment'
+          )),
+          description TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+        INSERT INTO journal_entries_v5 (id, business_id, entry_date, entry_type, description, created_at)
+        SELECT id, business_id, entry_date, entry_type, description, created_at FROM journal_entries;
+        DROP TABLE journal_entries;
+        ALTER TABLE journal_entries_v5 RENAME TO journal_entries;
+        CREATE INDEX journal_entries_business_date ON journal_entries (business_id, entry_date);
+
+        CREATE TABLE transactions_v5 (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
+          entry_date TEXT NOT NULL,
+          kind TEXT NOT NULL CHECK (kind IN ('opening-balance', 'income', 'expense', 'reversal', 'loan-advance', 'loan-repayment')),
+          account_id TEXT NOT NULL REFERENCES accounts(id),
+          category_account_id TEXT NOT NULL REFERENCES accounts(id),
+          amount_minor TEXT NOT NULL,
+          description TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+        INSERT INTO transactions_v5
+          (id, business_id, journal_entry_id, entry_date, kind, account_id, category_account_id, amount_minor, description, created_at)
+        SELECT id, business_id, journal_entry_id, entry_date, kind, account_id, category_account_id, amount_minor, description, created_at
+        FROM transactions;
+        DROP TABLE transactions;
+        ALTER TABLE transactions_v5 RENAME TO transactions;
+        CREATE INDEX transactions_business_date ON transactions (business_id, entry_date);
+
+        CREATE TABLE loan_agreements (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          lender_type TEXT NOT NULL CHECK (lender_type IN ('member', 'third-party')),
+          member_id TEXT REFERENCES members(id),
+          lender_name TEXT NOT NULL,
+          agreement_date TEXT NOT NULL,
+          commitment_minor TEXT NOT NULL CHECK (CAST(commitment_minor AS INTEGER) > 0),
+          annual_rate_basis_points INTEGER NOT NULL CHECK (annual_rate_basis_points BETWEEN 0 AND 100000),
+          day_count TEXT NOT NULL CHECK (day_count IN ('ACT/365F', 'ACT/ACT')),
+          description TEXT NOT NULL,
+          liability_account_id TEXT NOT NULL UNIQUE REFERENCES accounts(id),
+          created_at TEXT NOT NULL,
+          CHECK ((lender_type = 'member' AND member_id IS NOT NULL) OR (lender_type = 'third-party' AND member_id IS NULL))
+        );
+        CREATE INDEX loan_agreements_business_lender ON loan_agreements (business_id, lender_type, member_id, agreement_date);
+        CREATE TABLE loan_advances (
+          id TEXT PRIMARY KEY NOT NULL,
+          loan_id TEXT NOT NULL REFERENCES loan_agreements(id),
+          transaction_id TEXT NOT NULL UNIQUE REFERENCES transactions(id),
+          journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
+          advance_date TEXT NOT NULL,
+          cash_account_id TEXT NOT NULL REFERENCES accounts(id),
+          amount_minor TEXT NOT NULL CHECK (CAST(amount_minor AS INTEGER) > 0),
+          description TEXT NOT NULL,
+          created_at TEXT NOT NULL
+        );
+        CREATE INDEX loan_advances_loan_date ON loan_advances (loan_id, advance_date, created_at);
+        CREATE TABLE loan_repayments (
+          id TEXT PRIMARY KEY NOT NULL,
+          loan_id TEXT NOT NULL REFERENCES loan_agreements(id),
+          transaction_id TEXT NOT NULL UNIQUE REFERENCES transactions(id),
+          journal_entry_id TEXT NOT NULL UNIQUE REFERENCES journal_entries(id),
+          repayment_date TEXT NOT NULL,
+          cash_account_id TEXT NOT NULL REFERENCES accounts(id),
+          principal_minor TEXT NOT NULL CHECK (CAST(principal_minor AS INTEGER) >= 0),
+          interest_minor TEXT NOT NULL CHECK (CAST(interest_minor AS INTEGER) >= 0),
+          description TEXT NOT NULL,
+          created_at TEXT NOT NULL,
+          UNIQUE (loan_id, repayment_date),
+          CHECK (CAST(principal_minor AS INTEGER) > 0 OR CAST(interest_minor AS INTEGER) > 0)
+        );
+        CREATE INDEX loan_repayments_loan_date ON loan_repayments (loan_id, repayment_date, created_at);
+        UPDATE bookkeeping_schema SET version = 5 WHERE singleton = 1;
+      `);
+      const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+        'PRAGMA foreign_key_check',
+      );
+      if (violations.length > 0) throw new Error('The loan schema migration found invalid record references.');
+      await database.execAsync('COMMIT;');
+    } catch (error) {
+      await database.execAsync('ROLLBACK;').catch(() => undefined);
+      throw error;
+    }
+  } finally {
+    await database.execAsync('PRAGMA foreign_keys = ON;');
+  }
+}
+
+async function migrateBookkeepingV5ToV6(database: Database): Promise<void> {
+  await database.execAsync('PRAGMA foreign_keys = OFF;');
+  try {
+    await database.execAsync('BEGIN IMMEDIATE;');
+    try {
+      await database.execAsync(`
+        CREATE TABLE loan_agreements_v6 (
+          id TEXT PRIMARY KEY NOT NULL,
+          business_id TEXT NOT NULL REFERENCES businesses(id),
+          lender_type TEXT NOT NULL CHECK (lender_type IN ('member', 'third-party')),
+          member_id TEXT REFERENCES members(id),
+          lender_name TEXT NOT NULL,
+          agreement_date TEXT NOT NULL,
+          commitment_minor TEXT NOT NULL CHECK (CAST(commitment_minor AS INTEGER) > 0),
+          annual_rate_basis_points INTEGER NOT NULL CHECK (annual_rate_basis_points BETWEEN 0 AND 100000),
+          day_count TEXT NOT NULL CHECK (day_count IN ('ACT/365F', 'ACT/ACT ISDA')),
+          description TEXT NOT NULL,
+          liability_account_id TEXT NOT NULL UNIQUE REFERENCES accounts(id),
+          created_at TEXT NOT NULL,
+          CHECK ((lender_type = 'member' AND member_id IS NOT NULL) OR (lender_type = 'third-party' AND member_id IS NULL))
+        );
+        INSERT INTO loan_agreements_v6
+          (id, business_id, lender_type, member_id, lender_name, agreement_date, commitment_minor,
+           annual_rate_basis_points, day_count, description, liability_account_id, created_at)
+        SELECT id, business_id, lender_type, member_id, lender_name, agreement_date, commitment_minor,
+               annual_rate_basis_points,
+               CASE day_count WHEN 'ACT/ACT' THEN 'ACT/ACT ISDA' ELSE day_count END,
+               description, liability_account_id, created_at
+        FROM loan_agreements;
+        DROP TABLE loan_agreements;
+        ALTER TABLE loan_agreements_v6 RENAME TO loan_agreements;
+        CREATE INDEX loan_agreements_business_lender
+          ON loan_agreements (business_id, lender_type, member_id, agreement_date);
+        UPDATE bookkeeping_schema SET version = 6 WHERE singleton = 1;
+      `);
+      const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+        'PRAGMA foreign_key_check',
+      );
+      if (violations.length > 0) throw new Error('The loan day-count migration found invalid record references.');
+      await database.execAsync('COMMIT;');
+    } catch (error) {
+      await database.execAsync('ROLLBACK;').catch(() => undefined);
+      throw error;
+    }
+  } finally {
+    await database.execAsync('PRAGMA foreign_keys = ON;');
+  }
+}
+
 /** @internal SQL-level entry point used by repository tests. */
 export async function createBusinessInDatabase(database: Database, input: BusinessSetupInput): Promise<void> {
   assertValidBusinessSetup(input);
@@ -740,6 +987,23 @@ async function ensureGuaranteedPaymentExpenseAccount(
     `INSERT INTO accounts (id, business_id, code, name, kind, category, is_system, created_at)
      VALUES (?, ?, ?, ?, 'expense', 'Guaranteed payment', 1, ?)`,
     id, businessId, code, name, new Date().toISOString(),
+  );
+  return id;
+}
+
+async function ensureLoanInterestExpenseAccount(database: Database, businessId: string): Promise<string> {
+  const id = `loan-interest:${businessId}`;
+  const existing = await database.getFirstAsync<{ kind: string }>(
+    'SELECT kind FROM accounts WHERE id = ? AND business_id = ?', id, businessId,
+  );
+  if (existing) {
+    if (existing.kind !== 'expense') throw new Error('The loan interest expense account has an invalid account type.');
+    return id;
+  }
+  await database.runAsync(
+    `INSERT INTO accounts (id, business_id, code, name, kind, category, is_system, created_at)
+     VALUES (?, ?, 'LOAN-INTEREST', 'Interest expense · member and third-party loans', 'expense', 'Interest expense', 1, ?)`,
+    id, businessId, new Date().toISOString(),
   );
   return id;
 }
@@ -870,6 +1134,238 @@ export async function createCashAccountInDatabase(database: Database, input: Cas
         categoryAccountId: 'opening-equity', amountCents: opening, description,
       });
     }
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function createLoanAgreementInDatabase(database: Database, input: CreateLoanAgreementInput): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  if (!input.id.trim()) throw new Error('Loan agreement identifier is required.');
+  if (input.commitmentCents <= 0n) throw new Error('Loan commitment must be positive.');
+  if (!Number.isInteger(input.annualRateBasisPoints) || input.annualRateBasisPoints < 0 || input.annualRateBasisPoints > 100_000) {
+    throw new Error('Enter a fixed annual rate from 0.00% through 1000.00% in 0.01% increments.');
+  }
+  if (input.dayCount !== 'ACT/365F' && input.dayCount !== 'ACT/ACT ISDA') {
+    throw new Error('Choose ACT/365F or ACT/ACT ISDA to match the loan agreement.');
+  }
+  if (!input.description.trim()) throw new Error('Enter a loan agreement description.');
+  requireDate(input.agreementDate, 'loan agreement date');
+  const business = await requireBusiness(database, input.businessId);
+  if (input.agreementDate < business.bookkeepingStartDate) {
+    throw new Error('Loan agreement date cannot precede the bookkeeping start date.');
+  }
+
+  let memberId: string | null = null;
+  let lenderName: string;
+  if (input.lenderType === 'member') {
+    if (!input.memberId?.trim()) throw new Error('Choose the LLC member who made the loan.');
+    const member = await requireMemberAtDate(database, input.businessId, input.memberId, input.agreementDate);
+    memberId = member.id;
+    lenderName = member.name;
+  } else if (input.lenderType === 'third-party') {
+    if (input.memberId) throw new Error('Third-party loans cannot reference an LLC member.');
+    lenderName = input.lenderName?.trim() ?? '';
+    if (!lenderName) throw new Error('Enter the third-party lender name.');
+  } else {
+    throw new Error('Choose a member or third-party lender.');
+  }
+
+  const liabilityAccountId = `loan-liability:${input.id}`;
+  await inSqlTransaction(database, async () => {
+    await database.runAsync(
+      `INSERT INTO accounts (id, business_id, code, name, kind, category, is_system, created_at)
+       VALUES (?, ?, ?, ?, 'liability', 'Loan payable', 1, ?)`,
+      liabilityAccountId, input.businessId, liabilityAccountId,
+      `Loan payable · ${lenderName} · ${input.id.slice(0, 8)}`, new Date().toISOString(),
+    );
+    await database.runAsync(
+      `INSERT INTO loan_agreements
+       (id, business_id, lender_type, member_id, lender_name, agreement_date, commitment_minor,
+        annual_rate_basis_points, day_count, description, liability_account_id, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      input.id, input.businessId, input.lenderType, memberId, lenderName, input.agreementDate,
+      input.commitmentCents.toString(), input.annualRateBasisPoints, input.dayCount,
+      input.description.trim(), liabilityAccountId, new Date().toISOString(),
+    );
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function recordLoanAdvanceInDatabase(database: Database, input: RecordLoanAdvanceInput): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  if (!input.id.trim() || !input.transactionId.trim() || !input.journalEntryId.trim()) {
+    throw new Error('Loan advance identifiers are required.');
+  }
+  if (input.amountCents <= 0n) throw new Error('Loan advance amounts must be positive.');
+  if (!input.description.trim()) throw new Error('Enter a loan advance description.');
+  requireDate(input.date, 'loan advance date');
+
+  await inSqlTransaction(database, async () => {
+    const agreement = await database.getFirstAsync<{
+      id: string;
+      businessId: string;
+      agreementDate: string;
+      commitmentCents: string;
+      liabilityAccountId: string;
+    }>(
+      `SELECT id, business_id AS businessId, agreement_date AS agreementDate,
+              commitment_minor AS commitmentCents, liability_account_id AS liabilityAccountId
+       FROM loan_agreements WHERE id = ?`, input.loanId,
+    );
+    if (!agreement) throw new Error('Choose an existing loan agreement before recording an advance.');
+    const business = await requireBusiness(database, agreement.businessId);
+    if (input.date < business.bookkeepingStartDate) throw new Error('Loan advance date cannot precede the bookkeeping start date.');
+    if (input.date < agreement.agreementDate) throw new Error('Loan advance date cannot precede the agreement date.');
+    await requireCashAccount(database, agreement.businessId, input.cashAccountId);
+    const liability = await database.getFirstAsync<{ kind: string; businessId: string; isActive: number }>(
+      'SELECT kind, business_id AS businessId, is_active AS isActive FROM accounts WHERE id = ?', agreement.liabilityAccountId,
+    );
+    if (liability?.kind !== 'liability' || liability.businessId !== agreement.businessId || liability.isActive !== 1) {
+      throw new Error('The loan agreement payable account is unavailable or has an invalid account type.');
+    }
+    const advances = await database.getAllAsync<{ amountCents: string }>(
+      'SELECT amount_minor AS amountCents FROM loan_advances WHERE loan_id = ?', agreement.id,
+    );
+    const fundedCents = advances.reduce((sum, advance) => sum + BigInt(advance.amountCents), 0n);
+    if (fundedCents + input.amountCents > BigInt(agreement.commitmentCents)) {
+      throw new Error('The advance would exceed the loan commitment ceiling.');
+    }
+
+    const lines = loanAdvanceLines(input.cashAccountId, agreement.liabilityAccountId, input.amountCents);
+    await insertJournalEntry(
+      database, agreement.businessId, input.journalEntryId, input.date, 'loan-advance', input.description, lines,
+    );
+    await insertTransaction(database, {
+      id: input.transactionId, journalEntryId: input.journalEntryId, businessId: agreement.businessId,
+      date: input.date, kind: 'loan-advance', accountId: input.cashAccountId,
+      categoryAccountId: agreement.liabilityAccountId, amountCents: input.amountCents, description: input.description,
+    });
+    await database.runAsync(
+      `INSERT INTO loan_advances
+       (id, loan_id, transaction_id, journal_entry_id, advance_date, cash_account_id, amount_minor, description, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      input.id, agreement.id, input.transactionId, input.journalEntryId, input.date,
+      input.cashAccountId, input.amountCents.toString(), input.description.trim(), new Date().toISOString(),
+    );
+    await ensureCashAccountNeverNegative(database, agreement.businessId, input.cashAccountId);
+  });
+}
+
+async function validateLoanRepaymentHistory(database: Database, loanId: string, terms: {
+  annualRateBasisPoints: number;
+  dayCount: LoanDayCount;
+}): Promise<void> {
+  const advances = await database.getAllAsync<{ date: string; cents: string }>(
+    'SELECT advance_date AS date, amount_minor AS cents FROM loan_advances WHERE loan_id = ? ORDER BY advance_date, created_at', loanId,
+  );
+  const repayments = await database.getAllAsync<{
+    date: string;
+    principalCents: string;
+    interestCents: string;
+  }>(
+    `SELECT repayment_date AS date, principal_minor AS principalCents, interest_minor AS interestCents
+     FROM loan_repayments WHERE loan_id = ? ORDER BY repayment_date, created_at`, loanId,
+  );
+  const advanceEvents: DatedAmount[] = advances.map((event) => ({ date: event.date, cents: BigInt(event.cents) }));
+  const principalRepayments: DatedAmount[] = repayments
+    .filter((event) => BigInt(event.principalCents) > 0n)
+    .map((event) => ({ date: event.date, cents: BigInt(event.principalCents) }));
+  const interestRepayments: DatedAmount[] = repayments
+    .filter((event) => BigInt(event.interestCents) > 0n)
+    .map((event) => ({ date: event.date, cents: BigInt(event.interestCents) }));
+
+  for (const repayment of repayments) {
+    const outstandingBeforeDate = advanceEvents.filter((event) => event.date < repayment.date)
+      .reduce((total, event) => total + event.cents, 0n)
+      - principalRepayments.filter((event) => event.date < repayment.date)
+        .reduce((total, event) => total + event.cents, 0n);
+    const principalCents = BigInt(repayment.principalCents);
+    if (outstandingBeforeDate < 0n || principalCents > outstandingBeforeDate) {
+      throw new Error('A loan repayment exceeds outstanding principal on its recorded date.');
+    }
+    const accruedInterest = calculateUnpaidLoanInterestCents({
+      advances: advanceEvents,
+      principalRepayments,
+      interestRepayments: interestRepayments.filter((event) => event.date < repayment.date),
+      annualRateBasisPoints: terms.annualRateBasisPoints,
+      repaymentDate: repayment.date,
+      dayCount: terms.dayCount,
+    });
+    if (BigInt(repayment.interestCents) > accruedInterest) {
+      throw new Error('A loan repayment exceeds accrued interest on its recorded date.');
+    }
+  }
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function recordLoanRepaymentInDatabase(database: Database, input: RecordLoanRepaymentInput): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  if (!input.id.trim() || !input.transactionId.trim() || !input.journalEntryId.trim()) {
+    throw new Error('Loan repayment identifiers are required.');
+  }
+  if (input.principalCents < 0n || input.interestCents < 0n) {
+    throw new Error('Loan repayment amounts cannot be negative.');
+  }
+  if (input.principalCents + input.interestCents <= 0n) {
+    throw new Error('A loan repayment must include principal or interest.');
+  }
+  if (!input.description.trim()) throw new Error('Enter a loan repayment description.');
+  requireDate(input.date, 'loan repayment date');
+
+  await inSqlTransaction(database, async () => {
+    const agreement = await database.getFirstAsync<{
+      id: string;
+      businessId: string;
+      agreementDate: string;
+      liabilityAccountId: string;
+      annualRateBasisPoints: number;
+      dayCount: LoanDayCount;
+    }>(
+      `SELECT id, business_id AS businessId, agreement_date AS agreementDate,
+              liability_account_id AS liabilityAccountId,
+              annual_rate_basis_points AS annualRateBasisPoints, day_count AS dayCount
+       FROM loan_agreements WHERE id = ?`, input.loanId,
+    );
+    if (!agreement) throw new Error('Choose an existing loan agreement before recording a repayment.');
+    const business = await requireBusiness(database, agreement.businessId);
+    if (input.date < business.bookkeepingStartDate) throw new Error('Loan repayment date cannot precede the bookkeeping start date.');
+    if (input.date < agreement.agreementDate) throw new Error('Loan repayment date cannot precede the agreement date.');
+    await requireCashAccount(database, agreement.businessId, input.cashAccountId);
+    const liability = await database.getFirstAsync<{ kind: string; businessId: string; isActive: number }>(
+      'SELECT kind, business_id AS businessId, is_active AS isActive FROM accounts WHERE id = ?', agreement.liabilityAccountId,
+    );
+    if (liability?.kind !== 'liability' || liability.businessId !== agreement.businessId || liability.isActive !== 1) {
+      throw new Error('The loan agreement payable account is unavailable or has an invalid account type.');
+    }
+    const repaymentOnDate = await database.getFirstAsync<{ id: string }>(
+      'SELECT id FROM loan_repayments WHERE loan_id = ? AND repayment_date = ?', agreement.id, input.date,
+    );
+    if (repaymentOnDate) throw new Error('Record no more than one loan repayment per loan on a calendar date.');
+
+    const interestExpenseAccountId = await ensureLoanInterestExpenseAccount(database, agreement.businessId);
+    const lines = loanRepaymentLines(
+      input.cashAccountId, agreement.liabilityAccountId, interestExpenseAccountId,
+      input.principalCents, input.interestCents,
+    );
+    const totalCents = input.principalCents + input.interestCents;
+    await insertJournalEntry(
+      database, agreement.businessId, input.journalEntryId, input.date, 'loan-repayment', input.description, lines,
+    );
+    await insertTransaction(database, {
+      id: input.transactionId, journalEntryId: input.journalEntryId, businessId: agreement.businessId,
+      date: input.date, kind: 'loan-repayment', accountId: input.cashAccountId,
+      categoryAccountId: agreement.liabilityAccountId, amountCents: -totalCents, description: input.description,
+    });
+    await database.runAsync(
+      `INSERT INTO loan_repayments
+       (id, loan_id, transaction_id, journal_entry_id, repayment_date, cash_account_id,
+        principal_minor, interest_minor, description, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      input.id, agreement.id, input.transactionId, input.journalEntryId, input.date, input.cashAccountId,
+      input.principalCents.toString(), input.interestCents.toString(), input.description.trim(), new Date().toISOString(),
+    );
+    await validateLoanRepaymentHistory(database, agreement.id, agreement);
+    await ensureCashAccountNeverNegative(database, agreement.businessId, input.cashAccountId);
   });
 }
 
@@ -1380,7 +1876,9 @@ async function readAccounts(database: Database, businessId: string): Promise<Acc
   return accounts.map((account) => ({
     ...account,
     isSystem: account.isSystem === 1,
-    balanceCents: balances.get(account.id) ?? 0n,
+    balanceCents: account.kind === 'liability'
+      ? -(balances.get(account.id) ?? 0n)
+      : balances.get(account.id) ?? 0n,
   }));
 }
 
@@ -1388,7 +1886,8 @@ async function readTransactions(database: Database, businessId: string): Promise
   const rows = await database.getAllAsync<DbTransaction>(
     `SELECT t.id, t.journal_entry_id AS journalEntryId, t.entry_date AS date, t.kind,
             t.account_id AS accountId, a.name AS accountName,
-            t.category_account_id AS categoryAccountId, c.name AS category,
+            t.category_account_id AS categoryAccountId,
+            CASE t.kind WHEN 'loan-advance' THEN 'Loan proceeds' WHEN 'loan-repayment' THEN 'Loan repayment' ELSE c.name END AS category,
             t.amount_minor AS amountCents, t.description,
             COALESCE(original.original_transaction_id, correction.original_transaction_id,
                      guaranteedPaymentOriginal.transaction_id,
@@ -1613,6 +2112,54 @@ async function readGuaranteedPaymentCashEvents(database: Database, businessId: s
   ].sort((left, right) => left.date.localeCompare(right.date) || left.id.localeCompare(right.id));
 }
 
+async function readLoanAgreements(database: Database, businessId: string): Promise<LoanAgreementRecord[]> {
+  const rows = await database.getAllAsync<Omit<LoanAgreementRecord, 'commitmentCents'> & { commitmentCents: string }>(
+    `SELECT id, lender_type AS lenderType, member_id AS memberId, lender_name AS lenderName,
+            agreement_date AS agreementDate, commitment_minor AS commitmentCents,
+            annual_rate_basis_points AS annualRateBasisPoints, day_count AS dayCount,
+            description, liability_account_id AS liabilityAccountId
+     FROM loan_agreements WHERE business_id = ? ORDER BY agreement_date, created_at, id`, businessId,
+  );
+  return rows.map((row) => ({ ...row, commitmentCents: BigInt(row.commitmentCents) }));
+}
+
+async function readLoanActivities(database: Database, businessId: string): Promise<LoanActivityRecord[]> {
+  const rows = await database.getAllAsync<Omit<LoanActivityRecord, 'amountCents' | 'principalCents' | 'interestCents'> & {
+    amountCents: string;
+    principalCents: string;
+    interestCents: string;
+  }>(
+    `SELECT * FROM (
+     SELECT advance.id, advance.loan_id AS loanId, advance.transaction_id AS transactionId,
+            advance.journal_entry_id AS journalEntryId, advance.advance_date AS date, 'advance' AS kind,
+            advance.cash_account_id AS cashAccountId, cash.name AS cashAccountName,
+            advance.amount_minor AS amountCents, '0' AS principalCents, '0' AS interestCents,
+            advance.description
+     FROM loan_advances advance
+     JOIN loan_agreements agreement ON agreement.id = advance.loan_id
+     JOIN accounts cash ON cash.id = advance.cash_account_id
+     WHERE agreement.business_id = ?
+     UNION ALL
+     SELECT repayment.id, repayment.loan_id AS loanId, repayment.transaction_id AS transactionId,
+            repayment.journal_entry_id AS journalEntryId, repayment.repayment_date AS date, 'repayment' AS kind,
+            repayment.cash_account_id AS cashAccountId, cash.name AS cashAccountName,
+            '-' || CAST(CAST(repayment.principal_minor AS INTEGER) + CAST(repayment.interest_minor AS INTEGER) AS TEXT) AS amountCents,
+            repayment.principal_minor AS principalCents, repayment.interest_minor AS interestCents,
+            repayment.description
+     FROM loan_repayments repayment
+     JOIN loan_agreements agreement ON agreement.id = repayment.loan_id
+     JOIN accounts cash ON cash.id = repayment.cash_account_id
+     WHERE agreement.business_id = ?
+     ) loan_activity ORDER BY date, id`, businessId, businessId,
+  );
+  return rows.map((row) => ({
+    ...row,
+    amountCents: BigInt(row.amountCents),
+    principalCents: BigInt(row.principalCents),
+    interestCents: BigInt(row.interestCents),
+  }));
+}
+
 async function cashBasisForPeriod(database: Database, businessId: string, fromDate?: string, throughDate?: string): Promise<CashBasisTotals> {
   const conditions = ['je.business_id = ?', "a.kind IN ('income', 'expense')"];
   const parameters: Array<string> = [businessId];
@@ -1654,6 +2201,7 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
   if (!business) return {
     business: null, members: [], memberHistory: [], accounts: [], transactions: [], capitalActivities: [],
     memberCapitalSummaries: [], guaranteedPaymentInstallments: [], guaranteedPaymentCashEvents: [],
+    loanAgreements: [], loanActivities: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
   const { members, history } = await readMembers(database, business.id);
@@ -1663,10 +2211,12 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
   const memberCapitalSummaries = await readMemberCapitalSummaries(database, business.id);
   const guaranteedPaymentInstallments = await readGuaranteedPaymentInstallments(database, business.id);
   const guaranteedPaymentCashEvents = await readGuaranteedPaymentCashEvents(database, business.id);
+  const loanAgreements = await readLoanAgreements(database, business.id);
+  const loanActivities = await readLoanActivities(database, business.id);
   const cashBasis = await cashBasisForPeriod(database, business.id);
   return {
     business, members, memberHistory: history, accounts, transactions, capitalActivities, memberCapitalSummaries,
-    guaranteedPaymentInstallments, guaranteedPaymentCashEvents, cashBasis,
+    guaranteedPaymentInstallments, guaranteedPaymentCashEvents, loanAgreements, loanActivities, cashBasis,
   };
 }
 

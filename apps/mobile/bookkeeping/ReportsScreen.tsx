@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { getCashBasisReport } from '../../../packages/storage-native/src/bookkeeping-service';
 import type { BookkeepingSnapshot, CashBasisReport } from '../../../packages/storage-native/src/bookkeeping-store';
+import { summarizeLoanBalance } from '../../../packages/domain/src/loan-interest';
 import { Button, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
@@ -37,6 +38,36 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const capitalUseReturnedCents = paymentEventsInPeriod
     .filter((event) => event.classification === 'use-of-capital' && event.kind === 'reversal')
     .reduce((sum, event) => sum - event.amountCents, 0n);
+  const loanActivitiesInPeriod = snapshot.loanActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate);
+  const loanAdvancesInPeriodCents = loanActivitiesInPeriod.filter((activity) => activity.kind === 'advance')
+    .reduce((sum, activity) => sum + activity.amountCents, 0n);
+  const loanPrincipalRepaidInPeriodCents = loanActivitiesInPeriod
+    .reduce((sum, activity) => sum + activity.principalCents, 0n);
+  const loanInterestPaidInPeriodCents = loanActivitiesInPeriod
+    .reduce((sum, activity) => sum + activity.interestCents, 0n);
+  const loanSummaries = isValidDate(throughDate)
+    ? snapshot.loanAgreements.filter((loan) => loan.agreementDate <= throughDate).map((loan) => ({
+      loan,
+      summary: summarizeLoanBalance({
+        commitmentCents: loan.commitmentCents,
+        annualRateBasisPoints: loan.annualRateBasisPoints,
+        dayCount: loan.dayCount,
+        asOfDate: throughDate,
+        activities: snapshot.loanActivities.filter((activity) => activity.loanId === loan.id).map((activity) => ({
+          date: activity.date,
+          kind: activity.kind,
+          amountCents: activity.amountCents,
+          principalCents: activity.principalCents,
+          interestCents: activity.interestCents,
+        })),
+      }),
+    }))
+    : [];
+  const memberLoanPrincipalCents = loanSummaries.filter(({ loan }) => loan.lenderType === 'member')
+    .reduce((sum, { summary }) => sum + summary.principalOutstandingCents, 0n);
+  const thirdPartyLoanPrincipalCents = loanSummaries.filter(({ loan }) => loan.lenderType === 'third-party')
+    .reduce((sum, { summary }) => sum + summary.principalOutstandingCents, 0n);
+  const loanInterestOutstandingCents = loanSummaries.reduce((sum, { summary }) => sum + summary.interestOutstandingCents, 0n);
 
   const refresh = async () => {
     if (!snapshot.business) return;
@@ -97,10 +128,46 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       <Text style={uiStyles.helper}>Separate book categories only. CPA review is required for tax classification, deductibility, and capitalization. This workpaper is not a tax form.</Text>
     </Panel>
     <Panel>
+      <Text style={uiStyles.sectionTitle}>Loan workpapers</Text>
+      <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate} · loan balances as of the through date.</Text>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Funded advances during period · not income</Text><Money cents={loanAdvancesInPeriodCents} /></View>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Principal repaid during period · not expense</Text><Money cents={loanPrincipalRepaidInPeriodCents} /></View>
+      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Interest actually paid during period</Text><Money cents={loanInterestPaidInPeriodCents} /></View>
+      {isValidDate(throughDate) ? <>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Member loan principal outstanding</Text><Money cents={memberLoanPrincipalCents} /></View>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Third-party loan principal outstanding</Text><Money cents={thirdPartyLoanPrincipalCents} /></View>
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Accrued interest remaining · estimate</Text><Money cents={loanInterestOutstandingCents} /></View>
+        {loanSummaries.map(({ loan, summary }) => <View key={loan.id} style={uiStyles.reportRow}>
+          <View style={uiStyles.rowMain}>
+            <Text style={uiStyles.rowTitle}>{loan.lenderType === 'member' ? 'Member' : 'Third party'} · {loan.lenderName}</Text>
+            <Text style={uiStyles.rowDetail}>Commitment left {moneyLabel(summary.commitmentRemainingCents)} · {rateLabel(loan.annualRateBasisPoints)} · {loan.dayCount}</Text>
+          </View>
+          <Money cents={summary.principalOutstandingCents} />
+        </View>)}
+      </> : <Text style={uiStyles.helper}>Enter a valid through date to calculate loan balances.</Text>}
+      <Text style={uiStyles.helper}>Only paid interest appears in cash-basis expenses. Accrued interest is a bookkeeping estimate; this report does not select rates or determine tax deductibility.</Text>
+    </Panel>
+    <Panel>
       <Text style={uiStyles.sectionTitle}>Available from persisted books</Text>
       <Text style={uiStyles.rowDetail}>Account balances: {snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash').length} bank and cash accounts.</Text>
       <Text style={uiStyles.rowDetail}>Member interests: {snapshot.members.length} current members, with dated interest history.</Text>
       <Text style={uiStyles.helper}>Trial Balance, General Ledger, Balance Sheet and tax-specific reports are still to come.</Text>
     </Panel>
   </Page>;
+}
+
+function isValidDate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+}
+
+function moneyLabel(cents: bigint): string {
+  const whole = cents / 100n;
+  const fraction = String(cents % 100n).padStart(2, '0');
+  return `$${whole.toLocaleString('en-US')}.${fraction}`;
+}
+
+function rateLabel(basisPoints: number): string {
+  return `${Math.floor(basisPoints / 100)}.${String(basisPoints % 100).padStart(2, '0')}%`;
 }

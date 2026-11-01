@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { assertBalancedEntry, type JournalLine } from '../src/journal';
+import {
+  assertBalancedEntry,
+  loanAdvanceLines,
+  loanRepaymentLines,
+  type JournalLine,
+} from '../src/journal';
 
 describe('journal posting invariant', () => {
   it('accepts a balanced expense paid from cash', () => {
@@ -19,5 +24,29 @@ describe('journal posting invariant', () => {
       { account: 'cash', debitCents: -1n, creditCents: 0n },
       { account: 'equity', debitCents: 0n, creditCents: 1n },
     ])).toThrow();
+  });
+
+  it('posts a funded loan advance to cash and loan payable, not income', () => {
+    expect(loanAdvanceLines('checking', 'loan-payable', 12_500n)).toEqual([
+      { account: 'checking', debitCents: 12_500n, creditCents: 0n },
+      { account: 'loan-payable', debitCents: 0n, creditCents: 12_500n },
+    ]);
+  });
+
+  it('separates principal reduction and interest expense within one balanced repayment', () => {
+    expect(loanRepaymentLines('checking', 'loan-payable', 'loan-interest', 10_000n, 200n)).toEqual([
+      { account: 'loan-payable', debitCents: 10_000n, creditCents: 0n },
+      { account: 'loan-interest', debitCents: 200n, creditCents: 0n },
+      { account: 'checking', debitCents: 0n, creditCents: 10_200n },
+    ]);
+    expect(loanRepaymentLines('checking', 'loan-payable', 'loan-interest', 0n, 200n)).toEqual([
+      { account: 'loan-interest', debitCents: 200n, creditCents: 0n },
+      { account: 'checking', debitCents: 0n, creditCents: 200n },
+    ]);
+  });
+
+  it('rejects empty or negative loan repayments', () => {
+    expect(() => loanRepaymentLines('checking', 'loan-payable', 'loan-interest', 0n, 0n)).toThrow('positive');
+    expect(() => loanRepaymentLines('checking', 'loan-payable', 'loan-interest', -1n, 5n)).toThrow('cannot be negative');
   });
 });

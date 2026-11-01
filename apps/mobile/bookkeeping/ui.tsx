@@ -118,6 +118,7 @@ export const uiStyles = StyleSheet.create({
   headingRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
   reportRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 1, borderTopColor: palette.border, paddingVertical: 12 },
   reportTotal: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderTopWidth: 2, borderTopColor: palette.green, paddingTop: 14, marginTop: 5 },
+  loanCard: { borderTopWidth: 1, borderTopColor: palette.border, paddingTop: 12, marginTop: 2 },
   rowTitle: { color: palette.ink, fontSize: 14, fontWeight: '700' },
   rowDetail: { color: palette.muted, fontSize: 12, lineHeight: 17 },
   badge: { color: palette.green, backgroundColor: palette.greenSoft, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, overflow: 'hidden', fontSize: 11, fontWeight: '800' },

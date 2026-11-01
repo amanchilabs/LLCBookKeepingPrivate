@@ -6,14 +6,15 @@ import { AccountsScreen } from './AccountsScreen';
 import { BusinessSetupScreen } from './BusinessSetupScreen';
 import { DashboardScreen } from './DashboardScreen';
 import { MembersScreen } from './MembersScreen';
+import { LoansScreen } from './LoansScreen';
 import { ReportsScreen } from './ReportsScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { TransactionsScreen } from './TransactionsScreen';
 import { contentTopInset } from './layout';
 import { Button, Loading, palette } from './ui';
 
-type BookkeepingTab = 'Dashboard' | 'Transactions' | 'Accounts' | 'Members' | 'Reports' | 'Settings';
-const tabs: BookkeepingTab[] = ['Dashboard', 'Transactions', 'Accounts', 'Members', 'Reports', 'Settings'];
+type BookkeepingTab = 'Dashboard' | 'Transactions' | 'Accounts' | 'Members' | 'Loans' | 'Reports' | 'Settings';
+const tabs: BookkeepingTab[] = ['Dashboard', 'Transactions', 'Accounts', 'Members', 'Loans', 'Reports', 'Settings'];
 
 function emptySnapshot(): BookkeepingSnapshot {
   return {
@@ -26,6 +27,8 @@ function emptySnapshot(): BookkeepingSnapshot {
     memberCapitalSummaries: [],
     guaranteedPaymentInstallments: [],
     guaranteedPaymentCashEvents: [],
+    loanAgreements: [],
+    loanActivities: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
 }
@@ -113,6 +116,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
       {tab === 'Transactions' ? <TransactionsScreen snapshot={snapshot} onSaved={refresh} /> : null}
       {tab === 'Accounts' ? <AccountsScreen snapshot={snapshot} onSaved={refresh} /> : null}
       {tab === 'Members' ? <MembersScreen snapshot={snapshot} onSaved={refresh} /> : null}
+      {tab === 'Loans' ? <LoansScreen snapshot={snapshot} onSaved={refresh} /> : null}
       {tab === 'Reports' ? <ReportsScreen snapshot={snapshot} /> : null}
       {tab === 'Settings' ? <SettingsScreen business={snapshot.business} onOpenSecurityProof={() => setShowSecurityProof(true)} /> : null}
     </View>

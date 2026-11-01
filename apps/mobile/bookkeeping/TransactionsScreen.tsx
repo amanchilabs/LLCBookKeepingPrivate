@@ -17,7 +17,7 @@ import {
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 type EntryKind = 'income' | 'expense';
-type KindFilter = 'all' | EntryKind;
+type KindFilter = 'all' | EntryKind | 'loan-advance' | 'loan-repayment';
 interface TransactionDraft {
   kind: EntryKind;
   date: string;
@@ -190,6 +190,8 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
         { value: 'all', title: 'All activity' },
         { value: 'income', title: 'Income' },
         { value: 'expense', title: 'Expenses' },
+        { value: 'loan-advance', title: 'Loan advances' },
+        { value: 'loan-repayment', title: 'Loan repayments' },
       ]} onChange={setKindFilter} />
       <Choice label="Account filter" value={accountFilter} options={filterAccountOptions} onChange={setAccountFilter} />
       <Choice label="Category filter" value={categoryFilter} options={filterCategoryOptions} onChange={setCategoryFilter} />
@@ -219,6 +221,10 @@ function TransactionRow({ transaction, onCorrect }: { transaction: TransactionRe
         ? 'Original · corrected'
         : transaction.kind === 'opening-balance'
           ? 'Opening balance'
+          : transaction.kind === 'loan-advance'
+            ? 'Loan advance'
+            : transaction.kind === 'loan-repayment'
+              ? 'Loan repayment'
           : transaction.kind === 'income' ? 'Income' : 'Operating expense';
   return <View style={uiStyles.rowItem}>
     <View style={uiStyles.rowMain}>

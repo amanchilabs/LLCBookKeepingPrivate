@@ -6,7 +6,7 @@ Add local bookkeeping for loan agreements, actual advances, principal and intere
 
 ## Accounting policy
 
-The governing decisions are recorded in `docs/bookkeeping/member-loans-policy.md`. Commitments and agreements are memorandum records. Actual advances create a liability and cash movement. Actual principal repayments reduce the liability. Actual interest paid is recorded separately as expense. Fixed contractual rates use the agreement's selected `ACT/365F` or `ACT/ACT` day-count convention and the existing simple-interest calculator. Same-day repayment precedes a same-day advance; repayment dates are excluded from interest accrual. No compounding occurs.
+The governing decisions are recorded in `docs/bookkeeping/member-loans-policy.md`. Commitments and agreements are memorandum records. Actual advances create a liability and cash movement. Actual principal repayments reduce the liability. Actual interest paid is recorded separately as expense. Fixed contractual rates use the agreement's selected `ACT/365F` or `ACT/ACT ISDA` day-count convention and the existing simple-interest calculator. Other ACT/ACT variants are unsupported. Same-day repayment precedes a same-day advance; repayment dates are excluded from interest accrual. No compounding occurs.
 
 ## Data model and migration
 

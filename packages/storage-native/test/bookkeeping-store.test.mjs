@@ -7,11 +7,14 @@ import {
   cashBasisReportFromDatabase,
   createBusinessInDatabase,
   createCashAccountInDatabase,
+  createLoanAgreementInDatabase,
   correctCashTransactionInDatabase,
   ensureBookkeepingSchema,
   getBookkeepingSnapshotFromDatabase,
   createGuaranteedPaymentObligationInDatabase,
   recordGuaranteedPaymentInDatabase,
+  recordLoanAdvanceInDatabase,
+  recordLoanRepaymentInDatabase,
   reverseGuaranteedPaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
@@ -463,17 +466,373 @@ describe('bookkeeping repository SQL contract', () => {
       SELECT id, payment_id, reversal_transaction_id, reversal_journal_entry_id, reversal_date, reason, created_at
       FROM guaranteed_payment_reversals_v4;
       DROP TABLE guaranteed_payment_reversals_v4;
+      DROP TABLE loan_repayments;
+      DROP TABLE loan_advances;
+      DROP TABLE loan_agreements;
       UPDATE bookkeeping_schema SET version = 3 WHERE singleton = 1;
     `);
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(4);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(6);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(10_000n);
     expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal')).toMatchObject({
       cashAccountName: 'Checking', reason: 'Cash returned', amountCents: -5_000n,
     });
     expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
+  it('stores loan commitments for members and third parties without posting cash or income', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-1', openingJournalEntryId: 'opening-entry-1',
+    });
+    const before = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+
+    await createLoanAgreementInDatabase(database, {
+      id: 'member-loan', businessId: 'business-1', lenderType: 'member', memberId: 'member-1',
+      agreementDate: '2024-01-02', commitmentCents: 250_000n, annualRateBasisPoints: 725,
+      dayCount: 'ACT/365F', description: 'Jordan synthetic loan agreement',
+    });
+    await createLoanAgreementInDatabase(database, {
+      id: 'third-party-loan', businessId: 'business-1', lenderType: 'third-party', lenderName: 'Synthetic Credit Union',
+      agreementDate: '2024-01-03', commitmentCents: 500_000n, annualRateBasisPoints: 600,
+      dayCount: 'ACT/ACT ISDA', description: 'Synthetic lender agreement',
+    });
+
+    const after = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(after.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(100_000n);
+    expect(after.cashBasis).toEqual(before.cashBasis);
+    expect(database.database.prepare("SELECT COUNT(*) AS count FROM journal_entries WHERE entry_type LIKE 'loan-%'").get().count).toBe(0);
+    expect(database.database.prepare('SELECT kind FROM accounts WHERE id = ?').get('loan-liability:member-loan').kind).toBe('liability');
+    expect(database.database.prepare(`
+      SELECT id, lender_type AS lenderType, member_id AS memberId, lender_name AS lenderName,
+             commitment_minor AS commitmentMinor, annual_rate_basis_points AS annualRateBasisPoints, day_count AS dayCount
+      FROM loan_agreements ORDER BY id
+    `).all()).toEqual([
+      { id: 'member-loan', lenderType: 'member', memberId: 'member-1', lenderName: 'Jordan Lee', commitmentMinor: '250000', annualRateBasisPoints: 725, dayCount: 'ACT/365F' },
+      { id: 'third-party-loan', lenderType: 'third-party', memberId: null, lenderName: 'Synthetic Credit Union', commitmentMinor: '500000', annualRateBasisPoints: 600, dayCount: 'ACT/ACT ISDA' },
+    ]);
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
+  it('rejects an ambiguous ACT/ACT label when creating a loan agreement', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+
+    await expect(createLoanAgreementInDatabase(database, {
+      id: 'ambiguous-loan', businessId: 'business-1', lenderType: 'member', memberId: 'member-1',
+      agreementDate: '2024-01-01', commitmentCents: 100_000n, annualRateBasisPoints: 1_000,
+      dayCount: 'ACT/ACT', description: 'Synthetic agreement with ambiguous convention',
+    })).rejects.toThrow('ACT/ACT ISDA');
+
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM loan_agreements').get().count).toBe(0);
+    database.close();
+  });
+
+  it('migrates existing ACT/ACT agreements to the explicit ISDA calculation without losing advances', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 125_000n,
+      openingTransactionId: 'opening-transaction', openingJournalEntryId: 'opening-journal',
+    });
+    await createLoanAgreementInDatabase(database, {
+      id: 'legacy-act-act-loan', businessId: 'business-1', lenderType: 'member', memberId: 'member-1',
+      agreementDate: '2024-01-01', commitmentCents: 100_000n, annualRateBasisPoints: 1_000,
+      dayCount: 'ACT/ACT ISDA', description: 'Synthetic legacy migration agreement',
+    });
+    await recordLoanAdvanceInDatabase(database, {
+      id: 'legacy-act-act-advance', transactionId: 'legacy-act-act-transaction',
+      journalEntryId: 'legacy-act-act-journal', loanId: 'legacy-act-act-loan',
+      date: '2024-01-02', cashAccountId: 'bank-1', amountCents: 25_000n,
+      description: 'Synthetic advance to preserve across migration',
+    });
+    await recordLoanRepaymentInDatabase(database, {
+      id: 'legacy-act-act-repayment', transactionId: 'legacy-act-act-repayment-transaction',
+      journalEntryId: 'legacy-act-act-repayment-journal', loanId: 'legacy-act-act-loan',
+      date: '2024-01-10', cashAccountId: 'bank-1', principalCents: 10_000n,
+      interestCents: 22n, description: 'Synthetic repayment to preserve across migration',
+    });
+
+    database.database.exec(`
+      PRAGMA foreign_keys = OFF;
+      BEGIN IMMEDIATE;
+      CREATE TABLE loan_agreements_v5 (
+        id TEXT PRIMARY KEY NOT NULL,
+        business_id TEXT NOT NULL REFERENCES businesses(id),
+        lender_type TEXT NOT NULL CHECK (lender_type IN ('member', 'third-party')),
+        member_id TEXT REFERENCES members(id),
+        lender_name TEXT NOT NULL,
+        agreement_date TEXT NOT NULL,
+        commitment_minor TEXT NOT NULL CHECK (CAST(commitment_minor AS INTEGER) > 0),
+        annual_rate_basis_points INTEGER NOT NULL CHECK (annual_rate_basis_points BETWEEN 0 AND 100000),
+        day_count TEXT NOT NULL CHECK (day_count IN ('ACT/365F', 'ACT/ACT')),
+        description TEXT NOT NULL,
+        liability_account_id TEXT NOT NULL UNIQUE REFERENCES accounts(id),
+        created_at TEXT NOT NULL,
+        CHECK ((lender_type = 'member' AND member_id IS NOT NULL) OR (lender_type = 'third-party' AND member_id IS NULL))
+      );
+      INSERT INTO loan_agreements_v5
+        (id, business_id, lender_type, member_id, lender_name, agreement_date, commitment_minor,
+         annual_rate_basis_points, day_count, description, liability_account_id, created_at)
+      SELECT id, business_id, lender_type, member_id, lender_name, agreement_date, commitment_minor,
+             annual_rate_basis_points,
+             CASE day_count WHEN 'ACT/ACT ISDA' THEN 'ACT/ACT' ELSE day_count END,
+             description, liability_account_id, created_at
+      FROM loan_agreements;
+      DROP TABLE loan_agreements;
+      ALTER TABLE loan_agreements_v5 RENAME TO loan_agreements;
+      CREATE INDEX loan_agreements_business_lender
+        ON loan_agreements (business_id, lender_type, member_id, agreement_date);
+      UPDATE bookkeeping_schema SET version = 5 WHERE singleton = 1;
+      COMMIT;
+      PRAGMA foreign_keys = ON;
+    `);
+
+    await ensureBookkeepingSchema(database);
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(6);
+    expect(snapshot.loanAgreements[0].dayCount).toBe('ACT/ACT ISDA');
+    expect(snapshot.loanActivities.map((activity) => [activity.kind, activity.amountCents])).toEqual([
+      ['advance', 25_000n], ['repayment', -10_022n],
+    ]);
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(139_978n);
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
+  it('posts multiple funded loan advances to cash and liability without treating proceeds as income', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-1', openingJournalEntryId: 'opening-entry-1',
+    });
+    await createLoanAgreementInDatabase(database, {
+      id: 'member-loan', businessId: 'business-1', lenderType: 'member', memberId: 'member-1',
+      agreementDate: '2024-01-02', commitmentCents: 50_000n, annualRateBasisPoints: 1000,
+      dayCount: 'ACT/365F', description: 'Synthetic member loan',
+    });
+    const before = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+
+    await recordLoanAdvanceInDatabase(database, {
+      id: 'advance-1', transactionId: 'advance-transaction-1', journalEntryId: 'advance-entry-1',
+      loanId: 'member-loan', date: '2024-01-10', cashAccountId: 'bank-1', amountCents: 30_000n,
+      description: 'First funded advance',
+    });
+    const beforeLateFailure = {
+      entries: database.database.prepare('SELECT COUNT(*) AS count FROM journal_entries').get().count,
+      transactions: database.database.prepare('SELECT COUNT(*) AS count FROM transactions').get().count,
+    };
+    await expect(recordLoanAdvanceInDatabase(database, {
+      id: 'advance-duplicate', transactionId: 'advance-transaction-1', journalEntryId: 'advance-duplicate-entry',
+      loanId: 'member-loan', date: '2024-01-11', cashAccountId: 'bank-1', amountCents: 1_000n,
+      description: 'Must roll back on duplicate transaction ID',
+    })).rejects.toThrow();
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM journal_entries').get().count).toBe(beforeLateFailure.entries);
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM transactions').get().count).toBe(beforeLateFailure.transactions);
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM loan_advances').get().count).toBe(1);
+
+    await recordLoanAdvanceInDatabase(database, {
+      id: 'advance-2', transactionId: 'advance-transaction-2', journalEntryId: 'advance-entry-2',
+      loanId: 'member-loan', date: '2024-02-15', cashAccountId: 'bank-1', amountCents: 20_000n,
+      description: 'Second dated advance',
+    });
+    const after = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(after.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(150_000n);
+    expect(after.accounts.find((account) => account.id === 'loan-liability:member-loan').balanceCents).toBe(50_000n);
+    expect(after.cashBasis).toEqual(before.cashBasis);
+    expect(after.transactions.filter((transaction) => transaction.kind === 'loan-advance').map((transaction) => transaction.amountCents))
+      .toEqual([20_000n, 30_000n]);
+    expect(after.loanActivities.map((activity) => [activity.date, activity.kind, activity.amountCents])).toEqual([
+      ['2024-01-10', 'advance', 30_000n], ['2024-02-15', 'advance', 20_000n],
+    ]);
+    const unbalanced = database.database.prepare(`
+      SELECT je.id FROM journal_entries je JOIN journal_lines jl ON jl.journal_entry_id = je.id
+      WHERE je.business_id = 'business-1' GROUP BY je.id
+      HAVING SUM(CAST(jl.debit_minor AS INTEGER)) != SUM(CAST(jl.credit_minor AS INTEGER))
+    `).all();
+    expect(unbalanced).toEqual([]);
+    await expect(recordLoanAdvanceInDatabase(database, {
+      id: 'advance-overcommit', transactionId: 'advance-overcommit-transaction', journalEntryId: 'advance-overcommit-entry',
+      loanId: 'member-loan', date: '2024-03-01', cashAccountId: 'bank-1', amountCents: 1n,
+      description: 'Exceeds commitment',
+    })).rejects.toThrow('commitment');
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM loan_advances').get().count).toBe(2);
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
+  it('records mixed principal and interest repayments with journal, cash, P&L, and persisted loan activity in sync', async () => {
+    const path = databasePath();
+    let database = new TestDatabase(path);
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-1', openingJournalEntryId: 'opening-entry-1',
+    });
+    await createLoanAgreementInDatabase(database, {
+      id: 'member-loan', businessId: 'business-1', lenderType: 'member', memberId: 'member-1',
+      agreementDate: '2024-01-01', commitmentCents: 100_000n, annualRateBasisPoints: 1_000,
+      dayCount: 'ACT/365F', description: 'Synthetic 10 percent member loan',
+    });
+    await recordLoanAdvanceInDatabase(database, {
+      id: 'advance-1', transactionId: 'advance-tx-1', journalEntryId: 'advance-je-1', loanId: 'member-loan',
+      date: '2024-01-01', cashAccountId: 'bank-1', amountCents: 50_000n, description: 'First advance',
+    });
+    await recordLoanAdvanceInDatabase(database, {
+      id: 'advance-2', transactionId: 'advance-tx-2', journalEntryId: 'advance-je-2', loanId: 'member-loan',
+      date: '2024-01-11', cashAccountId: 'bank-1', amountCents: 50_000n, description: 'Second advance',
+    });
+
+    const { recordLoanRepaymentInDatabase } = await import('../src/bookkeeping-store.ts');
+    expect(recordLoanRepaymentInDatabase).toBeTypeOf('function');
+    await recordLoanRepaymentInDatabase(database, {
+      id: 'repayment-1', transactionId: 'repayment-tx-1', journalEntryId: 'repayment-je-1',
+      loanId: 'member-loan', date: '2024-01-21', cashAccountId: 'bank-1',
+      principalCents: 10_000n, interestCents: 411n, description: 'First synthetic mixed repayment',
+    });
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(189_589n);
+    expect(snapshot.accounts.find((account) => account.id === 'loan-liability:member-loan').balanceCents).toBe(90_000n);
+    expect(snapshot.accounts.find((account) => account.id === 'loan-interest:business-1').balanceCents).toBe(411n);
+    expect(snapshot.cashBasis.expenseCents).toBe(411n);
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'repayment-tx-1')).toMatchObject({
+      kind: 'loan-repayment', amountCents: -10_411n, categoryAccountId: 'loan-liability:member-loan', category: 'Loan repayment',
+    });
+    expect(snapshot.loanActivities.at(-1)).toMatchObject({
+      id: 'repayment-1', kind: 'repayment', principalCents: 10_000n, interestCents: 411n,
+      amountCents: -10_411n, date: '2024-01-21',
+    });
+    expect(database.database.prepare(`
+      SELECT SUM(CAST(jl.debit_minor AS INTEGER)) AS debits, SUM(CAST(jl.credit_minor AS INTEGER)) AS credits
+      FROM journal_lines jl WHERE jl.journal_entry_id = 'repayment-je-1'
+    `).get()).toEqual({ debits: 10_411, credits: 10_411 });
+
+    await recordLoanRepaymentInDatabase(database, {
+      id: 'repayment-2', transactionId: 'repayment-tx-2', journalEntryId: 'repayment-je-2',
+      loanId: 'member-loan', date: '2024-02-20', cashAccountId: 'bank-1',
+      principalCents: 0n, interestCents: 740n, description: 'Interest-only synthetic repayment',
+    });
+    const afterInterestOnly = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(afterInterestOnly.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(188_849n);
+    expect(afterInterestOnly.accounts.find((account) => account.id === 'loan-liability:member-loan').balanceCents).toBe(90_000n);
+    expect(afterInterestOnly.accounts.find((account) => account.id === 'loan-interest:business-1').balanceCents).toBe(1_151n);
+    expect(afterInterestOnly.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 1_151n, netIncomeCents: -1_151n });
+    expect(afterInterestOnly.loanActivities.at(-1)).toMatchObject({
+      id: 'repayment-2', principalCents: 0n, interestCents: 740n, amountCents: -740n,
+    });
+    await recordLoanRepaymentInDatabase(database, {
+      id: 'repayment-3', transactionId: 'repayment-tx-3', journalEntryId: 'repayment-je-3',
+      loanId: 'member-loan', date: '2024-03-01', cashAccountId: 'bank-1',
+      principalCents: 90_000n, interestCents: 0n, description: 'Principal-only synthetic repayment',
+    });
+    const afterPrincipalOnly = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(afterPrincipalOnly.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(98_849n);
+    expect(afterPrincipalOnly.accounts.find((account) => account.id === 'loan-liability:member-loan').balanceCents).toBe(0n);
+    expect(afterPrincipalOnly.cashBasis.expenseCents).toBe(1_151n);
+    expect(afterPrincipalOnly.loanActivities.at(-1)).toMatchObject({
+      id: 'repayment-3', principalCents: 90_000n, interestCents: 0n, amountCents: -90_000n,
+    });
+
+    database.close();
+    database = new TestDatabase(path);
+    await ensureBookkeepingSchema(database);
+    const reopened = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(reopened.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(98_849n);
+    expect(reopened.accounts.find((account) => account.id === 'loan-liability:member-loan').balanceCents).toBe(0n);
+    expect(reopened.loanActivities.map((activity) => [activity.kind, activity.principalCents, activity.interestCents]))
+      .toEqual([
+        ['advance', 0n, 0n], ['advance', 0n, 0n], ['repayment', 10_000n, 411n],
+        ['repayment', 0n, 740n], ['repayment', 90_000n, 0n],
+      ]);
+    database.close();
+  });
+
+  it('rejects principal and interest overpayments atomically and keeps loan activity out of generic correction', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-1', openingJournalEntryId: 'opening-entry-1',
+    });
+    await createCashAccountInDatabase(database, {
+      id: 'cash-empty', businessId: 'business-1', name: 'Petty cash', kind: 'cash',
+    });
+    await createLoanAgreementInDatabase(database, {
+      id: 'loan-1', businessId: 'business-1', lenderType: 'third-party', lenderName: 'Synthetic lender',
+      agreementDate: '2024-01-01', commitmentCents: 50_000n, annualRateBasisPoints: 1_000,
+      dayCount: 'ACT/365F', description: 'Synthetic loan',
+    });
+    await recordLoanAdvanceInDatabase(database, {
+      id: 'advance-1', transactionId: 'advance-tx-1', journalEntryId: 'advance-je-1', loanId: 'loan-1',
+      date: '2024-01-01', cashAccountId: 'bank-1', amountCents: 10_000n, description: 'Funded advance',
+    });
+    const { recordLoanRepaymentInDatabase } = await import('../src/bookkeeping-store.ts');
+    expect(recordLoanRepaymentInDatabase).toBeTypeOf('function');
+    const before = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+
+    await expect(recordLoanRepaymentInDatabase(database, {
+      id: 'principal-overpay', transactionId: 'principal-overpay-tx', journalEntryId: 'principal-overpay-je',
+      loanId: 'loan-1', date: '2024-01-10', cashAccountId: 'bank-1',
+      principalCents: 10_001n, interestCents: 0n, description: 'Principal exceeds outstanding',
+    })).rejects.toThrow('outstanding principal');
+    await expect(recordLoanRepaymentInDatabase(database, {
+      id: 'interest-overpay', transactionId: 'interest-overpay-tx', journalEntryId: 'interest-overpay-je',
+      loanId: 'loan-1', date: '2024-01-10', cashAccountId: 'bank-1',
+      principalCents: 0n, interestCents: 26n, description: 'Interest exceeds accrued amount',
+    })).rejects.toThrow('accrued interest');
+    await expect(recordLoanRepaymentInDatabase(database, {
+      id: 'cash-overdraw', transactionId: 'cash-overdraw-tx', journalEntryId: 'cash-overdraw-je',
+      loanId: 'loan-1', date: '2024-01-10', cashAccountId: 'cash-empty',
+      principalCents: 0n, interestCents: 25n, description: 'Must roll back when petty cash is empty',
+    })).rejects.toThrow('cash account balance would become negative');
+    const after = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(after.transactions).toEqual(before.transactions);
+    expect(after.loanActivities).toEqual(before.loanActivities);
+    expect(after.accounts.map((account) => [account.id, account.balanceCents]))
+      .toEqual(before.accounts.map((account) => [account.id, account.balanceCents]));
+    await recordLoanRepaymentInDatabase(database, {
+      id: 'interest-only', transactionId: 'interest-only-tx', journalEntryId: 'interest-only-je',
+      loanId: 'loan-1', date: '2024-01-10', cashAccountId: 'bank-1',
+      principalCents: 0n, interestCents: 25n, description: 'Pay accrued interest only',
+    });
+    const beforeBackdated = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    await expect(recordLoanRepaymentInDatabase(database, {
+      id: 'backdated-principal', transactionId: 'backdated-principal-tx', journalEntryId: 'backdated-principal-je',
+      loanId: 'loan-1', date: '2024-01-08', cashAccountId: 'bank-1',
+      principalCents: 5_000n, interestCents: 0n, description: 'Would invalidate later interest payment',
+    })).rejects.toThrow('accrued interest');
+    const afterBackdated = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(afterBackdated.transactions).toEqual(beforeBackdated.transactions);
+    expect(afterBackdated.loanActivities).toEqual(beforeBackdated.loanActivities);
+    await expect(correctCashTransactionInDatabase(database, {
+      correctionId: 'correction-loan', originalTransactionId: 'advance-tx-1',
+      reversalTransactionId: 'loan-reversal', reversalJournalEntryId: 'loan-reversal-je',
+      replacement: {
+        id: 'loan-replacement', journalEntryId: 'loan-replacement-je', businessId: 'business-1',
+        date: '2024-01-11', kind: 'expense', accountId: 'bank-1', categoryAccountId: 'expense-other',
+        amountCents: 1n, description: 'Must not alter loan activity',
+      },
+    })).rejects.toThrow('original income or expense');
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM loan_repayments').get().count).toBe(1);
     database.close();
   });
 

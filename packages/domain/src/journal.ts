@@ -21,3 +21,40 @@ export function assertBalancedEntry(lines: readonly JournalLine[]): void {
   }
   if (debits === 0n || debits !== credits) throw new Error('Journal entry is not balanced.');
 }
+
+export function loanAdvanceLines(cashAccountId: string, liabilityAccountId: string, amountCents: bigint): JournalLine[] {
+  if (amountCents <= 0n) throw new Error('Loan advances must be positive.');
+  const lines: JournalLine[] = [
+    { account: cashAccountId, debitCents: amountCents, creditCents: 0n },
+    { account: liabilityAccountId, debitCents: 0n, creditCents: amountCents },
+  ];
+  assertBalancedEntry(lines);
+  return lines;
+}
+
+export function loanRepaymentLines(
+  cashAccountId: string,
+  liabilityAccountId: string,
+  interestExpenseAccountId: string,
+  principalCents: bigint,
+  interestCents: bigint,
+): JournalLine[] {
+  if (principalCents < 0n || interestCents < 0n) throw new Error('Loan repayment amounts cannot be negative.');
+  if (principalCents === 0n && interestCents === 0n) {
+    throw new Error('A loan repayment must include a positive principal or interest amount.');
+  }
+  const lines: JournalLine[] = [];
+  if (principalCents > 0n) {
+    lines.push({ account: liabilityAccountId, debitCents: principalCents, creditCents: 0n });
+  }
+  if (interestCents > 0n) {
+    lines.push({ account: interestExpenseAccountId, debitCents: interestCents, creditCents: 0n });
+  }
+  lines.push({
+    account: cashAccountId,
+    debitCents: 0n,
+    creditCents: principalCents + interestCents,
+  });
+  assertBalancedEntry(lines);
+  return lines;
+}
