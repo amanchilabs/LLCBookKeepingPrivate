@@ -23,6 +23,7 @@ import {
   reverseGuaranteedPaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
+  recordSplitCashTransactionInDatabase,
   reopenAccountReconciliationInDatabase,
   replaceMembersInDatabase,
   setAccountReconciliationItemClearedInDatabase,
@@ -155,6 +156,134 @@ afterEach(() => {
 });
 
 describe('bookkeeping repository SQL contract', () => {
+  it('upgrades v8 transaction records to split-capable storage without changing legacy balances', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 125_000n,
+      openingTransactionId: 'opening-v8', openingJournalEntryId: 'opening-v8-journal',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'expense-v8', journalEntryId: 'expense-v8-journal', businessId: 'business-1',
+      date: '2024-01-10', kind: 'expense', accountId: 'bank-1', categoryAccountId: 'expense-rent',
+      amountCents: 1_000n, description: 'Legacy category transaction',
+    });
+    database.database.exec('DROP TABLE transaction_splits; UPDATE bookkeeping_schema SET version = 8 WHERE singleton = 1;');
+
+    await ensureBookkeepingSchema(database);
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(9);
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(124_000n);
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'expense-v8').splitLines).toEqual([
+      { categoryAccountId: 'expense-rent', category: 'Rent', amountCents: 1_000n },
+    ]);
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
+  it('posts and persists category splits as one balanced cash transaction', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 125_000n,
+      openingTransactionId: 'opening-split', openingJournalEntryId: 'opening-split-journal',
+    });
+
+    await recordSplitCashTransactionInDatabase(database, {
+      id: 'split-expense', journalEntryId: 'split-expense-journal', businessId: 'business-1',
+      date: '2024-01-10', kind: 'expense', accountId: 'bank-1', amountCents: 7_500n,
+      description: 'Synthetic combined receipt',
+      splits: [
+        { categoryAccountId: 'expense-rent', amountCents: 5_000n },
+        { categoryAccountId: 'expense-supplies', amountCents: 2_500n },
+      ],
+    });
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.transactions).toHaveLength(2);
+    expect(snapshot.transactions[0]).toMatchObject({
+      id: 'split-expense', kind: 'expense', amountCents: -7_500n,
+      splitLines: [
+        { categoryAccountId: 'expense-rent', category: 'Rent', amountCents: 5_000n },
+        { categoryAccountId: 'expense-supplies', category: 'Office Supplies', amountCents: 2_500n },
+      ],
+    });
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(117_500n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 7_500n, netIncomeCents: -7_500n });
+    expect(database.database.prepare(`
+      SELECT je.id FROM journal_entries je JOIN journal_lines jl ON jl.journal_entry_id = je.id
+      GROUP BY je.id HAVING SUM(CAST(jl.debit_minor AS INTEGER)) != SUM(CAST(jl.credit_minor AS INTEGER))
+    `).all()).toEqual([]);
+    expect(transactionsCsv(snapshot).split('\r\n')).toContain(
+      '"2024-01-10","Rent","-50.00","Checking","Synthetic combined receipt"',
+    );
+    expect(transactionsCsv(snapshot).split('\r\n')).toContain(
+      '"2024-01-10","Office Supplies","-25.00","Checking","Synthetic combined receipt"',
+    );
+
+    await correctCashTransactionInDatabase(database, {
+      correctionId: 'split-correction', originalTransactionId: 'split-expense',
+      reversalTransactionId: 'split-reversal', reversalJournalEntryId: 'split-reversal-journal',
+      replacement: {
+        id: 'split-replacement', journalEntryId: 'split-replacement-journal', businessId: 'business-1',
+        date: '2024-01-12', kind: 'expense', accountId: 'bank-1', categoryAccountId: 'expense-rent',
+        amountCents: 8_000n, description: 'Synthetic corrected split receipt',
+      },
+      replacementSplits: [
+        { categoryAccountId: 'expense-rent', amountCents: 6_000n },
+        { categoryAccountId: 'expense-supplies', amountCents: 2_000n },
+      ],
+    });
+    const corrected = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(corrected.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(117_000n);
+    expect(corrected.cashBasis.expenseCents).toBe(8_000n);
+    expect(corrected.transactions.find((transaction) => transaction.id === 'split-reversal').splitLines).toEqual([
+      { categoryAccountId: 'expense-rent', category: 'Rent', amountCents: 5_000n },
+      { categoryAccountId: 'expense-supplies', category: 'Office Supplies', amountCents: 2_500n },
+    ]);
+    const correctedCsv = transactionsCsv(corrected).split('\r\n');
+    expect(correctedCsv).toContain('"2024-01-10","Rent · reversal","50.00","Checking","Reversal of: Synthetic combined receipt"');
+    expect(correctedCsv).toContain('"2024-01-12","Rent","-60.00","Checking","Synthetic corrected split receipt"');
+    const exportedCashCents = correctedCsv.slice(1).reduce((sum, row) => {
+      const amount = Number(row.split(',')[2].replaceAll('"', ''));
+      return sum + BigInt(Math.round(amount * 100));
+    }, 0n);
+    expect(exportedCashCents).toBe(corrected.accounts.find((account) => account.id === 'bank-1').balanceCents);
+
+    await recordSplitCashTransactionInDatabase(database, {
+      id: 'split-income', journalEntryId: 'split-income-journal', businessId: 'business-1',
+      date: '2024-01-13', kind: 'income', accountId: 'bank-1', amountCents: 20_000n,
+      description: 'Synthetic combined deposit',
+      splits: [
+        { categoryAccountId: 'income-services', amountCents: 12_500n },
+        { categoryAccountId: 'income-other', amountCents: 7_500n },
+      ],
+    });
+    const withIncome = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(withIncome.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(137_000n);
+    expect(withIncome.cashBasis).toEqual({ incomeCents: 20_000n, expenseCents: 8_000n, netIncomeCents: 12_000n });
+    expect(transactionsCsv(withIncome).split('\r\n')).toContain(
+      '"2024-01-13","Sales and Services","125.00","Checking","Synthetic combined deposit"',
+    );
+    expect(transactionsCsv(withIncome).split('\r\n')).toContain(
+      '"2024-01-13","Other Income","75.00","Checking","Synthetic combined deposit"',
+    );
+
+    await expect(recordSplitCashTransactionInDatabase(database, {
+      id: 'bad-split', journalEntryId: 'bad-split-journal', businessId: 'business-1',
+      date: '2024-01-11', kind: 'expense', accountId: 'bank-1', amountCents: 7_500n,
+      description: 'Split does not add up',
+      splits: [{ categoryAccountId: 'expense-rent', amountCents: 7_499n }, { categoryAccountId: 'expense-supplies', amountCents: 2n }],
+    })).rejects.toThrow('split amounts must equal the transaction total');
+    expect(database.database.prepare(`SELECT COUNT(*) AS count FROM transactions WHERE id = 'bad-split'`).get().count).toBe(0);
+    expect(database.database.prepare(`SELECT COUNT(*) AS count FROM journal_entries WHERE id = 'bad-split-journal'`).get().count).toBe(0);
+    database.close();
+  });
+
   it('adds custom income and expense accounts that can post balanced, reportable transactions', async () => {
     const store = await import('../src/bookkeeping-store.ts');
     expect(store.createCategoryAccountInDatabase).toBeTypeOf('function');
@@ -526,7 +655,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(8);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(9);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(10_000n);
     expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal')).toMatchObject({
       cashAccountName: 'Checking', reason: 'Cash returned', amountCents: -5_000n,
@@ -653,7 +782,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(8);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(9);
     expect(snapshot.loanAgreements[0].dayCount).toBe('ACT/ACT ISDA');
     expect(snapshot.loanActivities.map((activity) => [activity.kind, activity.amountCents])).toEqual([
       ['advance', 25_000n], ['repayment', -10_022n],
@@ -718,7 +847,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
 
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(8);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(9);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(45_000n);
     expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 5_000n, netIncomeCents: -5_000n });
     expect(snapshot.transactions.map((transaction) => transaction.id).sort()).toEqual(['expense-migration', 'opening-migration']);

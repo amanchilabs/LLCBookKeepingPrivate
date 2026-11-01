@@ -7,6 +7,7 @@ import { parseUsd } from '../../../packages/domain/src/money';
 import {
   correctCashTransaction,
   recordCashTransaction,
+  recordSplitCashTransaction,
   recordTransfer,
 } from '../../../packages/storage-native/src/bookkeeping-service';
 import {
@@ -19,6 +20,11 @@ import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLoc
 
 type EntryKind = 'income' | 'expense' | 'transfer';
 type KindFilter = 'all' | EntryKind | 'loan-advance' | 'loan-repayment';
+interface DraftSplit {
+  id: string;
+  categoryAccountId: string;
+  amount: string;
+}
 interface TransactionDraft {
   kind: EntryKind;
   date: string;
@@ -26,6 +32,7 @@ interface TransactionDraft {
   categoryAccountId: string;
   amount: string;
   description: string;
+  splits: DraftSplit[] | null;
 }
 
 export function TransactionsScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void> }) {
@@ -49,7 +56,8 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
       const matchesKind = kindFilter === 'all' || transaction.kind === kindFilter;
       const matchesAccount = accountFilter === 'all' || transaction.accountId === accountFilter
         || (transaction.transferRole !== null && transaction.categoryAccountId === accountFilter);
-      const matchesCategory = categoryFilter === 'all' || transaction.categoryAccountId === categoryFilter;
+      const matchesCategory = categoryFilter === 'all' || transaction.categoryAccountId === categoryFilter
+        || transaction.splitLines?.some((split) => split.categoryAccountId === categoryFilter) === true;
       const matchesSearch = !query || [transaction.description, transaction.category, transaction.accountName, transaction.date]
         .some((value) => value.toLowerCase().includes(query));
       return matchesKind && matchesAccount && matchesCategory && matchesSearch;
@@ -69,6 +77,7 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
         : snapshot.accounts.find((account) => account.kind === kind)?.id ?? '',
       amount: '',
       description: '',
+      splits: null,
     });
   };
 
@@ -85,6 +94,11 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
       categoryAccountId: transaction.categoryAccountId,
       amount: formatPositiveCents(transaction.amountCents < 0n ? -transaction.amountCents : transaction.amountCents),
       description: transaction.description,
+      splits: (transaction.splitLines?.length ?? 0) > 1
+        ? transaction.splitLines!.map((split) => ({
+          id: Crypto.randomUUID(), categoryAccountId: split.categoryAccountId, amount: formatPositiveCents(split.amountCents),
+        }))
+        : null,
     });
   };
 
@@ -94,9 +108,15 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
     setError(null);
     setNotice(null);
     try {
-      const amountCents = parseUsd(draft.amount);
+      const splitInputs = draft.splits?.map((split) => ({
+        categoryAccountId: split.categoryAccountId,
+        amountCents: parseUsd(split.amount),
+      }));
+      const amountCents = splitInputs
+        ? splitInputs.reduce((sum, split) => sum + split.amountCents, 0n)
+        : parseUsd(draft.amount);
       if (amountCents <= 0n) throw new Error('Enter an amount greater than zero.');
-      if (!draft.accountId || !draft.categoryAccountId) {
+      if (!draft.accountId || (splitInputs ? splitInputs.some((split) => !split.categoryAccountId) : !draft.categoryAccountId)) {
         throw new Error(draft.kind === 'transfer'
           ? 'Create two bank or cash accounts and choose both accounts.'
           : 'Create a bank or cash account and choose a category first.');
@@ -114,10 +134,11 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
             date: draft.date,
             kind: draft.kind,
             accountId: draft.accountId,
-            categoryAccountId: draft.categoryAccountId,
+            categoryAccountId: splitInputs?.[0]?.categoryAccountId ?? draft.categoryAccountId,
             amountCents,
             description: draft.description,
           },
+          replacementSplits: splitInputs,
         });
         setNotice('The original remains in history. A reversal and replacement were posted.');
       } else if (draft.kind === 'transfer') {
@@ -133,18 +154,18 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
         });
         setNotice('Transfer posted between the selected cash or bank accounts; it does not change income or expenses.');
       } else {
-        await recordCashTransaction({
-          id: Crypto.randomUUID(),
-          journalEntryId: Crypto.randomUUID(),
-          businessId: snapshot.business!.id,
-          date: draft.date,
-          kind: draft.kind,
-          accountId: draft.accountId,
-          categoryAccountId: draft.categoryAccountId,
-          amountCents,
-          description: draft.description,
-        });
-        setNotice('Transaction posted to the encrypted journal.');
+        const common = {
+          id: Crypto.randomUUID(), journalEntryId: Crypto.randomUUID(), businessId: snapshot.business!.id,
+          date: draft.date, kind: draft.kind as 'income' | 'expense', accountId: draft.accountId,
+          amountCents, description: draft.description,
+        };
+        if (splitInputs) {
+          await recordSplitCashTransaction({ ...common, splits: splitInputs });
+          setNotice('Split transaction posted to the encrypted journal with category allocations.');
+        } else {
+          await recordCashTransaction({ ...common, categoryAccountId: draft.categoryAccountId });
+          setNotice('Transaction posted to the encrypted journal.');
+        }
       }
       setDraft(null);
       setCorrecting(null);
@@ -177,6 +198,9 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
     .filter((account) => account.kind === 'income' || account.kind === 'expense')
     .concat(cashAccounts)
     .map((account) => ({ value: account.id, title: account.name }))];
+  const splitTotalCents = draft?.splits?.reduce((sum, split) => {
+    try { return sum + parseUsd(split.amount); } catch { return sum; }
+  }, 0n) ?? 0n;
 
   return <Page>
     <Heading title="Transactions" subtitle="Income, expenses, and account transfers post balanced entries to the encrypted journal." />
@@ -193,6 +217,7 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
       ]} onChange={(kind) => setDraft((current) => current ? {
         ...current,
         kind,
+        splits: null,
         categoryAccountId: kind === 'transfer'
           ? cashAccounts.find((account) => account.id !== current.accountId)?.id ?? ''
           : snapshot.accounts.find((account) => account.kind === kind)?.id ?? '',
@@ -204,10 +229,46 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
           ? cashAccounts.find((account) => account.id !== accountId)?.id ?? ''
           : current.categoryAccountId,
       } : current)} />
-      <Choice label={draft.kind === 'transfer' ? 'To account' : 'Category'} value={draft.categoryAccountId} options={categoryOptions} onChange={(categoryAccountId) => setDraft((current) => current ? { ...current, categoryAccountId } : current)} />
+      {!draft.splits ? <Choice label={draft.kind === 'transfer' ? 'To account' : 'Category'} value={draft.categoryAccountId} options={categoryOptions} onChange={(categoryAccountId) => setDraft((current) => current ? { ...current, categoryAccountId } : current)} /> : null}
+      {draft.splits ? <View>
+        <Text style={uiStyles.sectionTitle}>Category allocations · total ${formatPositiveCents(splitTotalCents)}</Text>
+        {draft.splits.map((split, index) => <View key={split.id}>
+          <Choice label={`Split ${index + 1} category`} value={split.categoryAccountId} options={categoryOptions} onChange={(categoryAccountId) => setDraft((current) => current ? {
+            ...current,
+            splits: current.splits?.map((item) => item.id === split.id ? { ...item, categoryAccountId } : item) ?? null,
+          } : current)} />
+          <Field label={`Split ${index + 1} amount in USD`} value={split.amount} onChangeText={(amount) => setDraft((current) => current ? {
+            ...current,
+            splits: current.splits?.map((item) => item.id === split.id ? { ...item, amount } : item) ?? null,
+          } : current)} placeholder="0.00" keyboardType="decimal-pad" />
+          {draft.splits!.length > 2 ? <Button title={`Remove split ${index + 1}`} secondary onPress={() => setDraft((current) => current ? {
+            ...current, splits: current.splits?.filter((item) => item.id !== split.id) ?? null,
+          } : current)} /> : null}
+        </View>)}
+        <Button title="Add category line" secondary onPress={() => setDraft((current) => {
+          if (!current?.splits) return current;
+          const used = new Set(current.splits.map((split) => split.categoryAccountId));
+          const nextCategory = categories.find((account) => !used.has(account.id));
+          return nextCategory ? {
+            ...current,
+            splits: [...current.splits, { id: Crypto.randomUUID(), categoryAccountId: nextCategory.id, amount: '' }],
+          } : current;
+        })} disabled={draft.splits.length >= categories.length} />
+        <Text style={uiStyles.helper}>Split amounts must be positive and add up exactly to the transaction total.</Text>
+      </View> : draft.kind !== 'transfer' && categories.length > 1 ? <Button title="Split across categories" secondary onPress={() => {
+        const otherCategory = categories.find((account) => account.id !== draft.categoryAccountId);
+        if (!otherCategory) return;
+        setDraft((current) => current ? {
+          ...current,
+          splits: [
+            { id: Crypto.randomUUID(), categoryAccountId: current.categoryAccountId, amount: '' },
+            { id: Crypto.randomUUID(), categoryAccountId: otherCategory.id, amount: '' },
+          ],
+        } : current);
+      }} /> : null}
       <View style={uiStyles.row}>
         <Field label="Transaction date" value={draft.date} onChangeText={(date) => setDraft((current) => current ? { ...current, date } : current)} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
-        <Field label="Amount in USD" value={draft.amount} onChangeText={(amount) => setDraft((current) => current ? { ...current, amount } : current)} placeholder="0.00" keyboardType="decimal-pad" />
+        {!draft.splits ? <Field label="Amount in USD" value={draft.amount} onChangeText={(amount) => setDraft((current) => current ? { ...current, amount } : current)} placeholder="0.00" keyboardType="decimal-pad" /> : null}
       </View>
       <Field label="Description" value={draft.description} onChangeText={(description) => setDraft((current) => current ? { ...current, description } : current)} placeholder="What was this payment for?" />
       <FormError message={error} />

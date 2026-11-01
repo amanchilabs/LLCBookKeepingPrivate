@@ -18,6 +18,7 @@ import {
   recordLoanRepaymentInDatabase,
   recordMemberCapitalActivityInDatabase,
   recordCashTransactionInDatabase,
+  recordSplitCashTransactionInDatabase,
   recordTransferInDatabase,
   reopenAccountReconciliationInDatabase,
   reverseGuaranteedPaymentInDatabase,
@@ -32,6 +33,7 @@ import {
   type JournalBalanceReport,
   type CorrectCashTransactionInput,
   type CashTransactionInput,
+  type SplitCashTransactionInput,
   type TransferInput,
   type CreateGuaranteedPaymentObligationInput,
   type CreateLoanAgreementInput,
@@ -84,6 +86,10 @@ export async function createCategoryAccount(input: CategoryAccountInput): Promis
 
 export async function recordCashTransaction(input: CashTransactionInput): Promise<void> {
   await useActiveBooks((database) => recordCashTransactionInDatabase(database, input));
+}
+
+export async function recordSplitCashTransaction(input: SplitCashTransactionInput): Promise<void> {
+  await useActiveBooks((database) => recordSplitCashTransactionInDatabase(database, input));
 }
 
 export async function recordTransfer(input: TransferInput): Promise<void> {

@@ -18,7 +18,7 @@ import { accountTransferLines, assertBalancedEntry, loanAdvanceLines, loanRepaym
 import { calculateUnpaidLoanInterestCents, type DatedAmount, type LoanDayCount } from '../../domain/src/loan-interest';
 import { formatUsd } from '../../domain/src/money';
 
-const SCHEMA_VERSION = 8;
+const SCHEMA_VERSION = 9;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -63,6 +63,15 @@ export interface CashTransactionInput {
   categoryAccountId: string;
   amountCents: bigint;
   description: string;
+}
+
+export interface CashTransactionSplitInput {
+  categoryAccountId: string;
+  amountCents: bigint;
+}
+
+export interface SplitCashTransactionInput extends Omit<CashTransactionInput, 'categoryAccountId'> {
+  splits: readonly CashTransactionSplitInput[];
 }
 
 export interface TransferInput {
@@ -126,6 +135,7 @@ export interface CorrectCashTransactionInput {
   reversalTransactionId: string;
   reversalJournalEntryId: string;
   replacement: CashTransactionInput | TransferTransactionInput;
+  replacementSplits?: readonly CashTransactionSplitInput[];
 }
 
 export interface ReplaceMembersInput {
@@ -351,6 +361,13 @@ export interface TransactionRecord {
   correctionRole: 'reversal' | 'replacement' | null;
   isGuaranteedPayment: boolean;
   transferRole: 'transfer' | 'transfer-reversal' | null;
+  splitLines?: TransactionSplitRecord[];
+}
+
+export interface TransactionSplitRecord {
+  categoryAccountId: string;
+  category: string;
+  amountCents: bigint;
 }
 
 export interface CashBasisTotals {
@@ -629,6 +646,33 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
   if (version < 6) await migrateBookkeepingV5ToV6(database);
   if (version < 7) await migrateBookkeepingV6ToV7(database);
   if (version < 8) await migrateBookkeepingV7ToV8(database);
+  if (version < 9) await migrateBookkeepingV8ToV9(database);
+}
+
+async function migrateBookkeepingV8ToV9(database: Database): Promise<void> {
+  await database.execAsync('BEGIN IMMEDIATE;');
+  try {
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS transaction_splits (
+        transaction_id TEXT NOT NULL REFERENCES transactions(id),
+        line_number INTEGER NOT NULL CHECK (line_number >= 1),
+        category_account_id TEXT NOT NULL REFERENCES accounts(id),
+        amount_minor TEXT NOT NULL CHECK (CAST(amount_minor AS INTEGER) > 0),
+        PRIMARY KEY (transaction_id, line_number),
+        UNIQUE (transaction_id, category_account_id)
+      );
+      CREATE INDEX IF NOT EXISTS transaction_splits_category ON transaction_splits (category_account_id, transaction_id);
+      UPDATE bookkeeping_schema SET version = 9 WHERE singleton = 1;
+    `);
+    const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+      'PRAGMA foreign_key_check',
+    );
+    if (violations.length > 0) throw new Error('The transaction split migration found invalid record references.');
+    await database.execAsync('COMMIT;');
+  } catch (error) {
+    await database.execAsync('ROLLBACK;').catch(() => undefined);
+    throw error;
+  }
 }
 
 async function migrateBookkeepingV7ToV8(database: Database): Promise<void> {
@@ -1287,6 +1331,61 @@ async function requireCategoryAccount(
   if (!account) throw new Error(`Choose an active ${kind} account for this transaction.`);
 }
 
+async function validateCashTransactionSplits(
+  database: Database,
+  businessId: string,
+  kind: 'income' | 'expense',
+  amountCents: bigint,
+  splits: readonly CashTransactionSplitInput[],
+): Promise<void> {
+  if (splits.length < 2) throw new Error('A split transaction needs at least two category lines.');
+  const categoryIds = new Set<string>();
+  let splitTotal = 0n;
+  for (const split of splits) {
+    if (!split.categoryAccountId || categoryIds.has(split.categoryAccountId)) {
+      throw new Error('Choose a different category for each split line.');
+    }
+    if (split.amountCents <= 0n) throw new Error('Every split amount must be greater than zero.');
+    categoryIds.add(split.categoryAccountId);
+    splitTotal += split.amountCents;
+    await requireCategoryAccount(database, businessId, split.categoryAccountId, kind);
+  }
+  if (splitTotal !== amountCents) throw new Error('The split amounts must equal the transaction total.');
+}
+
+function cashSplitJournalLines(
+  kind: 'income' | 'expense',
+  cashAccountId: string,
+  splits: readonly CashTransactionSplitInput[],
+): JournalLine[] {
+  const total = splits.reduce((sum, split) => sum + split.amountCents, 0n);
+  const lines: JournalLine[] = kind === 'income'
+    ? [
+      { account: cashAccountId, debitCents: total, creditCents: 0n },
+      ...splits.map((split) => ({ account: split.categoryAccountId, debitCents: 0n, creditCents: split.amountCents })),
+    ]
+    : [
+      ...splits.map((split) => ({ account: split.categoryAccountId, debitCents: split.amountCents, creditCents: 0n })),
+      { account: cashAccountId, debitCents: 0n, creditCents: total },
+    ];
+  assertBalancedEntry(lines);
+  return lines;
+}
+
+async function insertTransactionSplits(
+  database: Database,
+  transactionId: string,
+  splits: readonly CashTransactionSplitInput[],
+): Promise<void> {
+  for (const [index, split] of splits.entries()) {
+    await database.runAsync(
+      `INSERT INTO transaction_splits (transaction_id, line_number, category_account_id, amount_minor)
+       VALUES (?, ?, ?, ?)`,
+      transactionId, index + 1, split.categoryAccountId, split.amountCents.toString(),
+    );
+  }
+}
+
 async function insertJournalEntry(
   database: Database,
   businessId: string,
@@ -1655,6 +1754,33 @@ export async function recordCashTransactionInDatabase(database: Database, input:
     await insertJournalEntry(database, input.businessId, input.journalEntryId, input.date, input.kind, input.description, lines);
     const signedAmount = input.kind === 'income' ? input.amountCents : -input.amountCents;
     await insertTransaction(database, { ...input, amountCents: signedAmount });
+    await ensureCashAccountNeverNegative(database, input.businessId, input.accountId);
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function recordSplitCashTransactionInDatabase(
+  database: Database,
+  input: SplitCashTransactionInput,
+): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  const business = await requireBusiness(database, input.businessId);
+  if (input.date < business.bookkeepingStartDate) throw new Error('Transaction date cannot precede the bookkeeping start date.');
+  requireDate(input.date, 'transaction date');
+  if (!input.description.trim()) throw new Error('Enter a transaction description.');
+  if (input.amountCents <= 0n) throw new Error('Transaction amounts must be positive.');
+  await requireCashAccount(database, input.businessId, input.accountId);
+  await validateCashTransactionSplits(database, input.businessId, input.kind, input.amountCents, input.splits);
+  const lines = cashSplitJournalLines(input.kind, input.accountId, input.splits);
+  await inSqlTransaction(database, async () => {
+    await insertJournalEntry(database, input.businessId, input.journalEntryId, input.date, input.kind, input.description, lines);
+    const signedAmount = input.kind === 'income' ? input.amountCents : -input.amountCents;
+    await insertTransaction(database, {
+      id: input.id, journalEntryId: input.journalEntryId, businessId: input.businessId,
+      date: input.date, kind: input.kind, accountId: input.accountId,
+      categoryAccountId: input.splits[0].categoryAccountId, amountCents: signedAmount, description: input.description,
+    });
+    await insertTransactionSplits(database, input.id, input.splits);
     await ensureCashAccountNeverNegative(database, input.businessId, input.accountId);
   });
 }
@@ -2184,12 +2310,20 @@ export async function correctCashTransactionInDatabase(database: Database, input
   if (replacement.amountCents <= 0n) throw new Error('Replacement amount must be positive.');
   if (!replacement.description.trim()) throw new Error('Enter a replacement description.');
   if (replacement.kind === 'transfer') {
+    if (input.replacementSplits) throw new Error('Transfers cannot use category splits.');
     if (replacement.accountId === replacement.categoryAccountId) throw new Error('Transfer accounts must be different.');
     await requireCashAccount(database, replacement.businessId, replacement.accountId);
     await requireCashAccount(database, replacement.businessId, replacement.categoryAccountId);
   } else {
     await requireCashAccount(database, replacement.businessId, replacement.accountId);
-    await requireCategoryAccount(database, replacement.businessId, replacement.categoryAccountId, replacement.kind);
+    if (input.replacementSplits) {
+      if (replacement.categoryAccountId !== input.replacementSplits[0]?.categoryAccountId) {
+        throw new Error('The replacement category must match its first split line.');
+      }
+      await validateCashTransactionSplits(database, replacement.businessId, replacement.kind, replacement.amountCents, input.replacementSplits);
+    } else {
+      await requireCategoryAccount(database, replacement.businessId, replacement.categoryAccountId, replacement.kind);
+    }
   }
 
   await inSqlTransaction(database, async () => {
@@ -2246,8 +2380,20 @@ export async function correctCashTransactionInDatabase(database: Database, input
       amountCents: -BigInt(original.amountMinor),
       description: reversalDescription,
     });
+    const originalSplits = await database.getAllAsync<{ categoryAccountId: string; amountMinor: string }>(
+      `SELECT category_account_id AS categoryAccountId, amount_minor AS amountMinor
+       FROM transaction_splits WHERE transaction_id = ? ORDER BY line_number`, original.id,
+    );
+    if (originalSplits.length > 0) {
+      await insertTransactionSplits(database, input.reversalTransactionId, originalSplits.map((split) => ({
+        categoryAccountId: split.categoryAccountId,
+        amountCents: BigInt(split.amountMinor),
+      })));
+    }
 
-    const replacementLines = replacement.kind === 'transfer'
+    const replacementLines = input.replacementSplits
+      ? cashSplitJournalLines(replacement.kind as 'income' | 'expense', replacement.accountId, input.replacementSplits)
+      : replacement.kind === 'transfer'
       ? accountTransferLines(replacement.accountId, replacement.categoryAccountId, replacement.amountCents)
       : replacement.kind === 'income'
         ? cashIncomeLines(replacement.accountId, replacement.categoryAccountId, replacement.amountCents)
@@ -2258,6 +2404,7 @@ export async function correctCashTransactionInDatabase(database: Database, input
     );
     const replacementSignedAmount = replacement.kind === 'income' ? replacement.amountCents : -replacement.amountCents;
     await insertTransaction(database, { ...replacement, amountCents: replacementSignedAmount });
+    if (input.replacementSplits) await insertTransactionSplits(database, replacement.id, input.replacementSplits);
 
     const createdAt = new Date().toISOString();
     await database.runAsync(
@@ -2275,7 +2422,8 @@ export async function correctCashTransactionInDatabase(database: Database, input
       replacement.id, input.correctionId,
     );
     for (const accountId of new Set([
-      original.accountId, original.categoryAccountId, replacement.accountId, replacement.categoryAccountId,
+      original.accountId, original.categoryAccountId, ...originalSplits.map((split) => split.categoryAccountId),
+      replacement.accountId, replacement.categoryAccountId, ...(input.replacementSplits ?? []).map((split) => split.categoryAccountId),
     ])) {
       await ensureCashAccountNeverNegative(database, original.businessId, accountId);
     }
@@ -2433,10 +2581,37 @@ async function readTransactions(database: Database, businessId: string): Promise
      LEFT JOIN guaranteed_payment_payments guaranteedPaymentOriginal ON guaranteedPaymentOriginal.id = guaranteedPaymentReversal.payment_id
      WHERE t.business_id = ? ORDER BY t.entry_date DESC, t.created_at DESC, t.id`, businessId,
   );
+  const splitRows = await database.getAllAsync<{
+    transactionId: string; categoryAccountId: string; category: string; amountCents: string;
+  }>(
+    `SELECT split.transaction_id AS transactionId, split.category_account_id AS categoryAccountId,
+            category.name AS category, split.amount_minor AS amountCents
+     FROM transaction_splits split JOIN accounts category ON category.id = split.category_account_id
+     JOIN transactions tx ON tx.id = split.transaction_id
+     WHERE tx.business_id = ? ORDER BY split.transaction_id, split.line_number`, businessId,
+  );
+  const splitsByTransaction = new Map<string, TransactionSplitRecord[]>();
+  for (const split of splitRows) {
+    const splits = splitsByTransaction.get(split.transactionId) ?? [];
+    splits.push({
+      categoryAccountId: split.categoryAccountId,
+      category: split.category,
+      amountCents: BigInt(split.amountCents),
+    });
+    splitsByTransaction.set(split.transactionId, splits);
+  }
   return rows.map((row) => ({
     ...row,
     amountCents: BigInt(row.amountCents),
     isGuaranteedPayment: row.isGuaranteedPayment === 1,
+    splitLines: splitsByTransaction.get(row.id) ?? (row.transferRole ? [] : [{
+      categoryAccountId: row.categoryAccountId,
+      category: row.category,
+      amountCents: BigInt(row.amountCents) < 0n ? -BigInt(row.amountCents) : BigInt(row.amountCents),
+    }]),
+    category: (splitsByTransaction.get(row.id) ?? []).length > 1
+      ? splitsByTransaction.get(row.id)!.map((split) => split.category).join(', ')
+      : row.category,
   }));
 }
 
@@ -2938,6 +3113,15 @@ export function transactionsCsv(snapshot: BookkeepingSnapshot): string {
           transaction.description,
         ],
       ];
+    }
+    if ((transaction.splitLines?.length ?? 0) > 1) {
+      return transaction.splitLines!.map((split) => [
+        transaction.date,
+        transaction.kind === 'reversal' ? `${split.category} · reversal` : split.category,
+        signedAmount(transaction.amountCents < 0n ? -split.amountCents : split.amountCents),
+        transaction.accountName,
+        transaction.description,
+      ]);
     }
     return [[
       transaction.date,
