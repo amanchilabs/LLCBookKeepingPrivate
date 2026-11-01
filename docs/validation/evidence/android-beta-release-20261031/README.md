@@ -1,29 +1,42 @@
 # Standalone Android beta candidate
 
-**Source checkpoint:** `c25649f` (`feature/member-capital-20261031-a91c`)
-**Build:** Android Release variant, version `0.1.0` / code `1`, min SDK 24, target SDK 36
-**Artifact (local, ignored by Git):** `android/app/build/outputs/apk/release/app-release.apk`
-**SHA-256:** `404851f4367625e10ad0ebdc2e2c0551a0d1809b83e0279c58fa65858f769935`
-**Size:** 134,658,861 bytes
-**Signing:** APK Signature Scheme v2 verified. Signed with the local Android Debug certificate, SHA-256 `fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c`. This is for controlled synthetic-data beta testing only; it is not a production signing key.
+## Current artifact
 
-## Emulator verification
+- **Source commit:** `ee2cdd1b88f48dab230e543422d667ebc78ab435` (`feature/member-capital-20261031-a91c`)
+- **Build:** Android Release, version `0.1.0` / code `1`, min SDK 24, target SDK 36
+- **Artifact (local, ignored by Git):** `android/app/build/outputs/apk/release/app-release.apk`
+- **SHA-256:** `b70e589c64e11966344b679af8a5e5c0b1f98cd9d7d91e40c5d3b30e1feb830e`
+- **Size:** 134,678,745 bytes
+- **Signing:** APK Signature Scheme v2 verified. Signed with the local Android Debug certificate, SHA-256 `fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c`. This is for controlled synthetic-data beta testing only; it is not a production signing key.
 
-- `./gradlew :app:assembleRelease` completed successfully; the Gradle task bundled the JavaScript into the APK.
-- `apksigner verify --verbose --print-certs` succeeded.
-- `adb install -r` updated the existing emulator app without clearing its synthetic local database.
-- Stopped the LLCBookKeepingPrivate Metro process, disabled emulator Wi-Fi and mobile data, force-stopped and relaunched the Release app. It opened directly into the persisted Dashboard without Metro or a development-server picker.
-- The offline Dashboard showed `$3,537.81` cash; the Members screen showed the persisted synthetic `Jordan QAx` edit and 40/20/20/20 interests.
-- While Wi-Fi and mobile data remained disabled, opened Reports. Cash-basis P&L showed `$100.00` income, `$132.19` expenses, and `−$32.19` net; exporting the report opened the native share sheet for `llc-profit-and-loss-2026-10-31.csv`. No share target was selected.
+## Exact-checkpoint emulator verification
 
-Images show the offline dashboard, Members and Reports screens after relaunch, and the native CSV share sheet. Device: Android 16/API 36 arm64 emulator `emulator-5554`.
+- `./gradlew :app:assembleRelease` completed successfully from source commit `ee2cdd1` and bundled the JavaScript into the APK. `apksigner verify --verbose --print-certs` succeeded.
+- Installed the APK with `adb install -r` over the existing emulator app. The update preserved its synthetic local database.
+- Android 16 / API 36 arm64 emulator `emulator-5554` was the only connected device. The Samsung physical device was not attached.
+- With emulator Wi-Fi and mobile data disabled, launched the Release app directly without Metro. Imported a synthetic expense from a local CSV using the amount `-$5.00`, force-stopped and relaunched offline, then verified it remained in transaction history and updated the dashboard and P&L.
+- After that import, dashboard cash was `$3,857.81`, including Synthetic Checking `$3,177.81`, synthetic savings `$130.00`, and Recon%QA `$550.00`. Cash-basis P&L was `$500.00` income, `$212.19` operating expenses, `$287.81` net income.
+- Re-selected the earlier two-row synthetic CSV in the current APK. Preview marked both existing rows as possible duplicates and showed `0 ready · 0 invalid · 2 possible duplicates`; the default action was to skip both. No duplicate rows were posted.
+- Transaction search on the current APK returned the imported `$400.00` receipt and `−$75.00` rent expense individually, each as 1 of 20 persisted records.
+
+See [Android CSV import workflow evidence](../android-csv-import-20261031/README.md) for screenshots and the two-row import reconciliation. The earlier two-row posting itself was exercised on the immediately preceding local release build; the exact `ee2cdd1` APK was then tested for duplicate detection and a further `-$5.00` import, offline persistence, search, dashboard, and P&L.
+
+## Earlier beta candidate screenshots
+
+`01-dashboard-offline-after-relaunch.png`, `02-members-offline-after-relaunch.png`, `03-reports-offline.png`, and `04-csv-share-sheet-offline.png` document the superseded `c25649f` candidate. Its dashboard/P&L values predate the CSV import scenario and do not describe the current artifact's current database state. The native share sheet was opened for a P&L CSV; no external share target was selected.
 
 ## Installation
 
-The local APK is at the artifact path above. On an authorized Android device with USB debugging enabled, install/update with `adb install -r android/app/build/outputs/apk/release/app-release.apk`. The package id is `com.amanchilabs.llcbookkeepingprivate`.
+Install or update on an authorized Android device with USB debugging enabled:
 
-Do not uninstall an existing installation to work around a signing mismatch: uninstalling removes its local database. The Samsung was not connected to ADB during this build, so physical-device install and acceptance remain unverified.
+```sh
+adb install -r android/app/build/outputs/apk/release/app-release.apk
+```
+
+Package id: `com.amanchilabs.llcbookkeepingprivate`.
+
+Do not uninstall an existing installation to work around a signing mismatch; uninstalling removes its local database. The APK is an ignored local build artifact and is not backed up by the Git remote. The Samsung physical-device install remains unverified.
 
 ## Limits
 
-This is a standalone, locally debug-signed beta candidate. No production credentials, real financial data, physical-device result, iOS device build, app lock/recovery release-gate acceptance, or public distribution is represented. The APK is an ignored local build artifact and is not backed up by the Git remote.
+This is a standalone, locally debug-signed beta candidate. It is not production-ready. No production signing credentials, real financial data, physical-device result, iOS device build, app lock/recovery release-gate acceptance, or public distribution is represented. Real financial data remains blocked pending the documented security and recovery gates.
