@@ -19,7 +19,7 @@ import { calculateUnpaidLoanInterestCents, type DatedAmount, type LoanDayCount }
 import { nextRecurringDate, type RecurringCadence } from '../../domain/src/recurring';
 import { formatUsd } from '../../domain/src/money';
 
-const SCHEMA_VERSION = 10;
+const SCHEMA_VERSION = 11;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -165,6 +165,30 @@ export interface AccountReconciliationEvent {
   eventType: 'created' | 'item-cleared' | 'item-uncleared' | 'completed' | 'reopened';
   transactionId: string | null;
   createdAt: string;
+}
+
+export interface AccountingPeriodEvent {
+  id: string;
+  action: 'close' | 'reopen';
+  periodStartDate: string;
+  throughDate: string;
+  reason: string;
+  targetCloseEventId: string | null;
+  createdAt: string;
+  isActive: boolean;
+}
+
+export interface CloseAccountingPeriodInput {
+  id: string;
+  businessId: string;
+  throughDate: string;
+  reason: string;
+}
+
+export interface ReopenAccountingPeriodInput {
+  id: string;
+  businessId: string;
+  reason: string;
 }
 
 export interface CorrectCashTransactionInput {
@@ -429,6 +453,8 @@ export interface BookkeepingSnapshot {
   loanActivities: LoanActivityRecord[];
   accountReconciliations: AccountReconciliationRecord[];
   accountReconciliationEvents: AccountReconciliationEvent[];
+  accountingPeriodEvents: AccountingPeriodEvent[];
+  closedThroughDate: string | null;
   recurringTransactions: RecurringTransactionRecord[];
   cashBasis: CashBasisTotals;
 }
@@ -541,6 +567,16 @@ function requireDate(value: string, label: string): void {
 function dayBefore(value: string): string {
   const [year, month, day] = value.split('-').map(Number);
   return new Date(Date.UTC(year, month - 1, day - 1)).toISOString().slice(0, 10);
+}
+
+function dayAfter(value: string): string {
+  const [year, month, day] = value.split('-').map(Number);
+  return new Date(Date.UTC(year, month - 1, day + 1)).toISOString().slice(0, 10);
+}
+
+function localDateToday(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 }
 
 async function inSqlTransaction<T>(database: Database, operation: () => Promise<T>): Promise<T> {
@@ -688,6 +724,41 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
   if (version < 8) await migrateBookkeepingV7ToV8(database);
   if (version < 9) await migrateBookkeepingV8ToV9(database);
   if (version < 10) await migrateBookkeepingV9ToV10(database);
+  if (version < 11) await migrateBookkeepingV10ToV11(database);
+}
+
+async function migrateBookkeepingV10ToV11(database: Database): Promise<void> {
+  await database.execAsync('BEGIN IMMEDIATE;');
+  try {
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS accounting_period_events (
+        id TEXT PRIMARY KEY NOT NULL,
+        business_id TEXT NOT NULL REFERENCES businesses(id),
+        event_type TEXT NOT NULL CHECK (event_type IN ('close', 'reopen')),
+        period_start_date TEXT NOT NULL,
+        period_end_date TEXT NOT NULL,
+        reason TEXT NOT NULL,
+        target_close_event_id TEXT REFERENCES accounting_period_events(id),
+        created_at TEXT NOT NULL,
+        CHECK (
+          (event_type = 'close' AND target_close_event_id IS NULL)
+          OR (event_type = 'reopen' AND target_close_event_id IS NOT NULL)
+        ),
+        CHECK (period_end_date >= period_start_date)
+      );
+      CREATE INDEX IF NOT EXISTS accounting_period_events_business_end
+        ON accounting_period_events (business_id, period_end_date, created_at);
+      UPDATE bookkeeping_schema SET version = 11 WHERE singleton = 1;
+    `);
+    const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+      'PRAGMA foreign_key_check',
+    );
+    if (violations.length > 0) throw new Error('The period close migration found invalid record references.');
+    await database.execAsync('COMMIT;');
+  } catch (error) {
+    await database.execAsync('ROLLBACK;').catch(() => undefined);
+    throw error;
+  }
 }
 
 async function migrateBookkeepingV9ToV10(database: Database): Promise<void> {
@@ -1481,6 +1552,7 @@ async function insertJournalEntry(
   lines: readonly JournalLine[],
 ): Promise<void> {
   requireDate(date, 'transaction date');
+  await assertDateIsOpen(database, businessId, date);
   if (!description.trim()) throw new Error('Enter a transaction description.');
   assertBalancedEntry(lines);
   const createdAt = new Date().toISOString();
@@ -2082,6 +2154,76 @@ export async function createAccountReconciliationInDatabase(
   });
 }
 
+async function currentActivePeriodClose(database: Database, businessId: string): Promise<AccountingPeriodEvent | null> {
+  return await database.getFirstAsync<AccountingPeriodEvent>(
+    `SELECT close_event.id, close_event.event_type AS action,
+            close_event.period_start_date AS periodStartDate, close_event.period_end_date AS throughDate,
+            close_event.reason, close_event.target_close_event_id AS targetCloseEventId,
+            close_event.created_at AS createdAt, 1 AS isActive
+     FROM accounting_period_events close_event
+     WHERE close_event.business_id = ? AND close_event.event_type = 'close'
+       AND NOT EXISTS (
+         SELECT 1 FROM accounting_period_events reopen_event
+         WHERE reopen_event.event_type = 'reopen'
+           AND reopen_event.target_close_event_id = close_event.id
+       )
+     ORDER BY close_event.period_end_date DESC, close_event.created_at DESC LIMIT 1`,
+    businessId,
+  );
+}
+
+async function assertDateIsOpen(database: Database, businessId: string, date: string): Promise<void> {
+  const activeClose = await currentActivePeriodClose(database, businessId);
+  if (activeClose && date <= activeClose.throughDate) {
+    throw new Error(`The books are closed through ${activeClose.throughDate}. Reopen the latest period in Settings before posting or correcting a transaction.`);
+  }
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function closeAccountingPeriodInDatabase(database: Database, input: CloseAccountingPeriodInput): Promise<void> {
+  requireDate(input.throughDate, 'period end date');
+  if (!input.reason.trim()) throw new Error('Enter a reason for closing the period.');
+  if (input.throughDate > localDateToday()) throw new Error('A bookkeeping period cannot be closed through a future date.');
+  await ensureBookkeepingSchema(database);
+  const business = await requireBusiness(database, input.businessId);
+  if (input.throughDate < business.bookkeepingStartDate) {
+    throw new Error('A closed period cannot end before the bookkeeping start date.');
+  }
+
+  await inSqlTransaction(database, async () => {
+    const activeClose = await currentActivePeriodClose(database, input.businessId);
+    if (activeClose && input.throughDate <= activeClose.throughDate) {
+      throw new Error(`Close the next period after ${activeClose.throughDate}, or reopen the latest period first.`);
+    }
+    const periodStartDate = activeClose ? dayAfter(activeClose.throughDate) : business.bookkeepingStartDate;
+    await database.runAsync(
+      `INSERT INTO accounting_period_events
+       (id, business_id, event_type, period_start_date, period_end_date, reason, target_close_event_id, created_at)
+       VALUES (?, ?, 'close', ?, ?, ?, NULL, ?)`,
+      input.id, input.businessId, periodStartDate, input.throughDate, input.reason.trim(), new Date().toISOString(),
+    );
+  });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function reopenAccountingPeriodInDatabase(database: Database, input: ReopenAccountingPeriodInput): Promise<void> {
+  if (!input.reason.trim()) throw new Error('Enter a reason for reopening the period.');
+  await ensureBookkeepingSchema(database);
+  await requireBusiness(database, input.businessId);
+
+  await inSqlTransaction(database, async () => {
+    const activeClose = await currentActivePeriodClose(database, input.businessId);
+    if (!activeClose) throw new Error('There is no closed period to reopen.');
+    await database.runAsync(
+      `INSERT INTO accounting_period_events
+       (id, business_id, event_type, period_start_date, period_end_date, reason, target_close_event_id, created_at)
+       VALUES (?, ?, 'reopen', ?, ?, ?, ?, ?)`,
+      input.id, input.businessId, activeClose.periodStartDate, activeClose.throughDate,
+      input.reason.trim(), activeClose.id, new Date().toISOString(),
+    );
+  });
+}
+
 /** @internal SQL-level entry point used by repository tests. */
 export async function setAccountReconciliationItemClearedInDatabase(
   database: Database,
@@ -2670,6 +2812,7 @@ export async function replaceMembersInDatabase(database: Database, input: Replac
   if (input.effectiveDate < business.bookkeepingStartDate) throw new Error('Ownership changes cannot precede the bookkeeping start date.');
 
   await inSqlTransaction(database, async () => {
+    await assertDateIsOpen(database, input.businessId, input.effectiveDate);
     const active = await database.getAllAsync<MemberRecord>(
       `SELECT m.id, m.name, h.ownership_basis_points AS ownershipBasisPoints,
               h.effective_from AS effectiveFrom, h.effective_to AS effectiveTo, m.retired_at AS retiredAt
@@ -3322,6 +3465,22 @@ async function readAccountReconciliationEvents(database: Database, businessId: s
   );
 }
 
+async function readAccountingPeriodEvents(database: Database, businessId: string): Promise<AccountingPeriodEvent[]> {
+  const events = await database.getAllAsync<Omit<AccountingPeriodEvent, 'isActive'> & { isActive: number }>(
+    `SELECT event.id, event.event_type AS action, event.period_start_date AS periodStartDate,
+            event.period_end_date AS throughDate, event.reason,
+            event.target_close_event_id AS targetCloseEventId, event.created_at AS createdAt,
+            CASE WHEN event.event_type = 'close' AND NOT EXISTS (
+              SELECT 1 FROM accounting_period_events reopen_event
+              WHERE reopen_event.event_type = 'reopen'
+                AND reopen_event.target_close_event_id = event.id
+            ) THEN 1 ELSE 0 END AS isActive
+     FROM accounting_period_events event WHERE event.business_id = ? ORDER BY event.rowid`,
+    businessId,
+  );
+  return events.map((event) => ({ ...event, isActive: event.isActive === 1 }));
+}
+
 /** @internal SQL-level entry point used by repository tests. */
 export async function getBookkeepingSnapshotFromDatabase(database: Database, businessId?: string): Promise<BookkeepingSnapshot | null> {
   await ensureBookkeepingSchema(database);
@@ -3330,6 +3489,7 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
     business: null, members: [], memberHistory: [], accounts: [], transactions: [], capitalActivities: [],
     memberCapitalSummaries: [], guaranteedPaymentInstallments: [], guaranteedPaymentCashEvents: [],
     loanAgreements: [], loanActivities: [], accountReconciliations: [], accountReconciliationEvents: [], recurringTransactions: [],
+    accountingPeriodEvents: [], closedThroughDate: null,
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
   const { members, history } = await readMembers(database, business.id);
@@ -3343,12 +3503,16 @@ export async function getBookkeepingSnapshotFromDatabase(database: Database, bus
   const loanActivities = await readLoanActivities(database, business.id);
   const accountReconciliations = await readAccountReconciliations(database, business.id);
   const accountReconciliationEvents = await readAccountReconciliationEvents(database, business.id);
+  const accountingPeriodEvents = await readAccountingPeriodEvents(database, business.id);
+  const activePeriodClose = await currentActivePeriodClose(database, business.id);
   const recurringTransactions = await readRecurringTransactions(database, business.id);
   const cashBasis = await cashBasisForPeriod(database, business.id);
   return {
     business, members, memberHistory: history, accounts, transactions, capitalActivities, memberCapitalSummaries,
     guaranteedPaymentInstallments, guaranteedPaymentCashEvents, loanAgreements, loanActivities,
-    accountReconciliations, accountReconciliationEvents, recurringTransactions, cashBasis,
+    accountReconciliations, accountReconciliationEvents, accountingPeriodEvents,
+    closedThroughDate: activePeriodClose?.throughDate ?? null,
+    recurringTransactions, cashBasis,
   };
 }
 

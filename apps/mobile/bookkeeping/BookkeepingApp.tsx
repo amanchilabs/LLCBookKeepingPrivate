@@ -31,6 +31,8 @@ function emptySnapshot(): BookkeepingSnapshot {
     loanActivities: [],
     accountReconciliations: [],
     accountReconciliationEvents: [],
+    accountingPeriodEvents: [],
+    closedThroughDate: null,
     recurringTransactions: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
@@ -121,7 +123,8 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
       {tab === 'Members' ? <MembersScreen snapshot={snapshot} onSaved={refresh} /> : null}
       {tab === 'Loans' ? <LoansScreen snapshot={snapshot} onSaved={refresh} /> : null}
       {tab === 'Reports' ? <ReportsScreen snapshot={snapshot} /> : null}
-      {tab === 'Settings' ? <SettingsScreen business={snapshot.business} onOpenSecurityProof={() => setShowSecurityProof(true)} /> : null}
+      {tab === 'Settings' ? <SettingsScreen business={snapshot.business} snapshot={snapshot}
+        onSaved={refresh} onOpenSecurityProof={() => setShowSecurityProof(true)} /> : null}
     </View>
   </SafeAreaView>;
 }

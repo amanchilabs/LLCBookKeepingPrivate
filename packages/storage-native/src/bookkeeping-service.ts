@@ -6,6 +6,7 @@ import {
   createRecurringTransactionInDatabase,
   updateRecurringTransactionInDatabase,
   createAccountReconciliationInDatabase,
+  closeAccountingPeriodInDatabase,
   createBusinessInDatabase,
   createCashAccountInDatabase,
   correctCashTransactionInDatabase,
@@ -24,12 +25,15 @@ import {
   postRecurringTransactionInDatabase,
   recordTransferInDatabase,
   reopenAccountReconciliationInDatabase,
+  reopenAccountingPeriodInDatabase,
   reverseGuaranteedPaymentInDatabase,
   setAccountReconciliationItemClearedInDatabase,
   setRecurringTransactionActiveInDatabase,
   replaceMembersInDatabase,
   type BookkeepingSnapshot,
   type CreateAccountReconciliationInput,
+  type CloseAccountingPeriodInput,
+  type ReopenAccountingPeriodInput,
   type CashAccountInput,
   type CategoryAccountInput,
   type CreateRecurringTransactionInput,
@@ -67,6 +71,8 @@ function emptySnapshot(): BookkeepingSnapshot {
     loanActivities: [],
     accountReconciliations: [],
     accountReconciliationEvents: [],
+    accountingPeriodEvents: [],
+    closedThroughDate: null,
     recurringTransactions: [],
     cashBasis: { incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n },
   };
@@ -125,6 +131,14 @@ export async function recordTransfer(input: TransferInput): Promise<void> {
 
 export async function createAccountReconciliation(input: CreateAccountReconciliationInput): Promise<void> {
   await useActiveBooks((database) => createAccountReconciliationInDatabase(database, input));
+}
+
+export async function closeAccountingPeriod(input: CloseAccountingPeriodInput): Promise<void> {
+  await useActiveBooks((database) => closeAccountingPeriodInDatabase(database, input));
+}
+
+export async function reopenAccountingPeriod(input: ReopenAccountingPeriodInput): Promise<void> {
+  await useActiveBooks((database) => reopenAccountingPeriodInDatabase(database, input));
 }
 
 export async function setAccountReconciliationItemCleared(

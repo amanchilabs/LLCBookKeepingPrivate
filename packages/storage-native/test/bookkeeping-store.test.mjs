@@ -18,6 +18,7 @@ import {
   journalBalanceReportFromDatabase,
   createGuaranteedPaymentObligationInDatabase,
   createAccountReconciliationInDatabase,
+  closeAccountingPeriodInDatabase,
   completeAccountReconciliationInDatabase,
   recordGuaranteedPaymentInDatabase,
   recordLoanAdvanceInDatabase,
@@ -29,6 +30,7 @@ import {
   postRecurringTransactionInDatabase,
   recordSplitCashTransactionInDatabase,
   reopenAccountReconciliationInDatabase,
+  reopenAccountingPeriodInDatabase,
   replaceMembersInDatabase,
   setAccountReconciliationItemClearedInDatabase,
   transactionsCsv,
@@ -160,16 +162,123 @@ afterEach(() => {
 });
 
 describe('bookkeeping repository SQL contract', () => {
+  it('closes periods as an auditable posting lock and reopens only the latest closed interval', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-1', openingJournalEntryId: 'opening-entry-1',
+    });
+
+    await closeAccountingPeriodInDatabase(database, {
+      id: 'close-jan', businessId: 'business-1', throughDate: '2024-01-31', reason: 'January review complete',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'feb-early-income', journalEntryId: 'feb-early-income-entry', businessId: 'business-1', date: '2024-02-01',
+      kind: 'income', accountId: 'bank-1', categoryAccountId: 'income-services', amountCents: 1_000n,
+      description: 'Open February receipt',
+    });
+    await closeAccountingPeriodInDatabase(database, {
+      id: 'close-feb', businessId: 'business-1', throughDate: '2024-02-29', reason: 'February review complete',
+    });
+
+    await expect(recordCashTransactionInDatabase(database, {
+      id: 'locked-income', journalEntryId: 'locked-income-entry', businessId: 'business-1', date: '2024-02-29',
+      kind: 'income', accountId: 'bank-1', categoryAccountId: 'income-services', amountCents: 2_500n,
+      description: 'Backdated after close',
+    })).rejects.toThrow('books are closed through 2024-02-29');
+
+    await reopenAccountingPeriodInDatabase(database, {
+      id: 'reopen-feb', businessId: 'business-1', reason: 'Correct an omitted February receipt',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'feb-income', journalEntryId: 'feb-income-entry', businessId: 'business-1', date: '2024-02-29',
+      kind: 'income', accountId: 'bank-1', categoryAccountId: 'income-services', amountCents: 2_500n,
+      description: 'Omitted February receipt',
+    });
+    await expect(recordCashTransactionInDatabase(database, {
+      id: 'still-locked-income', journalEntryId: 'still-locked-income-entry', businessId: 'business-1', date: '2024-01-31',
+      kind: 'income', accountId: 'bank-1', categoryAccountId: 'income-services', amountCents: 500n,
+      description: 'January remains closed',
+    })).rejects.toThrow('books are closed through 2024-01-31');
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.closedThroughDate).toBe('2024-01-31');
+    expect(snapshot.accountingPeriodEvents.map((event) => [event.action, event.throughDate, event.isActive])).toEqual([
+      ['close', '2024-01-31', true],
+      ['close', '2024-02-29', false],
+      ['reopen', '2024-02-29', false],
+    ]);
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(103_500n);
+    expect(snapshot.transactions).toHaveLength(3);
+    database.close();
+  });
+
+  it('rejects corrections to closed originals atomically and rejects ownership changes inside a closed period', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, { id: 'bank-1', businessId: 'business-1', name: 'Checking', kind: 'bank' });
+    await recordCashTransactionInDatabase(database, {
+      id: 'income-1', journalEntryId: 'income-entry-1', businessId: 'business-1', date: '2024-01-10',
+      kind: 'income', accountId: 'bank-1', categoryAccountId: 'income-services', amountCents: 2_500n,
+      description: 'Original receipt',
+    });
+    await closeAccountingPeriodInDatabase(database, {
+      id: 'close-jan', businessId: 'business-1', throughDate: '2024-01-31', reason: 'January reviewed',
+    });
+
+    await expect(correctCashTransactionInDatabase(database, {
+      correctionId: 'correction-1', originalTransactionId: 'income-1',
+      reversalTransactionId: 'reversal-1', reversalJournalEntryId: 'reversal-entry-1',
+      replacement: {
+        id: 'replacement-1', journalEntryId: 'replacement-entry-1', businessId: 'business-1',
+        date: '2024-02-01', kind: 'income', accountId: 'bank-1', categoryAccountId: 'income-services',
+        amountCents: 2_600n, description: 'Replacement receipt',
+      },
+    })).rejects.toThrow('books are closed through 2024-01-31');
+    await expect(replaceMembersInDatabase(database, {
+      businessId: 'business-1', effectiveDate: '2024-01-31', ownershipConfirmed: true,
+      members: setup.members,
+    })).rejects.toThrow('books are closed through 2024-01-31');
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.transactions.map((transaction) => transaction.id)).toEqual(['income-1']);
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM transaction_corrections').get().count).toBe(0);
+    expect(snapshot.members.map((member) => member.ownershipBasisPoints)).toEqual([4_000, 2_000, 2_000, 2_000]);
+    database.close();
+  });
+
+  it('rejects future or empty-reason period closes without recording an event', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    const future = new Date();
+    future.setDate(future.getDate() + 1);
+    const futureDate = `${future.getFullYear()}-${String(future.getMonth() + 1).padStart(2, '0')}-${String(future.getDate()).padStart(2, '0')}`;
+    await expect(closeAccountingPeriodInDatabase(database, {
+      id: 'future-close', businessId: 'business-1', throughDate: futureDate, reason: 'Future close',
+    })).rejects.toThrow('cannot be closed through a future date');
+    await expect(closeAccountingPeriodInDatabase(database, {
+      id: 'empty-reason-close', businessId: 'business-1', throughDate: '2024-01-31', reason: '   ',
+    })).rejects.toThrow('Enter a reason for closing');
+    expect(database.database.prepare('SELECT COUNT(*) AS count FROM accounting_period_events').get().count).toBe(0);
+    database.close();
+  });
+
   it('upgrades version 9 databases with recurring schedule and occurrence history tables', async () => {
     const database = new TestDatabase(databasePath());
     await ensureBookkeepingSchema(database);
     database.database.exec(`
       DROP TABLE recurring_transaction_occurrences;
       DROP TABLE recurring_transaction_templates;
+      DROP TABLE accounting_period_events;
       UPDATE bookkeeping_schema SET version = 9 WHERE singleton = 1;
     `);
     await ensureBookkeepingSchema(database);
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
     expect(database.database.prepare(`
       SELECT name FROM sqlite_master WHERE type = 'table' AND name IN (
         'recurring_transaction_templates', 'recurring_transaction_occurrences'
@@ -177,6 +286,7 @@ describe('bookkeeping repository SQL contract', () => {
     `).all().map((row) => row.name)).toEqual([
       'recurring_transaction_occurrences', 'recurring_transaction_templates',
     ]);
+    expect(database.database.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'accounting_period_events'").get()).toBeTruthy();
     database.close();
   });
 
@@ -327,7 +437,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(124_000n);
     expect(snapshot.transactions.find((transaction) => transaction.id === 'expense-v8').splitLines).toEqual([
       { categoryAccountId: 'expense-rent', category: 'Rent', amountCents: 1_000n },
@@ -808,7 +918,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(10_000n);
     expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal')).toMatchObject({
       cashAccountName: 'Checking', reason: 'Cash returned', amountCents: -5_000n,
@@ -935,7 +1045,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
     expect(snapshot.loanAgreements[0].dayCount).toBe('ACT/ACT ISDA');
     expect(snapshot.loanActivities.map((activity) => [activity.kind, activity.amountCents])).toEqual([
       ['advance', 25_000n], ['repayment', -10_022n],
@@ -1000,7 +1110,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
 
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(10);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(11);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(45_000n);
     expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 5_000n, netIncomeCents: -5_000n });
     expect(snapshot.transactions.map((transaction) => transaction.id).sort()).toEqual(['expense-migration', 'opening-migration']);
