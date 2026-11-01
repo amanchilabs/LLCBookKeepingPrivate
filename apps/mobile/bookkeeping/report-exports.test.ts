@@ -1,0 +1,76 @@
+import { describe, expect, it } from 'vitest';
+import {
+  balanceSheetCsv,
+  cashBasisCsv,
+  generalLedgerCsv,
+  trialBalanceCsv,
+} from './report-exports';
+import type { CashBasisReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
+
+const cashBasis: CashBasisReport = {
+  fromDate: '2026-01-01', throughDate: '2026-10-31',
+  incomeCents: 10_000n, expenseCents: 2_500n, netIncomeCents: 7_500n,
+};
+
+const balances: JournalBalanceReport = {
+  asOfDate: '2026-10-31',
+  trialBalance: [
+    { accountId: 'cash-1', code: 'cash-1', name: 'Checking, main', kind: 'bank', debitCents: 15_000n, creditCents: 0n },
+    { accountId: 'equity-1', code: '3000', name: 'Opening equity', kind: 'equity', debitCents: 0n, creditCents: 15_000n },
+  ],
+  totalDebitsCents: 15_000n,
+  totalCreditsCents: 15_000n,
+  balanceSheet: {
+    assets: [{ accountId: 'cash-1', code: 'cash-1', name: 'Checking, main', balanceCents: 15_000n }],
+    liabilities: [],
+    equity: [{ accountId: 'equity-1', code: '3000', name: 'Opening equity', balanceCents: 10_000n }],
+    currentEarningsCents: 5_000n,
+    totalAssetsCents: 15_000n,
+    totalLiabilitiesCents: 0n,
+    bookEquityCents: 10_000n,
+    totalEquityCents: 15_000n,
+    differenceCents: 0n,
+  },
+};
+
+const ledger: GeneralLedgerReport = {
+  accountId: 'cash-1', accountName: 'Checking, main', accountKind: 'bank', asOfDate: '2026-10-31',
+  lines: [{
+    journalEntryId: 'entry-1', date: '2026-10-02', description: 'Owner said "rent"',
+    debitCents: 10_000n, creditCents: 0n, runningBalanceCents: 10_000n,
+  }],
+  totalDebitsCents: 10_000n, totalCreditsCents: 0n, endingBalanceCents: 10_000n,
+};
+
+describe('CPA report CSV exports', () => {
+  it('exports a cash-basis P&L whose net equals income less expenses', () => {
+    expect(cashBasisCsv(cashBasis).split('\r\n')).toEqual([
+      '"From date","Through date","Basis","Line item","Amount"',
+      '"2026-01-01","2026-10-31","Cash basis","Income","100.00"',
+      '"2026-01-01","2026-10-31","Cash basis","Operating expenses","25.00"',
+      '"2026-01-01","2026-10-31","Cash basis","Net income","75.00"',
+    ]);
+  });
+
+  it('exports Balance Sheet sections and totals without changing their reconciliation', () => {
+    expect(balanceSheetCsv(balances).split('\r\n')).toContain('"2026-10-31","Reconciliation","Assets − liabilities − equity","","0.00"');
+    expect(balanceSheetCsv(balances).split('\r\n')).toContain('"2026-10-31","Equity","Current earnings through date","","50.00"');
+  });
+
+  it('exports Trial Balance debit and credit totals that match', () => {
+    expect(trialBalanceCsv(balances).split('\r\n')).toEqual([
+      '"As of date","Account","Account type","Debit","Credit"',
+      '"2026-10-31","Checking, main","bank","150.00","0.00"',
+      '"2026-10-31","Opening equity","equity","0.00","150.00"',
+      '"2026-10-31","TOTALS","","150.00","150.00"',
+    ]);
+  });
+
+  it('quotes delimiters in General Ledger descriptions and includes running balances', () => {
+    expect(generalLedgerCsv(ledger).split('\r\n')).toEqual([
+      '"As of date","Account","Date","Journal entry","Description","Debit","Credit","Running balance"',
+      '"2026-10-31","Checking, main","2026-10-02","entry-1","Owner said ""rent""","100.00","0.00","100.00"',
+      '"2026-10-31","Checking, main","TOTALS","","","100.00","0.00","100.00"',
+    ]);
+  });
+});

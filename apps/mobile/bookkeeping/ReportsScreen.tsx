@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
+import { File, Paths } from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { StyleSheet, Text, View } from 'react-native';
 import { getCashBasisReport, getGeneralLedgerReport, getJournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-service';
 import type { BookkeepingSnapshot, CashBasisReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
 import { summarizeLoanBalance } from '../../../packages/domain/src/loan-interest';
+import { balanceSheetCsv, cashBasisCsv, generalLedgerCsv, trialBalanceCsv } from './report-exports';
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
@@ -16,6 +19,9 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const [ledgerError, setLedgerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
   const capitalInPeriod = snapshot.capitalActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate);
   const cashContributionsCents = capitalInPeriod.filter((activity) => activity.kind === 'cash-contribution')
     .reduce((sum, activity) => sum + activity.amountCents, 0n);
@@ -109,10 +115,32 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     }
   };
 
+  const exportCsv = async (reportName: string, csv: string) => {
+    setExporting(true);
+    setExportError(null);
+    setExportNotice(null);
+    try {
+      const file = new File(Paths.cache, `llc-${reportName}-${todayLocalDate()}.csv`);
+      file.create({ intermediates: true, overwrite: true });
+      await file.write(csv);
+      await Sharing.shareAsync(file.uri, {
+        mimeType: 'text/csv',
+        dialogTitle: `Export ${reportName.replaceAll('-', ' ')} CSV`,
+      });
+      setExportNotice('CSV prepared. The system share sheet controls whether a copy leaves this device.');
+    } catch (exportFailure) {
+      setExportError(exportFailure instanceof Error ? exportFailure.message : 'The report CSV could not be exported.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   useEffect(() => { void refresh(); }, [snapshot.business?.id]);
 
   return <Page>
     <Heading title="Reports" subtitle="Cash-basis income and operating expenses are calculated from persisted journal lines. These reports are bookkeeping summaries, not tax returns." />
+    <FormError message={exportError} />
+    {exportNotice ? <Text style={uiStyles.helper}>{exportNotice}</Text> : null}
     <Panel>
       <Text style={uiStyles.sectionTitle}>Profit & loss · cash basis</Text>
       <View style={uiStyles.row}>
@@ -126,6 +154,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Income</Text><Money cents={report.incomeCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Operating expenses</Text><Money cents={report.expenseCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net income</Text><Money cents={report.netIncomeCents} /></View>
+        <Button title={exporting ? 'Preparing CSV…' : 'Export P&L CSV'} secondary
+          onPress={() => void exportCsv('profit-and-loss', cashBasisCsv(report))} disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Choose a date range to calculate the report from journal activity.</Text>}
     </Panel>
     <Panel>
@@ -150,6 +180,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportTotal}><Text style={uiStyles.rowTitle}>Total equity</Text><Money cents={journalReport.balanceSheet.totalEquityCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Assets − liabilities − equity</Text><Money cents={journalReport.balanceSheet.differenceCents} /></View>
         <Text style={uiStyles.helper}>Current income and expenses are included as current earnings. No closing entries are generated. Book balances do not establish tax basis or outside basis.</Text>
+        <Button title={exporting ? 'Preparing CSV…' : 'Export Balance Sheet CSV'} secondary
+          onPress={() => void exportCsv('balance-sheet', balanceSheetCsv(journalReport))} disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Update the report to calculate journal balances.</Text>}
     </Panel>
     <Panel>
@@ -171,6 +203,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
           <View style={styles.trialBalanceAmount}><Money cents={journalReport.totalDebitsCents} /></View>
           <View style={styles.trialBalanceAmount}><Money cents={journalReport.totalCreditsCents} /></View>
         </View>
+        <Button title={exporting ? 'Preparing CSV…' : 'Export Trial Balance CSV'} secondary
+          onPress={() => void exportCsv('trial-balance', trialBalanceCsv(journalReport))} disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Update the report to calculate journal balances.</Text>}
     </Panel>
     <Panel>
@@ -192,6 +226,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Total debits</Text><Money cents={ledgerReport.totalDebitsCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Total credits</Text><Money cents={ledgerReport.totalCreditsCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.rowTitle}>Ending balance · debit less credit</Text><Money cents={ledgerReport.endingBalanceCents} /></View>
+        <Button title={exporting ? 'Preparing CSV…' : 'Export General Ledger CSV'} secondary
+          onPress={() => void exportCsv('general-ledger', generalLedgerCsv(ledgerReport))} disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Update the report to calculate account activity.</Text>}
     </Panel>
     <Panel>
@@ -244,7 +280,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       <Text style={uiStyles.sectionTitle}>Available from persisted books</Text>
       <Text style={uiStyles.rowDetail}>Account balances: {snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash').length} bank and cash accounts.</Text>
       <Text style={uiStyles.rowDetail}>Member interests: {snapshot.members.length} current members, with dated interest history.</Text>
-      <Text style={uiStyles.helper}>General Ledger, member and loan workpaper exports, and tax-specific reports remain in progress.</Text>
+      <Text style={uiStyles.helper}>P&L, Balance Sheet, Trial Balance, and selected-account General Ledger are available as CSV. Member and loan workpaper exports, PDF reports, and tax-specific reports remain in progress.</Text>
     </Panel>
   </Page>;
 }
