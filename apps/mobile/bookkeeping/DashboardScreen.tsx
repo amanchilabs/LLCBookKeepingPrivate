@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import type { BookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-store';
+import type { AppDestination } from './navigation-model';
 import { Button, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function DashboardScreen({
@@ -8,7 +9,7 @@ export function DashboardScreen({
   onNavigate,
 }: {
   snapshot: BookkeepingSnapshot;
-  onNavigate: (screen: 'Transactions' | 'Accounts' | 'Members' | 'Reports' | 'Settings') => void;
+  onNavigate: (screen: AppDestination) => void;
 }) {
   const cashAccounts = snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash');
   const cashBalance = cashAccounts.reduce((sum, account) => sum + account.balanceCents, 0n);

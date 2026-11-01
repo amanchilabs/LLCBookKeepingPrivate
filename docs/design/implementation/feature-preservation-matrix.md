@@ -2,6 +2,16 @@
 
 This matrix records current source capabilities against proposed UX. “Current” means visible in the checked-in component and connected to service/store calls; it is not a simulator/device acceptance claim. The redesign must preserve behavior unless a separate product decision explicitly changes scope.
 
+## Implementation progress — UX branch checkpoint
+
+Implemented in source on `feature/ux-modernization-20261101-2b4ad87`:
+
+- Shared warm-neutral/navy/emerald tokens; refreshed page/card/type/form/button/status/money primitives and minimum native touch sizing.
+- Six onboarding states, explicit ownership confirmation, optional first account, review and completion. When an account is included, business/member/account creation now shares one SQL transaction; the opening entry remains Opening Balance Equity.
+- Five primary tabs; global search action; Accounts and Settings under More; member-specific loan entry opens from a member row. Existing screen/service calls remain connected.
+
+Automated baseline after this slice: `npm test` and `npm run typecheck` passed; 156 tests ran in the full suite. Native iOS/Android visual verification has not yet been recorded. The matrix below remains the preservation checklist; implementation status does not imply platform acceptance.
+
 | Capability | Current component / source | Persistence or calculation | Proposed UX | Preservation / gap |
 |---|---|---|---|---|
 | Create LLC profile | `BusinessSetupScreen.tsx` | `createBusiness`; local encrypted bookkeeping store | Multi-step onboarding | Preserve name, formation state/date, bookkeeping start date and atomic create. Add only presentation steps; no tax-classification selector. |

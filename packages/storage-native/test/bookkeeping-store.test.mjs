@@ -8,6 +8,7 @@ import {
   cashBasisReportFromDatabase,
   cashMovementReportFromDatabase,
   createBusinessInDatabase,
+  createBusinessWithInitialAccountInDatabase,
   createCashAccountInDatabase,
   createRecurringTransactionInDatabase,
   saveBookkeepingReminderInDatabase,
@@ -170,6 +171,45 @@ afterEach(() => {
 });
 
 describe('bookkeeping repository SQL contract', () => {
+  it('creates the LLC and optional opening account atomically without recording capital or income', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+
+    await createBusinessWithInitialAccountInDatabase(database, {
+      business: setup,
+      initialAccount: {
+        id: 'setup-bank', businessId: setup.id, name: 'Operating checking', kind: 'bank',
+        openingDate: '2024-01-01', openingBalanceCents: 125_000n,
+        openingTransactionId: 'setup-opening', openingJournalEntryId: 'setup-opening-entry',
+      },
+    });
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, setup.id);
+    expect(snapshot.business.name).toBe(setup.name);
+    expect(snapshot.accounts.find((account) => account.id === 'setup-bank').balanceCents).toBe(125_000n);
+    expect(snapshot.transactions.map((transaction) => transaction.kind)).toEqual(['opening-balance']);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n });
+    expect(snapshot.capitalActivities).toEqual([]);
+    expect(database.database.prepare(`
+      SELECT je.id FROM journal_entries je JOIN journal_lines jl ON jl.journal_entry_id = je.id
+      GROUP BY je.id HAVING SUM(CAST(jl.debit_minor AS INTEGER)) != SUM(CAST(jl.credit_minor AS INTEGER))
+    `).all()).toEqual([]);
+    database.close();
+  });
+
+  it('rolls back business setup when the optional opening account is invalid', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+
+    await expect(createBusinessWithInitialAccountInDatabase(database, {
+      business: setup,
+      initialAccount: { id: 'setup-bank', businessId: setup.id, name: '  ', kind: 'bank' },
+    })).rejects.toThrow('Enter a name for this bank or cash account.');
+
+    expect(await listBusinessProfilesFromDatabase(database)).toEqual([]);
+    database.close();
+  });
+
   it('keeps multiple LLC workspaces isolated and restores the selected workspace after reopen', async () => {
     const path = databasePath();
     let database = new TestDatabase(path);

@@ -24,7 +24,7 @@ type CapitalActivityKind = 'cash-contribution' | 'property-contribution' | 'dist
 type PaymentRecurrence = 'one-time' | 'monthly' | 'quarterly';
 interface PaymentAllocationDraft { key: string; installmentId: string; amount: string }
 
-export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void> }) {
+export function MembersScreen({ snapshot, onSaved, onOpenMemberLoans }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void>; onOpenMemberLoans: (memberId: string) => void }) {
   const [members, setMembers] = useState<MemberDraft[]>([]);
   const [effectiveDate, setEffectiveDate] = useState(todayLocalDate());
   const [saving, setSaving] = useState(false);
@@ -279,6 +279,21 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
 
   return <Page>
     <Heading title="Members" subtitle="Edit member names and ownership interests. Every ownership change keeps its prior effective dates in the local history." />
+    {snapshot.members.length ? <Panel>
+      <Text style={uiStyles.sectionTitle}>Member records</Text>
+      <Text style={uiStyles.helper}>Ownership and book capital are separate records. Member loans are recorded as debt, not capital.</Text>
+      {snapshot.members.map((member) => {
+        const capital = snapshot.memberCapitalSummaries.find((summary) => summary.memberId === member.id)?.bookCapitalActivityCents;
+        return <View key={member.id} style={uiStyles.rowItem}>
+          <View style={uiStyles.rowMain}>
+            <Text style={uiStyles.rowTitle}>{member.name}</Text>
+            <Text style={uiStyles.rowDetail}>{fromBasisPoints(member.ownershipBasisPoints)}% ownership</Text>
+            {capital !== undefined ? <Text style={uiStyles.rowDetail}>Book capital activity ${formatUsd(capital)}</Text> : null}
+          </View>
+          <Button title={`Loans · ${member.name}`} secondary onPress={() => onOpenMemberLoans(member.id)} />
+        </View>;
+      })}
+    </Panel> : null}
     <Panel>
       {members.map((member, index) => <View key={member.id}>
         <View style={uiStyles.row}>
