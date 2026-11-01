@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View } from 'react-native';
-import { getCashBasisReport } from '../../../packages/storage-native/src/bookkeeping-service';
-import type { BookkeepingSnapshot, CashBasisReport } from '../../../packages/storage-native/src/bookkeeping-store';
+import { StyleSheet, Text, View } from 'react-native';
+import { getCashBasisReport, getGeneralLedgerReport, getJournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-service';
+import type { BookkeepingSnapshot, CashBasisReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
 import { summarizeLoanBalance } from '../../../packages/domain/src/loan-interest';
-import { Button, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
+import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const [fromDate, setFromDate] = useState(`${todayLocalDate().slice(0, 4)}-01-01`);
   const [throughDate, setThroughDate] = useState(todayLocalDate());
   const [report, setReport] = useState<CashBasisReport | null>(null);
+  const [journalReport, setJournalReport] = useState<JournalBalanceReport | null>(null);
+  const [ledgerReport, setLedgerReport] = useState<GeneralLedgerReport | null>(null);
+  const [ledgerAccountId, setLedgerAccountId] = useState('');
+  const [ledgerLoading, setLedgerLoading] = useState(false);
+  const [ledgerError, setLedgerError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const capitalInPeriod = snapshot.capitalActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate);
@@ -68,17 +73,39 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const thirdPartyLoanPrincipalCents = loanSummaries.filter(({ loan }) => loan.lenderType === 'third-party')
     .reduce((sum, { summary }) => sum + summary.principalOutstandingCents, 0n);
   const loanInterestOutstandingCents = loanSummaries.reduce((sum, { summary }) => sum + summary.interestOutstandingCents, 0n);
+  const selectedLedgerAccountId = snapshot.accounts.some((account) => account.id === ledgerAccountId)
+    ? ledgerAccountId : snapshot.accounts[0]?.id ?? '';
 
   const refresh = async () => {
     if (!snapshot.business) return;
     setLoading(true);
     setError(null);
     try {
-      setReport(await getCashBasisReport(snapshot.business.id, fromDate, throughDate));
+      const cashReport = await getCashBasisReport(snapshot.business.id, fromDate, throughDate);
+      const balanceReport = await getJournalBalanceReport(snapshot.business.id, throughDate);
+      const generalLedger = selectedLedgerAccountId
+        ? await getGeneralLedgerReport(snapshot.business.id, selectedLedgerAccountId, throughDate)
+        : null;
+      setReport(cashReport);
+      setJournalReport(balanceReport);
+      setLedgerReport(generalLedger);
     } catch (reportError) {
       setError(reportError instanceof Error ? reportError.message : 'The report could not be calculated.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshLedger = async () => {
+    if (!snapshot.business || !selectedLedgerAccountId) return;
+    setLedgerLoading(true);
+    setLedgerError(null);
+    try {
+      setLedgerReport(await getGeneralLedgerReport(snapshot.business.id, selectedLedgerAccountId, throughDate));
+    } catch (ledgerRefreshError) {
+      setLedgerError(ledgerRefreshError instanceof Error ? ledgerRefreshError.message : 'The General Ledger could not be calculated.');
+    } finally {
+      setLedgerLoading(false);
     }
   };
 
@@ -92,7 +119,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <Field label="From date" value={fromDate} onChangeText={setFromDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
         <Field label="Through date" value={throughDate} onChangeText={setThroughDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
       </View>
-      <Button title={loading ? 'Calculating…' : 'Update report'} onPress={() => void refresh()} disabled={loading} />
+      <Button title={loading ? 'Calculating…' : 'Update report'} onPress={() => void refresh()} disabled={loading || ledgerLoading} />
       <FormError message={error} />
       {report ? <>
         <Text style={uiStyles.rowDetail}>{report.fromDate} through {report.throughDate}</Text>
@@ -100,6 +127,72 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Operating expenses</Text><Money cents={report.expenseCents} /></View>
         <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net income</Text><Money cents={report.netIncomeCents} /></View>
       </> : <Text style={uiStyles.helper}>Choose a date range to calculate the report from journal activity.</Text>}
+    </Panel>
+    <Panel>
+      <Text style={uiStyles.sectionTitle}>Balance Sheet · book basis</Text>
+      {journalReport ? <>
+        <Text style={uiStyles.rowDetail}>Cumulative journal balances through {journalReport.asOfDate}.</Text>
+        <Text style={uiStyles.rowTitle}>Assets</Text>
+        {journalReport.balanceSheet.assets.map((line) => <View key={line.accountId} style={uiStyles.reportRow}>
+          <Text style={uiStyles.rowMain}>{line.name}</Text><Money cents={line.balanceCents} />
+        </View>)}
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.rowTitle}>Total assets</Text><Money cents={journalReport.balanceSheet.totalAssetsCents} /></View>
+        <Text style={uiStyles.rowTitle}>Liabilities</Text>
+        {journalReport.balanceSheet.liabilities.map((line) => <View key={line.accountId} style={uiStyles.reportRow}>
+          <Text style={uiStyles.rowMain}>{line.name}</Text><Money cents={line.balanceCents} />
+        </View>)}
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.rowTitle}>Total liabilities</Text><Money cents={journalReport.balanceSheet.totalLiabilitiesCents} /></View>
+        <Text style={uiStyles.rowTitle}>Equity</Text>
+        {journalReport.balanceSheet.equity.map((line) => <View key={line.accountId} style={uiStyles.reportRow}>
+          <Text style={uiStyles.rowMain}>{line.name}</Text><Money cents={line.balanceCents} />
+        </View>)}
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Current earnings through date</Text><Money cents={journalReport.balanceSheet.currentEarningsCents} /></View>
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.rowTitle}>Total equity</Text><Money cents={journalReport.balanceSheet.totalEquityCents} /></View>
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Assets − liabilities − equity</Text><Money cents={journalReport.balanceSheet.differenceCents} /></View>
+        <Text style={uiStyles.helper}>Current income and expenses are included as current earnings. No closing entries are generated. Book balances do not establish tax basis or outside basis.</Text>
+      </> : <Text style={uiStyles.helper}>Update the report to calculate journal balances.</Text>}
+    </Panel>
+    <Panel>
+      <Text style={uiStyles.sectionTitle}>Trial Balance</Text>
+      {journalReport ? <>
+        <Text style={uiStyles.rowDetail}>Account debit and credit balances through {journalReport.asOfDate}.</Text>
+        <View style={uiStyles.reportRow}>
+          <View style={uiStyles.rowMain}><Text style={uiStyles.rowTitle}>Account</Text></View>
+          <View style={styles.trialBalanceAmount}><Text style={uiStyles.rowTitle}>Debit</Text></View>
+          <View style={styles.trialBalanceAmount}><Text style={uiStyles.rowTitle}>Credit</Text></View>
+        </View>
+        {journalReport.trialBalance.map((line) => <View key={line.accountId} style={uiStyles.reportRow}>
+          <View style={uiStyles.rowMain}><Text style={uiStyles.rowTitle}>{line.name}</Text><Text style={uiStyles.rowDetail}>{line.kind}</Text></View>
+          <View style={styles.trialBalanceAmount}><Money cents={line.debitCents} /></View>
+          <View style={styles.trialBalanceAmount}><Money cents={line.creditCents} /></View>
+        </View>)}
+        <View style={uiStyles.reportTotal}>
+          <View style={uiStyles.rowMain}><Text style={uiStyles.rowTitle}>Totals</Text></View>
+          <View style={styles.trialBalanceAmount}><Money cents={journalReport.totalDebitsCents} /></View>
+          <View style={styles.trialBalanceAmount}><Money cents={journalReport.totalCreditsCents} /></View>
+        </View>
+      </> : <Text style={uiStyles.helper}>Update the report to calculate journal balances.</Text>}
+    </Panel>
+    <Panel>
+      <Text style={uiStyles.sectionTitle}>General Ledger</Text>
+      <Choice label="Account" value={selectedLedgerAccountId}
+        options={snapshot.accounts.map((account) => ({ value: account.id, title: account.name }))}
+        onChange={(accountId) => { setLedgerAccountId(accountId); setLedgerReport(null); setLedgerError(null); }} />
+      <Button title={ledgerLoading ? 'Calculating…' : 'Update ledger'} onPress={() => void refreshLedger()} disabled={ledgerLoading || loading || !selectedLedgerAccountId} />
+      <FormError message={ledgerError} />
+      {ledgerReport ? <>
+        <Text style={uiStyles.rowDetail}>{ledgerReport.accountName} · activity through {ledgerReport.asOfDate}</Text>
+        {ledgerReport.lines.length ? ledgerReport.lines.map((line, index) => <View key={`${line.journalEntryId}:${index}`} style={uiStyles.reportRow}>
+          <View style={uiStyles.rowMain}>
+            <Text style={uiStyles.rowTitle}>{line.date} · {line.description}</Text>
+            <Text style={uiStyles.rowDetail}>Debit {moneyLabel(line.debitCents)} · Credit {moneyLabel(line.creditCents)}</Text>
+          </View>
+          <Money cents={line.runningBalanceCents} />
+        </View>) : <Text style={uiStyles.helper}>No journal activity is posted to this account through the selected date.</Text>}
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Total debits</Text><Money cents={ledgerReport.totalDebitsCents} /></View>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Total credits</Text><Money cents={ledgerReport.totalCreditsCents} /></View>
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.rowTitle}>Ending balance · debit less credit</Text><Money cents={ledgerReport.endingBalanceCents} /></View>
+      </> : <Text style={uiStyles.helper}>Update the report to calculate account activity.</Text>}
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Member capital movement · selected dates</Text>
@@ -151,10 +244,14 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       <Text style={uiStyles.sectionTitle}>Available from persisted books</Text>
       <Text style={uiStyles.rowDetail}>Account balances: {snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash').length} bank and cash accounts.</Text>
       <Text style={uiStyles.rowDetail}>Member interests: {snapshot.members.length} current members, with dated interest history.</Text>
-      <Text style={uiStyles.helper}>Trial Balance, General Ledger, Balance Sheet and tax-specific reports are still to come.</Text>
+      <Text style={uiStyles.helper}>General Ledger, member and loan workpaper exports, and tax-specific reports remain in progress.</Text>
     </Panel>
   </Page>;
 }
+
+const styles = StyleSheet.create({
+  trialBalanceAmount: { width: 88, alignItems: 'flex-end' },
+});
 
 function isValidDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;

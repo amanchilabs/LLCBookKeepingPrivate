@@ -10,6 +10,8 @@ import {
   createLoanAgreementInDatabase,
   createGuaranteedPaymentObligationInDatabase,
   getBookkeepingSnapshotFromDatabase,
+  generalLedgerReportFromDatabase,
+  journalBalanceReportFromDatabase,
   recordGuaranteedPaymentInDatabase,
   recordLoanAdvanceInDatabase,
   recordLoanRepaymentInDatabase,
@@ -24,6 +26,8 @@ import {
   type CreateAccountReconciliationInput,
   type CashAccountInput,
   type CashBasisReport,
+  type GeneralLedgerReport,
+  type JournalBalanceReport,
   type CorrectCashTransactionInput,
   type CashTransactionInput,
   type TransferInput,
@@ -148,4 +152,16 @@ export async function getCashBasisReport(
   throughDate: string,
 ): Promise<CashBasisReport> {
   return await useActiveBooks((database) => cashBasisReportFromDatabase(database, businessId, fromDate, throughDate));
+}
+
+export async function getJournalBalanceReport(businessId: string, asOfDate: string): Promise<JournalBalanceReport> {
+  return await useActiveBooks((database) => journalBalanceReportFromDatabase(database, businessId, asOfDate));
+}
+
+export async function getGeneralLedgerReport(
+  businessId: string,
+  accountId: string,
+  asOfDate: string,
+): Promise<GeneralLedgerReport> {
+  return await useActiveBooks((database) => generalLedgerReportFromDatabase(database, businessId, accountId, asOfDate));
 }

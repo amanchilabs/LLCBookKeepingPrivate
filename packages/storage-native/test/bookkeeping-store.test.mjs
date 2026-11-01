@@ -11,6 +11,8 @@ import {
   correctCashTransactionInDatabase,
   ensureBookkeepingSchema,
   getBookkeepingSnapshotFromDatabase,
+  generalLedgerReportFromDatabase,
+  journalBalanceReportFromDatabase,
   createGuaranteedPaymentObligationInDatabase,
   createAccountReconciliationInDatabase,
   completeAccountReconciliationInDatabase,
@@ -870,6 +872,73 @@ describe('bookkeeping repository SQL contract', () => {
     })]);
     await setAccountReconciliationItemClearedInDatabase(database, 'destination-reconciliation', 'bank-transfer', true);
     await completeAccountReconciliationInDatabase(database, 'destination-reconciliation');
+    expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    database.close();
+  });
+
+  it('builds a balanced trial balance and book balance sheet from journal lines through a date', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-report', businessId: 'business-1', name: 'Report checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 100_000n,
+      openingTransactionId: 'opening-report', openingJournalEntryId: 'opening-report-journal',
+    });
+    await createCashAccountInDatabase(database, {
+      id: 'bank-overdraft-report', businessId: 'business-1', name: 'Overdraft checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: -5_000n,
+      openingTransactionId: 'opening-overdraft-report', openingJournalEntryId: 'opening-overdraft-report-journal',
+    });
+    await createCashAccountInDatabase(database, { id: 'cash-report', businessId: 'business-1', name: 'Petty cash', kind: 'cash' });
+    await recordCashTransactionInDatabase(database, {
+      id: 'income-report', journalEntryId: 'income-report-journal', businessId: 'business-1',
+      date: '2024-01-10', kind: 'income', accountId: 'bank-report', categoryAccountId: 'income-services',
+      amountCents: 40_000n, description: 'Synthetic report income',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'expense-report', journalEntryId: 'expense-report-journal', businessId: 'business-1',
+      date: '2024-01-12', kind: 'expense', accountId: 'bank-report', categoryAccountId: 'expense-rent',
+      amountCents: 7_500n, description: 'Synthetic report rent',
+    });
+    await recordTransferInDatabase(database, {
+      transactionId: 'transfer-report', journalEntryId: 'transfer-report-journal', businessId: 'business-1',
+      date: '2024-01-15', sourceAccountId: 'bank-report', destinationAccountId: 'cash-report',
+      amountCents: 10_000n, description: 'Synthetic report cash transfer',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'income-after-report-date', journalEntryId: 'income-after-report-date-journal', businessId: 'business-1',
+      date: '2024-02-01', kind: 'income', accountId: 'bank-report', categoryAccountId: 'income-services',
+      amountCents: 30_000n, description: 'Excluded after report date',
+    });
+
+    const report = await journalBalanceReportFromDatabase(database, 'business-1', '2024-01-31');
+    const ledger = await generalLedgerReportFromDatabase(database, 'business-1', 'bank-report', '2024-01-31');
+
+    expect(report.trialBalance.find((line) => line.accountId === 'bank-report')).toMatchObject({ debitCents: 122_500n, creditCents: 0n });
+    expect(report.trialBalance.find((line) => line.accountId === 'bank-overdraft-report')).toMatchObject({ debitCents: 0n, creditCents: 5_000n });
+    expect(report.trialBalance.find((line) => line.accountId === 'cash-report')).toMatchObject({ debitCents: 10_000n, creditCents: 0n });
+    expect(report.trialBalance.find((line) => line.accountId === 'opening-equity')).toMatchObject({ debitCents: 0n, creditCents: 95_000n });
+    expect(report.trialBalance.find((line) => line.accountId === 'income-services')).toMatchObject({ debitCents: 0n, creditCents: 40_000n });
+    expect(report.trialBalance.find((line) => line.accountId === 'expense-rent')).toMatchObject({ debitCents: 7_500n, creditCents: 0n });
+    expect(report.totalDebitsCents).toBe(140_000n);
+    expect(report.totalCreditsCents).toBe(140_000n);
+    expect(report.balanceSheet).toMatchObject({
+      totalAssetsCents: 132_500n, totalLiabilitiesCents: 5_000n, bookEquityCents: 95_000n,
+      currentEarningsCents: 32_500n, totalEquityCents: 127_500n, differenceCents: 0n,
+    });
+    expect(report.balanceSheet.liabilities).toContainEqual(expect.objectContaining({
+      accountId: 'overdraft:bank-overdraft-report', name: 'Overdraft checking · bank overdraft', balanceCents: 5_000n,
+    }));
+    expect(ledger.lines.map(({ date, description, debitCents, creditCents, runningBalanceCents }) => [
+      date, description, debitCents, creditCents, runningBalanceCents,
+    ])).toEqual([
+      ['2024-01-01', 'Opening balance · Report checking', 100_000n, 0n, 100_000n],
+      ['2024-01-10', 'Synthetic report income', 40_000n, 0n, 140_000n],
+      ['2024-01-12', 'Synthetic report rent', 0n, 7_500n, 132_500n],
+      ['2024-01-15', 'Synthetic report cash transfer', 0n, 10_000n, 122_500n],
+    ]);
+    expect(ledger).toMatchObject({ totalDebitsCents: 140_000n, totalCreditsCents: 17_500n, endingBalanceCents: 122_500n });
     expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
     database.close();
   });

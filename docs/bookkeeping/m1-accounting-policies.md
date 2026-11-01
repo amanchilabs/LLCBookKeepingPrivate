@@ -18,12 +18,12 @@ This first native workflow records synthetic test data in the existing encrypted
 - Bank reconciliation stores statement periods, beginning and ending balances, cleared-transaction selections, and audit events. Cleared movements come from journal lines. A statement completes only when beginning balance plus selected movements equals the statement ending balance; reconciliation does not post or edit journal entries. The next period carries forward the prior statement date and ending balance. Only the latest completed statement can be reopened.
 - The first categories are Sales and Services, Other Income, Office Supplies, Rent, Software and Hosting, Travel, Meals, and Other Operating Expense. These are bookkeeping categories, not tax advice or tax-return mappings.
 - A non-zero opening balance posts on its entered date as a balanced entry against Opening Balance Equity. A positive balance debits the cash account; a negative bank opening balance credits it. A zero-balance account has no opening journal entry.
-- A cash-on-hand account may not become negative on any recorded date. A bank account may show a negative balance to reflect an overdraft.
+- A cash-on-hand account may not become negative on any recorded date. A bank account may show a negative balance to reflect an overdraft; the book Balance Sheet presents a negative bank balance as a bank-overdraft liability.
+- Trial Balance and Balance Sheet balances are cumulative journal balances through the selected date. Income less expenses is shown as current earnings within equity; generating these reports does not create closing entries. These book reports do not establish tax-basis capital or outside basis.
 - Corrections keep the original entry, post a reversing entry dated on the original transaction date, and post a replacement using the corrected date and details. This preserves the journal trail and moves the cash/P&L effect to the corrected period.
 - Cash account balances and cash-basis P&L are calculated from journal lines. CSV amounts are signed cash movements, including opening balances and reversals; a transfer exports both account legs so each account ledger reconciles and the transfer nets to zero.
 
 ## Not represented in this slice
 
 - Receivables, payables, accrual accounting, payroll, and tax calculations are not supported. Member capital activity and distributions are maintained as book-capital activity and do not establish tax basis or outside basis.
-- A bank account can display a negative balance for an overdraft. A future balance sheet must classify an overdraft as a liability where appropriate.
 - No transaction or ownership interest is synchronized to a service. CSV and encrypted backup sharing require an explicit user action.

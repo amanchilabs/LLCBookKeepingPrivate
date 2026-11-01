@@ -374,6 +374,60 @@ export interface CashBasisReport extends CashBasisTotals {
   throughDate: string;
 }
 
+export interface TrialBalanceLine {
+  accountId: string;
+  code: string;
+  name: string;
+  kind: AccountRecord['kind'];
+  debitCents: bigint;
+  creditCents: bigint;
+}
+
+export interface BalanceSheetLine {
+  accountId: string;
+  code: string;
+  name: string;
+  balanceCents: bigint;
+}
+
+export interface JournalBalanceReport {
+  asOfDate: string;
+  trialBalance: TrialBalanceLine[];
+  totalDebitsCents: bigint;
+  totalCreditsCents: bigint;
+  balanceSheet: {
+    assets: BalanceSheetLine[];
+    liabilities: BalanceSheetLine[];
+    equity: BalanceSheetLine[];
+    currentEarningsCents: bigint;
+    totalAssetsCents: bigint;
+    totalLiabilitiesCents: bigint;
+    bookEquityCents: bigint;
+    totalEquityCents: bigint;
+    differenceCents: bigint;
+  };
+}
+
+export interface GeneralLedgerLine {
+  journalEntryId: string;
+  date: string;
+  description: string;
+  debitCents: bigint;
+  creditCents: bigint;
+  runningBalanceCents: bigint;
+}
+
+export interface GeneralLedgerReport {
+  accountId: string;
+  accountName: string;
+  accountKind: AccountRecord['kind'];
+  asOfDate: string;
+  lines: GeneralLedgerLine[];
+  totalDebitsCents: bigint;
+  totalCreditsCents: bigint;
+  endingBalanceCents: bigint;
+}
+
 interface DbBusiness {
   id: string;
   name: string;
@@ -2623,6 +2677,125 @@ async function cashBasisForPeriod(database: Database, businessId: string, fromDa
     if (line.accountKind === 'expense') expenseCents += debit - credit;
   }
   return { incomeCents, expenseCents, netIncomeCents: incomeCents - expenseCents };
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function journalBalanceReportFromDatabase(
+  database: Database,
+  businessId: string,
+  asOfDate: string,
+): Promise<JournalBalanceReport> {
+  requireDate(asOfDate, 'report date');
+  await requireBusiness(database, businessId);
+  const accounts = await database.getAllAsync<Pick<DbAccount, 'id' | 'code' | 'name' | 'kind'>>(
+    'SELECT id, code, name, kind FROM accounts WHERE business_id = ? ORDER BY code, name', businessId,
+  );
+  const journalLines = await database.getAllAsync<{ accountId: string; debitMinor: string; creditMinor: string }>(
+    `SELECT jl.account_id AS accountId, jl.debit_minor AS debitMinor, jl.credit_minor AS creditMinor
+     FROM journal_lines jl JOIN journal_entries je ON je.id = jl.journal_entry_id
+     WHERE je.business_id = ? AND je.entry_date <= ?`, businessId, asOfDate,
+  );
+  const totalsByAccount = new Map<string, { debits: bigint; credits: bigint }>();
+  for (const line of journalLines) {
+    const totals = totalsByAccount.get(line.accountId) ?? { debits: 0n, credits: 0n };
+    totals.debits += BigInt(line.debitMinor);
+    totals.credits += BigInt(line.creditMinor);
+    totalsByAccount.set(line.accountId, totals);
+  }
+  const trialBalance: TrialBalanceLine[] = accounts.map((account) => {
+    const totals = totalsByAccount.get(account.id) ?? { debits: 0n, credits: 0n };
+    const netDebit = totals.debits - totals.credits;
+    return {
+      accountId: account.id, code: account.code, name: account.name, kind: account.kind,
+      debitCents: netDebit > 0n ? netDebit : 0n,
+      creditCents: netDebit < 0n ? -netDebit : 0n,
+    };
+  });
+  const totalDebitsCents = trialBalance.reduce((sum, line) => sum + line.debitCents, 0n);
+  const totalCreditsCents = trialBalance.reduce((sum, line) => sum + line.creditCents, 0n);
+  const balanceSheetLines = (kind: AccountRecord['kind'], normalSide: 'debit' | 'credit'): BalanceSheetLine[] =>
+    accounts.filter((account) => account.kind === kind).map((account) => {
+      const totals = totalsByAccount.get(account.id) ?? { debits: 0n, credits: 0n };
+      return {
+        accountId: account.id, code: account.code, name: account.name,
+        balanceCents: normalSide === 'debit' ? totals.debits - totals.credits : totals.credits - totals.debits,
+      };
+    });
+  const bankOverdrafts = accounts.filter((account) => account.kind === 'bank').flatMap((account) => {
+    const totals = totalsByAccount.get(account.id) ?? { debits: 0n, credits: 0n };
+    const netDebit = totals.debits - totals.credits;
+    return netDebit < 0n ? [{
+      accountId: `overdraft:${account.id}`, code: account.code,
+      name: `${account.name} · bank overdraft`, balanceCents: -netDebit,
+    }] : [];
+  });
+  const overdraftAccountIds = new Set(bankOverdrafts.map((line) => line.accountId.slice('overdraft:'.length)));
+  const assets = ['bank', 'cash', 'asset'].flatMap((kind) => balanceSheetLines(kind as AccountRecord['kind'], 'debit'))
+    .filter((line) => !overdraftAccountIds.has(line.accountId));
+  const liabilities = [...balanceSheetLines('liability', 'credit'), ...bankOverdrafts];
+  const equity = balanceSheetLines('equity', 'credit');
+  let currentEarningsCents = 0n;
+  for (const account of accounts) {
+    const totals = totalsByAccount.get(account.id) ?? { debits: 0n, credits: 0n };
+    if (account.kind === 'income') currentEarningsCents += totals.credits - totals.debits;
+    if (account.kind === 'expense') currentEarningsCents -= totals.debits - totals.credits;
+  }
+  const sumBalances = (lines: BalanceSheetLine[]) => lines.reduce((sum, line) => sum + line.balanceCents, 0n);
+  const totalAssetsCents = sumBalances(assets);
+  const totalLiabilitiesCents = sumBalances(liabilities);
+  const bookEquityCents = sumBalances(equity);
+  const totalEquityCents = bookEquityCents + currentEarningsCents;
+  return {
+    asOfDate, trialBalance, totalDebitsCents, totalCreditsCents,
+    balanceSheet: {
+      assets, liabilities, equity, currentEarningsCents, totalAssetsCents,
+      totalLiabilitiesCents, bookEquityCents, totalEquityCents,
+      differenceCents: totalAssetsCents - totalLiabilitiesCents - totalEquityCents,
+    },
+  };
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function generalLedgerReportFromDatabase(
+  database: Database,
+  businessId: string,
+  accountId: string,
+  asOfDate: string,
+): Promise<GeneralLedgerReport> {
+  requireDate(asOfDate, 'report date');
+  await requireBusiness(database, businessId);
+  const account = await database.getFirstAsync<{ id: string; name: string; kind: AccountRecord['kind'] }>(
+    'SELECT id, name, kind FROM accounts WHERE id = ? AND business_id = ?', accountId, businessId,
+  );
+  if (!account) throw new Error('Choose an account belonging to this business.');
+  const rows = await database.getAllAsync<{
+    journalEntryId: string; date: string; description: string; lineNumber: number; debitMinor: string; creditMinor: string;
+  }>(
+    `SELECT je.id AS journalEntryId, je.entry_date AS date, je.description, jl.line_number AS lineNumber,
+            jl.debit_minor AS debitMinor, jl.credit_minor AS creditMinor
+     FROM journal_lines jl JOIN journal_entries je ON je.id = jl.journal_entry_id
+     WHERE je.business_id = ? AND jl.account_id = ? AND je.entry_date <= ?
+     ORDER BY je.entry_date, je.created_at, jl.line_number, je.id`,
+    businessId, accountId, asOfDate,
+  );
+  let runningBalanceCents = 0n;
+  let totalDebitsCents = 0n;
+  let totalCreditsCents = 0n;
+  const lines = rows.map((row) => {
+    const debitCents = BigInt(row.debitMinor);
+    const creditCents = BigInt(row.creditMinor);
+    totalDebitsCents += debitCents;
+    totalCreditsCents += creditCents;
+    runningBalanceCents += debitCents - creditCents;
+    return {
+      journalEntryId: row.journalEntryId, date: row.date, description: row.description,
+      debitCents, creditCents, runningBalanceCents,
+    };
+  });
+  return {
+    accountId, accountName: account.name, accountKind: account.kind, asOfDate,
+    lines, totalDebitsCents, totalCreditsCents, endingBalanceCents: runningBalanceCents,
+  };
 }
 
 async function readAccountReconciliations(database: Database, businessId: string): Promise<AccountReconciliationRecord[]> {
