@@ -5,13 +5,17 @@ import { Text, View } from 'react-native';
 import { closeAccountingPeriod, reopenAccountingPeriod } from '../../../packages/storage-native/src/bookkeeping-service';
 import type { BookkeepingSnapshot, BusinessRecord } from '../../../packages/storage-native/src/bookkeeping-store';
 import { RemindersSection } from './RemindersSection';
+import { WorkspacesSection } from './WorkspacesSection';
 import { Button, Field, FormError, Heading, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function SettingsScreen({
-  business, snapshot, onSaved, onOpenSecurityProof,
+  business, snapshot, workspaces, onSelectBusiness, onAddBusiness, onSaved, onOpenSecurityProof,
 }: {
   business: BusinessRecord;
   snapshot: BookkeepingSnapshot;
+  workspaces: readonly BusinessRecord[];
+  onSelectBusiness: (businessId: string) => void;
+  onAddBusiness: () => void;
   onSaved: () => Promise<void>;
   onOpenSecurityProof: () => void;
 }) {
@@ -60,6 +64,12 @@ export function SettingsScreen({
       <Text style={uiStyles.rowDetail}>Formed in {business.formationState} on {business.formationDate}</Text>
       <Text style={uiStyles.rowDetail}>Books begin {business.bookkeepingStartDate}</Text>
     </Panel>
+    {snapshot.members.length === 1 ? <Panel>
+      <Text style={uiStyles.sectionTitle}>Single-member bookkeeping policy</Text>
+      <Text style={uiStyles.rowDetail}>Owner contributions and distributions are tracked as equity, not income or operating expenses. Guaranteed-payment obligations and payments are disabled. Owner labor and tax classification require CPA review; the app does not infer tax treatment.</Text>
+    </Panel> : null}
+    <WorkspacesSection activeBusinessId={business.id} workspaces={workspaces}
+      onSelectBusiness={onSelectBusiness} onAddBusiness={onAddBusiness} />
     <RemindersSection businessId={business.id} reminders={snapshot.reminders} onSaved={onSaved} />
     <Panel>
       <Text style={uiStyles.sectionTitle}>Bookkeeping periods</Text>

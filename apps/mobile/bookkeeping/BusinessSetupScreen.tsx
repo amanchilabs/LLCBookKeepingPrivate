@@ -32,6 +32,14 @@ export function BusinessSetupScreen({ onCreated }: { onCreated: () => Promise<vo
     setMembers((current) => current.map((member, memberIndex) => memberIndex === index ? { ...member, ...patch } : member));
   };
 
+  const removeMember = (index: number) => {
+    setMembers((current) => {
+      const next = current.filter((_, memberIndex) => memberIndex !== index);
+      if (next.length === 1) next[0] = { ...next[0], percent: '100' };
+      return next;
+    });
+  };
+
   const save = async () => {
     setSaving(true);
     setError(null);
@@ -70,11 +78,15 @@ export function BusinessSetupScreen({ onCreated }: { onCreated: () => Promise<vo
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Members and ownership interests</Text>
-      <Text style={uiStyles.helper}>The suggested four-member split is 40% / 20% / 20% / 20%. Review or edit every value. Your tap on “Confirm and create LLC” confirms the percentages shown.</Text>
-      {members.map((member, index) => <View key={index} style={uiStyles.row}>
-        <Field label={`Member ${index + 1} name`} value={member.name} onChangeText={(value) => updateMember(index, { name: value })} placeholder="Full name" autoCapitalize="words" />
-        <Field label={`Member ${index + 1} ownership percent`} value={member.percent} onChangeText={(value) => updateMember(index, { percent: value })} placeholder="20" keyboardType="decimal-pad" />
+      <Text style={uiStyles.helper}>The suggested four-member split is 40% / 20% / 20% / 20%. Remove rows for a smaller LLC or add rows for more members. Interests must total exactly 100%. Confirming creates the ownership values shown.</Text>
+      {members.map((member, index) => <View key={index}>
+        <View style={uiStyles.row}>
+          <Field label={`Member ${index + 1} name`} value={member.name} onChangeText={(value) => updateMember(index, { name: value })} placeholder="Full name" autoCapitalize="words" />
+          <Field label={`Member ${index + 1} ownership percent`} value={member.percent} onChangeText={(value) => updateMember(index, { percent: value })} placeholder="20" keyboardType="decimal-pad" />
+        </View>
+        {members.length > 1 ? <Button title={`Remove member ${index + 1}`} secondary onPress={() => removeMember(index)} /> : null}
       </View>)}
+      <Button title="Add member" secondary onPress={() => setMembers((current) => [...current, { name: '', percent: '0' }])} />
       <FormError message={error} />
       <Button title="Confirm and create LLC" onPress={() => void save()} disabled={saving} />
       {saving && <Text style={uiStyles.helper}>Saving the profile and confirmed interests locally…</Text>}

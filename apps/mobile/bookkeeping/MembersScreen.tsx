@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { parseOwnershipPercent, type MemberInterestInput } from '../../../packages/domain/src/bookkeeping';
 import { formatUsd, parseUsd } from '../../../packages/domain/src/money';
+import { canCreateGuaranteedPayment, canReverseHistoricalPayment, shouldShowPaymentHistoryControls } from './member-payment-history';
 import {
   createGuaranteedPaymentObligation,
   recordGuaranteedPayment,
@@ -78,6 +79,10 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
     .reduce((sum, installment) => sum + installment.outstandingAmountCents, 0n);
   const reversedPaymentIds = new Set(snapshot.guaranteedPaymentCashEvents
     .filter((event) => event.kind === 'reversal').map((event) => event.paymentId));
+  const showPaymentHistoryControls = shouldShowPaymentHistoryControls(
+    snapshot.members.length,
+    snapshot.guaranteedPaymentCashEvents,
+  );
 
   useEffect(() => {
     setMembers(snapshot.members.map((member) => ({
@@ -117,6 +122,14 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
 
   const update = (index: number, patch: Partial<MemberDraft>) => {
     setMembers((current) => current.map((member, memberIndex) => memberIndex === index ? { ...member, ...patch } : member));
+  };
+
+  const removeMember = (index: number) => {
+    setMembers((current) => {
+      const next = current.filter((_, memberIndex) => memberIndex !== index);
+      if (next.length === 1) next[0] = { ...next[0], percent: '100' };
+      return next;
+    });
   };
 
   const save = async () => {
@@ -267,16 +280,18 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
   return <Page>
     <Heading title="Members" subtitle="Edit member names and ownership interests. Every ownership change keeps its prior effective dates in the local history." />
     <Panel>
-      {members.map((member, index) => <View key={member.id} style={uiStyles.row}>
-        <Field label={`Member ${index + 1} name`} value={member.name} onChangeText={(value) => update(index, { name: value })} autoCapitalize="words" />
-        <Field label={`Member ${index + 1} ownership percent`} value={member.percent} onChangeText={(value) => update(index, { percent: value })} keyboardType="decimal-pad" />
-        <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${member.name || `member ${index + 1}`}`} onPress={() => setMembers((current) => current.filter((item) => item.id !== member.id))} style={uiStyles.remove}>
-          <Text style={uiStyles.removeText}>×</Text>
-        </Pressable>
+      {members.map((member, index) => <View key={member.id}>
+        <View style={uiStyles.row}>
+          <Field label={`Member ${index + 1} name`} value={member.name} onChangeText={(value) => update(index, { name: value })} autoCapitalize="words" />
+          <Field label={`Member ${index + 1} ownership percent`} value={member.percent} onChangeText={(value) => update(index, { percent: value })} keyboardType="decimal-pad" />
+          {members.length > 1 ? <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${member.name || `member ${index + 1}`}`} onPress={() => removeMember(index)} style={uiStyles.remove}>
+            <Text style={uiStyles.removeText}>×</Text>
+          </Pressable> : null}
+        </View>
       </View>)}
-      <Button title="Add member" secondary onPress={() => setMembers((current) => [...current, { id: Crypto.randomUUID(), name: '', percent: '0' }])} />
+      <Button title="Add member" secondary onPress={() => setMembers((current) => [...current, { id: Crypto.randomUUID(), name: '', percent: '0' }])} disabled={saving} />
       <Field label="Change effective date" value={effectiveDate} onChangeText={setEffectiveDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
-      <Text style={uiStyles.helper}>Active member interests must total exactly 100%. Saving confirms the percentages above. Effective dates cannot rewrite an existing ownership period.</Text>
+      <Text style={uiStyles.helper}>Active member interests must total exactly 100%. Removing members down to one sets the remaining interest to 100%. Saving confirms the percentages above. Effective dates cannot rewrite an existing ownership period.</Text>
       <FormError message={error} />
       <Button title="Confirm and save member changes" onPress={() => void save()} disabled={saving} />
     </Panel>
@@ -328,6 +343,7 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
     <Panel>
       <Text style={uiStyles.sectionTitle}>Guaranteed-payment obligations</Text>
       <Text style={uiStyles.helper}>Contracts and installments are memo-only. Unpaid obligations do not post an expense, liability, or cash movement. CPA review is needed for tax classification, deductibility, and capitalization.</Text>
+      {canCreateGuaranteedPayment(snapshot.members.length) ? <>
       <Choice label="Obligation member" value={paymentMemberId} options={snapshot.members.map((member) => ({ value: member.id, title: member.name }))} onChange={setPaymentMemberId} />
       <Choice label="Guaranteed payment classification" value={paymentClassification} options={[
         { value: 'services', title: 'Services' },
@@ -351,6 +367,7 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
       <Field label="Obligation description" value={paymentObligationDescription} onChangeText={setPaymentObligationDescription} placeholder="Agreement or service description" />
       <Text style={uiStyles.helper}>Monthly and quarterly due dates use the original day when possible and the last day of shorter months.</Text>
       <Button title={paymentSaving ? 'Saving…' : 'Save obligation and installments'} onPress={() => void savePaymentObligation()} disabled={paymentSaving || snapshot.members.length === 0} />
+      </> : <Text style={uiStyles.helper}>Owner equity only: new guaranteed-payment obligations are disabled for a single-member LLC. Owner labor and tax classification require CPA review; this app does not infer them.</Text>}
       <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Outstanding</Text><Money cents={totalPaymentOutstanding} /></View>
       <Text style={uiStyles.rowDetail}>Due ${formatUsd(duePaymentBalance)} · Overdue ${formatUsd(overduePaymentBalance)} as of {today}</Text>
       {snapshot.guaranteedPaymentInstallments.length ? snapshot.guaranteedPaymentInstallments.map((installment) => {
@@ -367,7 +384,7 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
         </View>;
       }) : <Text style={uiStyles.helper}>No guaranteed-payment obligations recorded.</Text>}
     </Panel>
-    <Panel>
+    {snapshot.members.length > 1 ? <Panel>
       <Text style={uiStyles.sectionTitle}>Record an actual member payment</Text>
       <Text style={uiStyles.helper}>Only cash actually paid posts an expense. Allocate the payment to one or more installments; partial allocations are allowed.</Text>
       <Choice label="Payment member" value={cashPaymentMemberId} options={snapshot.members.map((member) => ({ value: member.id, title: member.name }))} onChange={setCashPaymentMemberId} />
@@ -403,12 +420,14 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
       </> : <Text style={uiStyles.helper}>There are no unpaid installments for this member and classification.</Text>}
       <FormError message={paymentError} />
       {paymentNotice ? <Text accessibilityLiveRegion="polite" style={uiStyles.helper}>{paymentNotice}</Text> : null}
-    </Panel>
+    </Panel> : null}
     <Panel>
       <Text style={uiStyles.sectionTitle}>Member payment history</Text>
-      <Field label="Cash return date for reversals" value={paymentReversalDate} onChangeText={setPaymentReversalDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
-      <Choice label="Account receiving returned cash" value={paymentReturnCashAccountId} options={cashAccounts.map((account) => ({ value: account.id, title: account.name }))} onChange={setPaymentReturnCashAccountId} />
-      <Field label="Payment reversal reason" value={paymentReversalReason} onChangeText={setPaymentReversalReason} placeholder="Why were funds returned?" />
+      {showPaymentHistoryControls ? <>
+        <Field label="Cash return date for reversals" value={paymentReversalDate} onChangeText={setPaymentReversalDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
+        <Choice label="Account receiving returned cash" value={paymentReturnCashAccountId} options={cashAccounts.map((account) => ({ value: account.id, title: account.name }))} onChange={setPaymentReturnCashAccountId} />
+        <Field label="Payment reversal reason" value={paymentReversalReason} onChangeText={setPaymentReversalReason} placeholder="Why were funds returned?" />
+      </> : <Text style={uiStyles.helper}>Single-member books retain prior payment records for reference. New obligations and payments are disabled; ask a CPA about prior obligations and owner labor.</Text>}
       {snapshot.guaranteedPaymentCashEvents.length ? snapshot.guaranteedPaymentCashEvents.map((event) => {
         const paymentReversed = reversedPaymentIds.has(event.paymentId);
         return <View key={event.id} style={uiStyles.rowItem}>
@@ -417,7 +436,7 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
             <Text style={uiStyles.rowDetail}>{event.date} · {event.cashAccountName} · {event.description}</Text>
             {event.reason ? <Text style={uiStyles.rowDetail}>Reversal reason: {event.reason}</Text> : null}
             {event.kind === 'payment' && paymentReversed ? <Text style={uiStyles.badge}>Reversed · original retained</Text> : null}
-            {event.kind === 'payment' && !paymentReversed
+            {canReverseHistoricalPayment(event.kind, paymentReversed)
               ? <Button title="Reverse returned payment" secondary onPress={() => void reversePayment(event.paymentId)} disabled={paymentSaving} />
               : null}
           </View>

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState, type ComponentType } from 'react';
 import { Platform, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { getBookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-service';
-import type { BookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-store';
+import { getBookkeepingSnapshot, getBusinessProfiles, selectBusiness } from '../../../packages/storage-native/src/bookkeeping-service';
+import type { BookkeepingSnapshot, BusinessRecord } from '../../../packages/storage-native/src/bookkeeping-store';
 import { AccountsScreen } from './AccountsScreen';
 import { BusinessSetupScreen } from './BusinessSetupScreen';
 import { DashboardScreen } from './DashboardScreen';
@@ -45,13 +45,18 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showSecurityProof, setShowSecurityProof] = useState(false);
+  const [showBusinessSetup, setShowBusinessSetup] = useState(false);
+  const [workspaces, setWorkspaces] = useState<BusinessRecord[]>([]);
   const rootStyle = [styles.root, { paddingTop: contentTopInset(Platform.OS, StatusBar.currentHeight) }];
 
   const refresh = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
     try {
-      setSnapshot(await getBookkeepingSnapshot());
+      const nextSnapshot = await getBookkeepingSnapshot();
+      const nextWorkspaces = await getBusinessProfiles();
+      setSnapshot(nextSnapshot);
+      setWorkspaces(nextWorkspaces);
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : 'Encrypted local storage could not be opened.');
     } finally {
@@ -60,6 +65,22 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   }, []);
 
   useEffect(() => { void refresh(); }, [refresh]);
+
+  const createWorkspace = async () => {
+    setShowBusinessSetup(false);
+    setTab('Dashboard');
+    await refresh();
+  };
+
+  const changeWorkspace = async (businessId: string) => {
+    try {
+      await selectBusiness(businessId);
+      setTab('Dashboard');
+      await refresh();
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'The selected LLC could not be opened.');
+    }
+  };
 
   if (showSecurityProof) {
     return <SafeAreaView style={rootStyle}>
@@ -98,6 +119,18 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
     </SafeAreaView>;
   }
 
+  if (showBusinessSetup) {
+    return <SafeAreaView style={rootStyle}>
+      <View style={styles.setupHeader}>
+        <Text style={styles.brand}>Add an LLC workspace</Text>
+        <Pressable accessibilityRole="button" onPress={() => setShowBusinessSetup(false)} style={styles.backButton}>
+          <Text style={styles.backButtonText}>Cancel</Text>
+        </Pressable>
+      </View>
+      <BusinessSetupScreen onCreated={createWorkspace} />
+    </SafeAreaView>;
+  }
+
   return <SafeAreaView style={rootStyle}>
     <View style={styles.appHeader}>
       <View style={styles.headerLine}>
@@ -125,6 +158,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
       {tab === 'Loans' ? <LoansScreen snapshot={snapshot} onSaved={refresh} /> : null}
       {tab === 'Reports' ? <ReportsScreen snapshot={snapshot} /> : null}
       {tab === 'Settings' ? <SettingsScreen business={snapshot.business} snapshot={snapshot}
+        workspaces={workspaces} onSelectBusiness={changeWorkspace} onAddBusiness={() => setShowBusinessSetup(true)}
         onSaved={refresh} onOpenSecurityProof={() => setShowSecurityProof(true)} /> : null}
     </View>
   </SafeAreaView>;

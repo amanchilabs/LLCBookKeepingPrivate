@@ -18,6 +18,8 @@ import {
   createLoanAgreementInDatabase,
   correctCashTransactionInDatabase,
   ensureBookkeepingSchema,
+  listBusinessProfilesFromDatabase,
+  setActiveBusinessInDatabase,
   getBookkeepingSnapshotFromDatabase,
   generalLedgerReportFromDatabase,
   journalBalanceReportFromDatabase,
@@ -168,6 +170,106 @@ afterEach(() => {
 });
 
 describe('bookkeeping repository SQL contract', () => {
+  it('keeps multiple LLC workspaces isolated and restores the selected workspace after reopen', async () => {
+    const path = databasePath();
+    let database = new TestDatabase(path);
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'workspace-one-bank', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 45_000n,
+      openingTransactionId: 'workspace-one-opening', openingJournalEntryId: 'workspace-one-opening-entry',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'workspace-one-income', journalEntryId: 'workspace-one-income-entry', businessId: 'business-1',
+      date: '2024-01-02', kind: 'income', accountId: 'workspace-one-bank',
+      categoryAccountId: 'income-services', amountCents: 1_000n, description: 'First LLC receipt',
+    });
+
+    const secondSetup = {
+      ...setup,
+      id: 'business-2',
+      name: 'Cedar Design LLC',
+      members: [
+        { id: 'business-2-member-1', name: 'Morgan Owner', ownershipBasisPoints: 10_000 },
+      ],
+    };
+    await createBusinessInDatabase(database, secondSetup);
+    await createCashAccountInDatabase(database, {
+      id: 'workspace-two-bank', businessId: 'business-2', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 22_000n,
+      openingTransactionId: 'workspace-two-opening', openingJournalEntryId: 'workspace-two-opening-entry',
+    });
+    await recordCashTransactionInDatabase(database, {
+      id: 'workspace-two-income', journalEntryId: 'workspace-two-income-entry', businessId: 'business-2',
+      date: '2024-01-03', kind: 'income', accountId: 'workspace-two-bank',
+      categoryAccountId: 'business-2:income-services', amountCents: 500n, description: 'Second LLC receipt',
+    });
+
+    expect(await listBusinessProfilesFromDatabase(database)).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'business-1', name: setup.name }),
+      expect.objectContaining({ id: 'business-2', name: 'Cedar Design LLC' }),
+    ]));
+    expect((await getBookkeepingSnapshotFromDatabase(database)).business.id).toBe('business-2');
+    let active = await getBookkeepingSnapshotFromDatabase(database);
+    expect(active.transactions.map((transaction) => transaction.id).sort()).toEqual(['workspace-two-income', 'workspace-two-opening']);
+    expect(active.accounts.find((account) => account.id === 'workspace-two-bank').balanceCents).toBe(22_500n);
+    expect(active.cashBasis).toEqual({ incomeCents: 500n, expenseCents: 0n, netIncomeCents: 500n });
+    expect(active.members).toHaveLength(1);
+    expect(active.members[0]).toMatchObject({ id: 'business-2-member-1', ownershipBasisPoints: 10_000 });
+    expect(active.accounts.filter((account) => account.isSystem).map((account) => account.id))
+      .toContain('business-2:opening-equity');
+    await expect(createGuaranteedPaymentObligationInDatabase(database, {
+      id: 'single-member-guaranteed-payment', businessId: 'business-2', memberId: 'business-2-member-1',
+      classification: 'services', recurrence: 'one-time', firstDueDate: '2024-01-04',
+      installmentCount: 1, installmentAmountCents: 100n, description: 'Owner labor',
+    })).rejects.toThrow('Guaranteed-payment obligations require a multi-member LLC');
+    expect((await getBookkeepingSnapshotFromDatabase(database, 'business-2')).guaranteedPaymentInstallments).toEqual([]);
+    await expect(recordGuaranteedPaymentInDatabase(database, {
+      id: 'single-member-payment', transactionId: 'single-member-payment-transaction',
+      journalEntryId: 'single-member-payment-journal', businessId: 'business-2',
+      memberId: 'business-2-member-1', date: '2024-01-04', cashAccountId: 'workspace-two-bank',
+      description: 'Owner labor payment', allocations: [{ installmentId: 'missing-installment', amountCents: 100n }],
+    })).rejects.toThrow('Guaranteed-payment cash postings are disabled for a single-member LLC');
+    expect((await getBookkeepingSnapshotFromDatabase(database, 'business-2')).transactions.map((transaction) => transaction.id).sort())
+      .toEqual(['workspace-two-income', 'workspace-two-opening']);
+
+    await setActiveBusinessInDatabase(database, 'business-1');
+    active = await getBookkeepingSnapshotFromDatabase(database);
+    expect(active.business.id).toBe('business-1');
+    expect(active.transactions.map((transaction) => transaction.id).sort()).toEqual(['workspace-one-income', 'workspace-one-opening']);
+    expect(active.accounts.find((account) => account.id === 'workspace-one-bank').balanceCents).toBe(46_000n);
+    expect(active.cashBasis).toEqual({ incomeCents: 1_000n, expenseCents: 0n, netIncomeCents: 1_000n });
+    database.close();
+
+    database = new TestDatabase(path);
+    await ensureBookkeepingSchema(database);
+    expect((await getBookkeepingSnapshotFromDatabase(database)).business.id).toBe('business-1');
+    await setActiveBusinessInDatabase(database, 'business-2');
+    expect((await getBookkeepingSnapshotFromDatabase(database)).business.id).toBe('business-2');
+    database.close();
+  });
+
+  it('migrates existing v12 books to active-workspace preferences without changing records', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'workspace-migration-bank', businessId: 'business-1', name: 'Checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 12_300n,
+      openingTransactionId: 'workspace-migration-opening', openingJournalEntryId: 'workspace-migration-entry',
+    });
+    await database.execAsync('DROP TABLE bookkeeping_preferences; UPDATE bookkeeping_schema SET version = 12;');
+
+    await ensureBookkeepingSchema(database);
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database);
+    expect(snapshot.business.id).toBe('business-1');
+    expect(snapshot.transactions.map((transaction) => transaction.id)).toEqual(['workspace-migration-opening']);
+    expect(snapshot.accounts.find((account) => account.id === 'workspace-migration-bank').balanceCents).toBe(12_300n);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(13);
+    database.close();
+  });
+
   it('migrates v11 books to reminder storage without changing existing account balances', async () => {
     const database = new TestDatabase(databasePath());
     await ensureBookkeepingSchema(database);
@@ -184,7 +286,7 @@ describe('bookkeeping repository SQL contract', () => {
     expect(snapshot.accounts.find((account) => account.id === 'migration-bank').balanceCents).toBe(45_600n);
     expect(snapshot.transactions.map((transaction) => transaction.id)).toEqual(['migration-opening']);
     expect(snapshot.reminders).toEqual([]);
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(13);
     database.close();
   });
 
@@ -506,7 +608,7 @@ describe('bookkeeping repository SQL contract', () => {
       UPDATE bookkeeping_schema SET version = 9 WHERE singleton = 1;
     `);
     await ensureBookkeepingSchema(database);
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(13);
     expect(database.database.prepare(`
       SELECT name FROM sqlite_master WHERE type = 'table' AND name IN (
         'recurring_transaction_templates', 'recurring_transaction_occurrences'
@@ -665,7 +767,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(13);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(124_000n);
     expect(snapshot.transactions.find((transaction) => transaction.id === 'expense-v8').splitLines).toEqual([
       { categoryAccountId: 'expense-rent', category: 'Rent', amountCents: 1_000n },
@@ -1097,6 +1199,67 @@ describe('bookkeeping repository SQL contract', () => {
     expect(database.database.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
     database.close();
   });
+  it('preserves historical payment reversals after a partnership becomes single-member', async () => {
+    const database = new TestDatabase(databasePath());
+    await ensureBookkeepingSchema(database);
+    await createBusinessInDatabase(database, setup);
+    await createCashAccountInDatabase(database, {
+      id: 'bank-1', businessId: 'business-1', name: 'Operating checking', kind: 'bank',
+      openingDate: '2024-01-01', openingBalanceCents: 50_000n,
+      openingTransactionId: 'transition-opening', openingJournalEntryId: 'transition-opening-entry',
+    });
+    await createGuaranteedPaymentObligationInDatabase(database, {
+      id: 'transition-obligation', businessId: 'business-1', memberId: 'member-1', classification: 'services',
+      recurrence: 'monthly', firstDueDate: '2025-01-05', installmentCount: 2,
+      installmentAmountCents: 4_000n, description: 'Historical partnership service obligation',
+    });
+    await recordGuaranteedPaymentInDatabase(database, {
+      id: 'transition-payment', transactionId: 'transition-payment-transaction',
+      journalEntryId: 'transition-payment-entry', businessId: 'business-1', memberId: 'member-1',
+      date: '2025-01-05', cashAccountId: 'bank-1', description: 'January service payment',
+      allocations: [{ installmentId: 'transition-obligation:installment:1', amountCents: 4_000n }],
+    });
+    await replaceMembersInDatabase(database, {
+      businessId: 'business-1', effectiveDate: '2025-02-01', ownershipConfirmed: true,
+      members: [{ id: 'member-1', name: 'Jordan Lee', ownershipBasisPoints: 10_000 }],
+    });
+
+    await expect(createGuaranteedPaymentObligationInDatabase(database, {
+      id: 'single-member-obligation', businessId: 'business-1', memberId: 'member-1', classification: 'services',
+      recurrence: 'one-time', firstDueDate: '2025-03-02', installmentCount: 1,
+      installmentAmountCents: 1_000n, description: 'Must remain disabled for sole member',
+    })).rejects.toThrow('require a multi-member LLC');
+    await expect(recordGuaranteedPaymentInDatabase(database, {
+      id: 'single-member-installment-payment', transactionId: 'single-member-payment-transaction',
+      journalEntryId: 'single-member-payment-entry', businessId: 'business-1', memberId: 'member-1',
+      date: '2025-02-05', cashAccountId: 'bank-1', description: 'Must remain disabled for sole member',
+      allocations: [{ installmentId: 'transition-obligation:installment:2', amountCents: 4_000n }],
+    })).rejects.toThrow('disabled for a single-member LLC');
+
+    await reverseGuaranteedPaymentInDatabase(database, {
+      id: 'transition-reversal', paymentId: 'transition-payment',
+      reversalTransactionId: 'transition-reversal-transaction',
+      reversalJournalEntryId: 'transition-reversal-entry', date: '2025-03-01',
+      returnCashAccountId: 'bank-1', reason: 'Synthetic returned partnership payment',
+    });
+
+    const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
+    expect(snapshot.members).toHaveLength(1);
+    expect(snapshot.members[0].ownershipBasisPoints).toBe(10_000);
+    expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(50_000n);
+    expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 0n, netIncomeCents: 0n });
+    expect(snapshot.guaranteedPaymentCashEvents.map((event) => event.kind)).toEqual(['payment', 'reversal']);
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'transition-payment-transaction'))
+      .toMatchObject({ originalTransactionId: 'transition-payment-transaction', isGuaranteedPayment: true });
+    expect(snapshot.transactions.find((transaction) => transaction.id === 'transition-reversal-transaction'))
+      .toMatchObject({ originalTransactionId: 'transition-payment-transaction', correctionRole: 'reversal', isGuaranteedPayment: true });
+    expect((await journalBalanceReportFromDatabase(database, 'business-1', '2025-03-01')).totalDebitsCents)
+      .toBe((await journalBalanceReportFromDatabase(database, 'business-1', '2025-03-01')).totalCreditsCents);
+    expect(await cashBasisReportFromDatabase(database, 'business-1', '2025-01-01', '2025-03-01'))
+      .toMatchObject({ expenseCents: 0n, netIncomeCents: 0n });
+    database.close();
+  });
+
   it('migrates v3 payment reversals and backfills the original cash account', async () => {
     const database = new TestDatabase(databasePath());
     await ensureBookkeepingSchema(database);
@@ -1146,7 +1309,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(13);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(10_000n);
     expect(snapshot.guaranteedPaymentCashEvents.find((event) => event.kind === 'reversal')).toMatchObject({
       cashAccountName: 'Checking', reason: 'Cash returned', amountCents: -5_000n,
@@ -1273,7 +1436,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     await ensureBookkeepingSchema(database);
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(13);
     expect(snapshot.loanAgreements[0].dayCount).toBe('ACT/ACT ISDA');
     expect(snapshot.loanActivities.map((activity) => [activity.kind, activity.amountCents])).toEqual([
       ['advance', 25_000n], ['repayment', -10_022n],
@@ -1338,7 +1501,7 @@ describe('bookkeeping repository SQL contract', () => {
 
     const snapshot = await getBookkeepingSnapshotFromDatabase(database, 'business-1');
 
-    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(12);
+    expect(database.database.prepare('SELECT version FROM bookkeeping_schema WHERE singleton = 1').get().version).toBe(13);
     expect(snapshot.accounts.find((account) => account.id === 'bank-1').balanceCents).toBe(45_000n);
     expect(snapshot.cashBasis).toEqual({ incomeCents: 0n, expenseCents: 5_000n, netIncomeCents: -5_000n });
     expect(snapshot.transactions.map((transaction) => transaction.id).sort()).toEqual(['expense-migration', 'opening-migration']);

@@ -21,7 +21,7 @@ import { formatUsd } from '../../domain/src/money';
 import { escapeCsvCell } from '../../domain/src/csv';
 import { cashImportDuplicateKey } from '../../domain/src/transaction-csv-import';
 
-const SCHEMA_VERSION = 12;
+const SCHEMA_VERSION = 13;
 
 const SEEDED_ACCOUNTS = [
   { id: 'opening-equity', code: '3000', name: 'Opening Balance Equity', kind: 'equity', category: 'Opening balance' },
@@ -784,6 +784,28 @@ export async function ensureBookkeepingSchema(database: Database): Promise<void>
   if (version < 10) await migrateBookkeepingV9ToV10(database);
   if (version < 11) await migrateBookkeepingV10ToV11(database);
   if (version < 12) await migrateBookkeepingV11ToV12(database);
+  if (version < 13) await migrateBookkeepingV12ToV13(database);
+}
+
+async function migrateBookkeepingV12ToV13(database: Database): Promise<void> {
+  await database.execAsync('BEGIN IMMEDIATE;');
+  try {
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS bookkeeping_preferences (
+        preference_key TEXT PRIMARY KEY NOT NULL CHECK (preference_key = 'active_business_id'),
+        preference_value TEXT NOT NULL REFERENCES businesses(id)
+      );
+      UPDATE bookkeeping_schema SET version = 13 WHERE singleton = 1;
+    `);
+    const violations = await database.getAllAsync<{ table: string; rowid: number | null; parent: string; fkid: number }>(
+      'PRAGMA foreign_key_check',
+    );
+    if (violations.length > 0) throw new Error('The workspace migration found invalid record references.');
+    await database.execAsync('COMMIT;');
+  } catch (error) {
+    await database.execAsync('ROLLBACK;').catch(() => undefined);
+    throw error;
+  }
 }
 
 async function migrateBookkeepingV11ToV12(database: Database): Promise<void> {
@@ -1407,8 +1429,8 @@ export async function createBusinessInDatabase(database: Database, input: Busine
   assertValidBusinessSetup(input);
   await ensureBookkeepingSchema(database);
   await inSqlTransaction(database, async () => {
-    const existing = await database.getFirstAsync<{ id: string }>('SELECT id FROM businesses LIMIT 1');
-    if (existing) throw new Error('This installation already has an LLC profile.');
+    const existing = await database.getFirstAsync<{ count: number }>('SELECT COUNT(*) AS count FROM businesses');
+    const accountIdPrefix = (existing?.count ?? 0) === 0 ? '' : `${input.id}:`;
     const createdAt = new Date().toISOString();
     await database.runAsync(
       `INSERT INTO businesses (id, name, formation_state, formation_date, bookkeeping_start_date, created_at)
@@ -1420,7 +1442,7 @@ export async function createBusinessInDatabase(database: Database, input: Busine
       await database.runAsync(
         `INSERT INTO accounts (id, business_id, code, name, kind, category, is_system, created_at)
          VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
-        account.id, input.id, account.code, account.name, account.kind, account.category, createdAt,
+        `${accountIdPrefix}${account.id}`, input.id, account.code, account.name, account.kind, account.category, createdAt,
       );
     }
     for (const member of input.members) {
@@ -1436,7 +1458,35 @@ export async function createBusinessInDatabase(database: Database, input: Busine
         member.ownershipBasisPoints, input.bookkeepingStartDate, createdAt,
       );
     }
+    await database.runAsync(
+      `INSERT INTO bookkeeping_preferences (preference_key, preference_value)
+       VALUES ('active_business_id', ?)
+       ON CONFLICT(preference_key) DO UPDATE SET preference_value = excluded.preference_value`,
+      input.id,
+    );
   });
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function listBusinessProfilesFromDatabase(database: Database): Promise<BusinessRecord[]> {
+  await ensureBookkeepingSchema(database);
+  return await database.getAllAsync<BusinessRecord>(
+    `SELECT id, name, formation_state AS formationState, formation_date AS formationDate,
+            bookkeeping_start_date AS bookkeepingStartDate
+     FROM businesses ORDER BY created_at, id`,
+  );
+}
+
+/** @internal SQL-level entry point used by repository tests. */
+export async function setActiveBusinessInDatabase(database: Database, businessId: string): Promise<void> {
+  await ensureBookkeepingSchema(database);
+  await requireBusiness(database, businessId);
+  await database.runAsync(
+    `INSERT INTO bookkeeping_preferences (preference_key, preference_value)
+     VALUES ('active_business_id', ?)
+     ON CONFLICT(preference_key) DO UPDATE SET preference_value = excluded.preference_value`,
+    businessId,
+  );
 }
 
 async function requireBusiness(database: Database, businessId: string): Promise<DbBusiness> {
@@ -1468,6 +1518,16 @@ async function requireMemberAtDate(database: Database, businessId: string, membe
   );
   if (!member) throw new Error('Choose a member whose LLC interest is active on the activity date.');
   return member;
+}
+
+async function countMembersAtDate(database: Database, businessId: string, date: string): Promise<number> {
+  const result = await database.getFirstAsync<{ count: number }>(
+    `SELECT COUNT(DISTINCT member_id) AS count FROM member_interest_history
+     WHERE business_id = ? AND effective_from <= ?
+       AND (effective_to IS NULL OR effective_to >= ?)`,
+    businessId, date, date,
+  );
+  return result?.count ?? 0;
 }
 
 async function ensureMemberCapitalAccount(database: Database, businessId: string, member: { id: string; name: string }): Promise<string> {
@@ -1707,13 +1767,17 @@ export async function createCashAccountInDatabase(database: Database, input: Cas
       input.kind === 'bank' ? 'Bank account' : 'Cash account', new Date().toISOString(),
     );
     if (opening !== 0n) {
-      const lines = openingBalanceLines(input.id, 'opening-equity', opening);
+      const openingEquity = await database.getFirstAsync<{ id: string }>(
+        'SELECT id FROM accounts WHERE business_id = ? AND code = ?', input.businessId, '3000',
+      );
+      if (!openingEquity) throw new Error('The opening balance equity account is missing for this LLC.');
+      const lines = openingBalanceLines(input.id, openingEquity.id, opening);
       const description = `Opening balance · ${input.name.trim()}`;
       await insertJournalEntry(database, input.businessId, input.openingJournalEntryId!, input.openingDate!, 'opening-balance', description, lines);
       await insertTransaction(database, {
         id: input.openingTransactionId!, journalEntryId: input.openingJournalEntryId!, businessId: input.businessId,
         date: input.openingDate!, kind: 'opening-balance', accountId: input.id,
-        categoryAccountId: 'opening-equity', amountCents: opening, description,
+        categoryAccountId: openingEquity.id, amountCents: opening, description,
       });
     }
   });
@@ -2711,6 +2775,9 @@ export async function createGuaranteedPaymentObligationInDatabase(
   }
 
   await inSqlTransaction(database, async () => {
+    if (await countMembersAtDate(database, input.businessId, input.firstDueDate) < 2) {
+      throw new Error('Guaranteed-payment obligations require a multi-member LLC. Ask a CPA about owner labor treatment.');
+    }
     await requireMemberAtDate(database, input.businessId, input.memberId, input.firstDueDate);
     const createdAt = new Date().toISOString();
     await database.runAsync(
@@ -2769,6 +2836,9 @@ export async function recordGuaranteedPaymentInDatabase(
   }
   const business = await requireBusiness(database, input.businessId);
   if (input.date < business.bookkeepingStartDate) throw new Error('Payment date cannot precede the bookkeeping start date.');
+  if (await countMembersAtDate(database, input.businessId, input.date) < 2) {
+    throw new Error('Guaranteed-payment cash postings are disabled for a single-member LLC.');
+  }
   await requireCashAccount(database, input.businessId, input.cashAccountId);
 
   await inSqlTransaction(database, async () => {
@@ -3121,7 +3191,11 @@ async function readBusiness(database: Database, businessId?: string): Promise<Bu
     )
     : await database.getFirstAsync<DbBusiness>(
       `SELECT id, name, formation_state AS formationState, formation_date AS formationDate,
-              bookkeeping_start_date AS bookkeepingStartDate FROM businesses ORDER BY created_at LIMIT 1`,
+              bookkeeping_start_date AS bookkeepingStartDate FROM businesses
+       WHERE id = COALESCE(
+         (SELECT preference_value FROM bookkeeping_preferences WHERE preference_key = 'active_business_id'),
+         (SELECT id FROM businesses ORDER BY created_at, id LIMIT 1)
+       )`,
     );
   return business ?? null;
 }
