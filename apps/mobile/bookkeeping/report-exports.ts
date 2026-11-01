@@ -1,7 +1,10 @@
 import type {
   CashBasisReport,
   GeneralLedgerReport,
+  GuaranteedPaymentCashEvent,
   JournalBalanceReport,
+  LoanActivityRecord,
+  LoanAgreementRecord,
   MemberCapitalActivityRecord,
 } from '../../../packages/storage-native/src/bookkeeping-store';
 
@@ -99,5 +102,93 @@ export function memberCapitalMovementCsv(
   return csv([[
     'From date', 'Through date', 'Date', 'Journal entry', 'Member', 'Activity',
     'Book capital movement', 'Cash movement', 'Cash account', 'Property description', 'Description', 'CPA review',
+  ], ...rows]);
+}
+
+export function guaranteedPaymentCashCsv(
+  fromDate: string,
+  throughDate: string,
+  events: readonly GuaranteedPaymentCashEvent[],
+): string {
+  if (!isValidDateRange(fromDate, throughDate)) {
+    throw new Error('Enter a valid date range before exporting guaranteed-payment cash activity.');
+  }
+
+  const selected = events
+    .filter((event) => event.date >= fromDate && event.date <= throughDate)
+    .slice()
+    .sort((left, right) => left.date.localeCompare(right.date)
+      || (left.kind === right.kind ? 0 : left.kind === 'payment' ? -1 : 1)
+      || left.id.localeCompare(right.id));
+  const servicesNetCents = selected
+    .filter((event) => event.classification === 'services')
+    .reduce((sum, event) => sum + event.amountCents, 0n);
+  const capitalUseNetCents = selected
+    .filter((event) => event.classification === 'use-of-capital')
+    .reduce((sum, event) => sum + event.amountCents, 0n);
+
+  const rows = selected.map((event) => [
+    fromDate, throughDate, event.date, event.kind === 'payment' ? 'Payment' : 'Reversal',
+    event.memberName, event.classification === 'services' ? 'Services' : 'Use of capital',
+    usd(event.amountCents), usd(-event.amountCents), event.cashAccountName, event.description, event.paymentId,
+    event.transactionId, event.reason ?? '',
+  ]);
+  const totalRow = (classification: string, amountCents: bigint): string[] => [
+    fromDate, throughDate, throughDate, 'Period total', '', classification,
+    usd(amountCents), usd(-amountCents), '', '', '', '', '',
+  ];
+  rows.push(
+    totalRow('Services net', servicesNetCents),
+    totalRow('Use of capital net', capitalUseNetCents),
+    totalRow('All cash activity net', servicesNetCents + capitalUseNetCents),
+  );
+  return csv([[
+    'From date', 'Through date', 'Date', 'Event', 'Member', 'Classification',
+    'Signed workpaper amount (+ paid / - returned)', 'Cash movement (- paid / + returned)',
+    'Cash account', 'Description', 'Payment ID', 'Transaction ID', 'Reversal reason',
+  ], ...rows]);
+}
+
+export function loanCashActivityCsv(
+  fromDate: string,
+  throughDate: string,
+  activities: readonly LoanActivityRecord[],
+  agreements: readonly LoanAgreementRecord[],
+): string {
+  if (!isValidDateRange(fromDate, throughDate)) {
+    throw new Error('Enter a valid date range before exporting loan cash activity.');
+  }
+
+  const agreementsById = new Map(agreements.map((agreement) => [agreement.id, agreement]));
+  const selected = activities
+    .filter((activity) => activity.date >= fromDate && activity.date <= throughDate)
+    .slice()
+    .sort((left, right) => left.date.localeCompare(right.date) || left.id.localeCompare(right.id));
+  let cashMovementCents = 0n;
+  let principalMovementCents = 0n;
+  let interestPaidCents = 0n;
+  const rows = selected.map((activity) => {
+    const agreement = agreementsById.get(activity.loanId);
+    if (!agreement) throw new Error('Loan activity references an unknown agreement.');
+    const principalCents = activity.kind === 'advance' ? activity.amountCents : -activity.principalCents;
+    const interestCents = activity.kind === 'repayment' ? activity.interestCents : 0n;
+    cashMovementCents += activity.amountCents;
+    principalMovementCents += principalCents;
+    interestPaidCents += interestCents;
+    return [
+      fromDate, throughDate, activity.date, activity.kind === 'advance' ? 'Advance' : 'Repayment',
+      agreement.lenderName, agreement.lenderType === 'member' ? 'Member' : 'Third party', agreement.id,
+      activity.cashAccountName, usd(activity.amountCents), usd(principalCents), usd(interestCents),
+      activity.description, activity.id, activity.transactionId, activity.journalEntryId,
+    ];
+  });
+  rows.push([
+    fromDate, throughDate, throughDate, 'Period totals', '', '', '', '',
+    usd(cashMovementCents), usd(principalMovementCents), usd(interestPaidCents), '', '', '', '',
+  ]);
+  return csv([[
+    'From date', 'Through date', 'Date', 'Event', 'Lender', 'Lender type', 'Loan ID', 'Cash account',
+    'Cash movement (+ advance / - repayment)', 'Principal movement (+ advance / - repayment)',
+    'Interest paid', 'Description', 'Activity ID', 'Transaction ID', 'Journal entry ID',
   ], ...rows]);
 }

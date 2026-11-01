@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { getCashBasisReport, getGeneralLedgerReport, getJournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-service';
 import type { BookkeepingSnapshot, CashBasisReport, GeneralLedgerReport, JournalBalanceReport } from '../../../packages/storage-native/src/bookkeeping-store';
 import { summarizeLoanBalance } from '../../../packages/domain/src/loan-interest';
-import { balanceSheetCsv, cashBasisCsv, generalLedgerCsv, isValidDateRange, memberCapitalMovementCsv, trialBalanceCsv } from './report-exports';
+import { balanceSheetCsv, cashBasisCsv, generalLedgerCsv, guaranteedPaymentCashCsv, isValidDateRange, loanCashActivityCsv, memberCapitalMovementCsv, trialBalanceCsv } from './report-exports';
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
 export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
@@ -22,8 +22,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
-  const capitalDateRangeValid = isValidDateRange(fromDate, throughDate);
-  const capitalInPeriod = capitalDateRangeValid
+  const reportDateRangeValid = isValidDateRange(fromDate, throughDate);
+  const capitalInPeriod = reportDateRangeValid
     ? snapshot.capitalActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate)
     : [];
   const cashContributionsCents = capitalInPeriod.filter((activity) => activity.kind === 'cash-contribution')
@@ -32,8 +32,9 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     .reduce((sum, activity) => sum + activity.amountCents, 0n);
   const distributionsCents = capitalInPeriod.filter((activity) => activity.kind === 'distribution')
     .reduce((sum, activity) => sum + activity.amountCents, 0n);
-  const paymentEventsInPeriod = snapshot.guaranteedPaymentCashEvents
-    .filter((event) => event.date >= fromDate && event.date <= throughDate);
+  const paymentEventsInPeriod = reportDateRangeValid
+    ? snapshot.guaranteedPaymentCashEvents.filter((event) => event.date >= fromDate && event.date <= throughDate)
+    : [];
   const servicesCashNetCents = paymentEventsInPeriod
     .filter((event) => event.classification === 'services')
     .reduce((sum, event) => sum + event.amountCents, 0n);
@@ -52,7 +53,9 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const capitalUseReturnedCents = paymentEventsInPeriod
     .filter((event) => event.classification === 'use-of-capital' && event.kind === 'reversal')
     .reduce((sum, event) => sum - event.amountCents, 0n);
-  const loanActivitiesInPeriod = snapshot.loanActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate);
+  const loanActivitiesInPeriod = reportDateRangeValid
+    ? snapshot.loanActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate)
+    : [];
   const loanAdvancesInPeriodCents = loanActivitiesInPeriod.filter((activity) => activity.kind === 'advance')
     .reduce((sum, activity) => sum + activity.amountCents, 0n);
   const loanPrincipalRepaidInPeriodCents = loanActivitiesInPeriod
@@ -87,7 +90,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
 
   const refresh = async () => {
     if (!snapshot.business) return;
-    if (!isValidDateRange(fromDate, throughDate)) {
+    if (!reportDateRangeValid) {
       setError('Enter valid dates in YYYY-MM-DD format, with From date on or before Through date.');
       return;
     }
@@ -154,8 +157,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <Field label="From date" value={fromDate} onChangeText={setFromDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
         <Field label="Through date" value={throughDate} onChangeText={setThroughDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
       </View>
-      <FormError message={capitalDateRangeValid ? null : 'Enter valid dates in YYYY-MM-DD format, with From date on or before Through date.'} />
-      <Button title={loading ? 'Calculating…' : 'Update report'} onPress={() => void refresh()} disabled={loading || ledgerLoading || !capitalDateRangeValid} />
+      <FormError message={reportDateRangeValid ? null : 'Enter valid dates in YYYY-MM-DD format, with From date on or before Through date.'} />
+      <Button title={loading ? 'Calculating…' : 'Update report'} onPress={() => void refresh()} disabled={loading || ledgerLoading || !reportDateRangeValid} />
       <FormError message={error} />
       {report ? <>
         <Text style={uiStyles.rowDetail}>{report.fromDate} through {report.throughDate}</Text>
@@ -241,7 +244,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     <Panel>
       <Text style={uiStyles.sectionTitle}>Member capital movement · selected dates</Text>
       <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate} · book activity, not a tax basis report.</Text>
-      {capitalDateRangeValid ? <>
+      {reportDateRangeValid ? <>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Cash contributions</Text><Money cents={cashContributionsCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Property contributions</Text><Money cents={propertyContributionsCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Member distributions</Text><Money cents={-distributionsCents} /></View>
@@ -261,21 +264,33 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Guaranteed payment workpapers · cash dates</Text>
-      <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate}. Only actual payments and returned funds appear here; unpaid obligations stay off the cash-basis P&L.</Text>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Services actually paid</Text><Money cents={servicesPaidCents} /></View>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Services returned</Text><Money cents={servicesReturnedCents} /></View>
-      <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net services cash expense</Text><Money cents={servicesCashNetCents} /></View>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Use-of-capital payments</Text><Money cents={capitalUsePaidCents} /></View>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Use-of-capital returns</Text><Money cents={capitalUseReturnedCents} /></View>
-      <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net use-of-capital cash expense</Text><Money cents={capitalUseCashNetCents} /></View>
-      <Text style={uiStyles.helper}>Separate book categories only. CPA review is required for tax classification, deductibility, and capitalization. This workpaper is not a tax form.</Text>
+      {reportDateRangeValid ? <>
+        <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate}. Only actual payments and returned funds appear here; unpaid obligations stay off the cash-basis P&L.</Text>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Services actually paid</Text><Money cents={servicesPaidCents} /></View>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Services returned</Text><Money cents={servicesReturnedCents} /></View>
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net services cash expense</Text><Money cents={servicesCashNetCents} /></View>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Use-of-capital payments</Text><Money cents={capitalUsePaidCents} /></View>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Use-of-capital returns</Text><Money cents={capitalUseReturnedCents} /></View>
+        <View style={uiStyles.reportTotal}><Text style={uiStyles.sectionTitle}>Net use-of-capital cash expense</Text><Money cents={capitalUseCashNetCents} /></View>
+        <Button title={exporting ? 'Preparing CSV…' : 'Export payment cash workpaper CSV'} secondary
+          onPress={() => void exportCsv('guaranteed-payment-cash', guaranteedPaymentCashCsv(fromDate, throughDate, paymentEventsInPeriod))}
+          disabled={exporting || paymentEventsInPeriod.length === 0} />
+        {paymentEventsInPeriod.length === 0 ? <Text style={uiStyles.helper}>No actual guaranteed-payment cash activity falls within these selected dates.</Text> : null}
+        <Text style={uiStyles.helper}>This CSV contains only actual payment and reversal events. Unpaid obligations are omitted. Separate book categories only; CPA review is required for tax classification, deductibility, and capitalization. This is not a tax form.</Text>
+      </> : <Text style={uiStyles.helper}>Enter a valid date range to calculate or export guaranteed-payment cash activity.</Text>}
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Loan workpapers</Text>
-      <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate} · loan balances as of the through date.</Text>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Funded advances during period · not income</Text><Money cents={loanAdvancesInPeriodCents} /></View>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Principal repaid during period · not expense</Text><Money cents={loanPrincipalRepaidInPeriodCents} /></View>
-      <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Interest actually paid during period</Text><Money cents={loanInterestPaidInPeriodCents} /></View>
+      {reportDateRangeValid ? <>
+        <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate} · loan balances as of the through date.</Text>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Funded advances during period · not income</Text><Money cents={loanAdvancesInPeriodCents} /></View>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Principal repaid during period · not expense</Text><Money cents={loanPrincipalRepaidInPeriodCents} /></View>
+        <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Interest actually paid during period</Text><Money cents={loanInterestPaidInPeriodCents} /></View>
+        <Button title={exporting ? 'Preparing CSV…' : 'Export loan cash workpaper CSV'} secondary
+          onPress={() => void exportCsv('loan-cash-activity', loanCashActivityCsv(fromDate, throughDate, loanActivitiesInPeriod, snapshot.loanAgreements))}
+          disabled={exporting || loanActivitiesInPeriod.length === 0} />
+        {loanActivitiesInPeriod.length === 0 ? <Text style={uiStyles.helper}>No loan cash activity falls within these selected dates.</Text> : null}
+      </> : <Text style={uiStyles.helper}>Enter a valid date range to calculate loan activity totals.</Text>}
       {isValidDateRange(throughDate, throughDate) ? <>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Member loan principal outstanding</Text><Money cents={memberLoanPrincipalCents} /></View>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Third-party loan principal outstanding</Text><Money cents={thirdPartyLoanPrincipalCents} /></View>
@@ -288,13 +303,13 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
           <Money cents={summary.principalOutstandingCents} />
         </View>)}
       </> : <Text style={uiStyles.helper}>Enter a valid through date to calculate loan balances.</Text>}
-      <Text style={uiStyles.helper}>Only paid interest appears in cash-basis expenses. Accrued interest is a bookkeeping estimate; this report does not select rates or determine tax deductibility.</Text>
+      <Text style={uiStyles.helper}>Commitments are not cash advances. Loan proceeds are not income, principal repayments are not expenses, and only paid interest appears in cash-basis expenses. Accrued interest is a bookkeeping estimate; this report does not select rates or determine tax deductibility.</Text>
     </Panel>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Available from persisted books</Text>
       <Text style={uiStyles.rowDetail}>Account balances: {snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash').length} bank and cash accounts.</Text>
       <Text style={uiStyles.rowDetail}>Member interests: {snapshot.members.length} current members, with dated interest history.</Text>
-      <Text style={uiStyles.helper}>P&L, Balance Sheet, Trial Balance, and selected-account General Ledger are available as CSV. Member and loan workpaper exports, PDF reports, and tax-specific reports remain in progress.</Text>
+      <Text style={uiStyles.helper}>P&L, Balance Sheet, Trial Balance, selected-account General Ledger, member capital, guaranteed-payment cash, and loan cash workpapers are available as CSV. PDF reports and tax-specific reports remain in progress.</Text>
     </Panel>
   </Page>;
 }
