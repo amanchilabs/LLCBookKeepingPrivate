@@ -8,13 +8,14 @@ import { DashboardScreen } from './DashboardScreen';
 import { MembersScreen } from './MembersScreen';
 import { LoansScreen } from './LoansScreen';
 import { ReportsScreen } from './ReportsScreen';
+import { SearchScreen } from './SearchScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { TransactionsScreen } from './TransactionsScreen';
 import { contentTopInset } from './layout';
 import { Button, Loading, palette } from './ui';
 
-type BookkeepingTab = 'Dashboard' | 'Transactions' | 'Accounts' | 'Members' | 'Loans' | 'Reports' | 'Settings';
-const tabs: BookkeepingTab[] = ['Dashboard', 'Transactions', 'Accounts', 'Members', 'Loans', 'Reports', 'Settings'];
+type BookkeepingTab = 'Dashboard' | 'Search' | 'Transactions' | 'Accounts' | 'Members' | 'Loans' | 'Reports' | 'Settings';
+const tabs: BookkeepingTab[] = ['Dashboard', 'Search', 'Transactions', 'Accounts', 'Members', 'Loans', 'Reports', 'Settings'];
 
 function emptySnapshot(): BookkeepingSnapshot {
   return {
@@ -152,6 +153,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
     </View>
     <View style={styles.content}>
       {tab === 'Dashboard' ? <DashboardScreen snapshot={snapshot} onNavigate={setTab} /> : null}
+      {tab === 'Search' ? <SearchScreen snapshot={snapshot} onNavigate={setTab} /> : null}
       {tab === 'Transactions' ? <TransactionsScreen snapshot={snapshot} onSaved={refresh} /> : null}
       {tab === 'Accounts' ? <AccountsScreen snapshot={snapshot} onSaved={refresh} /> : null}
       {tab === 'Members' ? <MembersScreen snapshot={snapshot} onSaved={refresh} /> : null}

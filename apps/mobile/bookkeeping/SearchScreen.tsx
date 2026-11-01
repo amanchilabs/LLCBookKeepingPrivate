@@ -1,0 +1,82 @@
+import React, { useMemo, useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
+import type { BookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-store';
+import { searchBookkeepingRecords, type BookkeepingSearchDestination, type BookkeepingSearchResult } from './bookkeeping-search';
+import { Button, Field, Heading, Page, Panel, uiStyles } from './ui';
+
+export function SearchScreen({
+  snapshot,
+  onNavigate,
+}: {
+  snapshot: BookkeepingSnapshot;
+  onNavigate: (destination: BookkeepingSearchDestination) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const results = useMemo(() => searchBookkeepingRecords(snapshot, query), [snapshot, query]);
+
+  return <Page>
+    <Heading
+      title="Search"
+      subtitle={`Search the locally stored records for ${snapshot.business?.name ?? 'this LLC'}. Results follow the active workspace.`}
+    />
+    <Panel>
+      <Field
+        label="Search this LLC"
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Description, member, account, amount, date…"
+        autoCapitalize="none"
+        autoCorrect={false}
+        returnKeyType="search"
+      />
+      {query.length > 0 ? <Button title="Clear search" secondary onPress={() => setQuery('')} /> : null}
+      {!query.trim()
+        ? <Text style={uiStyles.helper}>Search transactions, categories, accounts, members, capital, payments, loans, reminders, reconciliations, and period history.</Text>
+        : results.length === 0
+          ? <Text style={uiStyles.helper}>No matching records in this LLC.</Text>
+          : <>
+            <Text style={uiStyles.helper}>{results.length} matching {results.length === 1 ? 'record' : 'records'} · select a result to open its section.</Text>
+            {results.map((result) => <SearchResultRow key={`${result.kind}:${result.id}`} result={result} onNavigate={onNavigate} />)}
+          </>}
+    </Panel>
+  </Page>;
+}
+
+function SearchResultRow({
+  result,
+  onNavigate,
+}: {
+  result: BookkeepingSearchResult;
+  onNavigate: (destination: BookkeepingSearchDestination) => void;
+}) {
+  return <Pressable
+    accessibilityRole="button"
+    accessibilityLabel={`${searchKindLabel(result.kind)}: ${result.title}. Open ${result.destination}.`}
+    onPress={() => onNavigate(result.destination)}
+    style={uiStyles.rowItem}
+  >
+    <View style={uiStyles.rowMain}>
+      <Text style={uiStyles.badge}>{searchKindLabel(result.kind)}</Text>
+      <Text style={uiStyles.rowTitle}>{result.title}</Text>
+      <Text style={uiStyles.rowDetail}>{result.details}</Text>
+    </View>
+    <Text style={uiStyles.rowDetail}>Open</Text>
+  </Pressable>;
+}
+
+function searchKindLabel(kind: BookkeepingSearchResult['kind']): string {
+  switch (kind) {
+    case 'business': return 'LLC';
+    case 'member': return 'Member';
+    case 'account': return 'Account';
+    case 'transaction': return 'Transaction';
+    case 'capital': return 'Capital activity';
+    case 'guaranteed-payment': return 'Member payment';
+    case 'loan': return 'Loan agreement';
+    case 'loan-activity': return 'Loan activity';
+    case 'recurring': return 'Recurring transaction';
+    case 'reconciliation': return 'Reconciliation';
+    case 'period': return 'Period history';
+    case 'reminder': return 'Reminder';
+  }
+}
