@@ -81,3 +81,20 @@ Automated verification on this checkpoint: `npm test` passed (157 tests); `npm r
 - If a component is split into routes, pass stable IDs and re-read persisted state; do not create a parallel in-memory ledger.
 - Keep local privacy and explicit export boundaries visible at each external share/backup action.
 - The feature is preserved only after end-to-end UI behavior and reconciliation are reverified on both platforms.
+
+
+<!-- Foundry pilot run-6a9ebcd4dfc04ca5 -->
+## Foundry search usability pilot — 2026-11-03
+
+Two presentation-only Stories completed on `feature/foundry-llc-pilot-20261103`; no main merge or release.
+
+| Story | Implemented outcome | Validated/reviewed source |
+|---|---|---|
+| STORY-SEARCH-1 | Clearer idle, no-match and result-count feedback; polite live-region props. | `530700eab3b0511f50c07b7e207b8f9d9d56b717` |
+| STORY-SEARCH-2 | Search result details in accessible labels, separate destination hints and a minimum 48-point/dp touch height. | `61ae2154abae7341f50b1219d1f7a2816cff7df0` |
+
+Each source passed TypeScript, the full host suite, whitespace validation, a dedicated iOS Simulator/Android emulator search flow, and fresh Claude review. Search idle, no-match, clear, one-result and result navigation were exercised with existing synthetic records. Accounting, storage, schema, authentication, security and dependencies were unchanged.
+
+Foundry automatically selected and launched Story 2 after publishing Story 1 evidence. The run/canonical evidence is in `.foundry/runs/run-6a9ebcd4dfc04ca5.json` and `.foundry/evidence/CAP-SEARCH-USABILITY/run-6a9ebcd4dfc04ca5/`. Native captures, launch/usage records and recovery evidence are in the Autonomous Foundry `feature/llc-pilot-20261103` branch under `docs/pilots/llc-20261103/`.
+
+Limits: simulator/emulator presentation evidence only; VoiceOver/TalkBack, physical-device, security/recovery release and production/store acceptance remain separate gates. Stop at this two-Story boundary. This matrix closeout occurs after the run; the controller updated run/evidence progress at each Story boundary.
