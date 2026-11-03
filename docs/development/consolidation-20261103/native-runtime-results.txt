@@ -243,4 +243,3 @@ Tap on "Settings and privacy", Index: 1... COMPLETED
 Assert that "Settings" is visible... COMPLETED
 Tap on "Dashboard"... COMPLETED
 Assert that "Synthetic Consolidation LLC" is visible... COMPLETED
-

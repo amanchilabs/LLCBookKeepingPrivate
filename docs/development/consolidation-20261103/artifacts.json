@@ -27,9 +27,11 @@
     "android-csv-share.png": "1268510b06d37cbe1418691973c56dc12cf3db4b7c404ac378b0b4d768c039dc",
     "android-onboarding-dashboard.png": "eb5febd8d11a66517426aade50857b8b527cc57061b8f8eae4165429d825e030",
     "android-pdf-share.png": "744617037db5f68253ea4af047e17448410b7af31741b51b88a7548b236e788f",
-    "android-synthetic-trial-balance.csv": "c2bc3d408213a93031d8bde4249987dd98ecd6f5c2b633660380a6825498afe5",
+    "android-synthetic-trial-balance.csv": "e5cdfd6c6b6c6c096244c474e54aa4148e8a1b0e2eb860a3903b1ec973516861",
     "android-synthetic-trial-balance.pdf": "ce101df9b1a499cd411e67cad18bb57c57747b31fc7d4e18d869229b4c04b69a",
     "android-trial-balance.png": "a67f424fb0eda2a6bafc831d059c608cba14fe6b4c62f0594af228dfcb6f14bd",
     "ios-keychain-blocked.png": "6211504d684f1397402ec61caec60929a87ce63d424849e8e8096c0fa45a1b53"
-  }
+  },
+  "native_csv_original_sha256": "c2bc3d408213a93031d8bde4249987dd98ecd6f5c2b633660380a6825498afe5",
+  "tracked_csv_line_endings": "LF normalized from native CRLF; data values unchanged"
 }

@@ -71,4 +71,3 @@ v24.22.2
       Tests  15 passed (15)
    Start at  00:49:35
    Duration  124ms (transform 58%, import 23%, tests 12%, worker 7%)
-
