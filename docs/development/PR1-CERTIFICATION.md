@@ -34,8 +34,23 @@ One minimal GitHub Actions job runs the pinned Node version, clean install, Type
 
 GitHub's branch response confirms main `protected=false`, protection disabled and required-check contexts empty. Owner merge authorization still applies. PR remains draft while native certification and final independent review are incomplete.
 
+## iOS Keychain root cause and correction
+
+The M5 Pro iOS 26.5 Simulator failure was a build-context problem, not defective key creation/read logic. The old build-only command used `CODE_SIGNING_ALLOWED=NO`, leaving the executable without the Simulator app identity needed by Keychain. System securityd reported -34018. Ordinary `codesign --entitlements` inspection was misleading: Xcode places simulated entitlements in `*-Simulated.xcent` and links an `__TEXT,__entitlements` section into the executable. Signature-only manual re-signing did not reproduce that pipeline and its variants were rejected at launch.
+
+A normal Xcode Simulator build with signing enabled, ad-hoc local execution and the existing app development-team context generates the expected team-prefixed application identity. An explicit access-group experiment was tested, then removed: the unchanged default app-owned Keychain group works and reads the same key. `app.config.ts`, all key aliases, WHEN_UNLOCKED_THIS_DEVICE_ONLY accessibility, SQLCipher requirements, authentication behavior, and financial/storage/backup code remain unchanged from the initial candidate.
+
+`scripts/build-ios-simulator.sh` encodes this build path, requires the pinned Node version and an explicit app development team, and checks Xcode's simulated application identity. It changes only the ignored machine-local Node setting. It does not export a signing key, use production signing, disable Keychain checks, or install a device provisioning profile. Example after prebuild/pod installation, with the appropriate existing team selected locally:
+
+```sh
+LLCB_IOS_DEVELOPMENT_TEAM=<app-team> LLCB_IOS_DERIVED_DATA=/tmp/llc-consolidation-derived \
+  scripts/build-ios-simulator.sh <dedicated-simulator-uuid>
+```
+
+Actual final-config runtime reaches onboarding and passes native SQLCipher/key-store read-write/reopen, record/attachment persistence, wrong-key rejection, in-memory backup wrong-passphrase/tamper/truncation, and all ten injected restore boundaries on iOS and Android. These synthetic proof operations ran before any bookkeeping data was created on the fresh targets. They are exception-boundary tests, not process-kill/power-loss or physical-device certification.
+
 ## Current native status
 
-iOS Keychain correction and final native acceptance are in progress. Required unexecuted checks remain BLOCKED. No encryption/key-access checks or accounting assertions are weakened. No production signing, deployment, store submission, or main merge is authorized.
+Final bookkeeping/navigation/export/relaunch acceptance is in progress. Required unexecuted checks remain BLOCKED. No encryption/key-access checks or accounting assertions are weakened. No production signing, deployment, store submission, or main merge is authorized.
 
 `WORKSPACE_RESET_NOT_SAFE`: native binaries/logs, simulator/AVD state, caches, private signing material and global agent configuration are not covered by remote source synchronization.
