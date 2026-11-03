@@ -31,7 +31,7 @@ Full host output retained in `host-regression.txt`; dependency summary in `depen
 
 ## Native evidence
 
-Both native Debug builds PASS at source `721cafd15f9f50c83e75c8314ab3857fdee03dc5` (application inputs identical to reviewed/tested `442fb01`). Android arm64 APK installed and launched on emulator-5562; four-member 40/20/20/20 onboarding with a $1,000 opening balance PASS. iOS simulator app installed and launched; runtime workflow automation is in progress. Required checks without completed evidence remain BLOCKED. The initial default Android build was deliberately interrupted after arm64 compilation to avoid building unused emulator ABIs; the resumed build restricts `reactNativeArchitectures=arm64-v8a` and max workers to 2. This is a build-destination/resource selection, not a source or assertion change.
+Both native Debug builds PASS at source `721cafd15f9f50c83e75c8314ab3857fdee03dc5` (application inputs identical to reviewed/tested `442fb01`). Android arm64 APK installed and launched on emulator-5562; four-member 40/20/20/20 onboarding with a $1,000 opening balance PASS. iOS simulator app installed and launched, but bookkeeping startup FAILS at the Keychain gate; workflows remain BLOCKED (details below). Required checks without completed evidence remain BLOCKED. The initial default Android build was deliberately interrupted after arm64 compilation to avoid building unused emulator ABIs; the resumed build restricts `reactNativeArchitectures=arm64-v8a` and max workers to 2. This is a build-destination/resource selection, not a source or assertion change.
 
 Build commands:
 
@@ -48,6 +48,31 @@ xcodebuild -workspace ios/LLCBookKeepingPrivate.xcworkspace -scheme LLCBookKeepi
 
 Android build: `BUILD SUCCESSFUL in 52s`, 390 actionable tasks. iOS: `BUILD SUCCEEDED`. Artifact metadata/hashes are in [artifacts.json](artifacts.json). These are local regenerable QA artifacts; no signed release candidate, physical-device binary, store artifact, production certificate, or submission is certified. APK is Android-debug-signed; iOS signing disabled. Temporary binaries/full build logs are excluded from Git and have no off-device recovery certification.
 
+## Runtime results and remaining gates
+
+| Required behavior | Android API34 arm64 | iOS 26.5 simulator |
+|---|---|---|
+| Install / launch | PASS | PASS for original unsigned build; later manual-entitlement variants rejected at launch |
+| Four-member onboarding, 40/20/20/20 confirmation, first account/opening balance | PASS, $1,000 opening | BLOCKED by Keychain |
+| Income / expense / reversal and replacement | PASS, $250 income; $50 expense replaced with $75 | BLOCKED |
+| Member capital | PASS, $100 cash contribution; bank $1,275; capital $100 | BLOCKED |
+| Description search for correction | PASS | BLOCKED |
+| Global search to Capital subsection | PASS; independently reviewed regression reproduced on native UI | BLOCKED |
+| Reports / CSV / PDF export | PASS, native trial balance CSV/PDF; debit = credit = $1,350 | BLOCKED |
+| SQLite persistence across force-stop/relaunch | PASS, same LLC, $1,275 bank, member and contribution retained | BLOCKED |
+| Five-tab navigation / visual regression | Targeted core navigation exercised; screenshots retained; full visual/accessibility matrix BLOCKED | BLOCKED |
+| Every advanced UI flow: loans, recurring, imports, reconciliation, reminders, periods, payment reversals | BLOCKED for complete current native acceptance; host regressions PASS and historical evidence retained | BLOCKED |
+
+Native accounting evidence: [synthetic CSV](evidence/android-synthetic-trial-balance.csv), [synthetic PDF](evidence/android-synthetic-trial-balance.pdf), trial balance and share-sheet screenshots. `pdftotext` verified PDF identity and expected cash/totals. [validate-native-export.py](validate-native-export.py) independently sums exported decimal debits/credits and checks each expected account. These files contain only synthetic test records generated on the isolated target; they are not a canonical financial dataset.
+
+Automation did **not** produce one uninterrupted all-green native suite. Initial overlays interfered with onboarding/search; disabling the Expo development Tools button fixed the obstruction. An accounting flow expected a comma in `$1,175.00` while the existing UI renders `$1175.00`; a continuation asserted the same exact numeric value with an optional grouping separator. A More-screen selector initially tapped the duplicate Settings heading instead of its button; an indexed button selector was used for the continuation. A screenshot command used an unsupported absolute path; a subsequent PDF flow used the supported relative path. Accounting writes were not replayed to force success. Executed actions, continuation assertions, exported data, and relaunch checks substantiate the targeted passes above. Raw relevant results are retained in `native-runtime-results.txt`, including harness failures. No product tests/assertions were weakened.
+
+### iOS Keychain blocker
+
+The generated app contains no application-identifier or keychain-access-groups entitlement. `securityd` records `-34018`: “Client has neither application-identifier nor keychain-access-groups entitlements”. App displays “Local books are unavailable” and preserves files; see [screenshot](evidence/ios-keychain-blocked.png). This is consistent with [Apple's entitlement error documentation](https://developer.apple.com/documentation/security/errsecmissingentitlement).
+
+Permitted diagnostics/corrections attempted: unsigned simulator build; Xcode ad-hoc signing; Xcode ad-hoc signing with the team identified from an installed development certificate. All builds succeeded, but Xcode still emitted empty app entitlements. Separate local simulator-only entitlement experiments (unprefixed and actual-team-prefixed app identities) produced valid-on-disk signatures but Simulator rejected launch (`FBSOpenApplicationServiceErrorDomain=1`, underlying launchd POSIX 163). These experimental fixtures are **not integrated**. No signing key was exported, no production identity used for signing, no security check disabled, and no data/key files cleared. Original unsigned QA archive was restored and launches; its Keychain blocker remains. Further simulator signing/entitlement correction and verified native execution are required; compile success is not an iOS workflow pass.
+
 ## Security and privacy limits
 
 No new telemetry, cloud sync, external financial storage, production signing, or real financial data introduced. Native security-negative binary, locked/missing keys, current-format cross-device backup/restore, interruption/kill recovery, plaintext DB/WAL scans, physical-device Keychain/Keystore and OS backup/transfer behavior remain BLOCKED pending dedicated evidence, as documented in the retained threat model and handoffs. Host backup tests and generated SQLCipher flags do not prove those behaviors. Synthetic validation only.
@@ -58,4 +83,10 @@ Draft PR: https://github.com/amanchilabs/LLCBookKeepingPrivate/pull/1, target ma
 
 ## Status
 
-INCOMPLETE validation / draft PR; main unchanged. Not ready to certify the Foundry pilot baseline after approval alone. Outstanding compatibility, native acceptance, and owner-visible gate confirmation must be resolved or explicitly scoped by the owner. `WORKSPACE_RESET_NOT_SAFE`.
+INCOMPLETE validation / draft PR; main unchanged. Not ready to certify the Foundry pilot baseline after approval alone. Outstanding iOS Keychain/signing, dependency compatibility, complete native acceptance, and owner-visible gate confirmation must be resolved or explicitly scoped by the owner. `WORKSPACE_RESET_NOT_SAFE`.
+
+## Global instructions and preservation
+
+Existing global policy is installed at `/Users/veerrajuamanchi/.codex/AGENTS.md`, Codex user-level scope; no global override was present. Fresh ephemeral read-only Codex session from `/tmp` returned `AMANCHI-GIT-WORKFLOW-20261103-7f2c8e91` and the user-level scope. Installation was already current, so no global file was overwritten. [Official instruction discovery documentation](https://learn.chatgpt.com/docs/agent-configuration/agents-md) was checked. Private global configuration is excluded from repository recovery.
+
+Native source at build SHA `721cafd` matches reviewed/tested application SHA `442fb01` byte-for-byte across App.tsx, apps, packages, plugins, app.config.ts and dependency manifests. Later task commits update documentation/evidence only. Use the live PR HEAD for the exact delivered documentation SHA.
