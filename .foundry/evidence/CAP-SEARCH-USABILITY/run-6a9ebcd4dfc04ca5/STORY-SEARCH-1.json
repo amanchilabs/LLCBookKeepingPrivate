@@ -19,7 +19,7 @@
       ],
       "exit_code": 0,
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stdout_sha256": "03578d914eb6974d9f68624c1b60b5c81a97015a47ef7cdeb0e1697fd28c2d03"
+      "stdout_sha256": "a7867bcd2786fd1a7fe1e1d339e66a3d5f37ed3fc9ca698ca660f3ff4b215b2b"
     },
     {
       "argv": [
@@ -37,8 +37,8 @@
         "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/native_check.py",
         "STORY-SEARCH-1"
       ],
-      "exit_code": -15,
-      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit_code": 1,
+      "stderr_sha256": "f0250eda642715005cc4c776e79358490e38aab6fa7fc34cd7be67398eebc3f2",
       "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
@@ -59,7 +59,7 @@
   },
   "review": null,
   "run": "run-6a9ebcd4dfc04ca5",
-  "source": "35a7ebd413b502c23e8b1b9e09c17e2bdb384629",
+  "source": "64386d270e4210bf7f795d3d62ea87ccf160a8f9",
   "status": "FAILED_VALIDATION",
-  "timestamp": "2026-11-03T11:57:51.096790+00:00"
+  "timestamp": "2026-11-03T11:59:39.661841+00:00"
 }
