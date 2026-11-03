@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { BookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-store';
 import { searchBookkeepingRecords, type BookkeepingSearchResult } from './bookkeeping-search';
+import { SearchFeedback } from './search-feedback';
 import { Button, Field, Heading, Page, Panel, uiStyles } from './ui';
 
 export function SearchScreen({
@@ -30,14 +31,10 @@ export function SearchScreen({
         returnKeyType="search"
       />
       {query.length > 0 ? <Button title="Clear search" secondary onPress={() => setQuery('')} /> : null}
-      {!query.trim()
-        ? <Text style={uiStyles.helper}>Search transactions, categories, accounts, members, capital, payments, loans, reminders, reconciliations, and period history.</Text>
-        : results.length === 0
-          ? <Text style={uiStyles.helper}>No matching records in this LLC.</Text>
-          : <>
-            <Text style={uiStyles.helper}>{results.length} matching {results.length === 1 ? 'record' : 'records'} · select a result to open its section.</Text>
-            {results.map((result) => <SearchResultRow key={`${result.kind}:${result.id}`} result={result} onNavigate={onNavigate} />)}
-          </>}
+      <SearchFeedback query={query} resultCount={results.length} />
+      {query.trim().length > 0 && results.length > 0
+        ? results.map((result) => <SearchResultRow key={`${result.kind}:${result.id}`} result={result} onNavigate={onNavigate} />)
+        : null}
     </Panel>
   </Page>;
 }
