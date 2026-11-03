@@ -1,4 +1,4 @@
-> Current consolidation candidate: [reconciliation](consolidation-20261103/RECONCILIATION.md). The M4 continuation checkpoint below is historical; use the live integration branch and current validation evidence.
+> Current PR #1 certification: [acceptance and remaining release gates](PR1-CERTIFICATION.md). Use the live integration branch until the owner authorizes its merge; the M4 checkpoint below is historical.
 
 # Continue LLCBookKeepingPrivate on M4
 
