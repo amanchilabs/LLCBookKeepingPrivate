@@ -1,0 +1,41 @@
+appId: com.amanchilabs.llcbookkeepingprivate
+---
+- tapOn: Dashboard
+- tapOn: Transactions
+- scrollUntilVisible:
+    element: Search description, category, account, or date
+    direction: DOWN
+- tapOn: Search description, category, account, or date
+- inputText: Synthetic consulting
+- hideKeyboard
+- scrollUntilVisible:
+    element: '1 of 5 persisted records shown.*'
+    direction: DOWN
+- assertVisible: '1 of 5 persisted records shown.*'
+- scrollUntilVisible:
+    element: Clear filters
+    direction: UP
+- tapOn: Clear filters
+- scrollUntilVisible:
+    element: Expenses
+    direction: UP
+- tapOn: Expenses
+- scrollUntilVisible:
+    element: '2 of 5 persisted records shown.*'
+    direction: DOWN
+- assertVisible: '2 of 5 persisted records shown.*'
+- scrollUntilVisible:
+    element: Clear filters
+    direction: UP
+- tapOn: Clear filters
+- tapOn: More
+- assertVisible: Accounts and reconciliation
+- tapOn: Accounts and reconciliation
+- assertVisible: Accounts
+- tapOn: More
+- tapOn:
+    text: Settings and privacy
+    index: 1
+- assertVisible: Settings
+- tapOn: Dashboard
+- assertVisible: Synthetic Consolidation LLC

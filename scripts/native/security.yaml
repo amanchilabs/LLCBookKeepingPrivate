@@ -1,0 +1,31 @@
+appId: com.amanchilabs.llcbookkeepingprivate
+---
+- tapOn:
+    text: Close
+    optional: true
+- assertVisible: Get started
+- scrollUntilVisible:
+    element: Storage and recovery tools
+    direction: DOWN
+- tapOn: Storage and recovery tools
+- scrollUntilVisible:
+    element: Run SQLCipher \+ key-storage proof
+    direction: DOWN
+- tapOn: Run SQLCipher \+ key-storage proof
+- extendedWaitUntil:
+    visible: '(?s).*Wrong key rejected: PASS.*'
+    timeout: 120000
+- scrollUntilVisible:
+    element: Run in-memory restore and tamper proofs
+    direction: DOWN
+- tapOn: Run in-memory restore and tamper proofs
+- extendedWaitUntil:
+    visible: '(?s).*originalRecordsPreservedOnFailures: PASS.*'
+    timeout: 120000
+- scrollUntilVisible:
+    element: Inject restore interruptions and recover
+    direction: DOWN
+- tapOn: Inject restore interruptions and recover
+- extendedWaitUntil:
+    visible: '(?s).*after-old-generation-delete: PASS.*'
+    timeout: 120000
