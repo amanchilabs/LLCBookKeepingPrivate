@@ -6,12 +6,18 @@
     "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
     "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
     "docs/design/implementation/acceptance-criteria.md": "35de7364634040f62f6f2fbe9e20251895bb575ab8b1aceca096754b31a5085e",
-    "docs/design/implementation/feature-preservation-matrix.md": "544a527ec7b24ba0c6b45044cefee62967bfc3fb657d4fee18bbbc8b70d87e55",
+    "docs/design/implementation/feature-preservation-matrix.md": "1e073c361ff5ecc91ce95c63d9b5605abb7dd471a46215eac9de6bdc0efee197",
     "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e"
   },
-  "head": "61ae2154abae7341f50b1219d1f7a2816cff7df0",
-  "history": [],
+  "head": "4d6d2ecf9a7cfd02ec48621ed3f13090ee9a9dff",
+  "history": [
+    {
+      "at": "2026-11-03T12:09:54.112546+00:00",
+      "event": "resolved_prior_blocker",
+      "reason": "Independent review failed or changed source"
+    }
+  ],
   "id": "run-6a9ebcd4dfc04ca5",
   "next": 2,
   "owner": "f7b8f9f975334b90be3163286280852e",
