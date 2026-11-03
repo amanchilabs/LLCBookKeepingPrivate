@@ -10,7 +10,10 @@ import { balanceSheetCsv, cashBasisCsv, cashMovementCsv, generalLedgerCsv, guara
 import { buildReportPdfHtml, REPORT_PDF_PAGE_SIZE } from './report-pdf';
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
+type ReportSection = 'profit-loss' | 'cash-movement' | 'balance-sheet' | 'trial-balance' | 'general-ledger' | 'capital' | 'payments' | 'loans';
+
 export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
+  const [section, setSection] = useState<ReportSection>('profit-loss');
   const [fromDate, setFromDate] = useState(`${todayLocalDate().slice(0, 4)}-01-01`);
   const [throughDate, setThroughDate] = useState(todayLocalDate());
   const [report, setReport] = useState<CashBasisReport | null>(null);
@@ -191,8 +194,18 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     <Heading title="Reports" subtitle="Cash-basis income and operating expenses are calculated from persisted journal lines. These reports are bookkeeping summaries, not tax returns." />
     <FormError message={exportError} />
     {exportNotice ? <Text style={uiStyles.helper}>{exportNotice}</Text> : null}
+    <Choice label="Report" value={section} options={[
+      { value: 'profit-loss', title: 'Profit & Loss' },
+      { value: 'cash-movement', title: 'Cash movement' },
+      { value: 'balance-sheet', title: 'Balance Sheet' },
+      { value: 'trial-balance', title: 'Trial Balance' },
+      { value: 'general-ledger', title: 'General Ledger' },
+      { value: 'capital', title: 'Member capital' },
+      { value: 'payments', title: 'Payments' },
+      { value: 'loans', title: 'Loans' },
+    ]} onChange={setSection} />
     <Panel>
-      <Text style={uiStyles.sectionTitle}>Profit & loss · cash basis</Text>
+      <Text style={uiStyles.sectionTitle}>Reporting period</Text>
       <View style={uiStyles.row}>
         <Field label="From date" value={fromDate} onChangeText={setFromDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
         <Field label="Through date" value={throughDate} onChangeText={setThroughDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
@@ -200,6 +213,10 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       <FormError message={reportDateRangeValid ? null : 'Enter valid dates in YYYY-MM-DD format, with From date on or before Through date.'} />
       <Button title={loading ? 'Calculating…' : 'Update report'} onPress={() => void refresh()} disabled={loading || ledgerLoading || !reportDateRangeValid} />
       <FormError message={error} />
+    </Panel>
+    {section === 'profit-loss' ? <>
+    <Panel>
+      <Text style={uiStyles.sectionTitle}>Profit & loss · cash basis</Text>
       {report ? <>
         <Text style={uiStyles.rowDetail}>{report.fromDate} through {report.throughDate}</Text>
         <View style={uiStyles.reportRow}><Text style={uiStyles.rowTitle}>Income</Text><Money cents={report.incomeCents} /></View>
@@ -212,6 +229,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
           disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Choose a date range to calculate the report from journal activity.</Text>}
     </Panel>
+    </> : null}
+    {section === 'cash-movement' ? <>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Cash movement · selected dates</Text>
       {cashMovementReport && cashMovementReport.fromDate === fromDate && cashMovementReport.throughDate === throughDate ? <>
@@ -235,6 +254,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         {cashMovementReport.accounts.length === 0 ? <Text style={uiStyles.helper}>Add a bank or cash account to report cash movement.</Text> : null}
       </> : <Text style={uiStyles.helper}>Update the report to calculate selected-period cash movement from journal lines.</Text>}
     </Panel>
+    </> : null}
+    {section === 'balance-sheet' ? <>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Balance Sheet · book basis</Text>
       {journalReport ? <>
@@ -264,6 +285,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
           disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Update the report to calculate journal balances.</Text>}
     </Panel>
+    </> : null}
+    {section === 'trial-balance' ? <>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Trial Balance</Text>
       {journalReport ? <>
@@ -290,6 +313,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
           disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Update the report to calculate journal balances.</Text>}
     </Panel>
+    </> : null}
+    {section === 'general-ledger' ? <>
     <Panel>
       <Text style={uiStyles.sectionTitle}>General Ledger</Text>
       <Choice label="Account" value={selectedLedgerAccountId}
@@ -316,6 +341,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
           disabled={exporting} />
       </> : <Text style={uiStyles.helper}>Update the report to calculate account activity.</Text>}
     </Panel>
+    </> : null}
+    {section === 'capital' ? <>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Member capital movement · selected dates</Text>
       <Text style={uiStyles.rowDetail}>{fromDate} through {throughDate} · book activity, not a tax basis report.</Text>
@@ -340,6 +367,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         ? <Text style={uiStyles.helper}>Property contribution valuation is flagged for CPA review. Book capital does not establish tax-basis capital or outside basis.</Text>
         : <Text style={uiStyles.helper}>Book capital does not establish tax-basis capital or outside basis.</Text>}
     </Panel>
+    </> : null}
+    {section === 'payments' ? <>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Guaranteed payment workpapers · cash dates</Text>
       {reportDateRangeValid ? <>
@@ -360,6 +389,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         <Text style={uiStyles.helper}>This CSV contains only actual payment and reversal events. Unpaid obligations are omitted. Separate book categories only; CPA review is required for tax classification, deductibility, and capitalization. This is not a tax form.</Text>
       </> : <Text style={uiStyles.helper}>Enter a valid date range to calculate or export guaranteed-payment cash activity.</Text>}
     </Panel>
+    </> : null}
+    {section === 'loans' ? <>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Loan workpapers</Text>
       {reportDateRangeValid ? <>
@@ -389,6 +420,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       </> : <Text style={uiStyles.helper}>Enter a valid through date to calculate loan balances.</Text>}
       <Text style={uiStyles.helper}>Commitments are not cash advances. Loan proceeds are not income, principal repayments are not expenses, and only paid interest appears in cash-basis expenses. Accrued interest is a bookkeeping estimate; this report does not select rates or determine tax deductibility.</Text>
     </Panel>
+    </> : null}
     <Panel>
       <Text style={uiStyles.sectionTitle}>Available from persisted books</Text>
       <Text style={uiStyles.rowDetail}>Account balances: {snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash').length} bank and cash accounts.</Text>

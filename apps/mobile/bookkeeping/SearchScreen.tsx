@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import type { BookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-store';
-import { searchBookkeepingRecords, type BookkeepingSearchDestination, type BookkeepingSearchResult } from './bookkeeping-search';
+import { searchBookkeepingRecords, type BookkeepingSearchResult } from './bookkeeping-search';
 import { Button, Field, Heading, Page, Panel, uiStyles } from './ui';
 
 export function SearchScreen({
@@ -9,7 +9,7 @@ export function SearchScreen({
   onNavigate,
 }: {
   snapshot: BookkeepingSnapshot;
-  onNavigate: (destination: BookkeepingSearchDestination) => void;
+  onNavigate: (result: BookkeepingSearchResult) => void;
 }) {
   const [query, setQuery] = useState('');
   const results = useMemo(() => searchBookkeepingRecords(snapshot, query), [snapshot, query]);
@@ -47,12 +47,12 @@ function SearchResultRow({
   onNavigate,
 }: {
   result: BookkeepingSearchResult;
-  onNavigate: (destination: BookkeepingSearchDestination) => void;
+  onNavigate: (result: BookkeepingSearchResult) => void;
 }) {
   return <Pressable
     accessibilityRole="button"
     accessibilityLabel={`${searchKindLabel(result.kind)}: ${result.title}. Open ${result.destination}.`}
-    onPress={() => onNavigate(result.destination)}
+    onPress={() => onNavigate(result)}
     style={uiStyles.rowItem}
   >
     <View style={uiStyles.rowMain}>

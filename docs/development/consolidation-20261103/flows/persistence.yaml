@@ -1,0 +1,14 @@
+appId: com.amanchilabs.llcbookkeepingprivate
+---
+- assertVisible: Synthetic Consolidation LLC
+- scrollUntilVisible:
+    element: ".*1275\\.00.*"
+    direction: DOWN
+- assertVisible: ".*1275\\.00.*"
+- tapOn: Members
+- assertVisible: ".*Synthetic Alice.*"
+- tapOn: Capital
+- scrollUntilVisible:
+    element: ".*Synthetic founding contribution.*"
+    direction: DOWN
+- assertVisible: ".*Synthetic founding contribution.*"

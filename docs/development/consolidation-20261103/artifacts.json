@@ -1,0 +1,37 @@
+{
+  "source_sha": "721cafd15f9f50c83e75c8314ab3857fdee03dc5",
+  "reviewed_application_source_sha": "442fb01fcff7d12d6bce75851039f118c585e289",
+  "application_inputs_identical": true,
+  "classification": "regenerable local QA Debug artifacts; not release candidates",
+  "bundle_package_id": "com.amanchilabs.llcbookkeepingprivate",
+  "version": "0.1.0",
+  "build": 1,
+  "android": {
+    "abi": "arm64-v8a",
+    "compile_sdk": "37.0",
+    "runtime_api": 34,
+    "sha256": "c12147189a60fac5fd06a1adfc2f2713696d0fe33dc6a85f025b449730fe9ab6",
+    "debug_certificate_sha256": "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c",
+    "local_path": "android/app/build/outputs/apk/debug/app-debug.apk"
+  },
+  "ios": {
+    "sdk_runtime": "26.5 simulator",
+    "signing": "CODE_SIGNING_ALLOWED=NO",
+    "zipped_app_sha256": "44363f88fda6062a5c9725c6953046ab24ca19ca7f7442c615db7302a19c1825",
+    "local_zip": "/tmp/llc-consolidation-ios-simulator.app.zip",
+    "runtime_result": "Original build launches but Keychain fails with -34018; workflows BLOCKED. Local entitlement-signing experiments rejected by Simulator and excluded; original unsigned archive restored."
+  },
+  "off_device_backup_verified": false,
+  "evidence_sha256": {
+    "android-capital-after-relaunch.png": "4ef293be277d2de35682a805d33810925ee1b9f9eaec4d03574461d62b5a6d91",
+    "android-csv-share.png": "1268510b06d37cbe1418691973c56dc12cf3db4b7c404ac378b0b4d768c039dc",
+    "android-onboarding-dashboard.png": "eb5febd8d11a66517426aade50857b8b527cc57061b8f8eae4165429d825e030",
+    "android-pdf-share.png": "744617037db5f68253ea4af047e17448410b7af31741b51b88a7548b236e788f",
+    "android-synthetic-trial-balance.csv": "e5cdfd6c6b6c6c096244c474e54aa4148e8a1b0e2eb860a3903b1ec973516861",
+    "android-synthetic-trial-balance.pdf": "ce101df9b1a499cd411e67cad18bb57c57747b31fc7d4e18d869229b4c04b69a",
+    "android-trial-balance.png": "a67f424fb0eda2a6bafc831d059c608cba14fe6b4c62f0594af228dfcb6f14bd",
+    "ios-keychain-blocked.png": "6211504d684f1397402ec61caec60929a87ce63d424849e8e8096c0fa45a1b53"
+  },
+  "native_csv_original_sha256": "c2bc3d408213a93031d8bde4249987dd98ecd6f5c2b633660380a6825498afe5",
+  "tracked_csv_line_endings": "LF normalized from native CRLF; data values unchanged"
+}

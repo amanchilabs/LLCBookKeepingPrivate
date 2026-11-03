@@ -1,0 +1,7 @@
+appId: com.amanchilabs.llcbookkeepingprivate
+---
+- extendedWaitUntil:
+    visible: Local books are unavailable
+    timeout: 30000
+- assertVisible: '(?s).*SQLCipher is unavailable.*Refusing to open persistent financial storage.*'
+- assertNotVisible: Dashboard

@@ -1,0 +1,245 @@
+=== android-onboarding-retry ===
+Running on LLC_Consolidation_API34_20261103
+ > Flow llc-consolidation-onboarding
+Tap on (Optional) "Continue"... COMPLETED
+Tap on (Optional) "Close"... COMPLETED
+Scrolling DOWN until "Get started" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Get started"... COMPLETED
+Scrolling DOWN until "LLC business name" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "LLC business name"... COMPLETED
+Input text Synthetic Consolidation LLC... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Formation state or territory" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Formation state or territory"... COMPLETED
+Input text AZ... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Formation date" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Formation date"... COMPLETED
+Input text 2026-01-01... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Bookkeeping start date" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Bookkeeping start date"... COMPLETED
+Input text 2026-01-01... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Continue to members" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Continue to members"... COMPLETED
+Scrolling DOWN until "Member 1 name" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Member 1 name"... COMPLETED
+Input text Synthetic Alice... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Member 2 name" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Member 2 name"... COMPLETED
+Input text Synthetic Bob... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Member 3 name" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Member 3 name"... COMPLETED
+Input text Synthetic Carol... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Member 4 name" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Member 4 name"... COMPLETED
+Input text Synthetic Dana... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until ".*I confirm these ownership interests are correct" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on ".*I confirm these ownership interests are correct"... COMPLETED
+Scrolling DOWN until "Continue to first account" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Continue to first account"... COMPLETED
+Scrolling DOWN until "Opening balance in USD \(optional\)" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Opening balance in USD \(optional\)"... COMPLETED
+Input text 1000.00... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Review setup" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Review setup"... COMPLETED
+Scrolling DOWN until "Create LLC" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Create LLC"... COMPLETED
+Scrolling DOWN until "Go to dashboard" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Go to dashboard"... COMPLETED
+Assert that "Synthetic Consolidation LLC" is visible... COMPLETED
+
+=== android-accounting ===
+Running on LLC_Consolidation_API34_20261103
+ > Flow llc-consolidation-accounting
+Tap on "Dashboard"... COMPLETED
+Scrolling DOWN until "Record income" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Record income"... COMPLETED
+Scrolling DOWN until "Amount in USD" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Amount in USD"... COMPLETED
+Input text 250.00... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Description" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Description"... COMPLETED
+Input text Synthetic consulting income... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Post transaction" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Post transaction"... COMPLETED
+Tap on "Dashboard"... COMPLETED
+Scrolling DOWN until "Record expense" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Record expense"... COMPLETED
+Scrolling DOWN until "Amount in USD" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Amount in USD"... COMPLETED
+Input text 50.00... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Description" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Description"... COMPLETED
+Input text Synthetic office expense... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Post transaction" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Post transaction"... COMPLETED
+Scrolling DOWN until "Search description, category, account, or date" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Search description, category, account, or date"... COMPLETED
+Input text Synthetic office expense... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Correct" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Correct"... COMPLETED
+Scrolling DOWN until "Amount in USD" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Amount in USD"... COMPLETED
+Erase text... COMPLETED
+Input text 75.00... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Description" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Description"... COMPLETED
+Erase text... COMPLETED
+Input text Synthetic corrected office expense... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Post reversal and replacement" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Post reversal and replacement"... COMPLETED
+Tap on "Dashboard"... COMPLETED
+Scrolling DOWN until ".*1,175.00.*" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... FAILED
+
+No visible element found: ".*1,175.00.*"
+
+Could not find a visible element matching selector: ".*1,175.00.*"
+Tip: Try adjusting the following settings to improve detection:
+- `timeout`: current = 15000ms → Increase if you need more time to find the element
+- `speed`: current = 40 (0-100 scale) → Increase for faster scrolling if element is far away
+- `waitToSettleTimeoutMs`: current = Not defined → Set this value (e.g., 500ms) if your UI updates frequently between scrolls
+- `visibilityPercentage`: current = 100% → Lower this value if you want to detect partially visible elements
+- `centerElement`: current = false → Enable if you want the element to be centered after finding it
+
+
+==== Debug output (logs & screenshots) ====
+
+/tmp/llc-consolidation-android-accounting/2026-11-03_005816
+
+=== android-capital ===
+Running on LLC_Consolidation_API34_20261103
+ > Flow llc-consolidation-capital
+Tap on "Members"... COMPLETED
+Tap on "Dashboard"... COMPLETED
+Scrolling DOWN until ".*1,?175\.00.*" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Assert that ".*1,?175\.00.*" is visible... COMPLETED
+Tap on "Members"... COMPLETED
+Tap on "Capital"... COMPLETED
+Scrolling DOWN until "Capital activity amount in USD" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Capital activity amount in USD"... COMPLETED
+Input text 100.00... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Capital activity description" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Capital activity description"... COMPLETED
+Input text Synthetic founding contribution... COMPLETED
+Hide Keyboard... COMPLETED
+Scrolling DOWN until "Post capital activity" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Post capital activity"... COMPLETED
+Tap on "Search"... COMPLETED
+Scrolling DOWN until "Search this LLC" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... FAILED
+
+No visible element found: "Search this LLC"
+
+Could not find a visible element matching selector: "Search this LLC"
+Tip: Try adjusting the following settings to improve detection:
+- `timeout`: current = 15000ms → Increase if you need more time to find the element
+- `speed`: current = 40 (0-100 scale) → Increase for faster scrolling if element is far away
+- `waitToSettleTimeoutMs`: current = Not defined → Set this value (e.g., 500ms) if your UI updates frequently between scrolls
+- `visibilityPercentage`: current = 100% → Lower this value if you want to detect partially visible elements
+- `centerElement`: current = false → Enable if you want the element to be centered after finding it
+
+
+==== Debug output (logs & screenshots) ====
+
+/tmp/llc-consolidation-android-capital/2026-11-03_010042
+
+=== android-search-reports ===
+Running on LLC_Consolidation_API34_20261103
+ > Flow llc-consolidation-search-reports
+Tap on "Search"... COMPLETED
+Scrolling DOWN until "Search this LLC" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Search this LLC"... COMPLETED
+Input text Synthetic founding contribution... COMPLETED
+Hide Keyboard... COMPLETED
+Tap on "Capital activity:.*Synthetic.*"... COMPLETED
+Assert that "Record member capital activity" is visible... COMPLETED
+Tap on "Dashboard"... COMPLETED
+Scrolling DOWN until ".*1,?275\.00.*" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Assert that ".*1,?275\.00.*" is visible... COMPLETED
+Tap on "Reports"... COMPLETED
+Scrolling DOWN until "Trial Balance" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Tap on "Trial Balance"... COMPLETED
+Scrolling DOWN until "Totals" is visible with speed 40, visibility percentage 100%, timeout 15000 ms, with centering disabled... COMPLETED
+Assert that "Totals" is visible... COMPLETED
+
+=== android-pdf ===
+Running on LLC_Consolidation_API34_20261103
+ > Flow llc-consolidation-pdf
+Scrolling DOWN until "Export Trial Balance PDF" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
+Tap on "Export Trial Balance PDF"... COMPLETED
+Take screenshot pdf-share... COMPLETED
+Press Back key... COMPLETED
+
+=== android-persistence ===
+Running on LLC_Consolidation_API34_20261103
+ > Flow llc-consolidation-persistence
+Assert that "Synthetic Consolidation LLC" is visible... COMPLETED
+Scrolling DOWN until ".*1275\.00.*" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
+Assert that ".*1275\.00.*" is visible... COMPLETED
+Tap on "Members"... COMPLETED
+Assert that ".*Synthetic Alice.*" is visible... COMPLETED
+Tap on "Capital"... COMPLETED
+Scrolling DOWN until ".*Synthetic founding contribution.*" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
+Assert that ".*Synthetic founding contribution.*" is visible... COMPLETED
+
+
+=== android-export ===
+Running on LLC_Consolidation_API34_20261103
+ > Flow llc-consolidation-export
+Scrolling DOWN until "Export Trial Balance CSV" is visible with speed 40, visibility percentage 100%, timeout 20000 ms, with centering disabled... COMPLETED
+Tap on "Export Trial Balance CSV"... COMPLETED
+Take screenshot /tmp/llc-consolidation-android-csv-share... FAILED
+
+Invalid path "/tmp/llc-consolidation-android-csv-share.png" for takeScreenshot: it resolves outside this run's takeScreenshot output folder. If the path comes from a variable, check what it expands to.
+
+==== Debug output (logs & screenshots) ====
+
+/tmp/llc-consolidation-android-export/2026-11-03_010331
+
+
+=== android-more ===
+Running on LLC_Consolidation_API34_20261103
+ > Flow llc-consolidation-more
+Tap on "More"... COMPLETED
+Assert that "Accounts and reconciliation" is visible... COMPLETED
+Tap on "Accounts and reconciliation"... COMPLETED
+Assert that "Accounts" is visible... COMPLETED
+Tap on "More"... COMPLETED
+Tap on "Settings and privacy"... COMPLETED
+Assert that "Settings" is visible... FAILED
+
+Assertion is false: "Settings" is visible
+
+Assertion '"Settings" is visible' failed. Check the UI hierarchy in debug artifacts to verify the element state and properties.
+
+Possible causes:
+- Element selector may be incorrect - check if there are similar elements with slightly different names/properties.
+- Element may be temporarily unavailable due to loading state
+- This could be a real regression that needs to be addressed
+
+==== Debug output (logs & screenshots) ====
+
+/tmp/llc-consolidation-android-more/2026-11-03_010610
+
+
+=== android-settings ===
+Running on LLC_Consolidation_API34_20261103
+ > Flow llc-consolidation-settings
+Tap on "Settings and privacy", Index: 1... COMPLETED
+Assert that "Settings" is visible... COMPLETED
+Tap on "Dashboard"... COMPLETED
+Assert that "Synthetic Consolidation LLC" is visible... COMPLETED

@@ -1,11 +1,12 @@
 import * as Crypto from 'expo-crypto';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
-import React, { useMemo, useState } from 'react';
-import { Text, View } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Pressable, Text, View } from 'react-native';
 import { parseUsd } from '../../../packages/domain/src/money';
 import { RecurringTransactionsSection } from './RecurringTransactionsSection';
 import { transactionRoleLabel } from './transaction-role';
+import { transactionWorkspaceSections, type TransactionWorkspaceSection } from './transaction-workspace';
 import { TransactionCsvImportPanel } from './TransactionCsvImportPanel';
 import {
   correctCashTransaction,
@@ -19,7 +20,7 @@ import {
   type BookkeepingSnapshot,
   type TransactionRecord,
 } from '../../../packages/storage-native/src/bookkeeping-store';
-import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
+import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, StatusIndicator, todayLocalDate, uiStyles } from './ui';
 
 type EntryKind = 'income' | 'expense' | 'transfer';
 type KindFilter = 'all' | EntryKind | 'loan-advance' | 'loan-repayment';
@@ -38,7 +39,19 @@ interface TransactionDraft {
   splits: DraftSplit[] | null;
 }
 
-export function TransactionsScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void> }) {
+export function TransactionsScreen({
+  snapshot,
+  onSaved,
+  initialKind,
+  initialSection = 'history',
+  onInitialKindHandled,
+}: {
+  snapshot: BookkeepingSnapshot;
+  onSaved: () => Promise<void>;
+  initialKind?: EntryKind | null;
+  initialSection?: TransactionWorkspaceSection;
+  onInitialKindHandled?: () => void;
+}) {
   const cashAccounts = snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash');
   const [draft, setDraft] = useState<TransactionDraft | null>(null);
   const [correcting, setCorrecting] = useState<TransactionRecord | null>(null);
@@ -49,6 +62,8 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
+  const [section, setSection] = useState<TransactionWorkspaceSection>(initialSection);
 
   const categories = draft?.kind === 'transfer'
     ? cashAccounts
@@ -68,6 +83,7 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
   }, [snapshot.transactions, kindFilter, accountFilter, categoryFilter, search]);
 
   const beginNew = (kind: EntryKind = 'income') => {
+    setSection('history');
     setError(null);
     setNotice(null);
     setCorrecting(null);
@@ -84,11 +100,18 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
     });
   };
 
+  useEffect(() => {
+    if (!initialKind) return;
+    beginNew(initialKind);
+    onInitialKindHandled?.();
+  }, [initialKind]);
+
   const beginCorrection = (transaction: TransactionRecord) => {
     if ((transaction.kind !== 'income' && transaction.kind !== 'expense' && transaction.kind !== 'transfer')
       || transaction.originalTransactionId || transaction.isGuaranteedPayment) return;
     setError(null);
     setNotice(null);
+    setSection('history');
     setCorrecting(transaction);
     setDraft({
       kind: transaction.kind,
@@ -204,9 +227,18 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
   const splitTotalCents = draft?.splits?.reduce((sum, split) => {
     try { return sum + parseUsd(split.amount); } catch { return sum; }
   }, 0n) ?? 0n;
+  const selectedTransaction = snapshot.transactions.find((transaction) => transaction.id === selectedTransactionId) ?? null;
+  const clearFilters = () => {
+    setSearch('');
+    setKindFilter('all');
+    setAccountFilter('all');
+    setCategoryFilter('all');
+  };
+  const hasFilters = search.length > 0 || kindFilter !== 'all' || accountFilter !== 'all' || categoryFilter !== 'all';
 
   return <Page>
     <Heading title="Transactions" subtitle="Income, expenses, and account transfers post balanced entries to the encrypted journal." />
+    <Choice label="Transaction workspace" value={section} options={transactionWorkspaceSections} onChange={setSection} />
     <View style={uiStyles.row}>
       <Button title="＋ Income" onPress={() => beginNew('income')} />
       <Button title="＋ Expense" secondary onPress={() => beginNew('expense')} />
@@ -281,9 +313,14 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
       </View>
     </Panel> : null}
 
-    {snapshot.business ? <RecurringTransactionsSection snapshot={snapshot} onSaved={onSaved} /> : null}
-    {snapshot.business ? <TransactionCsvImportPanel snapshot={snapshot} onImported={onSaved} /> : null}
+    <View style={section === 'recurring' ? undefined : hiddenSection}>
+      {snapshot.business ? <RecurringTransactionsSection snapshot={snapshot} onSaved={onSaved} /> : null}
+    </View>
+    <View style={section === 'import' ? undefined : hiddenSection}>
+      {snapshot.business ? <TransactionCsvImportPanel snapshot={snapshot} onImported={onSaved} /> : null}
+    </View>
 
+    <View style={section === 'history' ? undefined : hiddenSection}>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Search and filter</Text>
       <Field label="Search description, category, account, or date" value={search} onChangeText={setSearch} placeholder="Search transactions" />
@@ -297,31 +334,72 @@ export function TransactionsScreen({ snapshot, onSaved }: { snapshot: Bookkeepin
       ]} onChange={setKindFilter} />
       <Choice label="Account filter" value={accountFilter} options={filterAccountOptions} onChange={setAccountFilter} />
       <Choice label="Category filter" value={categoryFilter} options={filterCategoryOptions} onChange={setCategoryFilter} />
+      {hasFilters ? <Button title="Clear filters" secondary onPress={clearFilters} /> : null}
       <Button title="Export all transactions as CSV" secondary onPress={() => void exportCsv()} disabled={snapshot.transactions.length === 0} />
       <FormError message={error && !draft ? error : null} />
       {notice ? <Text accessibilityLiveRegion="polite" style={uiStyles.helper}>{notice}</Text> : null}
       <Text style={uiStyles.helper}>{filteredTransactions.length} of {snapshot.transactions.length} persisted records shown. CSV expands transfers into signed source and destination movements.</Text>
+      {selectedTransaction ? <Panel style={detailPanel}>
+        <View style={uiStyles.headingRow}>
+          <Text accessibilityRole="header" style={uiStyles.sectionTitle}>Transaction details</Text>
+          <Button title="Close details" secondary onPress={() => setSelectedTransactionId(null)} />
+        </View>
+        <Text style={uiStyles.rowTitle}>{selectedTransaction.description}</Text>
+        <View style={uiStyles.row}>
+          <StatusIndicator label={transactionRoleLabel(selectedTransaction)} tone={selectedTransaction.correctionRole === 'reversal' ? 'warning' : 'positive'} />
+          <Money cents={selectedTransaction.amountCents} />
+        </View>
+        <Text style={uiStyles.rowDetail}>{selectedTransaction.date} · {selectedTransaction.category}</Text>
+        <Text style={uiStyles.rowDetail}>Account: {selectedTransaction.accountName}</Text>
+        {selectedTransaction.splitLines?.length ? <View>
+          <Text style={uiStyles.rowTitle}>Category lines</Text>
+          {selectedTransaction.splitLines.map((line) => <View key={line.categoryAccountId} style={uiStyles.reportRow}>
+            <Text style={uiStyles.rowDetail}>{line.category}</Text><Money cents={line.amountCents} />
+          </View>)}
+        </View> : null}
+        {selectedTransaction.originalTransactionId ? <Text style={uiStyles.helper}>Linked original transaction: {selectedTransaction.originalTransactionId}</Text> : null}
+        {snapshot.transactions.filter((transaction) => transaction.originalTransactionId === selectedTransaction.id).map((linked) => <Text key={linked.id} style={uiStyles.helper}>
+          Linked {transactionRoleLabel(linked).toLowerCase()}: {linked.date} · {linked.description} · {formatSignedAmount(linked.amountCents)}
+        </Text>)}
+        {(selectedTransaction.kind === 'income' || selectedTransaction.kind === 'expense' || selectedTransaction.kind === 'transfer')
+          && !selectedTransaction.originalTransactionId && !selectedTransaction.isGuaranteedPayment
+          ? <Button title="Reverse and replace" secondary onPress={() => beginCorrection(selectedTransaction)} />
+          : null}
+      </Panel> : null}
       {filteredTransactions.length ? filteredTransactions.map((transaction) => <TransactionRow
         key={transaction.id}
         transaction={transaction}
+        onSelect={() => setSelectedTransactionId(transaction.id)}
         onCorrect={() => beginCorrection(transaction)}
       />) : <Text style={uiStyles.helper}>No transactions match these filters.</Text>}
     </Panel>
+    </View>
   </Page>;
 }
 
-function TransactionRow({ transaction, onCorrect }: { transaction: TransactionRecord; onCorrect: () => void }) {
+function TransactionRow({ transaction, onCorrect, onSelect }: { transaction: TransactionRecord; onCorrect: () => void; onSelect: () => void }) {
   const canCorrect = (transaction.kind === 'income' || transaction.kind === 'expense' || transaction.kind === 'transfer')
     && !transaction.originalTransactionId && !transaction.isGuaranteedPayment;
   const roleLabel = transactionRoleLabel(transaction);
-  return <View style={uiStyles.rowItem}>
-    <View style={uiStyles.rowMain}>
-      <Text style={uiStyles.rowTitle}>{transaction.description}</Text>
-      <Text style={uiStyles.rowDetail}>{transaction.date} · {transaction.category} · {transaction.accountName} · {roleLabel}</Text>
+  return <View style={uiStyles.transactionListItem}>
+    <Pressable accessibilityRole="button" accessibilityLabel={`Details for ${transaction.description}, ${roleLabel}`} onPress={onSelect} style={uiStyles.transactionSelect}>
+      <View style={uiStyles.rowMain}>
+        <Text style={uiStyles.rowTitle}>{transaction.description}</Text>
+        <Text style={uiStyles.rowDetail}>{transaction.date} · {transaction.category} · {transaction.accountName}</Text>
+        <StatusIndicator label={roleLabel} tone={transaction.correctionRole === 'reversal' ? 'warning' : 'neutral'} />
+      </View>
+      <Money cents={transaction.amountCents} />
+    </Pressable>
+    <View style={uiStyles.row}>
+      <Button title="Details" secondary onPress={onSelect} />
       {canCorrect ? <Button title="Correct" secondary onPress={onCorrect} /> : null}
     </View>
-    <Money cents={transaction.amountCents} />
   </View>;
+}
+
+function formatSignedAmount(cents: bigint): string {
+  const amount = cents < 0n ? -cents : cents;
+  return `${cents < 0n ? '−' : '+'}$${formatPositiveCents(amount)}`;
 }
 
 function formatPositiveCents(cents: bigint): string {
@@ -329,3 +407,6 @@ function formatPositiveCents(cents: bigint): string {
   const fraction = (cents % 100n).toString().padStart(2, '0');
   return `${whole}.${fraction}`;
 }
+
+const detailPanel = { borderColor: '#B7D6C4', backgroundColor: '#FCFEFC' };
+const hiddenSection = { display: 'none' as const };
