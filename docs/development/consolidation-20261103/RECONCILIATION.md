@@ -47,3 +47,7 @@ Read-only reviewer `independent_review` reviewed `f1834c038315f75631e0576c930edd
 Task branch: `integration/llc-consolidation-20261103`. This document records an integration candidate, not authorization to merge. Main remains the baseline above until separate approval and successful merge verification. Use the live task branch SHA and current validation report when resuming. No new capabilities or artwork changes are authorized by this task.
 
 `WORKSPACE_RESET_NOT_SAFE`. Ignored dependencies/native projects, caches, simulator/AVD synthetic data, temporary build logs/artifacts, debug signing keys and user-level agent configuration are excluded from Git recovery. No signing/off-device backup/restore certification performed.
+
+## Final independent evidence audit
+
+Reviewer independently audited exact candidate `97d0f386831bd5eb860e1b9534e86357b2c12286`: no remaining critical/important findings. Confirmed application-source parity with reviewed `442fb01` and build `721cafd`, all 20 inventory ref entries and their merge bases/unique counts, all eight evidence hashes, 163 host-test total, clean full integration diff check, and the native export validator PASS. Runtime harness failures/continuations and iOS/doctor/audit/security gaps are accurately disclosed. Final disposition remains draft/not ready for Foundry baseline certification. Full native build logs and flow definitions remain local; committed evidence is not a standalone end-to-end automation reproduction package. This follow-up records that audit without changing application inputs.
