@@ -1,3 +1,5 @@
+> Current consolidation candidate: [reconciliation](consolidation-20261103/RECONCILIATION.md). The M4 continuation checkpoint below is historical; use the live integration branch and current validation evidence.
+
 # Continue LLCBookKeepingPrivate on M4
 
 ## Start from this checkpoint

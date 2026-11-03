@@ -1,3 +1,5 @@
+> Current consolidation candidate: [`docs/development/consolidation-20261103/RECONCILIATION.md`](docs/development/consolidation-20261103/RECONCILIATION.md). Historical M4 instructions below do not replace this candidate or its outstanding gates.
+
 # LLCBookKeepingPrivate — Claude Code Project Guide
 
 ## Product vision
