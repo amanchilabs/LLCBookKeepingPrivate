@@ -32,7 +32,7 @@ No patched glob 13/minimatch 10 release was available. The overrides deliberatel
 
 One minimal GitHub Actions job runs the pinned Node version, clean install, TypeScript, full regression suite, SDK matrix check, audit, toolchain smoke, native configuration generation, and both native JavaScript exports. Actions are pinned to their official release commit SHAs; token permissions are read-only and checkout does not persist credentials. Native simulator/emulator runtime results are separate from this Linux job.
 
-GitHub's branch response confirms main `protected=false`, protection disabled and required-check contexts empty. Owner merge authorization still applies. PR remains draft while native certification and final independent review are incomplete.
+GitHub's branch response confirms main `protected=false`, protection disabled and required-check contexts empty. Owner merge authorization still applies. PR was kept draft during remediation; readiness requires the completed native review and a passing live-head Validation check. Owner merge authorization remains separate.
 
 ## iOS Keychain root cause and correction
 
@@ -97,6 +97,8 @@ Full native logs/captures and QA binaries remain local under /tmp/llc-cert-* and
 
 This certification targets the synthetic development baseline for the Foundry pilot. Physical-device Keychain/Keystore, full advanced-screen/accessibility matrix, cross-platform real-file/provider restore, process-kill/power-loss during restore, OS backup/transfer and signed production/store acceptance remain BLOCKED release/real-data gates. The iOS negative binary was not rerun; Android's binary negative, both positive native proofs and host fail-closed regressions cover the affected development gate. No claim of full product/release acceptance or real-data authorization is made.
 
-Independent new-code review at f7131b03 found no critical/important findings in the dependency, CI and Keychain correction and directly verified the executable's embedded app identity. Final candidate/evidence review and final-head CI confirmation are required before marking PR#1 ready. Main is unchanged; no merge authorization has been given.
+Independent final review of exact candidate ea0ea4383b2a6d7630750d0cccb3d6612c361cde found no critical/important findings. The reviewer verified Keychain handling and the executable's embedded identity, scoped dependency updates, unchanged accounting/storage/backup source, native result logs, both export validators, all eight artifact/capture hashes and the 30 byte-identical Android runtime-code entries. The targeted negative check was repeated with retained before/after maps; the reviewer independently compared all five filenames and hashes. Both maps have SHA-256 de79e933db6b4f16bf500556803db848d8a80c4af4d288790a8bf85f8db44a4f. The restored final positive build again passed persistence. Exact-head CI41627989213 also passed.
+
+All requested synthetic development acceptance gates are complete with no waived security findings or financial assertions. The final delivery/PR records the live-head CI result after this review-record-only update. PR#1 is eligible for owner review and merge authorization after that confirmation. Main remains unchanged; no merge authorization has been given. Real-data/release gates above remain open.
 
 `WORKSPACE_RESET_NOT_SAFE`: native binaries/logs, simulator/AVD state, caches, private signing material and global agent configuration are not covered by remote source synchronization.
