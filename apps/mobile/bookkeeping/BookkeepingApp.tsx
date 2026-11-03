@@ -14,7 +14,7 @@ import { TransactionsScreen } from './TransactionsScreen';
 import { MoreScreen } from './MoreScreen';
 import { contentTopInset } from './layout';
 import { BottomTabBar, Button, Loading, palette } from './ui';
-import { primaryTabForDestination, primaryTabs, type AppDestination, type MoreSection, type PrimaryTab } from './navigation-model';
+import { searchResultSections, primaryTabForDestination, primaryTabs, type AppDestination, type MoreSection, type PrimaryTab } from './navigation-model';
 
 function emptySnapshot(): BookkeepingSnapshot {
   return {
@@ -51,6 +51,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   const [showLoans, setShowLoans] = useState(false);
   const [loanMemberId, setLoanMemberId] = useState<string | undefined>();
   const [pendingTransactionKind, setPendingTransactionKind] = useState<'income' | 'expense' | 'transfer' | null>(null);
+  const [searchSections, setSearchSections] = useState(() => searchResultSections({ kind: 'transaction' }));
   const [workspaces, setWorkspaces] = useState<BusinessRecord[]>([]);
   const rootStyle = [styles.root, { paddingTop: contentTopInset(Platform.OS, StatusBar.currentHeight) }];
 
@@ -85,6 +86,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
       return;
     }
     setShowSearch(false);
+    setSearchSections(searchResultSections({ kind: 'transaction' }));
     setLoanMemberId(undefined);
     setPendingTransactionKind(null);
     setShowLoans(destination === 'Loans');
@@ -109,6 +111,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   };
 
   const selectTab = (next: PrimaryTab) => {
+    setSearchSections(searchResultSections({ kind: 'transaction' }));
     setTab(next);
     setShowSearch(false);
     setShowLoans(false);
@@ -118,6 +121,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   };
 
   const startTransaction = (kind: 'income' | 'expense' | 'transfer') => {
+    setSearchSections(searchResultSections({ kind: 'transaction' }));
     setTab('Transactions');
     setShowSearch(false);
     setShowLoans(false);
@@ -197,12 +201,15 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
     <View style={styles.content}>
       {showSearch ? <>
         <RouteBack title="Search" onBack={() => setShowSearch(false)} />
-        <SearchScreen snapshot={snapshot} onNavigate={navigateTo} />
+        <SearchScreen snapshot={snapshot} onNavigate={(result) => {
+          navigateTo(result.destination);
+          setSearchSections(searchResultSections(result));
+        }} />
       </> : null}
       {!showSearch && tab === 'Dashboard' ? <DashboardScreen snapshot={snapshot} onNavigate={navigateTo} onRecordTransaction={startTransaction} /> : null}
       {!showSearch && tab === 'Transactions' ? <TransactionsScreen snapshot={snapshot} onSaved={refresh}
-        initialKind={pendingTransactionKind} onInitialKindHandled={() => setPendingTransactionKind(null)} /> : null}
-      {!showSearch && tab === 'Members' && !showLoans ? <MembersScreen snapshot={snapshot} onSaved={refresh} onOpenMemberLoans={openMemberLoans} /> : null}
+        initialSection={searchSections.transaction} initialKind={pendingTransactionKind} onInitialKindHandled={() => setPendingTransactionKind(null)} /> : null}
+      {!showSearch && tab === 'Members' && !showLoans ? <MembersScreen initialSection={searchSections.member} snapshot={snapshot} onSaved={refresh} onOpenMemberLoans={openMemberLoans} /> : null}
       {!showSearch && tab === 'Members' && showLoans ? <>
         <RouteBack title="Members" onBack={() => { setShowLoans(false); setLoanMemberId(undefined); }} />
         <LoansScreen snapshot={snapshot} onSaved={refresh} initialMemberId={loanMemberId} />

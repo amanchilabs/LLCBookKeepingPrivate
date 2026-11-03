@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto';
+import type { MemberWorkspaceSection as MemberSection } from './navigation-model';
 import React, { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { parseOwnershipPercent, type MemberInterestInput } from '../../../packages/domain/src/bookkeeping';
@@ -22,11 +23,10 @@ interface MemberDraft {
 
 type CapitalActivityKind = 'cash-contribution' | 'property-contribution' | 'distribution';
 type PaymentRecurrence = 'one-time' | 'monthly' | 'quarterly';
-type MemberSection = 'members' | 'capital' | 'payments';
 interface PaymentAllocationDraft { key: string; installmentId: string; amount: string }
 
-export function MembersScreen({ snapshot, onSaved, onOpenMemberLoans }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void>; onOpenMemberLoans: (memberId: string) => void }) {
-  const [section, setSection] = useState<MemberSection>('members');
+export function MembersScreen({ snapshot, onSaved, onOpenMemberLoans, initialSection = 'members' }: { initialSection?: MemberSection; snapshot: BookkeepingSnapshot; onSaved: () => Promise<void>; onOpenMemberLoans: (memberId: string) => void }) {
+  const [section, setSection] = useState<MemberSection>(initialSection);
   const [members, setMembers] = useState<MemberDraft[]>([]);
   const [effectiveDate, setEffectiveDate] = useState(todayLocalDate());
   const [saving, setSaving] = useState(false);

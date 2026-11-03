@@ -43,11 +43,13 @@ export function TransactionsScreen({
   snapshot,
   onSaved,
   initialKind,
+  initialSection = 'history',
   onInitialKindHandled,
 }: {
   snapshot: BookkeepingSnapshot;
   onSaved: () => Promise<void>;
   initialKind?: EntryKind | null;
+  initialSection?: TransactionWorkspaceSection;
   onInitialKindHandled?: () => void;
 }) {
   const cashAccounts = snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash');
@@ -61,7 +63,7 @@ export function TransactionsScreen({
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null);
-  const [section, setSection] = useState<TransactionWorkspaceSection>('history');
+  const [section, setSection] = useState<TransactionWorkspaceSection>(initialSection);
 
   const categories = draft?.kind === 'transfer'
     ? cashAccounts
