@@ -19,7 +19,7 @@
       ],
       "exit_code": 0,
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stdout_sha256": "a7867bcd2786fd1a7fe1e1d339e66a3d5f37ed3fc9ca698ca660f3ff4b215b2b"
+      "stdout_sha256": "29ecb6e66564ea6ef48040d993ce140dde2617766710c291fd6add72557ca13f"
     },
     {
       "argv": [
@@ -37,9 +37,9 @@
         "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/native_check.py",
         "STORY-SEARCH-1"
       ],
-      "exit_code": 1,
-      "stderr_sha256": "f0250eda642715005cc4c776e79358490e38aab6fa7fc34cd7be67398eebc3f2",
-      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "eb17970a4b2b553574d0566dfb86598f4d95f234df1b2e8f9ef1e8e6d1c84a10"
     }
   ],
   "governance": {
@@ -57,9 +57,12 @@
     "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout_sha256": "1a513c8438f5bae6391c8a6d91c6e5a0cb1f95e4b7af48b2a73902a47b41e7de"
   },
-  "review": null,
+  "review": {
+    "source": "530700eab3b0511f50c07b7e207b8f9d9d56b717",
+    "verdict": "PASS"
+  },
   "run": "run-6a9ebcd4dfc04ca5",
-  "source": "64386d270e4210bf7f795d3d62ea87ccf160a8f9",
-  "status": "FAILED_VALIDATION",
-  "timestamp": "2026-11-03T11:59:39.661841+00:00"
+  "source": "530700eab3b0511f50c07b7e207b8f9d9d56b717",
+  "status": "VALIDATED",
+  "timestamp": "2026-11-03T12:04:47.440280+00:00"
 }
