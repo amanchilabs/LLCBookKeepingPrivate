@@ -10,10 +10,10 @@
     "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e"
   },
-  "head": "530700eab3b0511f50c07b7e207b8f9d9d56b717",
+  "head": "61ae2154abae7341f50b1219d1f7a2816cff7df0",
   "history": [],
   "id": "run-6a9ebcd4dfc04ca5",
-  "next": 1,
+  "next": 2,
   "owner": "f7b8f9f975334b90be3163286280852e",
   "phase": "READY",
   "plan": {
@@ -135,7 +135,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "PAUSED",
+  "status": "COMPLETE",
   "stories": [
     {
       "checks": [
@@ -223,18 +223,70 @@
       ]
     },
     {
+      "checks": [
+        {
+          "argv": [
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "0e30b28a5b9e47f41458c247c54bd2e0daf0604feb46a73476c81e7412f0f986"
+        },
+        {
+          "argv": [
+            "npm",
+            "test"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "5548736f47c30098e0fb4f922d0c5bae4cbb1e93de26a911fcbc28c7a0141bc3"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/python3.11",
+            "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/native_check.py",
+            "STORY-SEARCH-2"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "551fafae7302b78d61c7e630c7ce889a9395f67011faa6d00c0d78351ca9a323"
+        }
+      ],
       "depends_on": [
         "STORY-SEARCH-1"
       ],
+      "evidence": ".foundry/evidence/CAP-SEARCH-USABILITY/run-6a9ebcd4dfc04ca5/STORY-SEARCH-2.json",
       "files": [
         "apps/mobile/bookkeeping/SearchScreen.tsx",
         "apps/mobile/bookkeeping/search-result-row.tsx",
         "apps/mobile/bookkeeping/search-result-row.test.tsx"
       ],
       "id": "STORY-SEARCH-2",
+      "provider_result": {
+        "exit_code": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "3139afafd993ae41aa92248b8b4f384be3baf9cb670f3f08e563239eb593a9cd"
+      },
       "purpose": "Presentation-only, synthetic data. Existing search results/navigation must remain identical. Read CLAUDE.md and mapped design specifications; owner baseline main 0710e5188ba52199eb230be01c0289ec07bba902 supersedes historical migration branch hints. No edits to domain, storage, schema, auth, security, dependencies or accounting. Add meaningful component-level tests with vitest and existing react-dom/server; mock RN only at the host boundary. Test real rendered components/handlers, not source strings. Native platform acceptance remains a separate required coordinator check; never claim VoiceOver/TalkBack acceptance from props. Do not update progress docs: coordinator owns those. Extract the existing SearchResultRow and kind-label mapping into search-result-row.tsx. Preserve every kind label, key and onNavigate result identity. Improve result button accessibility by announcing kind/title/details and using a separate accessibilityHint for opening its destination; set minimum row touch height to 48 using the established tokens/helper where appropriate, retaining existing layout. Add search-result-row.test.tsx with all kind mappings, exact destination hints, details, long text, minimum touch height, and handler forwarding the exact original result. Tier 2 bounded presentation change. Expected model: Claude CLI login default. Deliver source and focused tests. Coordinator native evidence will be saved under /tmp/llc-foundry-pilot-native/<exact-source-SHA>/ on dedicated synthetic iOS and Android targets. Review those screenshots using Read as well as tests; do not claim assistive-technology hardware acceptance.",
+      "review": {
+        "source": "61ae2154abae7341f50b1219d1f7a2816cff7df0",
+        "verdict": "PASS"
+      },
       "review_required": true,
-      "status": "READY",
+      "source": "61ae2154abae7341f50b1219d1f7a2816cff7df0",
+      "status": "DONE",
       "validation": [
         [
           "npm",

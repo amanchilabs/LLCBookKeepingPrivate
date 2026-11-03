@@ -1,0 +1,68 @@
+{
+  "branch": "feature/foundry-llc-pilot-20261103",
+  "capability": "CAP-SEARCH-USABILITY",
+  "checks": [
+    {
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0e30b28a5b9e47f41458c247c54bd2e0daf0604feb46a73476c81e7412f0f986"
+    },
+    {
+      "argv": [
+        "npm",
+        "test"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "5548736f47c30098e0fb4f922d0c5bae4cbb1e93de26a911fcbc28c7a0141bc3"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/native_check.py",
+        "STORY-SEARCH-2"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "551fafae7302b78d61c7e630c7ce889a9395f67011faa6d00c0d78351ca9a323"
+    }
+  ],
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design/implementation/acceptance-criteria.md": "35de7364634040f62f6f2fbe9e20251895bb575ab8b1aceca096754b31a5085e",
+    "docs/design/implementation/feature-preservation-matrix.md": "544a527ec7b24ba0c6b45044cefee62967bfc3fb657d4fee18bbbc8b70d87e55",
+    "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
+    "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e"
+  },
+  "id": "STORY-SEARCH-2",
+  "profile": "claude-m5-llc-login",
+  "provider_result": {
+    "exit_code": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "3139afafd993ae41aa92248b8b4f384be3baf9cb670f3f08e563239eb593a9cd"
+  },
+  "review": {
+    "source": "61ae2154abae7341f50b1219d1f7a2816cff7df0",
+    "verdict": "PASS"
+  },
+  "run": "run-6a9ebcd4dfc04ca5",
+  "source": "61ae2154abae7341f50b1219d1f7a2816cff7df0",
+  "status": "VALIDATED",
+  "timestamp": "2026-11-03T12:08:25.248706+00:00"
+}
