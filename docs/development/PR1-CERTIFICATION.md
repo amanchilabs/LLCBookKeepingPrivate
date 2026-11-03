@@ -49,8 +49,54 @@ LLCB_IOS_DEVELOPMENT_TEAM=<app-team> LLCB_IOS_DERIVED_DATA=/tmp/llc-consolidatio
 
 Actual final-config runtime reaches onboarding and passes native SQLCipher/key-store read-write/reopen, record/attachment persistence, wrong-key rejection, in-memory backup wrong-passphrase/tamper/truncation, and all ten injected restore boundaries on iOS and Android. These synthetic proof operations ran before any bookkeeping data was created on the fresh targets. They are exception-boundary tests, not process-kill/power-loss or physical-device certification.
 
-## Current native status
+## Final acceptance evidence
 
-Final bookkeeping/navigation/export/relaunch acceptance is in progress. Required unexecuted checks remain BLOCKED. No encryption/key-access checks or accounting assertions are weakened. No production signing, deployment, store submission, or main merge is authorized.
+M5 Pro / macOS 26.5.1, Xcode 26.6 / iOS 26.5 Simulator, JDK 17 / Gradle 9.4.1 / Android API 34 arm64 emulator, Node 24.22.2. Dedicated iOS target DC112959-3443-4376-9D70-7CD4DB0CCCE5; fresh Android certification target emulator-5564. Other-product targets were not modified. Native apps remain version 0.1.0/build 1, bundle/package com.amanchilabs.llcbookkeepingprivate. Both artifacts are QA Debug builds; iOS uses ad-hoc Simulator execution, Android the unchanged public debug certificate. No production signing or store action occurred.
+
+| Gate | iOS Simulator | Android emulator |
+|---|---|---|
+| Native build / install / launch | PASS using the guarded Xcode build script | PASS, arm64 Debug |
+| Four-member setup / 40-20-20-20 confirmation / opening balance | PASS | PASS |
+| Income / expense / linked reversal+replacement | PASS | PASS |
+| Member cash contribution and journal-derived balances | PASS | PASS |
+| Global search → Capital section | PASS | PASS |
+| Description search / expense filter / clear / five tabs / Accounts and Settings | PASS | PASS |
+| Trial Balance native CSV and PDF export | PASS; share sheet opened, no destination selected | PASS; same |
+| Independent captured-export reconciliation | PASS | PASS |
+| Actual termination/force-stop and relaunch | PASS: same LLC, member, contribution and $1,275 bank | PASS; also preserved earlier baseline data during upgrade |
+| SQLCipher / secure key read-write / reopen / wrong-key rejection | PASS | PASS |
+| In-memory backup wrong-passphrase/tamper/truncation and ten restore exceptions | PASS, before books were created | PASS, before books were created |
+| Database plaintext-header / selected synthetic-string scan | PASS: five database/generation files | PASS: five files |
+| SQLCipher-disabled negative binary | BLOCKED / not rerun on iOS; host guard tests and positive native coverage reported separately | PASS: refuses persistent storage; all five database file hashes unchanged; restored positive build retains books |
+
+Exact financial results were preserved independently on both platforms: opening equity$1,000, income$250, corrected expense$75 (original$50 and its reversal retained), member capital$100, bank$1,275, trial balance debit=credit=$1,350. The cash transaction list has five persisted records: one income, original expense, separate reversal-kind entry, replacement expense and opening balance. Description search returns 1 of 5; Expense filter returns original+replacement 2 of 5. Capital is separately tracked. All163 host regressions also cover the existing accounting, capital, loans/payments/transfers, periods, recurring/import and reconciliation services.
+
+The iOS label/input and pinned-footer automation issues were diagnosed from actual touch coordinates, not treated as application defects. The member input was at the footer's touch point despite its label being visible. The adapter now scrolls and taps the same constrained input/control above the footer, uses bounded swipes inside Page, and fails if it enters recovery tools. Early harness attempts did not create a business or post financial writes. After the correction, four-member onboarding, the complete accounting flow, filtering/navigation, exports and actual relaunch all passed. No financial expectation or product assertion was weakened, and no app UI code changed.
+
+### Provenance and reproducibility
+
+- Application, domain, storage, backup, key aliases and app configuration are byte-identical to initial 793ff2d; only SDK dependency patches, tooling overrides, CI and validation helpers/documentation changed.
+- The first positive Android APK ran the complete fresh workflow. Canonical regeneration removed only the unused experimental `/ios/entitlements` entry from packaged app.config and refreshed app.fingerprint. A ZIP comparison proves all 30 DEX/native-code entries byte-identical. The final canonical APK was installed without data clearing and independently revalidated for exports and force-stop/relaunch. This distinguishes reuse of unchanged runtime-code evidence from final-artifact checks.
+- iOS's final normal build uses the untouched default app Keychain group. Both the generated simulated-entitlement plist and the actual executable's embedded __TEXT entitlement were independently inspected; only the expected app-owned application identity exists.
+- The positive Android project was regenerated after the negative check; expo.sqlite.useSQLCipher=true is restored. Negative environment flags were command-local and are not committed as defaults.
+- `scripts/native/README.md` records the existing fixtures, platform adapter and exact preconditions. `validate-native-export.py CSV PDF` checks actual captured files; historical no-argument fixture validation remains intact.
+- GitHub Validation runs 41620241865 (dependency commit3c525702),41621829156 (build-script commitf7131b03), and41625492958 (native-helper commitd2da5618) all PASS. Each includes clean install, TypeScript, all 163 regressions, SDK check, audit0, fingerprint/API smoke, native generation and both native JavaScript exports. Final live-head checks are verified before PR readiness; native device execution is not inferred from Linux CI.
+
+| Local QA/evidence identity | SHA-256 |
+|---|---|
+| Final canonical Android APK | 23407ac8778a8dc3aa8811c2edf24e55d77d29ee59c2511873330f2ab586cf72 |
+| SQLCipher-negative Android APK | 10d3d0bfc3a3eab738f4753f9c0eb54fcb162da073cb0733e7726627f5a76b89 |
+| iOS Simulator executable | 67041fa89b32eeabf20054d29cf9585a5b80e8d706f4ab89b144e62b5e68822e |
+| iOS Simulator debug dylib | 4675ef1eee06b6a823d356c5ad891664f69aa3774ddfa58900c5350d625bf312 |
+| iOS native CSV / PDF | 543625a4a0d7d1539cdb72cfb6cdb86a77c6f0da61419afdb27aac2f03e3c641 / d92b1f19fe8b81d882a5f46b8b345f806cbed13bf378ac3f1f2ac249e6fbfc4d |
+| Final Android native CSV / PDF | a8926cdc1f935feee1ef7dc52e987f8dc61eb3618981771bb2fc7dcb1c615f3c / a31045e7a5045e8331a7fa5a9e729028db6935b63ff18b28c9461319c14aca82 |
+
+Full native logs/captures and QA binaries remain local under /tmp/llc-cert-* and the task DerivedData; they are not represented as remotely backed-up release artifacts. No unnecessary binary/evidence package was added to Git.
+
+## Scope, review and readiness
+
+This certification targets the synthetic development baseline for the Foundry pilot. Physical-device Keychain/Keystore, full advanced-screen/accessibility matrix, cross-platform real-file/provider restore, process-kill/power-loss during restore, OS backup/transfer and signed production/store acceptance remain BLOCKED release/real-data gates. The iOS negative binary was not rerun; Android's binary negative, both positive native proofs and host fail-closed regressions cover the affected development gate. No claim of full product/release acceptance or real-data authorization is made.
+
+Independent new-code review at f7131b03 found no critical/important findings in the dependency, CI and Keychain correction and directly verified the executable's embedded app identity. Final candidate/evidence review and final-head CI confirmation are required before marking PR#1 ready. Main is unchanged; no merge authorization has been given.
 
 `WORKSPACE_RESET_NOT_SAFE`: native binaries/logs, simulator/AVD state, caches, private signing material and global agent configuration are not covered by remote source synchronization.

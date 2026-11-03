@@ -42,6 +42,16 @@ while index < len(lines):
         result.extend(['- tapOn:', '    text: ' + line.removeprefix('- tapOn: '), '    above:', '      text: ' + footer, '    index: 1', '- assertNotVisible: Return to books'])
         if not following.startswith('- eraseText'):
             result.append('- eraseText')
+    elif line.startswith('- tapOn: '):
+        target = line.removeprefix('- tapOn: ')
+        try:
+            plain_target = json.loads(target)
+        except (ValueError, TypeError):
+            plain_target = target
+        if plain_target in {'Dashboard', 'Transactions', 'Members', 'Reports', 'More', 'dismiss popup', 'Open', 'Close', 'Continue'}:
+            result.append(line)
+        else:
+            result.extend(['- tapOn:', '    text: ' + target, '    above:', '      text: ' + footer])
     elif line == '- hideKeyboard':
         result.append('- pressKey: ENTER')
     else:

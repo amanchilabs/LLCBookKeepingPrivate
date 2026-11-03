@@ -5,6 +5,8 @@ import csv
 import subprocess
 import sys
 
+if len(sys.argv) not in (1, 3):
+    raise SystemExit('Usage: validate-native-export.py [CSV PDF]')
 root = Path(__file__).parent / 'evidence'
 csv_path = Path(sys.argv[1]) if len(sys.argv) > 1 else root / 'android-synthetic-trial-balance.csv'
 pdf_path = Path(sys.argv[2]) if len(sys.argv) > 2 else root / 'android-synthetic-trial-balance.pdf'
