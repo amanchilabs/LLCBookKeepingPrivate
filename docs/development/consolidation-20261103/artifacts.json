@@ -1,0 +1,24 @@
+{
+  "source_sha": "721cafd15f9f50c83e75c8314ab3857fdee03dc5",
+  "reviewed_application_source_sha": "442fb01fcff7d12d6bce75851039f118c585e289",
+  "application_inputs_identical": true,
+  "classification": "regenerable local QA Debug artifacts; not release candidates",
+  "bundle_package_id": "com.amanchilabs.llcbookkeepingprivate",
+  "version": "0.1.0",
+  "build": 1,
+  "android": {
+    "abi": "arm64-v8a",
+    "compile_sdk": "37.0",
+    "runtime_api": 34,
+    "sha256": "c12147189a60fac5fd06a1adfc2f2713696d0fe33dc6a85f025b449730fe9ab6",
+    "debug_certificate_sha256": "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c",
+    "local_path": "android/app/build/outputs/apk/debug/app-debug.apk"
+  },
+  "ios": {
+    "sdk_runtime": "26.5 simulator",
+    "signing": "CODE_SIGNING_ALLOWED=NO",
+    "zipped_app_sha256": "44363f88fda6062a5c9725c6953046ab24ca19ca7f7442c615db7302a19c1825",
+    "local_zip": "/tmp/llc-consolidation-ios-simulator.app.zip"
+  },
+  "off_device_backup_verified": false
+}

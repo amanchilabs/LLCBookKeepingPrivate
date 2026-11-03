@@ -1,0 +1,74 @@
+v24.22.2
+
+> llc-bookkeeping-private@0.1.0 typecheck
+> tsc --noEmit
+
+
+> llc-bookkeeping-private@0.1.0 test
+> npm run test:preview && npm run test:bookkeeping-ui && npm run test:security-config && npm run test:domain && npm run test:backup
+
+
+> llc-bookkeeping-private@0.1.0 test:preview
+> vitest run apps/mobile/preview-capabilities.test.ts
+
+
+ RUN  v5.0.5 /Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate-integration
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  00:49:32
+   Duration  102ms (transform 63%, import 23%, worker 8%, tests 6%)
+
+
+> llc-bookkeeping-private@0.1.0 test:bookkeeping-ui
+> vitest run apps/mobile/bookkeeping
+
+
+ RUN  v5.0.5 /Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate-integration
+
+
+ Test Files  11 passed (11)
+      Tests  46 passed (46)
+   Start at  00:49:33
+   Duration  263ms (transform 81%, import 12%, worker 4%, tests 3%)
+
+
+> llc-bookkeeping-private@0.1.0 test:security-config
+> vitest run apps/mobile/native-build-policy.test.ts packages/storage-native/test
+
+
+ RUN  v5.0.5 /Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate-integration
+
+
+ Test Files  4 passed (4)
+      Tests  57 passed (57)
+   Start at  00:49:33
+   Duration  1.14s (tests 78%, transform 18%, import 4%, worker 1%)
+
+
+> llc-bookkeeping-private@0.1.0 test:domain
+> vitest run packages/domain/test
+
+
+ RUN  v5.0.5 /Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate-integration
+
+
+ Test Files  7 passed (7)
+      Tests  43 passed (43)
+   Start at  00:49:35
+   Duration  173ms (transform 69%, import 17%, tests 8%, worker 5%)
+
+
+> llc-bookkeeping-private@0.1.0 test:backup
+> vitest run packages/backup/test
+
+
+ RUN  v5.0.5 /Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate-integration
+
+
+ Test Files  2 passed (2)
+      Tests  15 passed (15)
+   Start at  00:49:35
+   Duration  124ms (transform 58%, import 23%, tests 12%, worker 7%)
+
