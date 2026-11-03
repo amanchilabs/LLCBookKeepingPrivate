@@ -1,0 +1,210 @@
+{
+  "branch": "feature/foundry-llc-pilot-20261103",
+  "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
+  "created_at": "2026-11-03T11:53:42.102549+00:00",
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design/implementation/acceptance-criteria.md": "35de7364634040f62f6f2fbe9e20251895bb575ab8b1aceca096754b31a5085e",
+    "docs/design/implementation/feature-preservation-matrix.md": "544a527ec7b24ba0c6b45044cefee62967bfc3fb657d4fee18bbbc8b70d87e55",
+    "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
+    "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e"
+  },
+  "head": "0710e5188ba52199eb230be01c0289ec07bba902",
+  "history": [],
+  "id": "run-6a9ebcd4dfc04ca5",
+  "next": 0,
+  "owner": "f7b8f9f975334b90be3163286280852e",
+  "phase": "READY",
+  "plan": {
+    "id": "CAP-SEARCH-USABILITY",
+    "scope": "Owner-authorized bounded two-Story LLC search usability pilot from existing approved UX scope. Presentation-only, synthetic data. Existing search results/navigation must remain identical. Read CLAUDE.md and mapped design specifications; owner baseline main 0710e5188ba52199eb230be01c0289ec07bba902 supersedes historical migration branch hints. No edits to domain, storage, schema, auth, security, dependencies or accounting. Add meaningful component-level tests with vitest and existing react-dom/server; mock RN only at the host boundary. Test real rendered components/handlers, not source strings. Native platform acceptance remains a separate required coordinator check; never claim VoiceOver/TalkBack acceptance from props. Do not update progress docs: coordinator owns those. ",
+    "stories": [
+      {
+        "depends_on": [],
+        "files": [
+          "apps/mobile/bookkeeping/SearchScreen.tsx",
+          "apps/mobile/bookkeeping/search-feedback.tsx",
+          "apps/mobile/bookkeeping/search-feedback.test.tsx"
+        ],
+        "id": "STORY-SEARCH-1",
+        "purpose": "Presentation-only, synthetic data. Existing search results/navigation must remain identical. Read CLAUDE.md and mapped design specifications; owner baseline main 0710e5188ba52199eb230be01c0289ec07bba902 supersedes historical migration branch hints. No edits to domain, storage, schema, auth, security, dependencies or accounting. Add meaningful component-level tests with vitest and existing react-dom/server; mock RN only at the host boundary. Test real rendered components/handlers, not source strings. Native platform acceptance remains a separate required coordinator check; never claim VoiceOver/TalkBack acceptance from props. Do not update progress docs: coordinator owns those. Improve SearchScreen idle/no-match/result-count feedback: extract a pure SearchFeedback component (query/resultCount props) in search-feedback.tsx, retain existing helpful idle text, make no-match state advise checking spelling or trying another term, count singular/plural correctly, and mark dynamic feedback with accessibilityLiveRegion=\"polite\". Keep Clear search behavior. Add search-feedback.test.tsx covering idle/whitespace, zero, one and multiple results and native accessibility props. Tier 2 bounded presentation change. Expected model: Claude CLI login default. Deliver source and focused tests. Coordinator native evidence will be saved under /tmp/llc-foundry-pilot-native/<exact-source-SHA>/ on dedicated synthetic iOS and Android targets. Review those screenshots using Read as well as tests; do not claim assistive-technology hardware acceptance.",
+        "review_required": true,
+        "validation": [
+          [
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          [
+            "npm",
+            "test"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ],
+          [
+            "/opt/homebrew/bin/python3.11",
+            "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/native_check.py",
+            "STORY-SEARCH-1"
+          ]
+        ]
+      },
+      {
+        "depends_on": [
+          "STORY-SEARCH-1"
+        ],
+        "files": [
+          "apps/mobile/bookkeeping/SearchScreen.tsx",
+          "apps/mobile/bookkeeping/search-result-row.tsx",
+          "apps/mobile/bookkeeping/search-result-row.test.tsx"
+        ],
+        "id": "STORY-SEARCH-2",
+        "purpose": "Presentation-only, synthetic data. Existing search results/navigation must remain identical. Read CLAUDE.md and mapped design specifications; owner baseline main 0710e5188ba52199eb230be01c0289ec07bba902 supersedes historical migration branch hints. No edits to domain, storage, schema, auth, security, dependencies or accounting. Add meaningful component-level tests with vitest and existing react-dom/server; mock RN only at the host boundary. Test real rendered components/handlers, not source strings. Native platform acceptance remains a separate required coordinator check; never claim VoiceOver/TalkBack acceptance from props. Do not update progress docs: coordinator owns those. Extract the existing SearchResultRow and kind-label mapping into search-result-row.tsx. Preserve every kind label, key and onNavigate result identity. Improve result button accessibility by announcing kind/title/details and using a separate accessibilityHint for opening its destination; set minimum row touch height to 48 using the established tokens/helper where appropriate, retaining existing layout. Add search-result-row.test.tsx with all kind mappings, exact destination hints, details, long text, minimum touch height, and handler forwarding the exact original result. Tier 2 bounded presentation change. Expected model: Claude CLI login default. Deliver source and focused tests. Coordinator native evidence will be saved under /tmp/llc-foundry-pilot-native/<exact-source-SHA>/ on dedicated synthetic iOS and Android targets. Review those screenshots using Read as well as tests; do not claim assistive-technology hardware acceptance.",
+        "review_required": true,
+        "validation": [
+          [
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          [
+            "npm",
+            "test"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ],
+          [
+            "/opt/homebrew/bin/python3.11",
+            "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/native_check.py",
+            "STORY-SEARCH-2"
+          ]
+        ]
+      }
+    ]
+  },
+  "product": {
+    "canonical_vision": "docs/design/proposed/design-decisions.md",
+    "execution_contract": "CLAUDE.md",
+    "execution_scope": "Two-Story search presentation pilot only; owner request 2026-11-03; no merge/release/data/security changes",
+    "id": "llcbookkeepingprivate",
+    "records": {
+      "progress": "docs/design/implementation/feature-preservation-matrix.md",
+      "specification": "docs/design/proposed/screen-specifications.md",
+      "validation": "docs/design/implementation/acceptance-criteria.md"
+    },
+    "repository_path": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate",
+    "repository_remote": "https://github.com/amanchilabs/LLCBookKeepingPrivate.git"
+  },
+  "profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "Existing first-party claude.ai Pro subscription login; CLI default model; no API credentials or fallback",
+    "commands": {
+      "implement": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/pilots/llc-20261103/claude_transport.py",
+        "implement",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/provider-events.jsonl"
+      ],
+      "review": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/pilots/llc-20261103/claude_transport.py",
+        "review",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/provider-events.jsonl"
+      ]
+    },
+    "id": "claude-m5-llc-login",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/pilots/llc-20261103/claude_transport.py",
+        "--version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/pilots/llc-20261103/claude_transport.py",
+        "--help"
+      ]
+    ],
+    "provider": "claude-code",
+    "timeout_seconds": 1800
+  },
+  "schema_version": 1,
+  "status": "READY",
+  "stories": [
+    {
+      "depends_on": [],
+      "files": [
+        "apps/mobile/bookkeeping/SearchScreen.tsx",
+        "apps/mobile/bookkeeping/search-feedback.tsx",
+        "apps/mobile/bookkeeping/search-feedback.test.tsx"
+      ],
+      "id": "STORY-SEARCH-1",
+      "purpose": "Presentation-only, synthetic data. Existing search results/navigation must remain identical. Read CLAUDE.md and mapped design specifications; owner baseline main 0710e5188ba52199eb230be01c0289ec07bba902 supersedes historical migration branch hints. No edits to domain, storage, schema, auth, security, dependencies or accounting. Add meaningful component-level tests with vitest and existing react-dom/server; mock RN only at the host boundary. Test real rendered components/handlers, not source strings. Native platform acceptance remains a separate required coordinator check; never claim VoiceOver/TalkBack acceptance from props. Do not update progress docs: coordinator owns those. Improve SearchScreen idle/no-match/result-count feedback: extract a pure SearchFeedback component (query/resultCount props) in search-feedback.tsx, retain existing helpful idle text, make no-match state advise checking spelling or trying another term, count singular/plural correctly, and mark dynamic feedback with accessibilityLiveRegion=\"polite\". Keep Clear search behavior. Add search-feedback.test.tsx covering idle/whitespace, zero, one and multiple results and native accessibility props. Tier 2 bounded presentation change. Expected model: Claude CLI login default. Deliver source and focused tests. Coordinator native evidence will be saved under /tmp/llc-foundry-pilot-native/<exact-source-SHA>/ on dedicated synthetic iOS and Android targets. Review those screenshots using Read as well as tests; do not claim assistive-technology hardware acceptance.",
+      "review_required": true,
+      "status": "READY",
+      "validation": [
+        [
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        [
+          "npm",
+          "test"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ],
+        [
+          "/opt/homebrew/bin/python3.11",
+          "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/native_check.py",
+          "STORY-SEARCH-1"
+        ]
+      ]
+    },
+    {
+      "depends_on": [
+        "STORY-SEARCH-1"
+      ],
+      "files": [
+        "apps/mobile/bookkeeping/SearchScreen.tsx",
+        "apps/mobile/bookkeeping/search-result-row.tsx",
+        "apps/mobile/bookkeeping/search-result-row.test.tsx"
+      ],
+      "id": "STORY-SEARCH-2",
+      "purpose": "Presentation-only, synthetic data. Existing search results/navigation must remain identical. Read CLAUDE.md and mapped design specifications; owner baseline main 0710e5188ba52199eb230be01c0289ec07bba902 supersedes historical migration branch hints. No edits to domain, storage, schema, auth, security, dependencies or accounting. Add meaningful component-level tests with vitest and existing react-dom/server; mock RN only at the host boundary. Test real rendered components/handlers, not source strings. Native platform acceptance remains a separate required coordinator check; never claim VoiceOver/TalkBack acceptance from props. Do not update progress docs: coordinator owns those. Extract the existing SearchResultRow and kind-label mapping into search-result-row.tsx. Preserve every kind label, key and onNavigate result identity. Improve result button accessibility by announcing kind/title/details and using a separate accessibilityHint for opening its destination; set minimum row touch height to 48 using the established tokens/helper where appropriate, retaining existing layout. Add search-result-row.test.tsx with all kind mappings, exact destination hints, details, long text, minimum touch height, and handler forwarding the exact original result. Tier 2 bounded presentation change. Expected model: Claude CLI login default. Deliver source and focused tests. Coordinator native evidence will be saved under /tmp/llc-foundry-pilot-native/<exact-source-SHA>/ on dedicated synthetic iOS and Android targets. Review those screenshots using Read as well as tests; do not claim assistive-technology hardware acceptance.",
+      "review_required": true,
+      "status": "READY",
+      "validation": [
+        [
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        [
+          "npm",
+          "test"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ],
+        [
+          "/opt/homebrew/bin/python3.11",
+          "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/llc-pilot/native_check.py",
+          "STORY-SEARCH-2"
+        ]
+      ]
+    }
+  ],
+  "workspace": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate-foundry-pilot"
+}
