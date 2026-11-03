@@ -17,19 +17,20 @@
     "test": "npm run test:preview && npm run test:bookkeeping-ui && npm run test:security-config && npm run test:domain && npm run test:backup",
     "typecheck": "tsc --noEmit",
     "doctor": "EXPO_NO_TELEMETRY=1 expo install --check",
-    "config:public": "EXPO_NO_TELEMETRY=1 expo config --type public"
+    "config:public": "EXPO_NO_TELEMETRY=1 expo config --type public",
+    "check:toolchain": "node scripts/check-toolchain.mjs"
   },
   "dependencies": {
-    "@expo/metro-runtime": "58.0.15",
+    "@expo/metro-runtime": "58.0.16",
     "decimal.js": "10.6.0",
-    "expo": "58.0.21",
+    "expo": "58.0.22",
     "expo-crypto": "58.0.7",
     "expo-document-picker": "58.0.4",
     "expo-file-system": "58.0.13",
     "expo-print": "~58.0.8",
     "expo-secure-store": "58.0.2",
     "expo-sharing": "58.0.21",
-    "expo-sqlite": "58.0.14",
+    "expo-sqlite": "58.0.15",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.1",
@@ -38,8 +39,12 @@
   },
   "devDependencies": {
     "@types/react": "19.3.0",
-    "expo-dev-client": "58.0.17",
+    "expo-dev-client": "58.0.18",
     "typescript": "6.0.3",
     "vitest": "5.0.5"
+  },
+  "overrides": {
+    "glob@13": "14.0.3",
+    "minimatch@10": "11.0.4"
   }
 }
