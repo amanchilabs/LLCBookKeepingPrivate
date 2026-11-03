@@ -22,9 +22,11 @@ interface MemberDraft {
 
 type CapitalActivityKind = 'cash-contribution' | 'property-contribution' | 'distribution';
 type PaymentRecurrence = 'one-time' | 'monthly' | 'quarterly';
+type MemberSection = 'members' | 'capital' | 'payments';
 interface PaymentAllocationDraft { key: string; installmentId: string; amount: string }
 
-export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void> }) {
+export function MembersScreen({ snapshot, onSaved, onOpenMemberLoans }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void>; onOpenMemberLoans: (memberId: string) => void }) {
+  const [section, setSection] = useState<MemberSection>('members');
   const [members, setMembers] = useState<MemberDraft[]>([]);
   const [effectiveDate, setEffectiveDate] = useState(todayLocalDate());
   const [saving, setSaving] = useState(false);
@@ -279,12 +281,33 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
 
   return <Page>
     <Heading title="Members" subtitle="Edit member names and ownership interests. Every ownership change keeps its prior effective dates in the local history." />
+    <Choice label="Member workspace" value={section} options={[
+      { value: 'members', title: 'Members' },
+      { value: 'capital', title: 'Capital' },
+      { value: 'payments', title: 'Payments' },
+    ]} onChange={setSection} />
+    {section === 'members' ? <>
+    {snapshot.members.length ? <Panel>
+      <Text style={uiStyles.sectionTitle}>Member records</Text>
+      <Text style={uiStyles.helper}>Ownership and book capital are separate records. Member loans are recorded as debt, not capital.</Text>
+      {snapshot.members.map((member) => {
+        const capital = snapshot.memberCapitalSummaries.find((summary) => summary.memberId === member.id)?.bookCapitalActivityCents;
+        return <View key={member.id} style={uiStyles.rowItem}>
+          <View style={uiStyles.rowMain}>
+            <Text style={uiStyles.rowTitle}>{member.name}</Text>
+            <Text style={uiStyles.rowDetail}>{fromBasisPoints(member.ownershipBasisPoints)}% ownership</Text>
+            {capital !== undefined ? <Text style={uiStyles.rowDetail}>Book capital activity ${formatUsd(capital)}</Text> : null}
+          </View>
+          <Button title={`Loans · ${member.name}`} secondary onPress={() => onOpenMemberLoans(member.id)} />
+        </View>;
+      })}
+    </Panel> : null}
     <Panel>
       {members.map((member, index) => <View key={member.id}>
-        <View style={uiStyles.row}>
-          <Field label={`Member ${index + 1} name`} value={member.name} onChangeText={(value) => update(index, { name: value })} autoCapitalize="words" />
-          <Field label={`Member ${index + 1} ownership percent`} value={member.percent} onChangeText={(value) => update(index, { percent: value })} keyboardType="decimal-pad" />
-          {members.length > 1 ? <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${member.name || `member ${index + 1}`}`} onPress={() => removeMember(index)} style={uiStyles.remove}>
+        <View style={uiStyles.fieldStack}>
+          <Field wide label={`Member ${index + 1} name`} value={member.name} onChangeText={(value) => update(index, { name: value })} autoCapitalize="words" />
+          <Field wide label={`Member ${index + 1} ownership percent`} value={member.percent} onChangeText={(value) => update(index, { percent: value })} keyboardType="decimal-pad" />
+          {members.length > 1 ? <Pressable accessibilityRole="button" accessibilityLabel={`Remove ${member.name || `member ${index + 1}`}`} onPress={() => removeMember(index)} style={[uiStyles.remove, { alignSelf: 'flex-end' }]}>
             <Text style={uiStyles.removeText}>×</Text>
           </Pressable> : null}
         </View>
@@ -295,6 +318,8 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
       <FormError message={error} />
       <Button title="Confirm and save member changes" onPress={() => void save()} disabled={saving} />
     </Panel>
+    </> : null}
+    {section === 'capital' ? <>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Record member capital activity</Text>
       <Choice label="Capital activity type" value={capitalKind} options={[
@@ -304,9 +329,9 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
       ]} onChange={setCapitalKind} />
       <Choice label="Member receiving capital activity" value={capitalMemberId} options={snapshot.members.map((member) => ({ value: member.id, title: member.name }))} onChange={setCapitalMemberId} />
       {capitalKind !== 'property-contribution' ? <Choice label="Cash or bank account for capital activity" value={capitalAccountId} options={cashAccounts.map((account) => ({ value: account.id, title: account.name }))} onChange={setCapitalAccountId} /> : null}
-      <View style={uiStyles.row}>
-        <Field label="Capital activity date" value={capitalDate} onChangeText={setCapitalDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
-        <Field label="Capital activity amount in USD" value={capitalAmount} onChangeText={setCapitalAmount} placeholder="0.00" keyboardType="decimal-pad" />
+      <View style={uiStyles.fieldStack}>
+        <Field wide label="Capital activity date" value={capitalDate} onChangeText={setCapitalDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
+        <Field wide label="Capital activity amount in USD" value={capitalAmount} onChangeText={setCapitalAmount} placeholder="0.00" keyboardType="decimal-pad" />
       </View>
       {capitalKind === 'property-contribution' ? <>
         <Field label="Property description — CPA review required" value={propertyDescription} onChangeText={setPropertyDescription} placeholder="Describe contributed property" />
@@ -340,6 +365,8 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
         <Money cents={activity.kind === 'distribution' ? -activity.amountCents : activity.amountCents} />
       </View>) : <Text style={uiStyles.helper}>No capital activity recorded yet.</Text>}
     </Panel>
+    </> : null}
+    {section === 'payments' ? <>
     <Panel>
       <Text style={uiStyles.sectionTitle}>Guaranteed-payment obligations</Text>
       <Text style={uiStyles.helper}>Contracts and installments are memo-only. Unpaid obligations do not post an expense, liability, or cash movement. CPA review is needed for tax classification, deductibility, and capitalization.</Text>
@@ -357,9 +384,9 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
         setPaymentRecurrence(recurrence);
         setPaymentInstallmentCount(recurrence === 'one-time' ? '1' : '2');
       }} />
-      <View style={uiStyles.row}>
-        <Field label="First due date" value={paymentFirstDueDate} onChangeText={setPaymentFirstDueDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
-        <Field label="Amount per installment in USD" value={paymentInstallmentAmount} onChangeText={setPaymentInstallmentAmount} placeholder="0.00" keyboardType="decimal-pad" />
+      <View style={uiStyles.fieldStack}>
+        <Field wide label="First due date" value={paymentFirstDueDate} onChangeText={setPaymentFirstDueDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" />
+        <Field wide label="Amount per installment in USD" value={paymentInstallmentAmount} onChangeText={setPaymentInstallmentAmount} placeholder="0.00" keyboardType="decimal-pad" />
       </View>
       {paymentRecurrence !== 'one-time'
         ? <Field label="Number of installments (2–120)" value={paymentInstallmentCount} onChangeText={setPaymentInstallmentCount} keyboardType="number-pad" />
@@ -444,7 +471,8 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
         </View>;
       }) : <Text style={uiStyles.helper}>No member payments recorded.</Text>}
     </Panel>
-    <Panel>
+    </> : null}
+    {section === 'members' ? <Panel>
       <Text style={uiStyles.sectionTitle}>Ownership history</Text>
       {snapshot.memberHistory.map((record) => <View key={record.id + record.effectiveFrom} style={uiStyles.rowItem}>
         <View style={uiStyles.rowMain}>
@@ -453,7 +481,7 @@ export function MembersScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnap
         </View>
         <Text style={uiStyles.badge}>{fromBasisPoints(record.ownershipBasisPoints)}%</Text>
       </View>)}
-    </Panel>
+    </Panel> : null}
   </Page>;
 }
 

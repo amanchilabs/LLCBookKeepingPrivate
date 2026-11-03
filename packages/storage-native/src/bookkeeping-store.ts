@@ -1428,43 +1428,61 @@ async function migrateBookkeepingV5ToV6(database: Database): Promise<void> {
 export async function createBusinessInDatabase(database: Database, input: BusinessSetupInput): Promise<void> {
   assertValidBusinessSetup(input);
   await ensureBookkeepingSchema(database);
+  await inSqlTransaction(database, () => insertBusinessInTransaction(database, input));
+}
+
+/** @internal SQL-level entry point used by onboarding transaction tests. */
+export async function createBusinessWithInitialAccountInDatabase(
+  database: Database,
+  input: { business: BusinessSetupInput; initialAccount: CashAccountInput },
+): Promise<void> {
+  assertValidBusinessSetup(input.business);
+  if (input.initialAccount.businessId !== input.business.id) {
+    throw new Error('The first account must belong to the LLC being created.');
+  }
+  await ensureBookkeepingSchema(database);
   await inSqlTransaction(database, async () => {
-    const existing = await database.getFirstAsync<{ count: number }>('SELECT COUNT(*) AS count FROM businesses');
-    const accountIdPrefix = (existing?.count ?? 0) === 0 ? '' : `${input.id}:`;
-    const createdAt = new Date().toISOString();
-    await database.runAsync(
-      `INSERT INTO businesses (id, name, formation_state, formation_date, bookkeeping_start_date, created_at)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      input.id, input.name.trim(), input.formationState.trim().toUpperCase(), input.formationDate,
-      input.bookkeepingStartDate, createdAt,
-    );
-    for (const account of SEEDED_ACCOUNTS) {
-      await database.runAsync(
-        `INSERT INTO accounts (id, business_id, code, name, kind, category, is_system, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
-        `${accountIdPrefix}${account.id}`, input.id, account.code, account.name, account.kind, account.category, createdAt,
-      );
-    }
-    for (const member of input.members) {
-      await database.runAsync(
-        'INSERT INTO members (id, business_id, name, created_at) VALUES (?, ?, ?, ?)',
-        member.id, input.id, member.name.trim(), createdAt,
-      );
-      await database.runAsync(
-        `INSERT INTO member_interest_history
-         (id, business_id, member_id, ownership_basis_points, effective_from, created_at)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        `${member.id}:interest:${input.bookkeepingStartDate}`, input.id, member.id,
-        member.ownershipBasisPoints, input.bookkeepingStartDate, createdAt,
-      );
-    }
-    await database.runAsync(
-      `INSERT INTO bookkeeping_preferences (preference_key, preference_value)
-       VALUES ('active_business_id', ?)
-       ON CONFLICT(preference_key) DO UPDATE SET preference_value = excluded.preference_value`,
-      input.id,
-    );
+    await insertBusinessInTransaction(database, input.business);
+    await insertCashAccountInTransaction(database, input.initialAccount);
   });
+}
+
+async function insertBusinessInTransaction(database: Database, input: BusinessSetupInput): Promise<void> {
+  const existing = await database.getFirstAsync<{ count: number }>('SELECT COUNT(*) AS count FROM businesses');
+  const accountIdPrefix = (existing?.count ?? 0) === 0 ? '' : `${input.id}:`;
+  const createdAt = new Date().toISOString();
+  await database.runAsync(
+    `INSERT INTO businesses (id, name, formation_state, formation_date, bookkeeping_start_date, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    input.id, input.name.trim(), input.formationState.trim().toUpperCase(), input.formationDate,
+    input.bookkeepingStartDate, createdAt,
+  );
+  for (const account of SEEDED_ACCOUNTS) {
+    await database.runAsync(
+      `INSERT INTO accounts (id, business_id, code, name, kind, category, is_system, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
+      `${accountIdPrefix}${account.id}`, input.id, account.code, account.name, account.kind, account.category, createdAt,
+    );
+  }
+  for (const member of input.members) {
+    await database.runAsync(
+      'INSERT INTO members (id, business_id, name, created_at) VALUES (?, ?, ?, ?)',
+      member.id, input.id, member.name.trim(), createdAt,
+    );
+    await database.runAsync(
+      `INSERT INTO member_interest_history
+       (id, business_id, member_id, ownership_basis_points, effective_from, created_at)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      `${member.id}:interest:${input.bookkeepingStartDate}`, input.id, member.id,
+      member.ownershipBasisPoints, input.bookkeepingStartDate, createdAt,
+    );
+  }
+  await database.runAsync(
+    `INSERT INTO bookkeeping_preferences (preference_key, preference_value)
+     VALUES ('active_business_id', ?)
+     ON CONFLICT(preference_key) DO UPDATE SET preference_value = excluded.preference_value`,
+    input.id,
+  );
 }
 
 /** @internal SQL-level entry point used by repository tests. */
@@ -1748,6 +1766,10 @@ async function insertTransaction(
 /** @internal SQL-level entry point used by repository tests. */
 export async function createCashAccountInDatabase(database: Database, input: CashAccountInput): Promise<void> {
   await ensureBookkeepingSchema(database);
+  await inSqlTransaction(database, () => insertCashAccountInTransaction(database, input));
+}
+
+async function insertCashAccountInTransaction(database: Database, input: CashAccountInput): Promise<void> {
   const business = await requireBusiness(database, input.businessId);
   if (!input.id.trim() || !input.name.trim()) throw new Error('Enter a name for this bank or cash account.');
   const opening = input.openingBalanceCents ?? 0n;
@@ -1759,28 +1781,26 @@ export async function createCashAccountInDatabase(database: Database, input: Cas
     requireDate(input.openingDate, 'opening balance date');
     if (input.openingDate < business.bookkeepingStartDate) throw new Error('Opening balance cannot precede the bookkeeping start date.');
   }
-  await inSqlTransaction(database, async () => {
-    await database.runAsync(
-      `INSERT INTO accounts (id, business_id, code, name, kind, category, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      input.id, input.businessId, `cash:${input.id}`, input.name.trim(), input.kind,
-      input.kind === 'bank' ? 'Bank account' : 'Cash account', new Date().toISOString(),
+  await database.runAsync(
+    `INSERT INTO accounts (id, business_id, code, name, kind, category, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    input.id, input.businessId, `cash:${input.id}`, input.name.trim(), input.kind,
+    input.kind === 'bank' ? 'Bank account' : 'Cash account', new Date().toISOString(),
+  );
+  if (opening !== 0n) {
+    const openingEquity = await database.getFirstAsync<{ id: string }>(
+      'SELECT id FROM accounts WHERE business_id = ? AND code = ?', input.businessId, '3000',
     );
-    if (opening !== 0n) {
-      const openingEquity = await database.getFirstAsync<{ id: string }>(
-        'SELECT id FROM accounts WHERE business_id = ? AND code = ?', input.businessId, '3000',
-      );
-      if (!openingEquity) throw new Error('The opening balance equity account is missing for this LLC.');
-      const lines = openingBalanceLines(input.id, openingEquity.id, opening);
-      const description = `Opening balance · ${input.name.trim()}`;
-      await insertJournalEntry(database, input.businessId, input.openingJournalEntryId!, input.openingDate!, 'opening-balance', description, lines);
-      await insertTransaction(database, {
-        id: input.openingTransactionId!, journalEntryId: input.openingJournalEntryId!, businessId: input.businessId,
-        date: input.openingDate!, kind: 'opening-balance', accountId: input.id,
-        categoryAccountId: openingEquity.id, amountCents: opening, description,
-      });
-    }
-  });
+    if (!openingEquity) throw new Error('The opening balance equity account is missing for this LLC.');
+    const lines = openingBalanceLines(input.id, openingEquity.id, opening);
+    const description = `Opening balance · ${input.name.trim()}`;
+    await insertJournalEntry(database, input.businessId, input.openingJournalEntryId!, input.openingDate!, 'opening-balance', description, lines);
+    await insertTransaction(database, {
+      id: input.openingTransactionId!, journalEntryId: input.openingJournalEntryId!, businessId: input.businessId,
+      date: input.openingDate!, kind: 'opening-balance', accountId: input.id,
+      categoryAccountId: openingEquity.id, amountCents: opening, description,
+    });
+  }
 }
 
 /** @internal SQL-level entry point used by repository tests. */

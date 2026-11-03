@@ -12,6 +12,7 @@ import {
   createAccountReconciliationInDatabase,
   closeAccountingPeriodInDatabase,
   createBusinessInDatabase,
+  createBusinessWithInitialAccountInDatabase,
   listBusinessProfilesFromDatabase,
   setActiveBusinessInDatabase,
   createCashAccountInDatabase,
@@ -99,6 +100,13 @@ async function useActiveBooks<T>(operation: (database: Parameters<typeof createB
 
 export async function createBusiness(input: BusinessSetupInput): Promise<void> {
   await useActiveBooks((database) => createBusinessInDatabase(database, input));
+}
+
+export async function createBusinessWithInitialAccount(input: {
+  business: BusinessSetupInput;
+  initialAccount: CashAccountInput;
+}): Promise<void> {
+  await useActiveBooks((database) => createBusinessWithInitialAccountInDatabase(database, input));
 }
 
 export async function getBusinessProfiles() {

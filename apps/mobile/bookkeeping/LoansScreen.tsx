@@ -12,7 +12,7 @@ import type { LoanAgreementRecord, LoanActivityRecord, LoanDayCount, LoanLenderT
 import type { BookkeepingSnapshot } from '../../../packages/storage-native/src/bookkeeping-store';
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
-export function LoansScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void> }) {
+export function LoansScreen({ snapshot, onSaved, initialMemberId }: { snapshot: BookkeepingSnapshot; onSaved: () => Promise<void>; initialMemberId?: string }) {
   const cashAccounts = snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash');
   const [lenderType, setLenderType] = useState<LoanLenderType>('member');
   const [memberId, setMemberId] = useState(snapshot.members[0]?.id ?? '');
@@ -45,6 +45,13 @@ export function LoansScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnapsh
     if (!cashAccounts.some((account) => account.id === advanceAccountId)) setAdvanceAccountId(cashAccounts[0]?.id ?? '');
     if (!cashAccounts.some((account) => account.id === repaymentAccountId)) setRepaymentAccountId(cashAccounts[0]?.id ?? '');
   }, [snapshot.members, snapshot.loanAgreements, snapshot.accounts, memberId, selectedLoanId, advanceAccountId, repaymentAccountId]);
+
+  useEffect(() => {
+    if (initialMemberId && snapshot.members.some((member) => member.id === initialMemberId)) {
+      setLenderType('member');
+      setMemberId(initialMemberId);
+    }
+  }, [initialMemberId, snapshot.members]);
 
   const createAgreement = async () => {
     setSaving(true);
@@ -135,7 +142,7 @@ export function LoansScreen({ snapshot, onSaved }: { snapshot: BookkeepingSnapsh
   const cashOptions = cashAccounts.map((account) => ({ value: account.id, title: account.name }));
 
   return <Page>
-    <Heading title="Loans" subtitle="Track member and third-party loan agreements, funded advances, principal, and actual interest payments in your encrypted local books." />
+    <Heading title={initialMemberId ? `Loans · ${snapshot.members.find((member) => member.id === initialMemberId)?.name ?? 'Member'}` : 'Loans'} subtitle="Track member and third-party loan agreements, funded advances, principal, and actual interest payments in this local workspace." />
     {activityNotice ? <Panel><Text accessibilityRole="status" style={uiStyles.rowDetail}>{activityNotice}</Text></Panel> : null}
     <Panel>
       <Text style={uiStyles.sectionTitle}>Loan agreement</Text>

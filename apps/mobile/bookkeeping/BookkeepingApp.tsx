@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState, type ComponentType } from 'react';
-import { Platform, Pressable, SafeAreaView, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { getBookkeepingSnapshot, getBusinessProfiles, selectBusiness } from '../../../packages/storage-native/src/bookkeeping-service';
 import type { BookkeepingSnapshot, BusinessRecord } from '../../../packages/storage-native/src/bookkeeping-store';
 import { AccountsScreen } from './AccountsScreen';
@@ -11,11 +11,10 @@ import { ReportsScreen } from './ReportsScreen';
 import { SearchScreen } from './SearchScreen';
 import { SettingsScreen } from './SettingsScreen';
 import { TransactionsScreen } from './TransactionsScreen';
+import { MoreScreen } from './MoreScreen';
 import { contentTopInset } from './layout';
-import { Button, Loading, palette } from './ui';
-
-type BookkeepingTab = 'Dashboard' | 'Search' | 'Transactions' | 'Accounts' | 'Members' | 'Loans' | 'Reports' | 'Settings';
-const tabs: BookkeepingTab[] = ['Dashboard', 'Search', 'Transactions', 'Accounts', 'Members', 'Loans', 'Reports', 'Settings'];
+import { BottomTabBar, Button, Loading, palette } from './ui';
+import { primaryTabForDestination, primaryTabs, type AppDestination, type MoreSection, type PrimaryTab } from './navigation-model';
 
 function emptySnapshot(): BookkeepingSnapshot {
   return {
@@ -42,11 +41,16 @@ function emptySnapshot(): BookkeepingSnapshot {
 
 export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: ComponentType }) {
   const [snapshot, setSnapshot] = useState<BookkeepingSnapshot>(emptySnapshot);
-  const [tab, setTab] = useState<BookkeepingTab>('Dashboard');
+  const [tab, setTab] = useState<PrimaryTab>('Dashboard');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showSecurityProof, setShowSecurityProof] = useState(false);
   const [showBusinessSetup, setShowBusinessSetup] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [moreSection, setMoreSection] = useState<MoreSection | null>(null);
+  const [showLoans, setShowLoans] = useState(false);
+  const [loanMemberId, setLoanMemberId] = useState<string | undefined>();
+  const [pendingTransactionKind, setPendingTransactionKind] = useState<'income' | 'expense' | 'transfer' | null>(null);
   const [workspaces, setWorkspaces] = useState<BusinessRecord[]>([]);
   const rootStyle = [styles.root, { paddingTop: contentTopInset(Platform.OS, StatusBar.currentHeight) }];
 
@@ -70,7 +74,55 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
   const createWorkspace = async () => {
     setShowBusinessSetup(false);
     setTab('Dashboard');
+    setMoreSection(null);
+    setShowSearch(false);
     await refresh();
+  };
+
+  const navigateTo = (destination: AppDestination) => {
+    if (destination === 'Search') {
+      setShowSearch(true);
+      return;
+    }
+    setShowSearch(false);
+    setLoanMemberId(undefined);
+    setPendingTransactionKind(null);
+    setShowLoans(destination === 'Loans');
+    if (destination === 'Accounts' || destination === 'Settings') {
+      setTab('More');
+      setMoreSection(destination);
+    } else if (destination === 'Loans') {
+      setTab('Members');
+      setMoreSection(null);
+    } else {
+      setTab(primaryTabForDestination(destination));
+      setMoreSection(null);
+    }
+  };
+
+  const openMemberLoans = (memberId: string) => {
+    setTab('Members');
+    setMoreSection(null);
+    setShowSearch(false);
+    setShowLoans(true);
+    setLoanMemberId(memberId);
+  };
+
+  const selectTab = (next: PrimaryTab) => {
+    setTab(next);
+    setShowSearch(false);
+    setShowLoans(false);
+    setLoanMemberId(undefined);
+    setMoreSection(null);
+    setPendingTransactionKind(null);
+  };
+
+  const startTransaction = (kind: 'income' | 'expense' | 'transfer') => {
+    setTab('Transactions');
+    setShowSearch(false);
+    setShowLoans(false);
+    setMoreSection(null);
+    setPendingTransactionKind(kind);
   };
 
   const changeWorkspace = async (businessId: string) => {
@@ -103,7 +155,7 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
         <Text style={styles.brand}>LLCBookKeepingPrivate</Text>
         <Text style={styles.lockedTitle}>Local books are unavailable</Text>
         <Text style={styles.lockedBody}>{loadError}</Text>
-        <Text style={styles.lockedBody}>Existing encrypted files are preserved. Use the storage recovery tools to retry key access or restore a separately encrypted backup.</Text>
+        <Text style={styles.lockedBody}>The app could not open the local books. Retry access or open the storage recovery tools to review available recovery options.</Text>
         <Button title="Open storage recovery tools" onPress={() => setShowSecurityProof(true)} />
         <Button title="Retry local storage" secondary onPress={() => void refresh()} />
       </View>
@@ -139,49 +191,57 @@ export function BookkeepingApp({ SecurityProofScreen }: { SecurityProofScreen: C
           <Text style={styles.brand}>LLCBookKeeping<Text style={styles.brandPrivate}>Private</Text></Text>
           <Text style={styles.business}>{snapshot.business.name}</Text>
         </View>
-        <Text style={styles.privacyLabel}>ON DEVICE</Text>
+        <Button title={showSearch ? 'Close search' : 'Search'} secondary onPress={() => setShowSearch((current) => !current)} />
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.navigation}>
-        {tabs.map((item) => <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ selected: tab === item }}
-          key={item}
-          onPress={() => setTab(item)}
-          style={[styles.navButton, tab === item && styles.navButtonSelected]}
-        ><Text style={[styles.navText, tab === item && styles.navTextSelected]}>{item}</Text></Pressable>)}
-      </ScrollView>
     </View>
     <View style={styles.content}>
-      {tab === 'Dashboard' ? <DashboardScreen snapshot={snapshot} onNavigate={setTab} /> : null}
-      {tab === 'Search' ? <SearchScreen snapshot={snapshot} onNavigate={setTab} /> : null}
-      {tab === 'Transactions' ? <TransactionsScreen snapshot={snapshot} onSaved={refresh} /> : null}
-      {tab === 'Accounts' ? <AccountsScreen snapshot={snapshot} onSaved={refresh} /> : null}
-      {tab === 'Members' ? <MembersScreen snapshot={snapshot} onSaved={refresh} /> : null}
-      {tab === 'Loans' ? <LoansScreen snapshot={snapshot} onSaved={refresh} /> : null}
-      {tab === 'Reports' ? <ReportsScreen snapshot={snapshot} /> : null}
-      {tab === 'Settings' ? <SettingsScreen business={snapshot.business} snapshot={snapshot}
+      {showSearch ? <>
+        <RouteBack title="Search" onBack={() => setShowSearch(false)} />
+        <SearchScreen snapshot={snapshot} onNavigate={navigateTo} />
+      </> : null}
+      {!showSearch && tab === 'Dashboard' ? <DashboardScreen snapshot={snapshot} onNavigate={navigateTo} onRecordTransaction={startTransaction} /> : null}
+      {!showSearch && tab === 'Transactions' ? <TransactionsScreen snapshot={snapshot} onSaved={refresh}
+        initialKind={pendingTransactionKind} onInitialKindHandled={() => setPendingTransactionKind(null)} /> : null}
+      {!showSearch && tab === 'Members' && !showLoans ? <MembersScreen snapshot={snapshot} onSaved={refresh} onOpenMemberLoans={openMemberLoans} /> : null}
+      {!showSearch && tab === 'Members' && showLoans ? <>
+        <RouteBack title="Members" onBack={() => { setShowLoans(false); setLoanMemberId(undefined); }} />
+        <LoansScreen snapshot={snapshot} onSaved={refresh} initialMemberId={loanMemberId} />
+      </> : null}
+      {!showSearch && tab === 'Reports' ? <ReportsScreen snapshot={snapshot} /> : null}
+      {!showSearch && tab === 'More' && moreSection === null ? <MoreScreen onNavigate={navigateTo} /> : null}
+      {!showSearch && tab === 'More' && moreSection === 'Accounts' ? <>
+        <RouteBack title="More" onBack={() => setMoreSection(null)} />
+        <AccountsScreen snapshot={snapshot} onSaved={refresh} />
+      </> : null}
+      {!showSearch && tab === 'More' && moreSection === 'Settings' ? <>
+        <RouteBack title="More" onBack={() => setMoreSection(null)} />
+        <SettingsScreen business={snapshot.business} snapshot={snapshot}
         workspaces={workspaces} onSelectBusiness={changeWorkspace} onAddBusiness={() => setShowBusinessSetup(true)}
-        onSaved={refresh} onOpenSecurityProof={() => setShowSecurityProof(true)} /> : null}
+        onSaved={refresh} onOpenSecurityProof={() => setShowSecurityProof(true)} />
+      </> : null}
     </View>
+    <BottomTabBar items={primaryTabs} selected={tab} onSelect={selectTab} />
   </SafeAreaView>;
+}
+
+function RouteBack({ title, onBack }: { title: string; onBack: () => void }) {
+  return <View style={styles.routeBack}>
+    <Button title={`‹ ${title}`} secondary onPress={onBack} />
+  </View>;
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.canvas },
   setupHeader: { paddingHorizontal: 18, paddingTop: 10, paddingBottom: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   appHeader: { backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: palette.border },
-  headerLine: { minHeight: 64, paddingHorizontal: 18, paddingTop: 6, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
+  headerLine: { minHeight: 72, paddingHorizontal: 18, paddingVertical: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   headerMain: { flex: 1, gap: 2 },
   brand: { color: palette.ink, fontSize: 16, fontWeight: '900', letterSpacing: -0.3 },
   brandPrivate: { color: '#52765e', fontWeight: '600' },
   business: { color: palette.muted, fontSize: 12, fontWeight: '600' },
-  privacyLabel: { color: '#55745d', backgroundColor: '#edf3eb', overflow: 'hidden', paddingHorizontal: 8, paddingVertical: 5, borderRadius: 6, fontSize: 9, fontWeight: '900', letterSpacing: 0.5 },
-  navigation: { gap: 4, paddingHorizontal: 12, paddingBottom: 8 },
-  navButton: { minHeight: 38, justifyContent: 'center', paddingHorizontal: 12, borderRadius: 8 },
-  navButtonSelected: { backgroundColor: '#e8f0e7' },
-  navText: { color: palette.muted, fontSize: 12, fontWeight: '700' },
-  navTextSelected: { color: palette.green, fontWeight: '900' },
+  privacyLabel: { color: '#07583F', backgroundColor: '#E7F3EC', overflow: 'hidden', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, fontSize: 12, fontWeight: '700' },
   content: { flex: 1 },
+  routeBack: { alignItems: 'flex-start', paddingHorizontal: 18, paddingTop: 10 },
   setupTools: { alignItems: 'center', paddingVertical: 11 },
   setupToolsText: { color: palette.green, fontSize: 12, fontWeight: '700' },
   proofBar: { minHeight: 54, paddingHorizontal: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#fff' },
