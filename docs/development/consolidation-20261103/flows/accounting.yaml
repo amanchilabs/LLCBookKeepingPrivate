@@ -1,0 +1,139 @@
+appId: com.amanchilabs.llcbookkeepingprivate
+---
+- tapOn: "Dashboard"
+- scrollUntilVisible:
+    element: "Record income"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Record income"
+- scrollUntilVisible:
+    element: "Amount in USD"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Amount in USD"
+- inputText: "250.00"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Description"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Description"
+- inputText: "Synthetic consulting income"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Post transaction"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Post transaction"
+- tapOn: "Dashboard"
+- scrollUntilVisible:
+    element: "Record expense"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Record expense"
+- scrollUntilVisible:
+    element: "Amount in USD"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Amount in USD"
+- inputText: "50.00"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Description"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Description"
+- inputText: "Synthetic office expense"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Post transaction"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Post transaction"
+- scrollUntilVisible:
+    element: "Search description, category, account, or date"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Search description, category, account, or date"
+- inputText: "Synthetic office expense"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Correct"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Correct"
+- scrollUntilVisible:
+    element: "Amount in USD"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Amount in USD"
+- eraseText
+- inputText: "75.00"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Description"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Description"
+- eraseText
+- inputText: "Synthetic corrected office expense"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Post reversal and replacement"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Post reversal and replacement"
+- tapOn: "Dashboard"
+- scrollUntilVisible:
+    element: ".*1,?175\\.00.*"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: ".*1,?175\\.00.*"
+- tapOn: "Members"
+- tapOn: "Capital"
+- scrollUntilVisible:
+    element: "Capital activity amount in USD"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Capital activity amount in USD"
+- inputText: "100.00"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Capital activity description"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Capital activity description"
+- inputText: "Synthetic founding contribution"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Post capital activity"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Post capital activity"
+- tapOn: "Search"
+- scrollUntilVisible:
+    element: "Search this LLC"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Search this LLC"
+- inputText: "Synthetic founding contribution"
+- hideKeyboard
+- tapOn: "Capital activity:.*Synthetic.*"
+- assertVisible: "Record member capital activity"
+- tapOn: "Dashboard"
+- scrollUntilVisible:
+    element: ".*1,?275\\.00.*"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: ".*1,?275\\.00.*"
+- tapOn: "Reports"
+- scrollUntilVisible:
+    element: "Trial Balance"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Trial Balance"
+- scrollUntilVisible:
+    element: "Totals"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: "Totals"

@@ -1,0 +1,8 @@
+appId: com.amanchilabs.llcbookkeepingprivate
+---
+- tapOn:
+    text: Settings and privacy
+    index: 1
+- assertVisible: Settings
+- tapOn: Dashboard
+- assertVisible: Synthetic Consolidation LLC

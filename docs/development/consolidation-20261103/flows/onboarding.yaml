@@ -1,0 +1,107 @@
+appId: com.amanchilabs.llcbookkeepingprivate
+---
+- tapOn:
+    text: "Continue"
+    optional: true
+- tapOn:
+    text: "Close"
+    optional: true
+- scrollUntilVisible:
+    element: "Get started"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Get started"
+- scrollUntilVisible:
+    element: "LLC business name"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "LLC business name"
+- inputText: "Synthetic Consolidation LLC"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Formation state or territory"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Formation state or territory"
+- inputText: "AZ"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Formation date"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Formation date"
+- inputText: "2026-01-01"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Bookkeeping start date"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Bookkeeping start date"
+- inputText: "2026-01-01"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Continue to members"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Continue to members"
+- scrollUntilVisible:
+    element: "Member 1 name"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Member 1 name"
+- inputText: "Synthetic Alice"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Member 2 name"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Member 2 name"
+- inputText: "Synthetic Bob"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Member 3 name"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Member 3 name"
+- inputText: "Synthetic Carol"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Member 4 name"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Member 4 name"
+- inputText: "Synthetic Dana"
+- hideKeyboard
+- scrollUntilVisible:
+    element: ".*I confirm these ownership interests are correct"
+    direction: DOWN
+    timeout: 15000
+- tapOn: ".*I confirm these ownership interests are correct"
+- scrollUntilVisible:
+    element: "Continue to first account"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Continue to first account"
+- scrollUntilVisible:
+    element: "Opening balance in USD \\(optional\\)"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Opening balance in USD \\(optional\\)"
+- inputText: "1000.00"
+- hideKeyboard
+- scrollUntilVisible:
+    element: "Review setup"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Review setup"
+- scrollUntilVisible:
+    element: "Create LLC"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Create LLC"
+- scrollUntilVisible:
+    element: "Go to dashboard"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Go to dashboard"
+- assertVisible: "Synthetic Consolidation LLC"

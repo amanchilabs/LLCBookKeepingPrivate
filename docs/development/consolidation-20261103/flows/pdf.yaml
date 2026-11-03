@@ -1,0 +1,8 @@
+appId: com.amanchilabs.llcbookkeepingprivate
+---
+- scrollUntilVisible:
+    element: "Export Trial Balance PDF"
+    direction: DOWN
+- tapOn: "Export Trial Balance PDF"
+- takeScreenshot: pdf-share
+- pressKey: BACK

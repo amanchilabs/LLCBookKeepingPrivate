@@ -1,0 +1,29 @@
+appId: com.amanchilabs.llcbookkeepingprivate
+---
+- tapOn: "Search"
+- scrollUntilVisible:
+    element: "Search this LLC"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Search this LLC"
+- inputText: "Synthetic founding contribution"
+- hideKeyboard
+- tapOn: "Capital activity:.*Synthetic.*"
+- assertVisible: "Record member capital activity"
+- tapOn: "Dashboard"
+- scrollUntilVisible:
+    element: ".*1,?275\\.00.*"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: ".*1,?275\\.00.*"
+- tapOn: "Reports"
+- scrollUntilVisible:
+    element: "Trial Balance"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Trial Balance"
+- scrollUntilVisible:
+    element: "Totals"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: "Totals"
