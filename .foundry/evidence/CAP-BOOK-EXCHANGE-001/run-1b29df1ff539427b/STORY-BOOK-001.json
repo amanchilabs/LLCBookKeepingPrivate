@@ -1,0 +1,40 @@
+{
+  "branch": "feature/bookkeeping-tax-exchange-20261105",
+  "capability": "CAP-BOOK-EXCHANGE-001",
+  "checks": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/fnm",
+        "exec",
+        "--using",
+        "24.22.2",
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 2,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "52498d7de2f9602ed5a40d49116faaa03b05bf1b25f37d7abe66a77fc85f06df"
+    }
+  ],
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design/implementation/feature-preservation-matrix.md": "544a527ec7b24ba0c6b45044cefee62967bfc3fb657d4fee18bbbc8b70d87e55",
+    "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
+    "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
+    "docs/pilots/parallel-20261105.md": "63e17b63fdf0bbc278760daba2486e9b35aea43243a30b82fee1a38c44703bd8"
+  },
+  "id": "STORY-BOOK-001",
+  "profile": "claude-m5-subscription-canonical",
+  "provider_result": {
+    "exit_code": 0,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "fbe1f1bff2bd01884cce8cfc3c03dec5028d825b250d4800c4c7a2cf9d922eef"
+  },
+  "review": null,
+  "run": "run-1b29df1ff539427b",
+  "source": "34b9e83c4db2cf953a55dd06a8fea420c7c0d92b",
+  "status": "FAILED_VALIDATION",
+  "timestamp": "2026-11-06T00:56:12.212964+00:00"
+}
