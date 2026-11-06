@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "product": "LLCBookKeepingPrivate",
+  "basis": "cash",
+  "currency": "USD",
+  "source": {
+    "businessId": "synthetic-business-0001",
+    "businessName": "SYNTHETIC EXAMPLE LLC (not a real business)",
+    "reference": "synthetic-cash-basis-report:2026-01-01:2026-10-31"
+  },
+  "period": {
+    "fromDate": "2026-01-01",
+    "throughDate": "2026-10-31"
+  },
+  "reviewStatus": "unreviewed",
+  "totals": {
+    "incomeCents": "1250000",
+    "expenseCents": "1312345",
+    "netIncomeCents": "-62345"
+  },
+  "limitations": [
+    "Book figures only, copied from a cash-basis bookkeeping report.",
+    "Not a tax return, tax classification, deductibility determination, tax-basis determination, or tax liability estimate.",
+    "Not reviewed by a CPA or tax preparer.",
+    "No synchronization or import is implemented; sharing this record is an explicit user action."
+  ]
+}

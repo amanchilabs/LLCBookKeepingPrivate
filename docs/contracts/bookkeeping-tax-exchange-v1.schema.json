@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/amanchilabs/LLCBookKeepingPrivate/docs/contracts/bookkeeping-tax-exchange-v1.schema.json",
+  "title": "LLCBookKeepingPrivate bookkeeping-to-tax exchange v1",
+  "description": "Sole canonical bookkeeping-to-tax exchange contract. Carries already computed cash-basis book totals copied exactly from an existing LLCBookKeepingPrivate cash-basis report. Book figures only: this record is not a tax return, tax classification, deductibility determination, tax-basis determination, tax liability estimate, or claim of compatibility with any tax-return software. No synchronization or import is implemented. Consumers must identify the exact revision of this file they rely on.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "product",
+    "basis",
+    "currency",
+    "source",
+    "period",
+    "reviewStatus",
+    "totals",
+    "limitations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "description": "Contract version. Any value other than 1 must be rejected.",
+      "const": 1
+    },
+    "product": {
+      "description": "Producing system of record.",
+      "const": "LLCBookKeepingPrivate"
+    },
+    "basis": {
+      "description": "Accounting basis of the copied report.",
+      "const": "cash"
+    },
+    "currency": {
+      "description": "ISO 4217 currency of all cent amounts.",
+      "const": "USD"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["businessId", "businessName", "reference"],
+      "properties": {
+        "businessId": { "$ref": "#/$defs/nonEmptyText" },
+        "businessName": { "$ref": "#/$defs/nonEmptyText" },
+        "reference": {
+          "description": "Producer-supplied reference identifying the source cash-basis report.",
+          "$ref": "#/$defs/nonEmptyText"
+        }
+      }
+    },
+    "period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fromDate", "throughDate"],
+      "description": "Inclusive report period. fromDate must be on or before throughDate; both must be real calendar dates.",
+      "properties": {
+        "fromDate": { "$ref": "#/$defs/calendarDate" },
+        "throughDate": { "$ref": "#/$defs/calendarDate" }
+      }
+    },
+    "reviewStatus": {
+      "description": "These book totals have not been reviewed by a CPA or tax preparer.",
+      "const": "unreviewed"
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["incomeCents", "expenseCents", "netIncomeCents"],
+      "description": "Cash-basis book totals in integer cents, copied exactly from the source report without recomputation, allocation, or tax classification.",
+      "properties": {
+        "incomeCents": { "$ref": "#/$defs/cents" },
+        "expenseCents": { "$ref": "#/$defs/cents" },
+        "netIncomeCents": { "$ref": "#/$defs/cents" }
+      }
+    },
+    "limitations": {
+      "description": "Fixed limitation statements. Must equal this exact ordered list.",
+      "const": [
+        "Book figures only, copied from a cash-basis bookkeeping report.",
+        "Not a tax return, tax classification, deductibility determination, tax-basis determination, or tax liability estimate.",
+        "Not reviewed by a CPA or tax preparer.",
+        "No synchronization or import is implemented; sharing this record is an explicit user action."
+      ]
+    }
+  },
+  "$defs": {
+    "nonEmptyText": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Trimmed text without control characters, 1 to 200 characters.",
+      "pattern": "^[^\\s\\u0000-\\u001F\\u007F](?:[^\\u0000-\\u001F\\u007F]*[^\\s\\u0000-\\u001F\\u007F])?$"
+    },
+    "calendarDate": {
+      "description": "YYYY-MM-DD real calendar date (for example 2026-02-29 is invalid).",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "format": "date"
+    },
+    "cents": {
+      "description": "Signed decimal integer string of cents with no leading zeros and no negative zero. Arbitrary magnitude; never a JSON number.",
+      "type": "string",
+      "pattern": "^(?:0|-?[1-9][0-9]*)$"
+    }
+  }
+}
