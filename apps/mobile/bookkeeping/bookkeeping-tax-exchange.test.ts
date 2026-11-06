@@ -251,7 +251,8 @@ describe('validation of untrusted records fails closed', () => {
   });
 
   it('serialize refuses an invalid record', () => {
-    expect(() => serializeBookkeepingTaxExchange({ ...clone(), currency: 'EUR' } as BookkeepingTaxExchangeV1))
+    const invalid: unknown = { ...clone(), currency: 'EUR' };
+    expect(() => serializeBookkeepingTaxExchange(invalid as BookkeepingTaxExchangeV1))
       .toThrow(/currency must be USD/);
   });
 });
