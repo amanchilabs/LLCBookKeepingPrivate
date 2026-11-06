@@ -1,0 +1,255 @@
+{
+  "branch": "feature/bookkeeping-tax-exchange-20261105",
+  "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
+  "created_at": "2026-11-06T00:52:56.123292+00:00",
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design/implementation/feature-preservation-matrix.md": "544a527ec7b24ba0c6b45044cefee62967bfc3fb657d4fee18bbbc8b70d87e55",
+    "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
+    "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
+    "docs/pilots/parallel-20261105.md": "63e17b63fdf0bbc278760daba2486e9b35aea43243a30b82fee1a38c44703bd8"
+  },
+  "head": "31b4e614493e20573f8b55ce4ea4559d82f57441",
+  "history": [],
+  "id": "run-1b29df1ff539427b",
+  "next": 0,
+  "owner": "f7b8f9f975334b90be3163286280852e",
+  "phase": "READY",
+  "plan": {
+    "id": "CAP-BOOK-EXCHANGE-001",
+    "scope": "Owner 2026-11-05 authorizes exactly CAP-BOOK-EXCHANGE-001 in docs/pilots/parallel-20261105.md. New independent capability from canonical main 0710e51; historical migration hints are superseded. Preserve prior source, accounting engine, persistent storage/schema, auth/security and all reports. No tax rules or estimates. Follow mapped governance. Do not edit progress; Foundry appends it. Tier 2; model Claude CLI default subscription. No native/build/test commands from provider. Coordinator runs validation. No other Stories or agents.",
+    "stories": [
+      {
+        "depends_on": [],
+        "files": [
+          "docs/contracts/bookkeeping-tax-exchange-v1.schema.json",
+          "docs/contracts/bookkeeping-tax-exchange-v1.synthetic.json",
+          "apps/mobile/bookkeeping/bookkeeping-tax-exchange.ts",
+          "apps/mobile/bookkeeping/bookkeeping-tax-exchange.test.ts"
+        ],
+        "id": "STORY-BOOK-001",
+        "purpose": "Create the sole versioned bookkeeping-to-tax exchange v1 JSON schema, synthetic example fixture, TS validator/serializer and meaningful automated tests. Read the approved pilot document. Expose a lossless serialized record with schemaVersion=1, product LLCBookKeepingPrivate, basis cash, currency USD, source business ID/name and source reference, period fromDate/throughDate, reviewStatus unreviewed, and incomeCents/expenseCents/netIncomeCents decimal integer strings copied exactly from an existing CashBasisReport; never recompute journal totals, allocate or classify tax. Explicit limitations: book figures only, not a tax return or deductibility/tax-basis determination; no sync/import implemented. Support negative book totals without floating-point coercion. Fail closed on unknown versions, malformed/leap-day dates, reversed period, unsupported currency, invalid cents (including unsafe numeric input), missing/invalid source/review status or mismatched report period; reject extra unknown schema fields to avoid silently losing semantics. Export typed APIs usable by the next UI Story; use existing report date validator if sufficient, strengthen only the new module otherwise. Fixture must clearly be synthetic. Tests validate fixture parity and roundtrip >MAX_SAFE_INTEGER strings, boundaries and malformed inputs; do not test source strings. Do not modify package manifests, existing domain/storage or report calculation code.",
+        "review_required": true,
+        "validation": [
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "test"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ]
+        ],
+        "validation_resources": []
+      },
+      {
+        "depends_on": [
+          "STORY-BOOK-001"
+        ],
+        "files": [
+          "apps/mobile/bookkeeping/ReportsScreen.tsx",
+          "apps/mobile/bookkeeping/BookkeepingExchangePanel.tsx",
+          "apps/mobile/bookkeeping/bookkeeping-exchange-panel.test.tsx"
+        ],
+        "id": "STORY-BOOK-002",
+        "purpose": "Integrate the existing v1 exchange serializer into a bounded Reports Bookkeeping exchange section. Use a new BookkeepingExchangePanel component with meaningful component tests via existing react-dom/server and React Native mocks (no new dependencies). Reports passes current source/business + existing computed report, requested dates, loading/error state and a JSON share callback. Never fetch or mutate ledger in the panel. Show source, period, cash basis, unreviewed/review needed, amounts and exclusions; missing data, bad dates, mismatched/stale report period or report failure disable export with a clear explanation. Explicit button Prepare bookkeeping JSON (accessibilityLabel same) invokes only the validated payload. Use explicit OS share action with application/json via existing expo File/Paths and Sharing patterns, handle errors and cancellation honestly (prepared/share-sheet opened, not delivered/sent). Preserve existing CSV/PDF/report flows. No tax calculations, import, sync, persistence/security changes. Minimum 48 native target for new buttons using existing Button. Add component tests for valid/empty/error/stale/loading states, exact payload callback/disabled behavior. Keep the new report section title Bookkeeping exchange and control label Exchange so the dedicated native test can find it. Coordinator native evidence at .foundry-host/parallel-pilot-20261105/native/<source SHA>/ in the Foundry root must be inspected during review; no physical-device or assistive-tech pass inferred.",
+        "review_required": true,
+        "validation": [
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "test"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ],
+          [
+            "/opt/homebrew/bin/python3.11",
+            "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/parallel-pilot-20261105/native_check.py"
+          ]
+        ],
+        "validation_resources": [
+          "native",
+          "simulator:F29C60DF-F722-40FC-8549-967EA496DA27"
+        ]
+      }
+    ]
+  },
+  "product": {
+    "canonical_vision": "docs/design/proposed/design-decisions.md",
+    "execution_contract": "CLAUDE.md",
+    "execution_scope": "CAP-BOOK-EXCHANGE-001 exactly two Stories; owner 2026-11-05; no tax interpretation, accounting/security/persistence changes or merge",
+    "id": "llcbookkeepingprivate",
+    "progress_updates": "append",
+    "records": {
+      "authorization": "docs/pilots/parallel-20261105.md",
+      "progress": "docs/design/implementation/feature-preservation-matrix.md",
+      "specification": "docs/design/proposed/screen-specifications.md"
+    },
+    "repository_path": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate",
+    "repository_remote": "https://github.com/amanchilabs/LLCBookKeepingPrivate.git",
+    "workspace_policy": "canonical"
+  },
+  "profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
+    "commands": {
+      "implement": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "implement"
+      ],
+      "review": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "review"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/.local/bin/claude"
+    ],
+    "id": "claude-m5-subscription-canonical",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "help"
+      ]
+    ],
+    "provider": "claude-code",
+    "timeout_seconds": 1800
+  },
+  "schema_version": 1,
+  "status": "READY",
+  "stories": [
+    {
+      "depends_on": [],
+      "files": [
+        "docs/contracts/bookkeeping-tax-exchange-v1.schema.json",
+        "docs/contracts/bookkeeping-tax-exchange-v1.synthetic.json",
+        "apps/mobile/bookkeeping/bookkeeping-tax-exchange.ts",
+        "apps/mobile/bookkeeping/bookkeeping-tax-exchange.test.ts"
+      ],
+      "id": "STORY-BOOK-001",
+      "purpose": "Create the sole versioned bookkeeping-to-tax exchange v1 JSON schema, synthetic example fixture, TS validator/serializer and meaningful automated tests. Read the approved pilot document. Expose a lossless serialized record with schemaVersion=1, product LLCBookKeepingPrivate, basis cash, currency USD, source business ID/name and source reference, period fromDate/throughDate, reviewStatus unreviewed, and incomeCents/expenseCents/netIncomeCents decimal integer strings copied exactly from an existing CashBasisReport; never recompute journal totals, allocate or classify tax. Explicit limitations: book figures only, not a tax return or deductibility/tax-basis determination; no sync/import implemented. Support negative book totals without floating-point coercion. Fail closed on unknown versions, malformed/leap-day dates, reversed period, unsupported currency, invalid cents (including unsafe numeric input), missing/invalid source/review status or mismatched report period; reject extra unknown schema fields to avoid silently losing semantics. Export typed APIs usable by the next UI Story; use existing report date validator if sufficient, strengthen only the new module otherwise. Fixture must clearly be synthetic. Tests validate fixture parity and roundtrip >MAX_SAFE_INTEGER strings, boundaries and malformed inputs; do not test source strings. Do not modify package manifests, existing domain/storage or report calculation code.",
+      "review_required": true,
+      "status": "READY",
+      "validation": [
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "test"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ]
+      ],
+      "validation_resources": []
+    },
+    {
+      "depends_on": [
+        "STORY-BOOK-001"
+      ],
+      "files": [
+        "apps/mobile/bookkeeping/ReportsScreen.tsx",
+        "apps/mobile/bookkeeping/BookkeepingExchangePanel.tsx",
+        "apps/mobile/bookkeeping/bookkeeping-exchange-panel.test.tsx"
+      ],
+      "id": "STORY-BOOK-002",
+      "purpose": "Integrate the existing v1 exchange serializer into a bounded Reports Bookkeeping exchange section. Use a new BookkeepingExchangePanel component with meaningful component tests via existing react-dom/server and React Native mocks (no new dependencies). Reports passes current source/business + existing computed report, requested dates, loading/error state and a JSON share callback. Never fetch or mutate ledger in the panel. Show source, period, cash basis, unreviewed/review needed, amounts and exclusions; missing data, bad dates, mismatched/stale report period or report failure disable export with a clear explanation. Explicit button Prepare bookkeeping JSON (accessibilityLabel same) invokes only the validated payload. Use explicit OS share action with application/json via existing expo File/Paths and Sharing patterns, handle errors and cancellation honestly (prepared/share-sheet opened, not delivered/sent). Preserve existing CSV/PDF/report flows. No tax calculations, import, sync, persistence/security changes. Minimum 48 native target for new buttons using existing Button. Add component tests for valid/empty/error/stale/loading states, exact payload callback/disabled behavior. Keep the new report section title Bookkeeping exchange and control label Exchange so the dedicated native test can find it. Coordinator native evidence at .foundry-host/parallel-pilot-20261105/native/<source SHA>/ in the Foundry root must be inspected during review; no physical-device or assistive-tech pass inferred.",
+      "review_required": true,
+      "status": "READY",
+      "validation": [
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "test"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ],
+        [
+          "/opt/homebrew/bin/python3.11",
+          "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/parallel-pilot-20261105/native_check.py"
+        ]
+      ],
+      "validation_resources": [
+        "native",
+        "simulator:F29C60DF-F722-40FC-8549-967EA496DA27"
+      ]
+    }
+  ],
+  "workspace": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate"
+}
