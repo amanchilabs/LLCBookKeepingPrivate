@@ -8,15 +8,17 @@ import type { BookkeepingSnapshot, CashBasisReport, CashMovementReport, GeneralL
 import { summarizeLoanBalance } from '../../../packages/domain/src/loan-interest';
 import { balanceSheetCsv, cashBasisCsv, cashMovementCsv, generalLedgerCsv, guaranteedPaymentCashCsv, isValidDateRange, loanCashActivityCsv, memberCapitalMovementCsv, trialBalanceCsv } from './report-exports';
 import { buildReportPdfHtml, REPORT_PDF_PAGE_SIZE } from './report-pdf';
+import { BOOKKEEPING_EXCHANGE_CONTROL_LABEL, BookkeepingExchangePanel, type BookkeepingExchangePayload } from './BookkeepingExchangePanel';
 import { Button, Choice, Field, FormError, Heading, Money, Page, Panel, todayLocalDate, uiStyles } from './ui';
 
-type ReportSection = 'profit-loss' | 'cash-movement' | 'balance-sheet' | 'trial-balance' | 'general-ledger' | 'capital' | 'payments' | 'loans';
+type ReportSection = 'profit-loss' | 'cash-movement' | 'balance-sheet' | 'trial-balance' | 'general-ledger' | 'capital' | 'payments' | 'loans' | 'exchange';
 
 export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const [section, setSection] = useState<ReportSection>('profit-loss');
   const [fromDate, setFromDate] = useState(`${todayLocalDate().slice(0, 4)}-01-01`);
   const [throughDate, setThroughDate] = useState(todayLocalDate());
   const [report, setReport] = useState<CashBasisReport | null>(null);
+  const [reportBusinessId, setReportBusinessId] = useState<string | null>(null);
   const [cashMovementReport, setCashMovementReport] = useState<CashMovementReport | null>(null);
   const [journalReport, setJournalReport] = useState<JournalBalanceReport | null>(null);
   const [ledgerReport, setLedgerReport] = useState<GeneralLedgerReport | null>(null);
@@ -26,9 +28,11 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
-  const [exportingKind, setExportingKind] = useState<'csv' | 'pdf' | null>(null);
+  const [exportingKind, setExportingKind] = useState<'csv' | 'pdf' | 'json' | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const [exchangeShareError, setExchangeShareError] = useState<string | null>(null);
+  const [exchangeShareNotice, setExchangeShareNotice] = useState<string | null>(null);
   const reportDateRangeValid = isValidDateRange(fromDate, throughDate);
   const capitalInPeriod = reportDateRangeValid
     ? snapshot.capitalActivities.filter((activity) => activity.date >= fromDate && activity.date <= throughDate)
@@ -103,6 +107,8 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     }
     setLoading(true);
     setError(null);
+    setExchangeShareError(null);
+    setExchangeShareNotice(null);
     try {
       const cashReport = await getCashBasisReport(snapshot.business.id, fromDate, throughDate);
       const movementReport = await getCashMovementReport(snapshot.business.id, fromDate, throughDate);
@@ -111,6 +117,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
         ? await getGeneralLedgerReport(snapshot.business.id, selectedLedgerAccountId, throughDate)
         : null;
       setReport(cashReport);
+      setReportBusinessId(snapshot.business.id);
       setCashMovementReport(movementReport);
       setJournalReport(balanceReport);
       setLedgerReport(generalLedger);
@@ -188,6 +195,40 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
     }
   };
 
+  // Shares only the validated exchange payload built by BookkeepingExchangePanel.
+  // The share sheet result cannot confirm delivery, so the notice never claims it.
+  const shareExchangeJson = async (payload: BookkeepingExchangePayload) => {
+    if (exporting) return;
+    setExporting(true);
+    setExportingKind('json');
+    setExchangeShareError(null);
+    setExchangeShareNotice(null);
+    let prepared = false;
+    try {
+      if (!(await Sharing.isAvailableAsync())) {
+        throw new Error('The system share sheet is not available on this device');
+      }
+      const file = new File(Paths.cache, payload.fileName);
+      file.create({ intermediates: true, overwrite: true });
+      await file.write(payload.json);
+      prepared = true;
+      await Sharing.shareAsync(file.uri, {
+        UTI: 'public.json',
+        mimeType: payload.mimeType,
+        dialogTitle: 'Share bookkeeping JSON',
+      });
+      setExchangeShareNotice('Bookkeeping JSON prepared and the system share sheet was opened. This app cannot confirm whether a copy was sent or saved; if you cancelled, nothing left this device.');
+    } catch (shareFailure) {
+      const detail = shareFailure instanceof Error ? shareFailure.message : 'unknown error';
+      setExchangeShareError(prepared
+        ? `Bookkeeping JSON was prepared, but the share sheet did not complete: ${detail}. Nothing was confirmed as sent.`
+        : `Bookkeeping JSON could not be prepared: ${detail}. Nothing was shared.`);
+    } finally {
+      setExporting(false);
+      setExportingKind(null);
+    }
+  };
+
   useEffect(() => { void refresh(); }, [snapshot.business?.id]);
 
   return <Page>
@@ -203,6 +244,7 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       { value: 'capital', title: 'Member capital' },
       { value: 'payments', title: 'Payments' },
       { value: 'loans', title: 'Loans' },
+      { value: 'exchange', title: BOOKKEEPING_EXCHANGE_CONTROL_LABEL },
     ]} onChange={setSection} />
     <Panel>
       <Text style={uiStyles.sectionTitle}>Reporting period</Text>
@@ -421,6 +463,19 @@ export function ReportsScreen({ snapshot }: { snapshot: BookkeepingSnapshot }) {
       <Text style={uiStyles.helper}>Commitments are not cash advances. Loan proceeds are not income, principal repayments are not expenses, and only paid interest appears in cash-basis expenses. Accrued interest is a bookkeeping estimate; this report does not select rates or determine tax deductibility.</Text>
     </Panel>
     </> : null}
+    {section === 'exchange' ? <BookkeepingExchangePanel
+      business={snapshot.business ? { id: snapshot.business.id, name: snapshot.business.name } : null}
+      report={report}
+      reportBusinessId={reportBusinessId}
+      fromDate={fromDate}
+      throughDate={throughDate}
+      loading={loading}
+      error={error}
+      sharing={exporting}
+      shareNotice={exchangeShareNotice}
+      shareError={exchangeShareError}
+      onShareJson={(payload) => void shareExchangeJson(payload)}
+    /> : null}
     <Panel>
       <Text style={uiStyles.sectionTitle}>Available from persisted books</Text>
       <Text style={uiStyles.rowDetail}>Account balances: {snapshot.accounts.filter((account) => account.kind === 'bank' || account.kind === 'cash').length} bank and cash accounts.</Text>
