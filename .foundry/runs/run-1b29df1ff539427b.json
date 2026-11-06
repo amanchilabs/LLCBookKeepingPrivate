@@ -5,12 +5,12 @@
   "governance": {
     "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
     "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
-    "docs/design/implementation/feature-preservation-matrix.md": "21210e87112667811d9811f0456fdb58bcdc122265ab75a31644223ef9a2cbb3",
+    "docs/design/implementation/feature-preservation-matrix.md": "959a773112673f6586d02efa6492fea76fd0693660ab6aeb39736a5b2d2c603c",
     "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/pilots/parallel-20261105.md": "63e17b63fdf0bbc278760daba2486e9b35aea43243a30b82fee1a38c44703bd8"
   },
-  "head": "c33f72765fd3756dc9f085e51074dd6552a56ebb",
+  "head": "db2fa91659327051a803a3bcb662902971df214c",
   "history": [
     {
       "at": "2026-11-06T00:57:06.033886+00:00",
@@ -25,7 +25,7 @@
     }
   ],
   "id": "run-1b29df1ff539427b",
-  "next": 1,
+  "next": 2,
   "owner": "f7b8f9f975334b90be3163286280852e",
   "phase": "READY",
   "plan": {
@@ -176,7 +176,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "PAUSED",
+  "status": "COMPLETE",
   "stories": [
     {
       "checks": [
@@ -268,18 +268,78 @@
       "validation_resources": []
     },
     {
+      "checks": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "0e30b28a5b9e47f41458c247c54bd2e0daf0604feb46a73476c81e7412f0f986"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "test"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "4096802420f0b3da80f2c376e8beca079410a72826b41064248bccfbd1abb408"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/python3.11",
+            "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/.foundry-host/parallel-pilot-20261105/native_check.py"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "93d4cbea7859090323ee69f924d14d50d0884916113d9b88129bef344881cf2b"
+        }
+      ],
       "depends_on": [
         "STORY-BOOK-001"
       ],
+      "evidence": ".foundry/evidence/CAP-BOOK-EXCHANGE-001/run-1b29df1ff539427b/STORY-BOOK-002.json",
       "files": [
         "apps/mobile/bookkeeping/ReportsScreen.tsx",
         "apps/mobile/bookkeeping/BookkeepingExchangePanel.tsx",
         "apps/mobile/bookkeeping/bookkeeping-exchange-panel.test.tsx"
       ],
       "id": "STORY-BOOK-002",
+      "progress_path": "docs/design/implementation/feature-preservation-matrix.md",
+      "provider_result": {
+        "exit_code": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "33793db3bfa2870cc7fc381fa1bd97c1621c47fc329a0343e673cdde8b0ca331"
+      },
       "purpose": "Integrate the existing v1 exchange serializer into a bounded Reports Bookkeeping exchange section. Use a new BookkeepingExchangePanel component with meaningful component tests via existing react-dom/server and React Native mocks (no new dependencies). Reports passes current source/business + existing computed report, requested dates, loading/error state and a JSON share callback. Never fetch or mutate ledger in the panel. Show source, period, cash basis, unreviewed/review needed, amounts and exclusions; missing data, bad dates, mismatched/stale report period or report failure disable export with a clear explanation. Explicit button Prepare bookkeeping JSON (accessibilityLabel same) invokes only the validated payload. Use explicit OS share action with application/json via existing expo File/Paths and Sharing patterns, handle errors and cancellation honestly (prepared/share-sheet opened, not delivered/sent). Preserve existing CSV/PDF/report flows. No tax calculations, import, sync, persistence/security changes. Minimum 48 native target for new buttons using existing Button. Add component tests for valid/empty/error/stale/loading states, exact payload callback/disabled behavior. Keep the new report section title Bookkeeping exchange and control label Exchange so the dedicated native test can find it. Coordinator native evidence at .foundry-host/parallel-pilot-20261105/native/<source SHA>/ in the Foundry root must be inspected during review; no physical-device or assistive-tech pass inferred.",
+      "review": {
+        "source": "db2fa91659327051a803a3bcb662902971df214c",
+        "verdict": "PASS"
+      },
       "review_required": true,
-      "status": "READY",
+      "source": "db2fa91659327051a803a3bcb662902971df214c",
+      "status": "DONE",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",
