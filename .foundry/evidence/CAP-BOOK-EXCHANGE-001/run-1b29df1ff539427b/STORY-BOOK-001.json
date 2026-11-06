@@ -12,9 +12,32 @@
         "run",
         "typecheck"
       ],
-      "exit_code": 2,
+      "exit_code": 0,
       "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stdout_sha256": "52498d7de2f9602ed5a40d49116faaa03b05bf1b25f37d7abe66a77fc85f06df"
+      "stdout_sha256": "0e30b28a5b9e47f41458c247c54bd2e0daf0604feb46a73476c81e7412f0f986"
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/fnm",
+        "exec",
+        "--using",
+        "24.22.2",
+        "npm",
+        "test"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e451276b3f274f62ae2d4c0ca0010c7b769789bd70b89a791b269605bbe90c16"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
   "governance": {
@@ -32,9 +55,12 @@
     "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "stdout_sha256": "fbe1f1bff2bd01884cce8cfc3c03dec5028d825b250d4800c4c7a2cf9d922eef"
   },
-  "review": null,
+  "review": {
+    "source": "c33f72765fd3756dc9f085e51074dd6552a56ebb",
+    "verdict": "PASS"
+  },
   "run": "run-1b29df1ff539427b",
-  "source": "34b9e83c4db2cf953a55dd06a8fea420c7c0d92b",
-  "status": "FAILED_VALIDATION",
-  "timestamp": "2026-11-06T00:56:12.212964+00:00"
+  "source": "c33f72765fd3756dc9f085e51074dd6552a56ebb",
+  "status": "VALIDATED",
+  "timestamp": "2026-11-06T01:02:34.073958+00:00"
 }

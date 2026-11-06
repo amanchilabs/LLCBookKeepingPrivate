@@ -81,3 +81,15 @@ Automated verification on this checkpoint: `npm test` passed (157 tests); `npm r
 - If a component is split into routes, pass stable IDs and re-read persisted state; do not create a parallel in-memory ledger.
 - Keep local privacy and explicit export boundaries visible at each external share/backup action.
 - The feature is preserved only after end-to-end UI behavior and reconciliation are reverified on both platforms.
+
+
+<!-- Foundry run-1b29df1ff539427b STORY-BOOK-001 -->
+### STORY-BOOK-001 — validated
+
+Capability: `CAP-BOOK-EXCHANGE-001`. Branch: `feature/bookkeeping-tax-exchange-20261105`.
+
+Exact validated source: `c33f72765fd3756dc9f085e51074dd6552a56ebb`. Profile: `claude-m5-subscription-canonical`.
+
+Outcome: Create the sole versioned bookkeeping-to-tax exchange v1 JSON schema, synthetic example fixture, TS validator/serializer and meaningful automated tests. Read the approved pilot document. Expose a lossless serialized record with schemaVersion=1, product LLCBookKeepingPrivate, basis cash, currency USD, source business ID/name and source reference, period fromDate/throughDate, reviewStatus unreviewed, and incomeCents/expenseCents/netIncomeCents decimal integer strings copied exactly from an existing CashBasisReport; never recompute journal totals, allocate or classify tax. Explicit limitations: book figures only, not a tax return or deductibility/tax-basis determination; no sync/import implemented. Support negative book totals without floating-point coercion. Fail closed on unknown versions, malformed/leap-day dates, reversed period, unsupported currency, invalid cents (including unsafe numeric input), missing/invalid source/review status or mismatched report period; reject extra unknown schema fields to avoid silently losing semantics. Export typed APIs usable by the next UI Story; use existing report date validator if sufficient, strengthen only the new module otherwise. Fixture must clearly be synthetic. Tests validate fixture parity and roundtrip >MAX_SAFE_INTEGER strings, boundaries and malformed inputs; do not test source strings. Do not modify package manifests, existing domain/storage or report calculation code.
+
+Required checks passed; independent review: PASS. See `.foundry/evidence/CAP-BOOK-EXCHANGE-001/run-1b29df1ff539427b/STORY-BOOK-001.json`. No merge, deployment or release acceptance implied.

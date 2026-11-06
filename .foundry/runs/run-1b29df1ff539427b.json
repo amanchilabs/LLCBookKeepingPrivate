@@ -1,17 +1,16 @@
 {
-  "blocker": "Validation failed; next Story was not started",
   "branch": "feature/bookkeeping-tax-exchange-20261105",
   "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
   "created_at": "2026-11-06T00:52:56.123292+00:00",
   "governance": {
     "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
     "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
-    "docs/design/implementation/feature-preservation-matrix.md": "544a527ec7b24ba0c6b45044cefee62967bfc3fb657d4fee18bbbc8b70d87e55",
+    "docs/design/implementation/feature-preservation-matrix.md": "21210e87112667811d9811f0456fdb58bcdc122265ab75a31644223ef9a2cbb3",
     "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/pilots/parallel-20261105.md": "63e17b63fdf0bbc278760daba2486e9b35aea43243a30b82fee1a38c44703bd8"
   },
-  "head": "b8e64b7f69428ef5f2cdefa974cfb31b5e4ab602",
+  "head": "c33f72765fd3756dc9f085e51074dd6552a56ebb",
   "history": [
     {
       "at": "2026-11-06T00:57:06.033886+00:00",
@@ -26,9 +25,9 @@
     }
   ],
   "id": "run-1b29df1ff539427b",
-  "next": 0,
+  "next": 1,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "VALIDATING",
+  "phase": "READY",
   "plan": {
     "id": "CAP-BOOK-EXCHANGE-001",
     "scope": "Owner 2026-11-05 authorizes exactly CAP-BOOK-EXCHANGE-001 in docs/pilots/parallel-20261105.md. New independent capability from canonical main 0710e51; historical migration hints are superseded. Preserve prior source, accounting engine, persistent storage/schema, auth/security and all reports. No tax rules or estimates. Follow mapped governance. Do not edit progress; Foundry appends it. Tier 2; model Claude CLI default subscription. No native/build/test commands from provider. Coordinator runs validation. No other Stories or agents.",
@@ -191,9 +190,32 @@
             "run",
             "typecheck"
           ],
-          "exit_code": 2,
+          "exit_code": 0,
           "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          "stdout_sha256": "52498d7de2f9602ed5a40d49116faaa03b05bf1b25f37d7abe66a77fc85f06df"
+          "stdout_sha256": "0e30b28a5b9e47f41458c247c54bd2e0daf0604feb46a73476c81e7412f0f986"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "test"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e451276b3f274f62ae2d4c0ca0010c7b769789bd70b89a791b269605bbe90c16"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         }
       ],
       "depends_on": [],
@@ -205,15 +227,20 @@
         "apps/mobile/bookkeeping/bookkeeping-tax-exchange.test.ts"
       ],
       "id": "STORY-BOOK-001",
+      "progress_path": "docs/design/implementation/feature-preservation-matrix.md",
       "provider_result": {
         "exit_code": 0,
         "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "stdout_sha256": "fbe1f1bff2bd01884cce8cfc3c03dec5028d825b250d4800c4c7a2cf9d922eef"
       },
       "purpose": "Create the sole versioned bookkeeping-to-tax exchange v1 JSON schema, synthetic example fixture, TS validator/serializer and meaningful automated tests. Read the approved pilot document. Expose a lossless serialized record with schemaVersion=1, product LLCBookKeepingPrivate, basis cash, currency USD, source business ID/name and source reference, period fromDate/throughDate, reviewStatus unreviewed, and incomeCents/expenseCents/netIncomeCents decimal integer strings copied exactly from an existing CashBasisReport; never recompute journal totals, allocate or classify tax. Explicit limitations: book figures only, not a tax return or deductibility/tax-basis determination; no sync/import implemented. Support negative book totals without floating-point coercion. Fail closed on unknown versions, malformed/leap-day dates, reversed period, unsupported currency, invalid cents (including unsafe numeric input), missing/invalid source/review status or mismatched report period; reject extra unknown schema fields to avoid silently losing semantics. Export typed APIs usable by the next UI Story; use existing report date validator if sufficient, strengthen only the new module otherwise. Fixture must clearly be synthetic. Tests validate fixture parity and roundtrip >MAX_SAFE_INTEGER strings, boundaries and malformed inputs; do not test source strings. Do not modify package manifests, existing domain/storage or report calculation code.",
+      "review": {
+        "source": "c33f72765fd3756dc9f085e51074dd6552a56ebb",
+        "verdict": "PASS"
+      },
       "review_required": true,
-      "source": "b8e64b7f69428ef5f2cdefa974cfb31b5e4ab602",
-      "status": "FAILED_VALIDATION",
+      "source": "c33f72765fd3756dc9f085e51074dd6552a56ebb",
+      "status": "DONE",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",
