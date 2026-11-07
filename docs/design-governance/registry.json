@@ -14,6 +14,12 @@
   "product": "llcbookkeepingprivate",
   "provider_assignment": "docs/design-governance/provider-assignment.json",
   "provider_profile": "claude-m5-llc-login",
+  "refinement_run": "design-discovery-14cb8a13bec84572",
+  "refinement_runs": [
+    "design-discovery-358b47589a0842b1",
+    "design-discovery-14cb8a13bec84572",
+    "design-discovery-79d1188294a74094"
+  ],
   "schema_version": 1,
   "screens": [
     {
@@ -86,6 +92,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "fd11d7704a6f255ed5b0cd1b7d40cb1719a757604276bc5963d89848430f04da",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "OB-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -115,6 +122,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -125,14 +138,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nWelcome, first launch, with no tab bar. Emerald header showing the brand and 'Private - on this device'. White canvas. Lock mark and an 'On device' pill styled for the white canvas. Left-aligned sans-serif title on two lines: 'Your LLC books, kept private.' A card titled 'What you'll set up' lists the four real setup steps in order: Your LLC, Members and ownership, First account (optional), Review. Mist privacy note: no registration, no bank connection, no automatic cloud sync. One primary emerald button, 'Get started', opens OB-02. There is no Skip, no carousel, no app-icon artwork, and no tax, CPA-readiness or tracking claims. State: default.\n\nVisual-only changes:\n- Emerald header\n- White canvas instead of cream\n- Left-aligned sans-serif headline\n- Setup step list card\n- Mist privacy note\n\nExisting supported behavior:\n- 'Get started' opens OB-02\n- Existing privacy copy: no registration, no bank connection, no automatic cloud sync\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Skip (would bypass required setup)\n- Carousel and 5-dot pager\n- 'CPA-ready' and 'no data tracking' claims\n- App-icon artwork\n- Serif headline from the reference\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n- Old capture docs/design-governance/captures/v2/book-welcome.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\n\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Ob 01. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -206,6 +212,7 @@
       ],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "7c6bedd0c17dc69f7ea14f608696f2b6c8a28f8dc4c7e31423e030c7cd5a9be2",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "OB-02",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -235,6 +242,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -245,14 +258,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nSetup step 1, 'Your LLC'. A back link, then 'Step 1 of 4' with a 4-segment progress bar. Title 'Your LLC'. Four labeled fields: LLC name; state as a 2-letter code, uppercased automatically; formation date; books start date. A validation failure shows an inline red error beside the field that says what to fix, is announced as an alert, and keeps every typed value. Mist note: tax classification is not set in this app. Primary 'Continue' goes to OB-03. States: default, validation error.\n\nVisual-only changes:\n- Emerald header and step bar\n- Field styling\n- Inline error placement\n- Mist note\n\nExisting supported behavior:\n- Validation through FormError, keeping typed values\n- Step progress\n- State code uppercased\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Tax-classification picker\n- EIN field\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n- Old capture captures/v2/book-business.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\nvalidation error\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Ob 02. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -304,6 +310,7 @@
       ],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "da27da4982bf5fd1cffbdbf9325fa6a5d48185890942d45ac8cc5d1c22900d08",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "OB-03",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -333,6 +340,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -343,14 +356,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nSetup step 2 of 4, 'Members and ownership'. Segmented control Multi-member / Single-member, defaulting to multi-member. A sage row offers 'Apply suggested split 40/20/20/20'. A member card holds a name and ownership-% field for each member. A total check states the total in words and whether it equals 100%. A confirmation checkbox clears whenever anything is edited. Mist note: ownership percentage is not a profit, loss, tax or capital allocation rule. 'Continue' stays disabled, with the reason given in words, until the total is exactly 100% and the box is confirmed. Single-member mode shows one member at 100%. States: multi-member default, single-member, total not 100% (blocked).\n\nVisual-only changes:\n- Segmented control\n- Sage template row\n- Member card\n- Worded total indicator\n\nExisting supported behavior:\n- Defaults to multi-member with the suggested split\n- Confirmation resets on any edit\n- Continue blocked unless the total is 100% and confirmed\n- Single-member 100% interest\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Skip\n- Per-member overflow menu\n- 5-step count from the reference\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nsingle-member\ntotal not 100% (blocked)\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Ob 03. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -402,6 +408,7 @@
       ],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "075d86d0211df8942288afd1c5af6988aa206bd5fd71cfab5b0874386c857042",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "OB-04",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -431,6 +438,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -441,14 +454,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nSetup step 3 of 4, 'First account (optional)'. Segmented 'Set up now' / 'Do this later'. Set up now: Bank or Cash type, account name, optional opening balance (negative allowed only for bank accounts), and a balance date field that appears once an amount is entered and cannot be earlier than the books start date. Sage note: the opening balance offsets to Opening Balance Equity and is not a member contribution. Do this later: creates no account. 'Continue' goes to OB-05. Errors appear inline and keep the entered values. States: set up now, do this later, error.\n\nVisual-only changes:\n- Segmented controls\n- Sage note\n\nExisting supported behavior:\n- Skipping creates no account\n- Date cannot precede the books start date\n- Opening balance offsets to Opening Balance Equity\n- Negative opening balance allowed for bank only\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Any 'owner contribution' wording for opening balances\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\ndo this later\nerror\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Ob 04. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -500,6 +506,7 @@
       ],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "7f5c52acca32610edf0b7050c1276f6d4de82d8d57d7d107423ea057080febba",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "OB-05",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -529,6 +536,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -539,14 +552,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nSetup step 4 of 4, 'Review'. Three summary cards (LLC, Members, First account), each with an Edit link back to its step. One-line note: everything is saved together on this device. Primary 'Create LLC' changes to 'Creating...' and is disabled while saving. A failure shows the error, saves nothing, and keeps the review data. Success opens OB-06. States: default, saving, error.\n\nVisual-only changes:\n- Summary cards\n- Header and step bar\n\nExisting supported behavior:\n- createBusinessWithInitialAccount saves in one atomic step\n- No contribution inferred from the opening balance\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nsaving\nerror\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Ob 05. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -597,6 +603,7 @@
       ],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "93ddc3a5727cb6d9e15a14a601c2ead5d26f35091c2f30bace5bd6c3547080e1",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "OB-06",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -626,6 +633,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -636,14 +649,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nSetup complete. A simple check mark, the title 'Your books are ready.', and a summary card with the LLC name, members and accounts. Three 'what's next' rows: record activity, members, reports. Primary 'Go to dashboard' opens DB-01 with the new business loaded. There is no tour and no illustration. State: default.\n\nVisual-only changes:\n- Check mark instead of the illustration\n- Summary card\n\nExisting supported behavior:\n- Opens Dashboard with the new business loaded\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Quick tour\n- Mountain illustration\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\n\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Ob 06. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -700,6 +706,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "e8170d6abdcff744a0e704415412a9a3141613d1f7fcdd6d90cafd931fd507b2",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "SH-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -728,6 +735,14 @@
         "path": "docs/design-governance/proposals/v3/SH-01.svg",
         "sha256": "043dad4581ac269e3862104025e74a4935aab7ddcb7f2d7b049bc2283b6e4bca"
       },
+      "proposal_provider_profile": "claude-m5-llc-login",
+      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -738,16 +753,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nNavigation shell for every screen while books are open. Emerald header, 56pt plus the safe area (at least 72pt total): brand, active LLC name, and a 44pt Search icon button that toggles search. White tab bar, 64pt plus the home-indicator inset, with five labeled tabs: Dashboard, Transactions, Members, Reports, More. The selected tab has a sage pill, a bold emerald label and accessibilityState.selected. Changing tabs resets sub-routes and transaction drafts. Sub-screens show a back link above a left-aligned title; Android system back does the same as the back link. There is no bell, no avatar and no workspace dropdown; switching workspaces stays in More. States: each tab selected, sub-route with back.\n\nVisual-only changes:\n- Emerald header color and layout\n- Search as an icon button\n- Sage tab pill style\n\nExisting supported behavior:\n- Five tabs\n- Search toggle\n- Tab change resets sub-routes and transaction drafts\n- Header at least 72pt total\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Notification bell\n- Avatar/initials\n- Workspace dropdown in the header\n\nOutstanding decisions:\n- Header workspace-switcher shortcut: proposed no, switching stays in More\n\nUnverified native/accessibility evidence:\n- STD\n- Old capture captures/book-dashboard.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\n\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Sh 01. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_provider_profile": "claude-m5-llc-login",
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -803,6 +809,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "e3b7cb26c7a9bdc8f3684c92f6fbeb37c7634e60e71fc066cbc7eb518bee9191",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "DB-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -831,6 +838,14 @@
         "path": "docs/design-governance/proposals/v3/DB-01.svg",
         "sha256": "7a0ca733c938c60f3be83b4ed77c06386f0e808a330cda47620fcf4c2650b7dd"
       },
+      "proposal_provider_profile": "claude-m5-llc-login",
+      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -841,16 +856,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nDashboard tab. Title 'Dashboard'. Sage hero: cash across bank and cash accounts, derived from the journal, with the book-balance date. Three quick-action tiles: Record income, Record expense, Transfer. Cards, each with a header action: Accounts, Recent activity, Members, Reminders, and a Reports link. They navigate to Accounts, Transactions, Members, Settings/Reminders and Reports as today. Empty states use the existing copy and actions when there are no accounts or no activity. Proposed only if authorized: a period selector and Income / Expense / Net income tiles from a new derived period query; until then they are not shown. States: populated, no accounts, no activity.\n\nVisual-only changes:\n- Sage hero card\n- Quick-action tiles\n- Card headers\n\nExisting supported behavior:\n- Journal-derived cash total\n- Accounts, recent activity, members and reminders cards\n- Existing empty states\n- Navigation to Accounts, Transactions, Members, Settings and Reports\n\nNew capability \u2014 separate authorization and tests required:\n- Income/Expense/Net income period tiles (new derived query)\n- FY/period selector\n\nUnsupported/excluded:\n- Record Journal (manual journal entry does not exist)\n- Decorative sparkline wave\n\nOutstanding decisions:\n- Authorize the period income/expense tiles and period selector?\n\nUnverified native/accessibility evidence:\n- STD\n- Old capture captures/book-dashboard.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\nno accounts\nno activity\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Db 01. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_provider_profile": "claude-m5-llc-login",
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -909,6 +915,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "41277c81f1293d05e02b6e590e3296ac725dcc3d18697f0296e26fdbee0cecdb",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "SR-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -941,6 +948,43 @@
         "path": "docs/design-governance/proposals/v3/SR-01-home.svg",
         "sha256": "a6e2e881f2a4921a18abcca39b431de2bb70a0c7b31da99079a317a02cf59cf3"
       },
+      "proposal_provider_profile": "claude-m5-llc-login",
+      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/SR-01.svg",
+            "sha256": "889e620d3198b371c390e69403fc0e9bf9229f2fa6adc63e7a55b5341e0a5901"
+          },
+          "name": "Results"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/SR-01-filters.svg",
+            "sha256": "d3d3923813191ae61762b5b00619d19d6dc453375f7ec4d518d6bb78ab00685f"
+          },
+          "name": "Filters"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/SR-01-details.svg",
+            "sha256": "2576f482a3334e2a4a18407172ecb9bd6545dda142ede2bf769314390f957b8a"
+          },
+          "name": "Details"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/SR-01-noresults.svg",
+            "sha256": "b27125002da59c5c9f9e534216650ad82ecfa2565364bf8f3ee96f3adccdaceb"
+          },
+          "name": "No results"
+        }
+      ],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -955,45 +999,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nOne Global Search with five states, laid out from the Global Search Package composite reference. It opens from the header Search button; the tab bar keeps whichever tab was active. Search is local, offline and read-only, limited to the selected LLC, and never writes. Emerald-outlined search field with Clear. Chips are at least 48pt tall and scroll horizontally without clipping. Mist note: search reads saved records only and never changes them. (1) Home: field; with an empty query, the existing helper text. Proposed: a category grid of the owner-listed kinds (Transactions, Categories, Accounts, Members, Capital, Payments, Loans, Reminders, Reconciliations, Period history), each with a count from persisted records, and recent searches with Clear. (2) Results: existing aggregate line 'N matching records' and result rows. Each row is an accessible button whose label names the record kind, title and destination. Rows show title, kind, date and amount, with outflows in red and a minus sign. Proposed: sections grouped by kind with per-kind counts and View all, and type chips that filter the list. (3) Filters, proposed: full-screen list of filter rows (record type, date range, amount min/max, account, member, category, status) with 'Clear all' and 'Apply filters' (no live count unless authorized). Focus is trapped and returns to the Filters chip, which shows the active count. (4) Details: today a result opens its section. Proposed: open the specific existing record screen (transactions open TX-03 with description, role badge, signed amount, date, category, account, split lines with a total check, related reversal/replacement links shown as date, description and amount, and 'Reverse and replace' only if the owner decides it appears here). The back link reads 'Results for <query>'. Proposed: returning restores query, filters, chip selection and scroll. Corrections only through the existing reversal flow. (5) No results: existing empty message 'No matching records in this LLC.' Proposed additions: name the active filters, an illustration slot, suggestions, 'Clear filters' and 'Edit search'. All counts and amounts in the proposal are synthetic. States: Home, Results, Filters, Details, No results, loading, search error.\n\nVisual-only changes:\n- Emerald-outlined search field\n- Result cards\n- 48pt chips\n- Mist read-only note\n\nExisting supported behavior:\n- Local, offline, read-only search across the active LLC's record kinds\n- Clear search\n- Empty-query helper\n- Aggregate 'N matching records' count\n- 'No matching records in this LLC.' empty state\n- Result rows with accessibilityRole button and a label naming kind, title and destination\n- A result opens its section\n- TX-03 transaction detail with split lines and reversal/replacement links\n\nNew capability \u2014 separate authorization and tests required:\n- Per-kind counts in the category grid, chips and section headers\n- Grouped result sections with View all\n- Type chips filtering results\n- 'Categories' group (income/expense accounts)\n- Filters screen (record type, date, amount, account, member, category, status) with Apply/Clear all\n- Recent searches stored on the device\n- Opening the specific record instead of its section\n- Restoring query, filters, chips and scroll on Back\n- Related links shown as date, description and amount instead of a raw ID\n- Live result count on Apply\n\nUnsupported/excluded:\n- Project filter and project field\n- Receipt attachment row\n- Form 1065 line mapping\n- Microphone/voice\n- Bell and avatar\n- 'Cleared' badge and cleared date (per-transaction cleared status not verified in source)\n- Reports tab highlighted while searching\n- Fabricated counts\n\nOutstanding decisions:\n- Allow recent searches on the device? If so, encrypted and clearable?\n- Show the recurring and LLC-profile kinds (searched today, not in the owner's list) as groups?\n- Offer 'Reverse and replace' on a detail opened from search, or keep it read-only there?\n- Authorize a live result count on the Apply button?\n- Reconciliation finding: the saved note requests a Project filter, but the source has no Project dimension. It is excluded from this bounded proposal; a future Project capability needs an explicit scope decision and verification, not silent omission or fabricated support.\n\nUnverified native/accessibility evidence:\n- STD\n- Foundry captures book-search-empty.png show the OLD layout\n\nStates without rendered proposals (not visually verified):\nloading\nsearch error\n\nCoordinator source check: aggregate result count, empty feedback, accessible destination descriptions and clear-search already exist in SearchScreen.tsx. Preserve these; per-kind grouping/counts, filters and specific-record navigation are proposed additions. The additional supplied Global Search Package PNG contains all five reference states; the earlier missing-mockups statement is superseded.\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Home, Results, Filters, Details, No results. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [
-        {
-          "name": "Results",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/SR-01.svg",
-            "sha256": "889e620d3198b371c390e69403fc0e9bf9229f2fa6adc63e7a55b5341e0a5901"
-          }
-        },
-        {
-          "name": "Filters",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/SR-01-filters.svg",
-            "sha256": "d3d3923813191ae61762b5b00619d19d6dc453375f7ec4d518d6bb78ab00685f"
-          }
-        },
-        {
-          "name": "Details",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/SR-01-details.svg",
-            "sha256": "2576f482a3334e2a4a18407172ecb9bd6545dda142ede2bf769314390f957b8a"
-          }
-        },
-        {
-          "name": "No results",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/SR-01-noresults.svg",
-            "sha256": "b27125002da59c5c9f9e534216650ad82ecfa2565364bf8f3ee96f3adccdaceb"
-          }
-        }
-      ],
-      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_provider_profile": "claude-m5-llc-login",
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1049,6 +1055,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "c52edf1d393f9716a3e4398b0d69842aae763cee662f10a4129e2a5019058f0c",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "TX-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1078,6 +1085,14 @@
         "path": "docs/design-governance/proposals/v3/TX-01.svg",
         "sha256": "2144d80fd619c5aba3f28c18bd0079bf613619fc573b12e695d1c5c7af558a28"
       },
+      "proposal_provider_profile": "claude-m5-llc-login",
+      "proposal_provider_run": "design-discovery-14cb8a13bec84572",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -1088,16 +1103,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nTransactions tab, History. 48pt sub-tab row: History / Recurring (TX-05) / Import (TX-06). Action row: '+ Income' (primary), '+ Expense', '+ Transfer'. Search field. Type chips All, Income, Expenses, Transfers, Loans: they fit at 390pt and scroll below 360pt or at large text. Account and category dropdowns. 'Clear filters'. Cards grouped by date, each showing description, kind, signed amount and a role badge (Original / Reversal / Replacement). A reversal and its replacement are both visible and linked. Tapping a card opens TX-03; corrections go only through Reverse and replace. A count line and 'Export CSV' (existing export of all transactions). States: populated, filtered, no matches (clear-filters action), no transactions (existing empty copy and actions).\n\nVisual-only changes:\n- Date grouping\n- Role badges\n- Chips and dropdowns instead of choice lists\n- 48pt sub-tab row\n\nExisting supported behavior:\n- Search\n- Type, account and category filters\n- Clear filters\n- Details\n- Correct via reverse and replace\n- Export all as CSV\n- Count line\n\nNew capability \u2014 separate authorization and tests required:\n- Period income/expense/net summary\n- Sort control\n\nUnsupported/excluded:\n- 'Owner Contribution' label on an opening balance\n- Overflow menu with edit or delete\n- FY selector from the reference\n\nOutstanding decisions:\n- Date grouping by posting date: confirm\n- Confirm the single 'Loans' chip maps to the existing loan-advance and loan-repayment type filter values\n\nUnverified native/accessibility evidence:\n- STD\n- Foundry capture book-transactions.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\nfiltered\nno matches\nno transactions\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Tx 01. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_run": "design-discovery-14cb8a13bec84572",
-      "proposal_provider_profile": "claude-m5-llc-login",
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1153,6 +1159,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "0c174c68451be7ab770cf309f9a45dbed8c59cae9967b431e2a889a36d5fa227",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "TX-02",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1181,6 +1188,14 @@
         "path": "docs/design-governance/proposals/v3/TX-02.svg",
         "sha256": "8ec5614ae213099ecb8e491f1a59c332fc5efe6186e4d0d6614e454e4b42ffe2"
       },
+      "proposal_provider_profile": "claude-m5-llc-login",
+      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -1191,16 +1206,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nTransaction entry. Type cards Income / Expense / Transfer. Income and expense: cash or bank account, category, date and amount side by side, description, and 'Split across categories', whose lines must sum exactly to the amount with the difference shown. Transfer: From and To cash accounts, date, amount, description. The date stays a typed YYYY-MM-DD field unless a picker is authorized. Note: posted transactions can't be edited, only reversed and replaced. 'Cancel' and 'Post transaction'; Post is disabled while saving, and errors keep all inputs. Money uses fixed precision. Nothing is assigned or allocated to members. States: income, expense, transfer, split, error, saving.\n\nVisual-only changes:\n- Type cards\n- Field layout\n\nExisting supported behavior:\n- Balanced journal posting\n- Splits must sum exactly\n- Transfers between cash accounts\n- Fixed-precision money\n- Typed date field\n\nNew capability \u2014 separate authorization and tests required:\n- Native date picker\n\nUnsupported/excluded:\n- Member assignment or allocation\n- Character counter\n\nOutstanding decisions:\n- Authorize a native date picker?\n\nUnverified native/accessibility evidence:\n- STD\n- Foundry capture book-transaction-entry.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\nexpense\ntransfer\nsplit\nerror\nsaving\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Tx 02. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_provider_profile": "claude-m5-llc-login",
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1250,6 +1256,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "dc560f46703cb4983d62fb864752cd65c525bb92a940b893a0f490951211d7b4",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "TX-03",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1280,6 +1287,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -1290,14 +1303,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nTransaction detail, pushed full-screen. Header card: description, kind, date, signed amount, role badge. Fields card: date, account, category, description. Category-lines card with a sum check. Linked-corrections card: links between original, reversal and replacement. Proposed: label the links with date, description and amount instead of a raw ID. The only action is 'Reverse and replace', shown only when allowed (not for guaranteed payments or entries already corrected). Proposed, if authorized: a full balanced journal-lines card (debit/credit per account, with a Debits = Credits check) and timestamped audit events. States: original, reversal, replacement, split.\n\nVisual-only changes:\n- Cards\n- Role badge\n- Full-screen instead of an inline panel\n\nExisting supported behavior:\n- Role label\n- Split lines\n- Linked original/reversal/replacement\n- Reverse-and-replace eligibility rules\n\nNew capability \u2014 separate authorization and tests required:\n- Full balanced journal lines (shares work with RP-05 expansion)\n- Timestamped audit events\n- Related links shown as date, description and amount\n\nUnsupported/excluded:\n- Member allocation\n- Edit\n- Delete\n- Duplicate\n- User names (there are no user accounts)\n\nOutstanding decisions:\n- Authorize journal lines on this screen?\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nreversal\nreplacement\nsplit\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Tx 03. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1349,6 +1355,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "e474cecfc353bf37c0790f08bb0b654c9197d4dc5cfc3fa31ae8a5ba9beb82e5",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "TX-04",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1380,19 +1387,18 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
-      "references": [],
-      "revision": "proposal-v3",
-      "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReverse and replace, with no layout reference; the design is derived from text. Step 1: the existing correction form, prefilled from the original and restyled. Today, posting from this form commits the linked reversal (on the original date, sign flipped) and the replacement (on the chosen date) atomically, and keeps the original. Proposed Step 2, if authorized: a confirmation preview with three cards (Original, which stays in history; Reversal; Replacement), a reconciliation strip with the net effect on the affected account, a note that each entry balances and the original is never edited or deleted, and 'Back to edit' / 'Post reversal and replacement'. Nothing posts before confirmation, and the preview figures equal what is posted. Proposed closed-period pre-check: if the date is locked, show the reason and no post button. Without it, the existing posting validation and error handling stay as they are. States: form, preview, blocked by closed period, posting, error.\n\nVisual-only changes:\n- Correction form restyle\n\nExisting supported behavior:\n- Linked reversal on the original date\n- Replacement on the chosen date\n- Original kept\n- Atomic post\n- Existing posting validation\n\nNew capability \u2014 separate authorization and tests required:\n- Confirmation preview step with computed net effect\n- Closed-period pre-check before posting\n\nUnsupported/excluded:\n- Edit in place\n- Delete\n\nOutstanding decisions:\n- Authorize the two-step preview flow and closed-period pre-check?\n- Accept the text-derived layout (no reference image exists)?\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nform\nblocked by closed period\nposting\nerror\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Tx 04. DEFAULT capture means the first displayed proposal state.",
-      "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
       "proposal_provider_runs": [
         "design-discovery-7c8a2aed6237439b",
         "design-discovery-358b47589a0842b1",
         "design-discovery-14cb8a13bec84572"
       ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "proposal_states": [],
+      "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
+      "references": [],
+      "revision": "proposal-v3",
+      "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReverse and replace, with no layout reference; the design is derived from text. Step 1: the existing correction form, prefilled from the original and restyled. Today, posting from this form commits the linked reversal (on the original date, sign flipped) and the replacement (on the chosen date) atomically, and keeps the original. Proposed Step 2, if authorized: a confirmation preview with three cards (Original, which stays in history; Reversal; Replacement), a reconciliation strip with the net effect on the affected account, a note that each entry balances and the original is never edited or deleted, and 'Back to edit' / 'Post reversal and replacement'. Nothing posts before confirmation, and the preview figures equal what is posted. Proposed closed-period pre-check: if the date is locked, show the reason and no post button. Without it, the existing posting validation and error handling stay as they are. States: form, preview, blocked by closed period, posting, error.\n\nVisual-only changes:\n- Correction form restyle\n\nExisting supported behavior:\n- Linked reversal on the original date\n- Replacement on the chosen date\n- Original kept\n- Atomic post\n- Existing posting validation\n\nNew capability \u2014 separate authorization and tests required:\n- Confirmation preview step with computed net effect\n- Closed-period pre-check before posting\n\nUnsupported/excluded:\n- Edit in place\n- Delete\n\nOutstanding decisions:\n- Authorize the two-step preview flow and closed-period pre-check?\n- Accept the text-derived layout (no reference image exists)?\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nform\nblocked by closed period\nposting\nerror\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Tx 04. DEFAULT capture means the first displayed proposal state.",
+      "visual_verification_evidence": [],
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1443,6 +1449,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "e27a846c3d6fc9a4c2f35a3000f7eb7d2225b67632567ffc3ab45ab7835df4f4",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "TX-05",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1473,6 +1480,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -1483,14 +1496,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nTransactions > Recurring. '+ Schedule' button. Schedule cards: description, status badge in words, kind (income or expense), category, cadence, next date, account, last posted, amount. Actions: 'Post due occurrence' (enabled only when the schedule is active and due by the device's local date; otherwise disabled as 'Not due yet'), Edit, Pause/Resume. The next date advances only after the post commits. Mist note: nothing posts automatically. Proposed, if authorized: search field, status chips with counts (All, Active, Due now, Paused) derived from isActive and nextDate, and three summary tiles. States: list, filtered, empty, form, posting, error.\n\nVisual-only changes:\n- Cards\n- Status badges\n- Action row\n\nExisting supported behavior:\n- Create/Edit schedule\n- Post due occurrence, advancing the next date only after commit\n- Pause/Resume\n- 'Not due yet' disabled state\n\nNew capability \u2014 separate authorization and tests required:\n- Search over schedules\n- Status filter chips, counts and summary tiles\n\nUnsupported/excluded:\n- Recurring guaranteed payments, loans or splits\n- Ended state\n- Projects\n- Overflow menu or delete\n\nOutstanding decisions:\n- Authorize schedule search, status chips and tiles?\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nfiltered\nempty\nform\nposting\nerror\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Tx 05. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1541,6 +1547,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "e036db1a5231aa5361fea5486aeb382a2863a0c78aec163f0dfbeaaf9aa17dfe",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "TX-06",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1571,6 +1578,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -1581,14 +1594,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nTransactions > Import, a CSV transaction import over two screens with a real 3-step indicator. Screen 1 'Choose file': a local CSV of up to 5MB, a file card with Discard, deposit account, column mapping, and duplicate mode (skip or include). Screen 2 'Review': tiles for rows, ready, invalid and possible duplicates; row cards for the first 12 rows previewed, each with a status badge and errors in words. The import button is labeled with the exact count. While any row is invalid it is disabled and the reason is shown. Import is atomic, with no partial post. Done state reports the posted count. Only income/expense CSV rows are supported. States: choose file, mapping, review, invalid rows, importing, done, error.\n\nVisual-only changes:\n- Stepper\n- Summary tiles\n- Row cards instead of a table\n\nExisting supported behavior:\n- Local CSV up to 5MB\n- Column mapping\n- Skip or include duplicates\n- Validation of every row\n- First 12 rows previewed\n- Atomic import with no partial post\n\nNew capability \u2014 separate authorization and tests required:\n- Per-row include/exclude\n- Search/filter in the preview\n- Duplicate match compare\n- Default category\n\nUnsupported/excluded:\n- Default Project\n- Drag and drop\n- Transfers, refunds or splits in CSV\n- OFX/QFX/Excel\n\nOutstanding decisions:\n- Which per-row preview controls, if any, to authorize\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nchoose file\nmapping\ninvalid rows\nimporting\ndone\nerror\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Tx 06. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1644,6 +1650,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "6eeb3306b49851e2176f102fc1e7cba9a0737f27013c92f8fde1fcfc58c67e32",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "MB-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1671,6 +1678,14 @@
         "path": "docs/design-governance/proposals/v3/MB-01.svg",
         "sha256": "3f9ee796dedb020c731e99cded40a81d7ba781514b850dc6a577e1d798a5dbc5"
       },
+      "proposal_provider_profile": "claude-m5-llc-login",
+      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -1681,16 +1696,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nMembers tab. 48pt sub-tab row: Members / Capital (MB-02) / Payments (MB-03). Tiles: member count, total ownership. Stacked ownership bar with a text legend. Member cards: initials, name, current %, effective-since date, a History chevron to dated interest history, and a loans link to MB-04. '+ Add member'. Editing names and interests records dated history and requires confirmation before saving. Mist note: ownership is not an allocation rule. Single-member: one member at 100%. States: multi-member, single-member, editing.\n\nVisual-only changes:\n- Ownership bar instead of a donut\n- Member cards\n- Sub-tab row\n\nExisting supported behavior:\n- Edit names and interests with dated history\n- Confirm and save\n- Member loans link\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Roles such as 'Managing Member'\n- 'Contributed' figures on this list\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n- Foundry capture book-members.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\nsingle-member\nediting\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Mb 01. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_provider_profile": "claude-m5-llc-login",
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1740,6 +1746,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "0d5a7b3f21de16025de9a3347b2b7f8dd5dd3120a0b8ec4dc4a21037efef2bd0",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "MB-02",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1769,6 +1776,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -1779,14 +1792,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nMembers > Capital. Member selector. 2x2 all-time tiles: cash contributions, property contributions, distributions, net book capital activity. Activity cards: date, type, amount, and a CPA-review flag on property contributions. '+ Record' opens the existing form for a cash contribution, property contribution or distribution. Mist note: book capital only, which is not tax basis or outside basis; guaranteed payments and loans are tracked separately. Contributions are never shown as income; distributions are never shown as expenses. States: populated, empty, record form.\n\nVisual-only changes:\n- Tiles\n- Activity cards\n\nExisting supported behavior:\n- Cash and property contributions\n- Distributions\n- All-time book capital per member\n- Property valuation CPA flag\n\nNew capability \u2014 separate authorization and tests required:\n- Running capital balance per row\n- Per-member capital export\n\nUnsupported/excluded:\n- Guaranteed payments or loans in capital\n- Contact actions\n- Notes tab\n- 'Opening Capital' label\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nempty\nrecord form\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Mb 02. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1836,6 +1842,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "d92fce82eea28c35defdffc3724a498cf9cfeef1911145dd8cd23f244606881f",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "MB-03",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1866,6 +1873,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -1876,14 +1889,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nMembers > Payments. Member selector. Two visually separate sections. 'Obligations - not cash': type (services or use of capital), cadence (one-time, monthly, quarterly), amount, effective date, allocation lines. 'Actual payments - cash': date, amount, account, and a returned/reversed badge. Buttons '+ Obligation' and '+ Record payment'; returned payments are reversed through the existing action. Note: an unpaid obligation does not reduce cash or create a cash-basis expense, and guaranteed payments are not capital. Obligations and payments are never merged into one total. Single-member LLC: the section is disabled with the existing policy text. States: multi-member, single-member disabled, empty.\n\nVisual-only changes:\n- Separated sections\n- Cards\n\nExisting supported behavior:\n- Obligations (services, use of capital; one-time, monthly, quarterly)\n- Allocation lines\n- Actual payments\n- Reverse returned payment\n- Single-member disablement\n\nNew capability \u2014 separate authorization and tests required:\n- Outstanding (obligation minus paid) figure\n- Percent-paid metric\n\nUnsupported/excluded:\n- Payment schedule tab beyond the existing cadence\n\nOutstanding decisions:\n- Authorize an outstanding computation, and how is it defined?\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nsingle-member disabled\nempty\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Mb 03. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -1933,6 +1939,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "c3c87bc678fd21c09938c8319520e53023a0c99bdd57da57ed46d50733bbd23f",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "MB-04",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -1962,6 +1969,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -1972,14 +1985,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nMember and third-party loans, reached from a member card. Chips All / Member / Third party. 2x2 tiles: principal outstanding, advances, principal repaid, interest paid. Loan cards: lender, type, commitment, stored simple rate and day count, outstanding principal, accrued-interest estimate. Activity cards split principal and interest. Buttons for loan agreement, funded advance and repayment. Note: loan proceeds are not income or capital, principal repaid is not an expense, and only outstanding principal accrues interest. States: populated, empty, forms.\n\nVisual-only changes:\n- Tiles\n- Cards instead of a wide table\n\nExisting supported behavior:\n- Member and third-party agreements\n- Funded advances\n- Principal and actual interest payments\n- Stored simple rate and day count\n- Accrued estimate\n\nNew capability \u2014 separate authorization and tests required:\n- Term/maturity fields\n- Amortization schedule (see RP-08)\n\nUnsupported/excluded:\n- Interest calculator\n- Rate selection advice\n- Edit on agreement terms\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nempty\nforms\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Mb 04. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -2035,6 +2041,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "b62921f3acaa5f83130ae40a1ccf72c1e41347752719f93957630a1bfddaba41",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "RP-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -2063,6 +2070,14 @@
         "path": "docs/design-governance/proposals/v3/RP-01.svg",
         "sha256": "3bcf643a705146b568aa2c6da1bf913c9f3e3389768957bfc22717ca3d72e9b4"
       },
+      "proposal_provider_profile": "claude-m5-llc-login",
+      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -2073,16 +2088,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReports tab, Profit and loss. Scrollable report picker chips for the 9 reports. Period card with from and through dates and 'Update report'; invalid dates are rejected. Sage summary card: basis (cash) and period, Income, Operating expenses, Net income, all from journal lines. 'Export CSV' and 'Export PDF' send the existing computed P&L totals for the shown period through the OS share sheet. Mist note: a bookkeeping summary, not a tax return. States: not calculated, calculating, result, error.\n\nVisual-only changes:\n- Picker chips\n- Summary card\n\nExisting supported behavior:\n- Cash-basis totals from journal lines\n- Date validation\n- CSV and PDF via the share sheet\n\nNew capability \u2014 separate authorization and tests required:\n- Per-category income/expense breakdown\n- Period presets\n\nUnsupported/excluded:\n- Send/email\n- Profit-margin KPI\n\nOutstanding decisions:\n- Authorize the per-category breakdown?\n\nUnverified native/accessibility evidence:\n- STD\n- Foundry capture book-reports.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\nnot calculated\ncalculating\nerror\nexport in progress\nexport failed\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Rp 01. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_provider_profile": "claude-m5-llc-login",
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -2132,6 +2138,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "941e0934cb2485073d15a2ac495af4d256c513d6b9fc62a026e63a2daed1523b",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "RP-02",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -2161,6 +2168,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -2171,14 +2184,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReports > Cash movement. Period card with 'Update'. Four tiles: beginning, inflows, outflows, ending (total across cash accounts). Reconciliation strip: beginning + inflows - outflows = ending, with a worded status. One card per cash account with the same rows and its net. Note: transfers net to zero across accounts. Export CSV/PDF of the existing all-account report through the share sheet. States: not calculated, result, no cash accounts, error.\n\nVisual-only changes:\n- Tiles\n- Reconciliation strip\n- Account cards\n\nExisting supported behavior:\n- Per-account beginning, inflows, outflows, net and ending\n- Total ending cash\n- Equation sentence\n- CSV/PDF exports\n\nNew capability \u2014 separate authorization and tests required:\n- Single-account filter\n- Transaction counts per direction\n\nUnsupported/excluded:\n- Decorative bar chart\n\nOutstanding decisions:\n- Add a single-account filter?\n\nUnverified native/accessibility evidence:\n- STD\n\nStates without rendered proposals (not visually verified):\nnot calculated\nno cash accounts\nerror\nexport in progress\nexport failed\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Rp 02. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -2228,6 +2234,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "cdd5ce4c45c2665274df77e168e6ed458b1a5016c62eae3c16a2d7d62c5723f3",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "RP-03",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -2256,6 +2263,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -2266,14 +2279,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReports > Balance sheet. Header 'Book basis - cumulative through <date>' with 'Update'. Sections Assets / Liabilities / Equity, each with lines and a sage total; equity includes the current-earnings line. Reconciliation strip: assets - liabilities - equity = difference, with a worded status. A non-zero difference shows a warning in words. Note: book balances do not establish tax basis or outside basis. Export CSV/PDF of the existing report through the share sheet. States: not calculated, balanced, out of balance, error.\n\nVisual-only changes:\n- Section bands\n- Reconciliation strip\n\nExisting supported behavior:\n- Journal-derived sections\n- Current earnings\n- Difference row\n- CSV/PDF exports\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- 'Final' badge\n- Compare\n- Print\n- Save report\n- Ownership % on equity lines\n\nOutstanding decisions:\n\n\nUnverified native/accessibility evidence:\n- STD\n\nStates without rendered proposals (not visually verified):\nnot calculated\nout of balance\nerror\nexport in progress\nexport failed\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Rp 03. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -2325,6 +2331,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "b773abae05656784e8d561b64899d51df7ec7313c4d411941095584ad343d1b2",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "RP-04",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -2355,6 +2362,27 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-14cb8a13bec84572",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-04-accounts.svg",
+            "sha256": "a737ad47f5f2572709ebd95ef7bf8b6e7965c4d212fe549b8125680507301c86"
+          },
+          "name": "Accounts"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-04-export.svg",
+            "sha256": "a0624e5e7d642c60c5149cc14e6eb44671c1d7d4f8aa1ac1ebf6b4835c93cf6b"
+          },
+          "name": "Export"
+        }
+      ],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -2365,29 +2393,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReports > Trial balance. 48pt sub-tab row: Overview / Accounts / Export. Overview: as-of date, 'Update report', totals card (total debits, total credits, difference), strip 'Debits = Credits'. 'In balance' appears only when the unfiltered difference is exactly $0.00; otherwise 'Out of balance by $X' in words. Accounts: cards for every account with account code, name, type badge, and Dr or Cr balance, with no horizontal overflow. Proposed: search, type chips, and a chevron drilling into that account's general ledger (RP-05); filtered views never show the balance status. Export: scope card stating the as-of date and that the file always covers all accounts, unfiltered, whatever is set on the Accounts tab. Current file columns: as-of date, account, account type, debit, credit, plus a totals row; account code is not included today. 'Export CSV' (primary), 'Export PDF' (secondary; the PDF holds the CSV rows), and a share-sheet statement. States: Overview, Accounts, Export, out of balance, not calculated.\n\nVisual-only changes:\n- Sub-tabs\n- Account cards instead of three-column rows\n- Reconciliation strip\n\nExisting supported behavior:\n- Debit/credit per account from the journal\n- Totals\n- Account codes and kinds in data\n- Update report\n- trialBalanceCsv (as-of, account, type, debit, credit, totals row)\n- PDF from the same CSV rows\n- OS share sheet delivery\n\nNew capability \u2014 separate authorization and tests required:\n- Account search and type filter\n- Drill-down from trial balance to the general ledger (no such link exists today)\n- Account code column in CSV/PDF\n\nUnsupported/excluded:\n- Print\n- Account-type dropdown from the reference\n- Hard-coded totals\n\nOutstanding decisions:\n- Authorize trial-balance-to-ledger drill-down as new navigation?\n- Add account code to the CSV/PDF?\n\nUnverified native/accessibility evidence:\n- STD\n\nStates without rendered proposals (not visually verified):\nout of balance\nnot calculated\nexport in progress\nexport failed\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Rp 04, Accounts, Export. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [
-        {
-          "name": "Accounts",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-04-accounts.svg",
-            "sha256": "a737ad47f5f2572709ebd95ef7bf8b6e7965c4d212fe549b8125680507301c86"
-          }
-        },
-        {
-          "name": "Export",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-04-export.svg",
-            "sha256": "a0624e5e7d642c60c5149cc14e6eb44671c1d7d4f8aa1ac1ebf6b4835c93cf6b"
-          }
-        }
-      ],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -2439,6 +2445,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "84b6fdd0a625a47728f1e77fd7d31054416a4eef5b6324ef7c0aaea5cc0c6bf0",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "RP-05",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -2470,6 +2477,34 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-358b47589a0842b1",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-05.svg",
+            "sha256": "00c7933500e681da511591c79c08fe7dedaf68a5816e70bca8b9e582dfc9dbfc"
+          },
+          "name": "Entries"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-05-accounts.svg",
+            "sha256": "38d7748a19b8d2ec4085158b7954a8007748f2cdf97868b9271baede6609329e"
+          },
+          "name": "Accounts"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-05-export.svg",
+            "sha256": "543262fbbd5ceda34bec8080462ecd28f5e07e36a4617c09b981c2540f17eeeb"
+          },
+          "name": "Export"
+        }
+      ],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -2480,36 +2515,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReports > General ledger. 48pt sub-tab row: Overview / Entries / Accounts / Export. Existing basis: one account's ledger, cumulative through the as-of date. Running and ending balance are computed as cumulative debits minus credits whatever the account's normal side, so credit-normal accounts come out negative. Overview: account selector, through date, 'Apply filters', summary (entries, total debits, total credits, ending balance as signed debits minus credits). Proposed and marked as such: a from-date with a beginning balance (no beginning figure is shown until it exists), and Dr/Cr side presentation. Entries: cards with date, reference, description, Debit or Credit, and running balance. The reference is a placeholder until decided. Proposed: entry search, and expanding a card to show the complete balanced journal (every line with debit and credit, a Debits = Credits check, and audit links to original/reversal/replacement). A simplified cash row never replaces debit/credit detail. Footer strip: 'Balance = cumulative debits - credits' for the selected account. It is not a universal beginning + debits - credits identity. Accounts (proposed): search plus account cards (code and name, type, debits and credits, ending balance, chevron into that ledger), with no balance status on filtered lists. Export: scope card stating one account, cumulative through the date, with no from-date in the file. CSV and PDF of the existing ledger via the share sheet. Proposed: export that respects a from-date or all accounts. States: Overview, Entries, Accounts, Export, no activity, error.\n\nVisual-only changes:\n- Sub-tabs\n- Entry cards\n\nExisting supported behavior:\n- One account's lines with debit, credit and running balance, cumulative through the date\n- journalEntryId per line\n- Totals\n- Ending balance (debits less credits)\n- Update ledger\n- CSV/PDF\n\nNew capability \u2014 separate authorization and tests required:\n- From-date (period) filter and beginning balance\n- Dr/Cr side or normal-side balance presentation\n- All-accounts mode and Accounts tab\n- Entry search\n- Expanded full balanced journal with other lines and audit history\n- User-facing reference display\n- Export respecting a from-date or all accounts\n\nUnsupported/excluded:\n- Project filter\n- Transaction-type filter\n- Simplified income/expense row replacing debit/credit\n- Universal normal-side identity\n\nOutstanding decisions:\n- What is the 'reference': a short journal-entry ID or a new user-facing number?\n- How is the beginning balance defined when a from-date is set?\n- Present balances as Dr/Cr sides (proposed) or as signed debits minus credits (current)?\n\nUnverified native/accessibility evidence:\n- STD\n\nStates without rendered proposals (not visually verified):\nno activity\nerror\nexport in progress\nexport failed\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Overview, Entries, Accounts, Export. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [
-        {
-          "name": "Entries",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-05.svg",
-            "sha256": "00c7933500e681da511591c79c08fe7dedaf68a5816e70bca8b9e582dfc9dbfc"
-          }
-        },
-        {
-          "name": "Accounts",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-05-accounts.svg",
-            "sha256": "38d7748a19b8d2ec4085158b7954a8007748f2cdf97868b9271baede6609329e"
-          }
-        },
-        {
-          "name": "Export",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-05-export.svg",
-            "sha256": "543262fbbd5ceda34bec8080462ecd28f5e07e36a4617c09b981c2540f17eeeb"
-          }
-        }
-      ],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -2560,6 +2566,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "3998dfff0eee536e4c8f328a7c98ee68e33ffbb4bba7dce6e5cb50414040c605",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "RP-06",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -2590,6 +2597,34 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-14cb8a13bec84572",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-06-members.svg",
+            "sha256": "780655ed35d75bcb4234b3fb2becf43916e952a5093a2f57b0635f796b711590"
+          },
+          "name": "Members"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-06-activity.svg",
+            "sha256": "1eb088b345a3c0a31db6092ee738db09138e8ecc5c857932a3b3641d16a61be3"
+          },
+          "name": "Activity"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-06-export.svg",
+            "sha256": "3c1935d8d385c0df45ca4db24f5045e67c9d53976bae9059d713180337baacc0"
+          },
+          "name": "Export"
+        }
+      ],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -2600,36 +2635,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReports > Capital movement workpaper. 48pt sub-tab row: Overview / By member / Activity / Export. Overview: period, 'Update workpaper', and existing period totals (cash contributions, property contributions, distributions, net capital activity). Proposed card 'Book capital rollforward (proposed)': total beginning capital, contributions, distributions, approved allocations 'None recorded', ending capital, with a strip where beginning + movements = ending. It needs a new period function; a note says today's file lists activity only. Member filter proposed. By member: cards with existing all-time ending book capital. Proposed: an expandable per-member rollforward with a check line and a footer reconciling to the Overview. Activity: dated cards (journal entry, CPA review badge; a distribution reduces capital and cash and is not an expense). Proposed: search, and chips All / Contributions / Distributions. Export: scope card (period, all members, rows, columns). The current memberCapitalMovementCsv has per-activity rows and period totals, with no beginning or ending capital lines. CSV and PDF. A disabled dashed row 'Export one member only' needs authorization. Ownership % never drives allocations. Book capital is not tax-basis capital, outside basis or at-risk amount. States: Overview, By member, Activity, Export, no activity.\n\nVisual-only changes:\n- Sub-tabs\n- Member cards instead of a seven-column table\n- Reconciliation strip\n\nExisting supported behavior:\n- Period cash and property contributions and distributions\n- Net capital activity\n- All-time book capital per member\n- memberCapitalMovementCsv and PDF\n- CPA review flag\n\nNew capability \u2014 separate authorization and tests required:\n- Period beginning and ending capital, per member and in total\n- Per-member rollforward\n- Member filter and member-filtered export\n- Activity search and chips\n\nUnsupported/excluded:\n- Computed income/loss allocations\n- Ownership % as an allocation driver\n- Illustrative allocation figures\n- Adjustments line (no such record type exists)\n\nOutstanding decisions:\n- Should opening-balance equity be part of beginning member capital? (proposed: no)\n- Introduce an 'adjustment' activity type? (existing kinds are cash contribution, property contribution and distribution only)\n\nUnverified native/accessibility evidence:\n- STD\n\nStates without rendered proposals (not visually verified):\nno activity\nexport in progress\nexport failed\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Rp 06, Members, Activity, Export. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [
-        {
-          "name": "Members",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-06-members.svg",
-            "sha256": "780655ed35d75bcb4234b3fb2becf43916e952a5093a2f57b0635f796b711590"
-          }
-        },
-        {
-          "name": "Activity",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-06-activity.svg",
-            "sha256": "1eb088b345a3c0a31db6092ee738db09138e8ecc5c857932a3b3641d16a61be3"
-          }
-        },
-        {
-          "name": "Export",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-06-export.svg",
-            "sha256": "3c1935d8d385c0df45ca4db24f5045e67c9d53976bae9059d713180337baacc0"
-          }
-        }
-      ],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -2681,6 +2687,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "f13981649b2b6b6327fa646a3a2240abb022d2cbaef0f531018e07d09d30641d",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "RP-07",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -2711,6 +2718,34 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-14cb8a13bec84572",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-07-recipients.svg",
+            "sha256": "45149d3644377faecaf7ec7621d3244ac2380de57034acd086a044ad0d4c6d8c"
+          },
+          "name": "Recipients"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-07-activity.svg",
+            "sha256": "60d387764f98badc12e73a135772b9312179dc84394b80eb74457bf2b2f72a03"
+          },
+          "name": "Activity"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-07-export.svg",
+            "sha256": "3e2540b1b0f440f1404d47e88cc8e9a542ae0f97ba2d058d106b9400e90b5e59"
+          },
+          "name": "Export"
+        }
+      ],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -2721,36 +2756,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReports > Payment cash workpaper. 48pt sub-tab row: Overview / By recipient / Activity / Export. Existing basis: guaranteedPaymentCashCsv covers guaranteed-payment cash only (services and use-of-capital payments and returns). Distribution cash is in RP-06 and loan cash in RP-08. Overview: period, 'Update', and the existing guaranteed-payment section (services and use-of-capital nets). Proposed card 'Proposed combined cash view' with subtitle 'Today's report backs guaranteed payments only'. It lists separately classified categories (guaranteed payments split into services and use of capital, member distributions, loan principal, loan interest) and a 'Proposed total'. Categories never merge; distributions are never grouped under Other. Type and recipient filters proposed. By recipient (proposed): member cards with per-category subtotals and a strip reconciling to the total. Activity: vertical cards with recipient, date, type, amount and a chevron to the source record. Loan repayments show principal and interest separately. Expanded: cash account, journal entry, status, reconciliation reference ('Definition needed'). Search and chips proposed. Export: the current file is guaranteed payments only, CSV and PDF via the share sheet. A combined export is a disabled row needing authorization. States: Overview, By recipient, Activity, Export, no payments.\n\nVisual-only changes:\n- Sub-tabs\n- Vertical payment cards instead of a wide table\n\nExisting supported behavior:\n- guaranteedPaymentCashCsv (GP payments and reversals, services and use-of-capital nets, signed amount, cash movement, payment and transaction IDs) with CSV/PDF\n- Distribution cash in the capital workpaper; loan cash in the loan workpaper\n\nNew capability \u2014 separate authorization and tests required:\n- Combined cash aggregation across GP, distributions and loan principal/interest\n- Combined total\n- Type and recipient filters\n- By-recipient grouping\n- Activity search and chips\n- Reconciliation reference per payment\n- Combined export\n\nUnsupported/excluded:\n- Illustrative totals\n- Distributions inside 'Other'\n- Separate By Type and Reconciliation tabs\n\nOutstanding decisions:\n- Define 'Other payments' (which records?) or drop it\n- What is a 'reconciliation reference': a bank reconciliation ID or a journal entry?\n\nUnverified native/accessibility evidence:\n- STD\n\nStates without rendered proposals (not visually verified):\nno payments\nexport in progress\nexport failed\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Rp 07, Recipients, Activity, Export. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [
-        {
-          "name": "Recipients",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-07-recipients.svg",
-            "sha256": "45149d3644377faecaf7ec7621d3244ac2380de57034acd086a044ad0d4c6d8c"
-          }
-        },
-        {
-          "name": "Activity",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-07-activity.svg",
-            "sha256": "60d387764f98badc12e73a135772b9312179dc84394b80eb74457bf2b2f72a03"
-          }
-        },
-        {
-          "name": "Export",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-07-export.svg",
-            "sha256": "3e2540b1b0f440f1404d47e88cc8e9a542ae0f97ba2d058d106b9400e90b5e59"
-          }
-        }
-      ],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -2801,6 +2807,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "538611abecfb626f5f1bb8757d141898b0666b47b285e5de622043d1449669b1",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "RP-08",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -2831,6 +2838,34 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-14cb8a13bec84572",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-08-loans.svg",
+            "sha256": "d2024a58f83f0d38db0666bba0f81e3d3ace72e50ae9852824d1ee444d0b4310"
+          },
+          "name": "Loans"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-08-activity.svg",
+            "sha256": "60870b9410e73f780f0e6c8bd4b9a1f4b6ae9a2c6cce500a27307c3c4c29207a"
+          },
+          "name": "Activity"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-08-export.svg",
+            "sha256": "5d9a69d54a822995a492d2cd4b2ef2e06fc31c7ac0fa21ef66e8405e0af68b40"
+          },
+          "name": "Export"
+        }
+      ],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -2841,36 +2876,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReports > Loan cash workpaper. 48pt sub-tab row: Overview / By loan / Activity / Export. Existing basis: loanCashActivityCsv (advances and repayments, lender and lender type, cash, principal/interest split, journal entry, period totals, balances as of the through date). Overview: period, 'Update', and existing period advances, principal repaid, interest paid (shown separately as cash) and outstanding principal as of the through date by member and third party. Proposed card 'Principal rollforward (proposed)': beginning principal, advances, principal repaid, adjustments (only if an adjustment record type is approved), ending principal, with a strip. Loan filter proposed. No scheduled amounts exist without a schedule model; if one is authorized, scheduled amounts are labeled 'scheduled' and never added to cash. By loan: lender cards with lender type, commitment remaining and existing outstanding principal. Proposed: per-loan beginning-to-ending rollforward, and 'Open loan detail', where amortization would live, with a footer reconciling to the Overview. Activity: cards. A repayment expands to principal + interest = cash paid, plus the journal entry. An advance is described as principal received, not income or capital. Search and chips proposed. Export: scope card (period, all loans, columns, balances as of the through date), CSV and PDF via the share sheet, and a disabled amortization row. States: Overview, By loan, Activity, Export, no loans.\n\nVisual-only changes:\n- Sub-tabs\n- Loan cards\n- Reconciliation strip\n\nExisting supported behavior:\n- Advances, principal repaid and interest paid in the period\n- Outstanding principal by member/third party\n- Per-loan outstanding and commitment remaining\n- Accrued estimate\n- loanCashActivityCsv and PDF\n\nNew capability \u2014 separate authorization and tests required:\n- Period beginning principal, in total and per loan (rollforward)\n- Adjustments line\n- Loan filter\n- Amortization in loan detail (requires a schedule model)\n- Activity search and chips\n\nUnsupported/excluded:\n- Illustrative amounts\n- Term/maturity unless stored\n- Amortization and Reconciliation as top-level tabs\n\nOutstanding decisions:\n- Introduce an adjustment record type? If not, omit the line\n- Authorize amortization (requires a schedule model)?\n\nUnverified native/accessibility evidence:\n- STD\n\nStates without rendered proposals (not visually verified):\nno loans\nexport in progress\nexport failed\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Rp 08, Loans, Activity, Export. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [
-        {
-          "name": "Loans",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-08-loans.svg",
-            "sha256": "d2024a58f83f0d38db0666bba0f81e3d3ace72e50ae9852824d1ee444d0b4310"
-          }
-        },
-        {
-          "name": "Activity",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-08-activity.svg",
-            "sha256": "60870b9410e73f780f0e6c8bd4b9a1f4b6ae9a2c6cce500a27307c3c4c29207a"
-          }
-        },
-        {
-          "name": "Export",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-08-export.svg",
-            "sha256": "5d9a69d54a822995a492d2cd4b2ef2e06fc31c7ac0fa21ef66e8405e0af68b40"
-          }
-        }
-      ],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -2906,6 +2912,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "03f61585dcb00a77adcd1474b4482df0d3b577eb7ca11deed75a97eee0ab3356",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "RP-09",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -2936,6 +2943,34 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-358b47589a0842b1",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-09-datareview.svg",
+            "sha256": "d48cc7d3a244abca485099c8153b24fc3ebe81e0bbf577c1a62a353a69d1147b"
+          },
+          "name": "Data review"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-09-package.svg",
+            "sha256": "183ff31975d46c4fff23a38025f96b2868eaf03844bbf2697f66832ff4c22924"
+          },
+          "name": "Package"
+        },
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/RP-09.svg",
+            "sha256": "2b64e87c84049801d2a2d232a675154c6edfd3941df47965f16c5bd9bb7a99bd"
+          },
+          "name": "Export"
+        }
+      ],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -2946,36 +2981,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nReports > Tax Data Exchange, with Reports selected in the tab bar. Subtitle: 'Bookkeeping evidence for your CPA or LLCBookKeepingTaxReturn. No tax calculations.' 48pt sub-tab row: Overview / Data review / Package / Export. Overview: from/through dates; tax-year selector as a disabled dashed row needing authorization; readiness limited to the existing validation (report calculated, active LLC matches, dates valid), with blocked reasons in words; 'Review data'. Data review: cash-basis summary (income, operating expenses, income minus expenses), what those totals exclude, and a disabled row for capital and missing-category checks. Package: one fixed, locked item, 'Income and operating-expense totals (exchange v1)', with its exclusions and limitations listed. Trial balance, general ledger, capital movement and loan cash are listed as unavailable, each needing separate authorization and a new contract version. Export: package details 'Format: JSON file, not encrypted' and 'Review status: Unreviewed', 'Prepare bookkeeping JSON', and a statement that nothing is sent until the user picks a share-sheet destination. Share outcome text stays honest (shared or cancelled). The file content matches the Package tab exactly. No screen says 'encrypted'. Form 1065, K-1 and allocations belong to LLCBookKeepingTaxReturn and are not in this product. States: Overview, Data review, Package, Export, blocked, preparing, shared, cancelled.\n\nVisual-only changes:\n- Name 'Tax Data Exchange' (owner-requested)\n- Sub-tabs\n- Cards\n\nExisting supported behavior:\n- Exchange v1 plaintext JSON of the computed cash-basis income and operating-expense totals\n- Validation and blocked reasons\n- Exclusions and limitations list\n- Explicit OS share with honest outcome text\n- No tax calculation\n\nNew capability \u2014 separate authorization and tests required:\n- Tax-year selector\n- Capital and missing-category readiness checks\n- Multi-dataset package selection (new exchange contract version)\n- Encrypted export (crypto exists only in backup development tools)\n- Explicit share target to LLCBookKeepingTaxReturn\n\nUnsupported/excluded:\n- AES-256 or any 'encrypted' claim\n- '.zip' multi-dataset package\n- Secure share to CPA\n- EIN\n- Form 1065, K-1 or allocations\n- Any change to LLCBookKeepingTaxReturn\n\nOutstanding decisions:\n- Authorize an encrypted package and new exchange contract version?\n- Authorize the tax-year selector and additional readiness checks?\n\nUnverified native/accessibility evidence:\n- STD\n\nStates without rendered proposals (not visually verified):\nblocked\npreparing\nshared\ncancelled\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Overview, Data review, Package, Export. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [
-        {
-          "name": "Data review",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-09-datareview.svg",
-            "sha256": "d48cc7d3a244abca485099c8153b24fc3ebe81e0bbf577c1a62a353a69d1147b"
-          }
-        },
-        {
-          "name": "Package",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-09-package.svg",
-            "sha256": "183ff31975d46c4fff23a38025f96b2868eaf03844bbf2697f66832ff4c22924"
-          }
-        },
-        {
-          "name": "Export",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/RP-09.svg",
-            "sha256": "2b64e87c84049801d2a2d232a675154c6edfd3941df47965f16c5bd9bb7a99bd"
-          }
-        }
-      ],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -3014,6 +3020,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "3065d439c8ab51a7de22564ff89802901628a5fbd61796435b1a1747323c889f",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "MO-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -3042,6 +3049,14 @@
         "path": "docs/design-governance/proposals/v3/MO-01.svg",
         "sha256": "24e19b92b776fb3ddd38d8e5d8f62edb7d91634b0fca5b6f27a911de81659a70"
       },
+      "proposal_provider_profile": "claude-m5-llc-login",
+      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -3052,16 +3067,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nMore tab, laid out from the registry 'More Settings' reference. Title 'More'. Sage workspace card: active LLC name, member count, 'Switch'. Group 'Books': Accounts and reconciliation (AC-01), LLC workspaces (OB-ADD list), Bookkeeping periods (SET-01 periods card). Group 'Settings and data': Settings and privacy (SET-01), Reminders, Storage and recovery tools (BOOT-03). Rows are at least 48pt (52pt proposed), each with icon, title, one-line description and chevron, and every row opens an existing screen or section. Until the direct rows are authorized, workspaces, periods and reminders stay reachable inside Settings as they are today. State: default.\n\nVisual-only changes:\n- Grouped list\n- Workspace card\n\nExisting supported behavior:\n- Accounts entry\n- Settings entry\n- Workspaces, periods and reminders inside Settings\n- Storage tools entry\n\nNew capability \u2014 separate authorization and tests required:\n- Direct More > LLC workspaces row (owner-requested navigation)\n- Direct rows for Bookkeeping periods and Reminders\n\nUnsupported/excluded:\n- Notifications\n- App lock or biometrics\n- Help center\n- Data deletion\n- Preferences/currency\n- Edit LLC\n- Export Data hub\n\nOutstanding decisions:\n- Approve direct More rows for periods and reminders?\n\nUnverified native/accessibility evidence:\n- STD\n- Foundry capture book-more.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\n\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Mo 01. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_provider_profile": "claude-m5-llc-login",
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -3100,6 +3106,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "88cd455766d23b7c5821aa2c125a31c375b9c3f3ca17a9195a70ab7af0c21991",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "AC-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -3128,6 +3135,14 @@
         "path": "docs/design-governance/proposals/v3/AC-01.svg",
         "sha256": "40003b5080e10679314e816a283c115774eae8f22e05511cfe9a7ed6c3fcf265"
       },
+      "proposal_provider_profile": "claude-m5-llc-login",
+      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -3138,16 +3153,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nMore > Accounts and reconciliation, laid out from the registry 'Accounts & Reconciliation' reference. Back to More. 48pt sub-tab row: Accounts / Reconcile / Categories. Accounts: tiles for cash total and account counts; account cards with name, bank or cash type, and journal balance; '+ Add account' with an optional opening balance offset to Opening Balance Equity. Proposed: a not-yet-reconciled count tile and a last-reconciled badge per account. Reconcile: statement date and ending balance, select cleared items, a difference strip, Complete or Reopen, and statement history cards with audit events. Reconciliation never changes balances. Categories: income and expense chart accounts and '+ Add chart account'. States: Accounts, Reconcile, Categories, no accounts.\n\nVisual-only changes:\n- Sub-tabs\n- Tiles\n- Cards instead of a table\n\nExisting supported behavior:\n- Create account with opening balance (OBE offset)\n- Balances from the journal\n- Chart accounts\n- Manual reconciliation start/complete/reopen\n- Statement history\n- Audit events\n\nNew capability \u2014 separate authorization and tests required:\n- Not-reconciled count and last-reconciled badge (derived)\n- Reconciliation report PDF\n\nUnsupported/excluded:\n- Bank institution names\n- Masked account numbers\n- Bank connection\n- Reference's 'Activity' tab\n\nOutstanding decisions:\n- Use Categories as the third tab instead of the reference's 'Activity'?\n\nUnverified native/accessibility evidence:\n- STD\n- Foundry capture book-accounts.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\nReconcile\nCategories\nno accounts\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Ac 01. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_provider_profile": "claude-m5-llc-login",
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -3186,6 +3192,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "828193728326a2358eb2d868148667b811b41436efd5b47cc4a7c81d033aca13",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "SET-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -3216,19 +3223,18 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
-      "references": [],
-      "revision": "proposal-v3",
-      "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nMore > Settings, workspaces and periods. There is no layout reference: the registry 'Settings' image actually shows a More menu, so it serves only as a style cue, and the loan-workpaper image is excluded. Back to More. Cards: business profile (read-only); single-member policy (shown when there is one member); LLC workspaces and Reminders (existing sections, also reachable from More rows if authorized); Bookkeeping periods (lock status in words, 'Close books through' date, required reason, Close and 'Reopen latest' with a required reason, and period audit history that is never removed); Privacy statement; a row to Storage and recovery tools (BOOT-03). States: open periods, closed through date, busy, error.\n\nVisual-only changes:\n- Cards instead of a long column of panels\n- Lock status band\n\nExisting supported behavior:\n- Business profile display\n- Single-member policy\n- Workspaces\n- Reminders\n- Close/reopen with required reason\n- Period audit history\n- Privacy text\n- Storage tools link\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Editing the business profile\n\nOutstanding decisions:\n- Accept the text-derived layout (no Settings reference exists)?\n\nUnverified native/accessibility evidence:\n- STD\n- Foundry capture book-settings.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\nclosed through date\nbusy\nerror\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Set 01. DEFAULT capture means the first displayed proposal state.",
-      "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
       "proposal_provider_runs": [
         "design-discovery-7c8a2aed6237439b",
         "design-discovery-358b47589a0842b1",
         "design-discovery-14cb8a13bec84572"
       ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "proposal_states": [],
+      "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
+      "references": [],
+      "revision": "proposal-v3",
+      "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nMore > Settings, workspaces and periods. There is no layout reference: the registry 'Settings' image actually shows a More menu, so it serves only as a style cue, and the loan-workpaper image is excluded. Back to More. Cards: business profile (read-only); single-member policy (shown when there is one member); LLC workspaces and Reminders (existing sections, also reachable from More rows if authorized); Bookkeeping periods (lock status in words, 'Close books through' date, required reason, Close and 'Reopen latest' with a required reason, and period audit history that is never removed); Privacy statement; a row to Storage and recovery tools (BOOT-03). States: open periods, closed through date, busy, error.\n\nVisual-only changes:\n- Cards instead of a long column of panels\n- Lock status band\n\nExisting supported behavior:\n- Business profile display\n- Single-member policy\n- Workspaces\n- Reminders\n- Close/reopen with required reason\n- Period audit history\n- Privacy text\n- Storage tools link\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Editing the business profile\n\nOutstanding decisions:\n- Accept the text-derived layout (no Settings reference exists)?\n\nUnverified native/accessibility evidence:\n- STD\n- Foundry capture book-settings.png shows the OLD layout\n\nStates without rendered proposals (not visually verified):\nclosed through date\nbusy\nerror\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Set 01. DEFAULT capture means the first displayed proposal state.",
+      "visual_verification_evidence": [],
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -3263,6 +3269,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "1668cddb42b863e9a67171f0e1cbb4c688c5c12a8bace69f32a948bbdafb966c",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "OB-ADD",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -3293,6 +3300,20 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [
+        {
+          "artifact": {
+            "path": "docs/design-governance/proposals/v3/OB-ADD-workspaces.svg",
+            "sha256": "1f7f946096142bd2a3fdd6bb2a4e718546fe5662eb4083d50265d058d62c73fa"
+          },
+          "name": "Workspaces"
+        }
+      ],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -3303,22 +3324,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nTwo separate screens reached via More > LLC workspaces, with More selected in the tab bar. 'LLC workspaces': one card per local workspace, an 'Open now' check on the active one and 'Switch' on the others, plus '+ Add another LLC'. Switching never mixes LLC data. 'Add another LLC': mist note that each LLC has separate local books; fields LLC name, state, formation date, books start date; a 'What will be created' card; Cancel / Continue. Continue goes through the existing members, first-account and review steps, and creation is atomic. Cancel leaves no partial workspace. Today this flow runs full-screen without tabs; keeping tabs visible is proposed. States: workspaces list, add form, creating, error.\n\nVisual-only changes:\n- Workspace cards\n- Add form styling\n\nExisting supported behavior:\n- Separate local books per LLC\n- Switch workspace\n- Add via the existing setup flow\n\nNew capability \u2014 separate authorization and tests required:\n- Direct More > LLC workspaces route (owner-requested)\n- Tab bar visible during add-LLC (currently full-screen)\n\nUnsupported/excluded:\n- EIN\n- Tax classification\n- Fiscal year\n- Currency choice (USD only)\n- Rename, archive or delete\n- Active/Inactive status\n\nOutstanding decisions:\n- Keep tabs visible through the later setup steps (members, account, review)?\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\ncreating\nerror\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Ob add, Workspaces. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [
-        {
-          "name": "Workspaces",
-          "artifact": {
-            "path": "docs/design-governance/proposals/v3/OB-ADD-workspaces.svg",
-            "sha256": "1f7f946096142bd2a3fdd6bb2a4e718546fe5662eb4083d50265d058d62c73fa"
-          }
-        }
-      ],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -3353,6 +3359,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "305e197c0d237c4ead09faffb6587b1b34560082c46157539d05c5e54f25c1f6",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "BOOT-03",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -3383,6 +3390,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -3393,14 +3406,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nStorage and recovery tools, full-screen and reachable even when books are locked (from BOOT-02 and Settings), with a 'Return to books' back link. Caution chip 'Development tools - synthetic data' until certified. Card 'Encrypted backup file': passphrase field and 'Create encrypted backup', with a caption that the user chooses where the file goes and there is no recovery server. Card 'Restore from a backup file': warning that it replaces this LLC's local books after the file and passphrase are checked, 'Choose backup file', and an explicit restore confirmation. A restore never partly replaces data. Collapsed 'Storage checks' card with the existing retry-key-access, restore-journal recovery, SQLCipher and tamper proof runners. No cloud wording. States: default, running, restore confirm, success, failure.\n\nVisual-only changes:\n- Cards\n- Caution chip\n\nExisting supported behavior:\n- Encrypted proof backup export with passphrase\n- Restore from backup file\n- Retry key access\n- Restore-journal recovery\n- SQLCipher and tamper proofs (development scope)\n\nNew capability \u2014 separate authorization and tests required:\n- Certified user backup/restore of real books (production verification)\n- Storage usage meter\n- 'Last backup' record\n\nUnsupported/excluded:\n- Automatic backups\n- Cloud icons or wording\n- In-app list of backups\n- Backup sizes\n- 'Export & Import (Advanced)' entry\n\nOutstanding decisions:\n- When is the 'development' label removed? (requires the security release gate)\n\nUnverified native/accessibility evidence:\n- STD\n- Restore must be verified in both platform directions\n\nStates without rendered proposals (not visually verified):\nrunning\nrestore confirm\nsuccess\nfailure\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Boot 03. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -3435,6 +3441,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "8566f14faa744d397f01ada7330b2d7ecd493c3d71a4b1a66c1b66a4183a49f9",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "BOOT-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -3465,19 +3472,18 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
-      "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
-      "references": [],
-      "revision": "proposal-v3",
-      "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nLoading books, the startup loading state before the snapshot loads. Emerald header with the brand only. Centered progress ring, title 'Opening your books', and the line 'Checking the encrypted database on this device.' During restore-journal recovery, the existing message 'Checking restore journal...' replaces that line. No actions, no tab bar, no import UI. The screen reader announces the busy state. States: loading, recovery check.\n\nVisual-only changes:\n- Header\n- Progress ring\n- Copy\n\nExisting supported behavior:\n- Loading state before snapshot\n- Recovery check message\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Any import UI on this screen (the supplied import-preview image does not apply)\n- OFX/QFX/Excel import\n- Templates\n\nOutstanding decisions:\n- Should the import-preview concept from that image become its own future screen ID? (existing CSV import stays in TX-06)\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nrecovery check\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Boot 01. DEFAULT capture means the first displayed proposal state.",
-      "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
       "proposal_provider_runs": [
         "design-discovery-7c8a2aed6237439b",
         "design-discovery-358b47589a0842b1",
         "design-discovery-14cb8a13bec84572"
       ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "proposal_states": [],
+      "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
+      "references": [],
+      "revision": "proposal-v3",
+      "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nLoading books, the startup loading state before the snapshot loads. Emerald header with the brand only. Centered progress ring, title 'Opening your books', and the line 'Checking the encrypted database on this device.' During restore-journal recovery, the existing message 'Checking restore journal...' replaces that line. No actions, no tab bar, no import UI. The screen reader announces the busy state. States: loading, recovery check.\n\nVisual-only changes:\n- Header\n- Progress ring\n- Copy\n\nExisting supported behavior:\n- Loading state before snapshot\n- Recovery check message\n\nNew capability \u2014 separate authorization and tests required:\n\n\nUnsupported/excluded:\n- Any import UI on this screen (the supplied import-preview image does not apply)\n- OFX/QFX/Excel import\n- Templates\n\nOutstanding decisions:\n- Should the import-preview concept from that image become its own future screen ID? (existing CSV import stays in TX-06)\n\nUnverified native/accessibility evidence:\n- STD\n- No capture exists\n\nStates without rendered proposals (not visually verified):\nrecovery check\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Boot 01. DEFAULT capture means the first displayed proposal state.",
+      "visual_verification_evidence": [],
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     },
     {
       "acceptance": [
@@ -3512,6 +3518,7 @@
       "depends_on": [],
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "design_hash": "18020faef65de39555d3ea4bd024beabfe8fbdaf55f5b991537acbb7bc1d6f6c",
+      "design_implementation_status": "NOT_IMPLEMENTED",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "id": "BOOT-02",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -3542,6 +3549,12 @@
       },
       "proposal_provider_profile": "claude-m5-llc-login",
       "proposal_provider_run": "design-discovery-7c8a2aed6237439b",
+      "proposal_provider_runs": [
+        "design-discovery-7c8a2aed6237439b",
+        "design-discovery-358b47589a0842b1",
+        "design-discovery-14cb8a13bec84572"
+      ],
+      "proposal_states": [],
       "proposal_type": "OWNER_REQUESTED_PROVIDER_REDESIGN",
       "references": [
         {
@@ -3552,14 +3565,7 @@
       "revision": "proposal-v3",
       "specification": "REVISED DESIGN PROPOSAL \u2014 NOT IMPLEMENTED OR APPROVED.\n\nLocal books unavailable. Shown when the selected LLC's local database can't be opened safely, which fails closed. No tab bar. Database icon with an alert mark, title 'Local books are unavailable', an error detail card with the existing loadError text, and a mist note 'Your existing encrypted files have not been replaced.' Actions in order: 1 'Retry opening books' (primary, first focusable, existing retry); 2 'Restore from a backup file' (opens BOOT-03; landing directly on restore is proposed); 3 'Open storage and recovery tools'. Nothing can overwrite data without the explicit restore confirmation in BOOT-03. Privacy note: books are stored on this device, with no recovery server or key escrow. States: error, retrying, retry failed.\n\nVisual-only changes:\n- Hierarchy\n- Retry promoted to primary (owner-requested reorder of existing actions)\n\nExisting supported behavior:\n- Retry local storage\n- Open storage recovery tools (which contain restore)\n- Fail-closed open\n\nNew capability \u2014 separate authorization and tests required:\n- Deep link straight to restore\n- Showing the selected LLC name from the catalog\n- Static troubleshooting help\n\nUnsupported/excluded:\n- Load Books here\n- Choose a different storage location\n- EIN/Form 1065\n- Tab bar\n\nOutstanding decisions:\n- Accept no tab bar in this state (the reference shows one)?\n\nUnverified native/accessibility evidence:\n- STD\n- Requires a fault-injected native run on both platforms\n\nStates without rendered proposals (not visually verified):\nretrying\nretry failed\n\nExisting native captures show the OLD source at ae6754baba017adea78fb43e755e468c1a09dbf9. New-design native captures do not yet exist. Palette contrast and native interaction checks remain separate; provider prose is not a test pass.\n\nGallery presentation order: Boot 02. DEFAULT capture means the first displayed proposal state.",
       "visual_verification_evidence": [],
-      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED",
-      "proposal_states": [],
-      "proposal_provider_runs": [
-        "design-discovery-7c8a2aed6237439b",
-        "design-discovery-358b47589a0842b1",
-        "design-discovery-14cb8a13bec84572"
-      ],
-      "design_implementation_status": "NOT_IMPLEMENTED"
+      "visual_verification_status": "VISUAL_VERIFICATION_REQUIRED"
     }
   ],
   "source_revision": "ae6754baba017adea78fb43e755e468c1a09dbf9",
@@ -3567,11 +3573,5 @@
   "ui_source_roots": [
     "apps/mobile/bookkeeping",
     "App.tsx"
-  ],
-  "refinement_run": "design-discovery-14cb8a13bec84572",
-  "refinement_runs": [
-    "design-discovery-358b47589a0842b1",
-    "design-discovery-14cb8a13bec84572",
-    "design-discovery-79d1188294a74094"
   ]
 }
