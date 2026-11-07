@@ -1,0 +1,14 @@
+{
+  "actual_error": "rate_limit",
+  "evidence_source": "Owned Claude session e407f816-c95f-46c5-adbf-5840924360f7 for exact review source505c0466; assistant API error rate_limit",
+  "fallback_used": false,
+  "implementation_authorized": false,
+  "next_action": "After provider availability returns, rerun assigned read-only independent catalog review; preserve owner approval gate",
+  "prior_review": "FAIL at7ae5d10: dashboard preservation; correction committed but independent re-review not completed",
+  "profile": "claude-m5-llc-review",
+  "provider": "claude-code",
+  "provider_message": "You've hit your 5-hour limit \u00b7 resets6:30am (America/Los_Angeles)",
+  "review_source": "505c0466f9392ae1094b85339707ab0e7ef328c1",
+  "status": "BLOCKED_PROVIDER_RATE_LIMIT",
+  "substitution_used": false
+}
