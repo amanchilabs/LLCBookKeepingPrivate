@@ -2,7 +2,7 @@
   "schema_version": 1,
   "product": "llcbookkeepingprivate",
   "source_revision": "ae6754baba017adea78fb43e755e468c1a09dbf9",
-  "discovery_run": "design-discovery-2d46b04419114659",
+  "discovery_run": "design-discovery-bd1a1dc0dece47d3",
   "provider_profile": "claude-m5-llc-login",
   "synthetic_data_only": true,
   "imported_owner_approvals": [],
@@ -18,7 +18,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/Private LLC Bookkeeping Onboarding.png",
@@ -26,11 +26,16 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/OB-01.svg",
-        "sha256": "94e0c1cde2df8187794ed534bdde00a2e5cea64b0ad4a7b137f8d1a5ee7b4403"
+        "path": "docs/design-governance/captures/v2/book-welcome.png",
+        "sha256": "9db69518cdd2c08dede7eeb9210e08c2a56562f7aef15d6465b3374a39eb7ff2"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
-      "actual": [],
+      "proposal_type": "AS_IS_NATIVE_CAPTURE",
+      "actual": [
+        {
+          "path": "docs/design-governance/captures/v2/book-welcome.png",
+          "sha256": "9db69518cdd2c08dede7eeb9210e08c2a56562f7aef15d6465b3374a39eb7ff2"
+        }
+      ],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  OB-01  \u00b7  Welcome  \u00b7  Impl (`:206-218`)  \u00b7  Cream card `#FFFDF8`; \"On device\" status pill; title \"Your LLC books, kept private.\"; privacy sentence; \"Get started\"; a \"What you'll set up\" card  \u00b7  Mockup: *Private LLC Bookkeeping Onboarding.png*. It shows things the source doesn't: Skip (would bypass required setup), a 5-dot carousel, the claims \"CPA-ready reports\" and \"no data tracking\", an app icon, and a serif headline. Keep the source copy.  \u00b7  No Skip; one CTA that goes to OB-02; no \"CPA-ready\" or tax claims.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
         "Owner reviews the exact proposal hash and stated reference deviations.",
@@ -43,7 +48,7 @@
         "apps/mobile/bookkeeping/BusinessSetupScreen.tsx"
       ],
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
-      "capture_status": "UNVERIFIED",
+      "capture_status": "CAPTURED_IOS_SYNTHETIC",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "owner_approval_identity": null,
@@ -58,11 +63,13 @@
       "visual_verification_evidence": [],
       "last_reviewed_revision": null,
       "outstanding_design_issues": [
-        "No verifiable owner approval found.",
-        "Native visual coverage incomplete; browser wireframe is not native evidence."
+        "No trustworthy owner visual approval exists.",
+        "Native capture is an as-is proposal; physical-device, Android and assistive-technology acceptance are unverified."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "54b87435dffba429db1693d6eb51d1ea9ae35b69f1acd31a2ca58e8ef867836d"
+      "design_hash": "ed9e6c017d69808b1ade170ed54c338704a94a3aada3e95836022a514a87fb0b",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "OB-02",
@@ -76,7 +83,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/LLC Setup Onboarding Screen.png",
@@ -84,11 +91,16 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/OB-02.svg",
-        "sha256": "401f7cb9f5e9b6b1a8ba8678cd22100ac010fcd6ab4897d357548de55b17ee6f"
+        "path": "docs/design-governance/captures/v2/book-business.png",
+        "sha256": "19f55c1bebd3f1207a7247fd3c3eefa1b06f44e32a59b4dde3ac61d9f81f57a3"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
-      "actual": [],
+      "proposal_type": "AS_IS_NATIVE_CAPTURE",
+      "actual": [
+        {
+          "path": "docs/design-governance/captures/v2/book-business.png",
+          "sha256": "19f55c1bebd3f1207a7247fd3c3eefa1b06f44e32a59b4dde3ac61d9f81f57a3"
+        }
+      ],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  OB-02  \u00b7  Your LLC  \u00b7  Impl (`:220-232`)  \u00b7  Progress \"Setup \u00b7 1 of 4\" with a 4-segment bar; name, state (2 letters, auto-uppercased), formation date, books start date  \u00b7  Mockup has a tax-classification picker. Rejected, and correctly absent from source.  \u00b7  Validation errors appear in FormError and typed values are kept.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
         "Owner reviews the exact proposal hash and stated reference deviations.",
@@ -101,7 +113,7 @@
         "apps/mobile/bookkeeping/BusinessSetupScreen.tsx"
       ],
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
-      "capture_status": "UNVERIFIED",
+      "capture_status": "CAPTURED_IOS_SYNTHETIC",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "owner_approval_identity": null,
@@ -116,11 +128,13 @@
       "visual_verification_evidence": [],
       "last_reviewed_revision": null,
       "outstanding_design_issues": [
-        "No verifiable owner approval found.",
-        "Native visual coverage incomplete; browser wireframe is not native evidence."
+        "No trustworthy owner visual approval exists.",
+        "Native capture is an as-is proposal; physical-device, Android and assistive-technology acceptance are unverified."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "be0495d9262c7bb995e48ffa36c2054c90fdd365c244784ae84d099254749e15"
+      "design_hash": "8844797a925f0662d892980ec82b30f2017438286242e4d32228e4cde499f228",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "OB-03",
@@ -134,7 +148,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/LLC Members and Ownership Setup.png",
@@ -142,10 +156,10 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/OB-03.svg",
-        "sha256": "e5601ac6bdb8f53c43baa1445cb02a169053f2ebad26afd5583396cd9a22ca44"
+        "path": "docs/design-governance/proposals/v2/OB-03.svg",
+        "sha256": "3d5daed101ff09c16f7429e9403961bff634d5d90dc404b6c025e2dcac71e55e"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  OB-03  \u00b7  Members & ownership  \u00b7  Impl (`:234-267`)  \u00b7  Single/multi choice; button to apply the suggested 40/20/20/20 split; member cards; running total; explicit confirmation checkbox, which resets whenever anything is edited  \u00b7  Matches the corrected decision. Defaults to \"multi\" with the suggested split prefilled (Q2).  \u00b7  Can't continue unless the total is 100% and the box is checked.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -178,7 +192,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "51f26d062efc0c462c8018e1f3a09490998a77a3b27be6008f56936646a37e5d"
+      "design_hash": "a3f0d75f82679dd877a25e53677ee1e883b896b0a8a0fa67fbc395665786141c",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "OB-04",
@@ -192,7 +208,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/First Account Setup Onboarding Screen.png",
@@ -200,10 +216,10 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/OB-04.svg",
-        "sha256": "fbb17313c4c2758a4ac6f2398c428f1c6be14904ca69dc3c60d0b10f1502bc72"
+        "path": "docs/design-governance/proposals/v2/OB-04.svg",
+        "sha256": "9ed8d83ebe3fe179e8eb105d694494c4f4003fc2c8b7fdae5bfb416d271939b4"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  OB-04  \u00b7  First account  \u00b7  Impl (`:269-286`)  \u00b7  \"Set up now\" / \"Do this later\"; bank or cash; name; optional opening balance (negative allowed for bank only); date field appears when a balance is entered  \u00b7  The subtitle states the Opening Balance Equity offset. \u2714  \u00b7  If skipped, no account is created. The opening balance date can't be before the books start date.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -236,7 +252,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "53d574ffbcd7cab1a63e9a0615981213aec9fb619c63906c9ba9f69bd32a24dd"
+      "design_hash": "c5d7a4d09d74a825b8b85fadce6ba931aaec045015d7390072a3d4f97e830e71",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "OB-05",
@@ -250,7 +268,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/LLC Onboarding Review Screen.png",
@@ -258,10 +276,10 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/OB-05.svg",
-        "sha256": "bce1a645c5ba9fc268cea16f2c0617e1e6d8e79af7af14474f4942cf41a4e988"
+        "path": "docs/design-governance/proposals/v2/OB-05.svg",
+        "sha256": "9661508a94721c4ba9fbb83d0c2df712d1f98bcd32640c25b818dcfb05afa7fc"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  OB-05  \u00b7  Review  \u00b7  Impl (`:288-316`)  \u00b7  Three sections, each with an \"Edit\u2026\" button; \"Create LLC\" shows a saving state  \u00b7  \u2714  \u00b7  Business and account are saved in one action (`createBusinessWithInitialAccount`). No contribution is inferred from the opening balance.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -294,7 +312,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "2c4ca4e4c6b71a408618bd3f11704a91877ac2f3d2f7f59785ae4e0b772c18ba"
+      "design_hash": "eca8606c5c4ec7e851b35d3c4e6046da5aa8b1d80f59087e98308467e16a380e",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "OB-06",
@@ -308,7 +328,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/LLC Workspace Ready Screen.png",
@@ -316,10 +336,10 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/OB-06.svg",
-        "sha256": "8d8055b656bfce85d2c740d16f97d7bae1c7ef458652c0a20c25de0b1e6601dd"
+        "path": "docs/design-governance/proposals/v2/OB-06.svg",
+        "sha256": "10407db83ae3b5c9711cc2afe14b745d3fa080be26434263b34dd5292900a0a6"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  OB-06  \u00b7  Ready  \u00b7  Impl (`:318-326`)  \u00b7  \"Your books are ready.\" with a summary and \"Go to dashboard\"  \u00b7  Mockup offers a tour. Not supported, and correctly absent.  \u00b7  Goes to the Dashboard with the new business loaded.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -352,7 +372,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "689d12d70fa2272a766c157455d256762003fe6dc51867ceeb3009cbbfecb71e"
+      "design_hash": "ae93c0e850beac518b3971d482973caae64b85bb415cc4f62f6dac282f18003f",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "SH-01",
@@ -659,7 +681,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/Transaction Details and Member Allocation.png",
@@ -667,10 +689,10 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/TX-03.svg",
-        "sha256": "491bdf8b883a48117546efe0558f63c433aa302c00fc2f301cca4145e02e25a0"
+        "path": "docs/design-governance/proposals/v2/TX-03.svg",
+        "sha256": "a675976f43c081eb0a74ba9aff430b915134ff4158aa2a49a555624a65710b59"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  TX-03  \u00b7  Transaction detail (inline)  \u00b7  Description; role badge; amount; date, category and account; split lines; links to related reversal/replacement entries; \"Reverse and replace\" only for eligible entries  \u00b7  Mockup *Transaction Details and Member Allocation.png*: reject member allocation, Edit, Duplicate, Delete, \"by John Doe\" and the timeline actors (it also has the typo \"Activitv\"). Source issue T-a: the link shows a raw UUID (\"Linked original transaction: {id}\"); it should show date, description and amount. T-b: the panel only appears inside History; when a search result opens Transactions, the matching record isn't selected.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -703,7 +725,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "d172fa1d66596e332d9748d51f7cf4240441b9c8893d32c8b33ad1af8faf847b"
+      "design_hash": "0ea20a79e4292c4fc90ba1f57b86d828f5038e091db23e0227985fa69c66bd78",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "TX-04",
@@ -715,13 +739,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/TX-04.svg",
-        "sha256": "377f0536420b983149292f01820f4a7d3c7f9a2dd7f361f058a9cb31128f9917"
+        "path": "docs/design-governance/proposals/v2/TX-04.svg",
+        "sha256": "0f3d479f7e361a5f58f546288fc73a57cdcdc26f70cc1340b0f14ea556a18539"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  TX-04  \u00b7  Reverse and replace  \u00b7  Same form as TX-02 with a heading and an explanation that the original entry stays; \"Post reversal and replacement\"; notice afterwards  \u00b7  Gap: there is no preview or confirmation step showing original vs reversal vs replacement before posting. The spec requires one (Q5).  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -754,7 +778,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "e5a47463b12830ae8718ff7eab21d06ce5bf1475c560571b93a6434ab7a9a3ee"
+      "design_hash": "34f4d2f0fc29cebe3bf9ed2f93978532f1330e72bd259c6e8148f29b2a65d3a8",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "TX-05",
@@ -766,13 +792,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/TX-05.svg",
-        "sha256": "1ab5d5c4ba343b873efb3c132478ce2a5a80e6b67a6f127203847fb7980a847d"
+        "path": "docs/design-governance/proposals/v2/TX-05.svg",
+        "sha256": "1406844f53ff253e2a2d54d47628c5c250ca273940d52b7f2c05776f46ca5604"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  TX-05  \u00b7  Recurring  \u00b7  `RecurringTransactionsSection.tsx`  \u00b7  I inventoried this but didn't review its content.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -805,7 +831,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "c59026bb00a8025299165f2379641edae83725e5dab06984ccea1bb2ad5451e2"
+      "design_hash": "6a58231a2bbac941ee60d3b2a3f545e58a8a45d0d3ff83ae5accd35569747796",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "TX-06",
@@ -817,13 +845,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/TX-06.svg",
-        "sha256": "2cb02aa21c2dd48a88bce27d01d7d1bdebae33abf47b200e618a33553604e591"
+        "path": "docs/design-governance/proposals/v2/TX-06.svg",
+        "sha256": "ac222a2cb15e859c22f24f07c0717be9c07a7b5d8401c645961638f155234bec"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  TX-06  \u00b7  CSV import  \u00b7  `TransactionCsvImportPanel.tsx`  \u00b7  I inventoried this but didn't review its content.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -856,7 +884,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "297788df0c6954cc55b71c646b4f4d4ec89e924b24994d3d493ede5535006b38"
+      "design_hash": "6dfb77f777689440180f4d48c3ffac3de977754ab894db6765aa9a1e07d2854f",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "MB-01",
@@ -929,7 +959,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/Member Capital Ledger Dashboard.png",
@@ -937,10 +967,10 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/MB-02.svg",
-        "sha256": "f473cb0b1605b92606f3ef010a07dc6260f7d8f217a847b7343e1b1dcdf6aa59"
+        "path": "docs/design-governance/proposals/v2/MB-02.svg",
+        "sha256": "5af9c09a5d02384254e8824707848a60242d891f767d8178d32e4fd25efa6677"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  MB-02  \u00b7  Capital  \u00b7  Contribution/distribution form (property requires a description and is flagged for CPA review); per-member ledgers; dated activity list  \u00b7  M-a: the field label \"Member receiving capital activity\" reads wrong for contributions. Suggested label: \"Member\". The *Member Capital Ledger* mockup's inclusion of loans and guaranteed payments is rejected.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -973,7 +1003,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "41aa48f2a2e014271c97e2e76642da6c10742d5b73aa89636fe08941cc74fb59"
+      "design_hash": "41a725c04673a9f4071e45a42ca6aa4794b6ee772b13be48eb71d6399669f6ab",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "MB-03",
@@ -985,7 +1017,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/Modern Guaranteed Payments Dashboard.png",
@@ -993,10 +1025,10 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/MB-03.svg",
-        "sha256": "a323277478f0c25bc07bd8578e42b6dd8611f869b4d9880295f3e7bbd6dc361e"
+        "path": "docs/design-governance/proposals/v2/MB-03.svg",
+        "sha256": "e5850cbb9cc0dac9551ceda127ced016af34ccb7662d8c4bcf3634512905811b"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  MB-03  \u00b7  Payments  \u00b7  Obligation form (memo only, no posting); totals for outstanding, due and overdue; installment list; actual-payment form with allocation lines (multi-member only); payment history with reversal fields  \u00b7  A single-member LLC gets disabled-state text. \u2714 The *Modern Guaranteed Payments* mockup's split between obligations and paid amounts matches the source. Gap: reversal date, account and reason are entered once and shared by every \"Reverse returned payment\" button, and there's no confirmation step (Q5).  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1029,7 +1061,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "2ef0f18bed287ee04a3e3601622320b93c66c4d5820aabd65e13581002b72200"
+      "design_hash": "00d2436fc7d0a2f87d7c9fcd420248f7ff760652302fe374e83e047e2f4d1b00",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "MB-04",
@@ -1041,7 +1075,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/Member Loan Overview Dashboard.png",
@@ -1049,10 +1083,10 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/MB-04.svg",
-        "sha256": "a0d75932c56e1b2611c44bc340305463475593c2108eb46cd15d25b0d97dd787"
+        "path": "docs/design-governance/proposals/v2/MB-04.svg",
+        "sha256": "07c0ba56909792ce6913c72e3e508cad1069ec2a656fb6da6a26dc0e916ddc0b"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  MB-04  \u00b7  Loans  \u00b7  `LoansScreen.tsx`, opened from MB-01 with the member preselected, plus a \"\u2039 Members\" back button. Agreement (memo only), funded advance, repayment (principal and interest), balances as of today, dated history  \u00b7  L-a: the loan picker shows `id.slice(0,6)`; the member and lender branches of that code are identical. L-b: third-party loans can only be reached through a member's Loans button, so they're hard to find (Q3). The *Member Loan* mockup is missing the commitment-vs-funded split and has a tax implication. Keep the source version.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1085,7 +1119,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "384e3621b7eb174547990ebcfe1175da998e20801db3eaf1fdc16fcf6fbd7e44"
+      "design_hash": "1834809abdee3b004c031a8f084ee24b6f0bdce64e1ced2e4d102ef7b3721ef0",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "RP-01",
@@ -1158,13 +1194,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/RP-02.svg",
-        "sha256": "584a43880c6c6b95b4f7249d1b1b82d71dc86b4b62535689345bd580c78370e6"
+        "path": "docs/design-governance/proposals/v2/RP-02.svg",
+        "sha256": "207d51b6c7e985fd1dca0c12363073b361b9c37220dddc935464d980b86990a6"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  RP-02  \u00b7  Cash movement  \u00b7  Per account: beginning, inflows, outflows, net, ending, plus a reconciliation line  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1197,7 +1233,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "737fd89bf731ee3a74833850ef09dc837e0fbf2787d3c0eb43217fa91c4e040c"
+      "design_hash": "6f41f9007a226367426efa30abcb24f029ad353b8a81eeaa8d1315163bbb7962",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "RP-03",
@@ -1209,7 +1247,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/LLC Balance Sheet Report Detail.png",
@@ -1217,10 +1255,10 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/RP-03.svg",
-        "sha256": "73993206538cc8c64dd071f89511f68aea6bed548b347fd3179376be65cfc6ab"
+        "path": "docs/design-governance/proposals/v2/RP-03.svg",
+        "sha256": "21f65460990cd875e8181e35659d7b6839df6df563d177512b75b1950a314905"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  RP-03  \u00b7  Balance Sheet, book basis  \u00b7  Assets, liabilities and equity, current earnings, and the A\u2212L\u2212E difference. The mockup's $40 mismatch and \"Final\" badge are rejected.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1253,7 +1291,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "b44b333888f1a19fe28cd2a92c71e14bc440a7ae6eac1a23f7c6325ad6158b10"
+      "design_hash": "0f25ba5868648f2c1ea78d3250a7ee7f78ca309d3ecc6dc86cebbf60cfa09064",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "RP-04",
@@ -1265,13 +1305,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/RP-04.svg",
-        "sha256": "89e5a8e15ea83e032e1cb2d9495a65dea8e27a64be60ebdfe35807240eb19288"
+        "path": "docs/design-governance/proposals/v2/RP-04.svg",
+        "sha256": "802d360576fc8920f28987477ea32d6587ee6b437ed50d63d1d29a4ae99c636a"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  RP-04  \u00b7  Trial Balance  \u00b7  Debit and credit columns, each 88 wide (Q6: may be too narrow for large amounts at large text sizes)  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1304,7 +1344,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "b4c7caf17fcff970b8743718478ae8b8868da19fb3fe5453bc9dc55a2a362561"
+      "design_hash": "af741de523b594f7b88b3d61d3ec7f63533babeb22edcb29f7e06be11f458bb9",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "RP-05",
@@ -1316,13 +1358,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/RP-05.svg",
-        "sha256": "89284cbb08abd98fea8025b6865822a1a57a8180ecd8d16a0b7898a9292e7b66"
+        "path": "docs/design-governance/proposals/v2/RP-05.svg",
+        "sha256": "4621a051d366315c65830792054fecfe247f8381cc41282df91c55850c472448"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  RP-05  \u00b7  General Ledger  \u00b7  Account picker plus its own \"Update ledger\"  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1355,7 +1397,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "c96374ccae560925f67453c1f1c317fd83f203927e1d1c69d21bc480c7f75b13"
+      "design_hash": "bbd3d2fc2c9ca7040818a739069cfca213c55eb4b46f44c359b4b7dc74ee2930",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "RP-06",
@@ -1367,13 +1411,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/RP-06.svg",
-        "sha256": "4ab5f54ffcf05865ec00fd6c4839e88e7033874922a1cb011580caa457fa0836"
+        "path": "docs/design-governance/proposals/v2/RP-06.svg",
+        "sha256": "0433eaccd14ad736cf268c7f43b7dd45c3e7a27c0894fd6baf0520676760a75a"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  RP-06  \u00b7  Member capital  \u00b7  Period activity plus all-time per-member capital; \"not tax basis\" note  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1406,7 +1450,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "9ef72fb8f9e0c92b9e7b1115348b23069a7506dbef5c35778a3374adabf8d71a"
+      "design_hash": "4a4aac31d8704a10eb4c05d20872a055dbfd997ad10ac357b333b27557e51663",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "RP-07",
@@ -1418,13 +1464,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/RP-07.svg",
-        "sha256": "5cc8b5398aca1a0689caec5d5864fb009693ff34030ea7fea8a5e06f1377c300"
+        "path": "docs/design-governance/proposals/v2/RP-07.svg",
+        "sha256": "a190d05282916bb326cb0e12fddbd206a0656c845dad59d01c0d2022d8fc52b4"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  RP-07  \u00b7  Guaranteed-payment cash  \u00b7  Actual payments only  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1457,7 +1503,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "6fe9af577e8abbed17d82bd306474cac22ec0633514d8336b5188d9b2ea391be"
+      "design_hash": "95b524c47d9becee2515ebdf014017d3a8c0e03b7ecad5595ac5f8bf358660dc",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "RP-08",
@@ -1469,13 +1517,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/RP-08.svg",
-        "sha256": "4d25648063e2d7a185969ecece881345319d6c6dc53b6523218987880b24ea89"
+        "path": "docs/design-governance/proposals/v2/RP-08.svg",
+        "sha256": "7b8de0d9cef20dcfc2e841f39edf9252a1b7907d6fc20bc1bbfc1028d063ab0b"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  RP-08  \u00b7  Loans  \u00b7  Period flows and balances as of the through date  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1508,7 +1556,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "cc1ab4018aa5153a9df82a8b7d00dfc702318423359c83cd4506b5b6782797e9"
+      "design_hash": "28e70872e76aac6dadb9d032e73ba3d2f7e10e5b65def41b37a2bca37aab27ab",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "RP-09",
@@ -1520,13 +1570,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/RP-09.svg",
-        "sha256": "a5a2dbba447a5a6ef96b8b446bd1823f1edc4c4ae3017b144d018b723d63d822"
+        "path": "docs/design-governance/proposals/v2/RP-09.svg",
+        "sha256": "b92464150263f72fe2eb818bac8ccf8f4a06ba891b8d06cb82a23abbca8c7966"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  RP-09  \u00b7  Exchange  \u00b7  Source, period, \"Cash basis \u00b7 USD\", and \"Unreviewed \u00b7 review needed\" in warning tone. Totals appear only when the report is ready; otherwise a blocking reason is announced as an alert. \"Prepare bookkeeping JSON\" button; exclusions and limitations listed.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1559,7 +1609,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "7f131cdaee1533f9d38c71ed7e4b3e9d897edcb3cf9019fbbba891a18cc60a6f"
+      "design_hash": "f7a56fbd6707801d2acfcf47041e69fd323af2e4910875f0cee1297ef1c26635",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "MO-01",
@@ -1693,7 +1745,7 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [
         {
           "path": "docs/design/proposed/screenshots/LLC Bookkeeping Settings Screen.png",
@@ -1701,11 +1753,16 @@
         }
       ],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/SET-01.svg",
-        "sha256": "65e80c1825a34f8a71443af791f6496fc26e518aece25ad48df3326c259d340f"
+        "path": "docs/design-governance/captures/v2/book-settings.png",
+        "sha256": "faf0e0d4ee3fee2d1b435c34de66bf170cf275eec165bf8cb1adb9445c793a3a"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
-      "actual": [],
+      "proposal_type": "AS_IS_NATIVE_CAPTURE",
+      "actual": [
+        {
+          "path": "docs/design-governance/captures/v2/book-settings.png",
+          "sha256": "faf0e0d4ee3fee2d1b435c34de66bf170cf275eec165bf8cb1adb9445c793a3a"
+        }
+      ],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  SET-01  \u00b7  Settings  \u00b7  Business profile (read-only); single-member policy; Workspaces; Reminders; Bookkeeping periods (close/reopen require a reason, audit list); Privacy; Development storage and recovery tools  \u00b7  The *Secure & Private* mockups' app-lock, biometrics, iCloud, analytics and delete-data controls are rejected and correctly absent. S-a: \"Close books through date\" runs immediately with no confirmation (Q5). WorkspacesSection and RemindersSection were inventoried but not reviewed in detail.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
         "Owner reviews the exact proposal hash and stated reference deviations.",
@@ -1718,7 +1775,7 @@
         "apps/mobile/bookkeeping/SettingsScreen.tsx"
       ],
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
-      "capture_status": "UNVERIFIED",
+      "capture_status": "CAPTURED_IOS_SYNTHETIC",
       "design_status": "AWAITING_HUMAN_APPROVAL",
       "design_approval_status": "AWAITING_HUMAN_APPROVAL",
       "owner_approval_identity": null,
@@ -1733,12 +1790,13 @@
       "visual_verification_evidence": [],
       "last_reviewed_revision": null,
       "outstanding_design_issues": [
-        "No verifiable owner approval found.",
-        "Actual capture awaits owner visual review; no visual pass inferred.",
-        "Initial automated navigation tapped a heading, not the settings action; excluded misidentified capture."
+        "No trustworthy owner visual approval exists.",
+        "Native capture is an as-is proposal; physical-device, Android and assistive-technology acceptance are unverified."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "491d9d8c1399fcbe1e1927d6b6c4d3de0ef9ac6f523a3ecc81c2a8ba2f124ccc"
+      "design_hash": "531eb7f7ad61304fc4492a8e59c485aa14c0e7c6e0ff77eda09a51422716b85c",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "OB-ADD",
@@ -1750,13 +1808,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/OB-ADD.svg",
-        "sha256": "e5a04f59c28ccc8f3bd425dc099038cda5979ef4084e267cf39e6e685b50816c"
+        "path": "docs/design-governance/proposals/v2/OB-ADD.svg",
+        "sha256": "bfac172b7bead9492a4459ca9e058f788a78d49384259ecb40bde7dde2b8da4e"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  OB-ADD  \u00b7  Add an LLC workspace  \u00b7  Impl (`BookkeepingApp.tsx:179`)  \u00b7  Same flow, with a Cancel header  \u00b7  Opened from SET-01 Workspaces  \u00b7  Cancel returns without saving anything.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1789,7 +1847,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "5a3478eaa938c2cf9a73d686240c319459f382a006cca72d10cc002c7c1f43ff"
+      "design_hash": "34d4f61707dc1c9c06110f95bae58bcf3c3797972ded770a5b31beec81f38935",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "BOOT-03",
@@ -1801,13 +1861,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/BOOT-03.svg",
-        "sha256": "a4ca08450a12949dd17afc6e6fdc7d296e1b7802ca9dc311a976ae921d068829"
+        "path": "docs/design-governance/proposals/v2/BOOT-03.svg",
+        "sha256": "7af21c3a400a556d054d00afdd20b2a95b2883037c3b6f17ad828096f4ec4d79"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  BOOT-03  \u00b7  Storage and recovery tools  \u00b7  `App.tsx:113` `NativeProofScreen`, reached via a prop from BookkeepingApp  \u00b7  Impl (development tools)  \u00b7  States: recovering, locked (retry key / restore encrypted backup), SQLCipher check, backup/KDF checks, results box. Header button \"Return to books\".  \u00b7  The visual style differs from the app (its own `native*` styles). It shows the database path, which is fine for synthetic data but must not ship in release. Accept: reachable from BOOT-02, OB-01 and SET-01; the footnote stays (\"production readiness remains unverified\").  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1840,7 +1900,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "8490b315fb7b982f3873fa1659962d9764bcef1d2d7251e8d43c92d5015bfaf9"
+      "design_hash": "7fbfebe81803516bfd092dd792e5224e0aaa225cd444bd232e1089285d922b41",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "BOOT-01",
@@ -1852,13 +1914,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/BOOT-01.svg",
-        "sha256": "6ff23ce75753e0c2d27059bb38d4fa67b2a46ba6414df93ef3b88d20feccf721"
+        "path": "docs/design-governance/proposals/v2/BOOT-01.svg",
+        "sha256": "fbad7ca412a33d202982124a68398294880210b03a143c4fc6499302bdbfe77d"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  BOOT-01  \u00b7  Loading  \u00b7  `BookkeepingApp.tsx:154`, `Loading`  \u00b7  Impl  \u00b7  Spinner plus \"Loading encrypted books\u2026\" with a polite live region  \u00b7  Q7: \"encrypted\" is a security claim and needs approval. Accept: visible until the snapshot resolves; announced by the screen reader.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1891,7 +1953,9 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "894609d088a80dbc9ea0e70dc64a613029a20ed7ad7c0696ce735695a86a257e"
+      "design_hash": "39fc8df9bafa742d00e5d698c21f2bc0fd72e4e84b71021d3397b9127497f369",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     },
     {
       "id": "BOOT-02",
@@ -1903,13 +1967,13 @@
         "ios",
         "android"
       ],
-      "revision": "proposal-v1",
+      "revision": "proposal-v2",
       "references": [],
       "proposal": {
-        "path": "docs/design-governance/proposals/v1/BOOT-02.svg",
-        "sha256": "5c237697d51a05edea48c2d1d55f8aacc065eab9edac79cfc08a77eb38cdcc13"
+        "path": "docs/design-governance/proposals/v2/BOOT-02.svg",
+        "sha256": "9cbc317c0f3336dd8390e0340eb2435bd8dfc1b86b32ffeff1622b3a30b8c946"
       },
-      "proposal_type": "SOURCE_DERIVED_WIREFRAME",
+      "proposal_type": "SOURCE_DERIVED_PROVIDER_PROPOSAL",
       "actual": [],
       "specification": "As-is review proposal. Preserve navy text, emerald primary actions, cream background, system typography, 18pt page/card spacing and existing five-tab native navigation. No unsupported mockup claims/controls are authorized.  \u00b7  BOOT-02  \u00b7  Local books unavailable  \u00b7  `BookkeepingApp.tsx:156-167`  \u00b7  Impl  \u00b7  Title, the error message, an explanation, primary \"Open storage recovery tools\", secondary \"Retry local storage\"  \u00b7  Accept: no records are changed; retry calls `refresh`; the recovery button opens BOOT-03.  \u00b7 \nAccessibility/responsive acceptance: readable labels, logical focus, state conveyed in words, contrast and 44pt iOS/48dp Android targets where applicable; scrolling and safe areas at narrow widths and large text. VoiceOver, physical-device and Android fidelity are unverified. Empty/loading/error states must be reviewed separately; do not fabricate captures.\nReferences can differ materially: see discovery.md for unsupported features and source deviations. Approval of this proposal does not authorize the original reference's unsupported behavior.",
       "acceptance": [
@@ -1942,7 +2006,10 @@
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
       "material_change_reason": "Initial visual-governance onboarding; as-is proposal for existing screens. Proposed first-launch Tax screens are not implemented or authorized for coding.",
-      "design_hash": "ec4586281dc87a0cd4ca0d612162bb646fd6230df3504784f136125717dc40ba"
+      "design_hash": "aa2b440dd0aef20603d889421aa47a588dd28269fb9fb23d0b0012cbfe5931d9",
+      "proposal_provider_run": "design-discovery-bd1a1dc0dece47d3",
+      "proposal_provider_profile": "claude-m5-llc-login"
     }
-  ]
+  ],
+  "provider_assignment": "docs/design-governance/provider-assignment.json"
 }

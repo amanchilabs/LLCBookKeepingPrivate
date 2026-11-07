@@ -1,47 +1,51 @@
-# Chronological visual coverage
+# Chronological owner visual review
 
-Application source: `ae6754baba017adea78fb43e755e468c1a09dbf9`. No source changes in this branch.
+Application implementation source: `ae6754baba017adea78fb43e755e468c1a09dbf9`. Application source remains unchanged.
 
-Reference images are proposals, not owner approvals. Imported owner approvals: **0**.
+Provider design run: `design-discovery-bd1a1dc0dece47d3` · profile `claude-m5-llc-login`.
 
-| Order | Screen ID | Screen | Implementation | Current native capture | Approval |
+All screens await authenticated owner review. Imported owner approvals: **0**. Native captures are iOS simulator synthetic data; provider-generated SVGs are browser proposals, not native fidelity evidence.
+
+| Order | Screen | ID | Implementation | Native capture | Proposal |
 | --- | --- | --- | --- | --- | --- |
-| 1 | OB-01 | Welcome | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 2 | OB-02 | Your LLC | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 3 | OB-03 | Members and ownership setup | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 4 | OB-04 | First account (optional) | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 5 | OB-05 | Review setup | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 6 | OB-06 | Ready | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 7 | SH-01 | Navigation shell | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 8 | DB-01 | Dashboard | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 9 | SR-01 | Search and results | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 10 | TX-01 | Transaction history | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 11 | TX-02 | Income, expense and transfer entry | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 12 | TX-03 | Transaction detail | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 13 | TX-04 | Reverse and replace | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 14 | TX-05 | Recurring transactions | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 15 | TX-06 | CSV import and review | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 16 | MB-01 | Members and ownership history | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 17 | MB-02 | Member capital | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 18 | MB-03 | Obligations and actual payments | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 19 | MB-04 | Member and third-party loans | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 20 | RP-01 | Profit and loss | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 21 | RP-02 | Cash movement | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 22 | RP-03 | Balance sheet | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 23 | RP-04 | Trial balance | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 24 | RP-05 | General ledger | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 25 | RP-06 | Capital movement workpaper | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 26 | RP-07 | Payment cash workpaper | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 27 | RP-08 | Loan cash workpaper | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 28 | RP-09 | Bookkeeping-to-tax exchange | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 29 | MO-01 | More | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 30 | AC-01 | Accounts and reconciliation | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 31 | SET-01 | Settings, workspaces and periods | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AWAITING_HUMAN_APPROVAL |
-| 32 | OB-ADD | Add another LLC workspace | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 33 | BOOT-03 | Storage and recovery tools | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 34 | BOOT-01 | Loading books | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
-| 35 | BOOT-02 | Local books unavailable | IMPLEMENTED | UNVERIFIED | AWAITING_HUMAN_APPROVAL |
+| 1 | Welcome | OB-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 2 | Your LLC | OB-02 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 3 | Members and ownership setup | OB-03 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 4 | First account (optional) | OB-04 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 5 | Review setup | OB-05 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 6 | Ready | OB-06 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 7 | Navigation shell | SH-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 8 | Dashboard | DB-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 9 | Search and results | SR-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 10 | Transaction history | TX-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 11 | Income, expense and transfer entry | TX-02 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 12 | Transaction detail | TX-03 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 13 | Reverse and replace | TX-04 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 14 | Recurring transactions | TX-05 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 15 | CSV import and review | TX-06 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 16 | Members and ownership history | MB-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 17 | Member capital | MB-02 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 18 | Obligations and actual payments | MB-03 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 19 | Member and third-party loans | MB-04 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 20 | Profit and loss | RP-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 21 | Cash movement | RP-02 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 22 | Balance sheet | RP-03 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 23 | Trial balance | RP-04 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 24 | General ledger | RP-05 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 25 | Capital movement workpaper | RP-06 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 26 | Payment cash workpaper | RP-07 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 27 | Loan cash workpaper | RP-08 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 28 | Bookkeeping-to-tax exchange | RP-09 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 29 | More | MO-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 30 | Accounts and reconciliation | AC-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 31 | Settings, workspaces and periods | SET-01 | IMPLEMENTED | CAPTURED_IOS_SYNTHETIC | AS_IS_NATIVE_CAPTURE |
+| 32 | Add another LLC workspace | OB-ADD | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 33 | Storage and recovery tools | BOOT-03 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 34 | Loading books | BOOT-01 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
+| 35 | Local books unavailable | BOOT-02 | IMPLEMENTED | UNVERIFIED | SOURCE_DERIVED_PROVIDER_PROPOSAL |
 
-See discovery.md for exact specifications, source deviations, open design questions and states. Native captures are iOS synthetic samples, not physical-device, assistive-technology or Android acceptance. Source-derived wireframes identify missing visual evidence. No screen is VISUALLY_VERIFIED.
+Capture gaps remain for uncaptured views/states, Android, large text, VoiceOver/TalkBack and physical devices. No screen is VISUALLY_VERIFIED. Partial native flow failures are retained outside the application source and are not acceptance passes. The initial bookkeeping settings attempt navigated to More, so that old draft image is excluded and replaced by the asserted Settings capture in captures/v2/. Setup automation did not complete later onboarding states; these use provider proposals.
 
-Review from the first screen in the Foundry chronological gallery. Each Approve / Request changes / Reject / Defer action requires owner biometric authentication for the displayed hash. No application source changes are authorized by creating this catalog.
+TaxReturn currently starts directly at Tax Outlook; welcome/privacy/setup in this review are proposed only. No Forms, estimates or tax calculations are implemented or authorized. Bookkeeping original references may contain unsupported controls and conflicting financial labels: discovery.md documents exclusions.
+
+Owner: open the Foundry review URL from the delivery report, follow the numbered journey, and use Approve / Request changes / Reject / Defer. Decisions require macOS owner biometrics for the exact design hash. No approval is inferred from this catalog, AI reviews or silence. Application implementation requires separately authorized Story scope.
