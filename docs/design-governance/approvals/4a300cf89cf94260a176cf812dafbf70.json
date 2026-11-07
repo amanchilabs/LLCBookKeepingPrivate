@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T07:28:45.784975+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "0f25ba5868648f2c1ea78d3250a7ee7f78ca309d3ecc6dc86cebbf60cfa09064",
+  "id": "4a300cf89cf94260a176cf812dafbf70",
+  "note": "I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts.\n",
+  "owner": "local-os-uid:501",
+  "previous": "c34b6a50850c019288ef391bc9f5bc610b0d2b1748eaccc84ce3da09a73e1cc0",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "RP-03",
+  "sequence": 51,
+  "signature": "MEYCIQC91mORhzzPkZqh+QgtCUBLWmDzrXrrk247nGSq6BXfKQIhAKRGyCt3LtQneUzjeH7dXVQ5XLsWcSc7uqtcZM4pccke",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
