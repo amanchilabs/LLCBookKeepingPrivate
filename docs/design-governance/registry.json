@@ -2011,5 +2011,6 @@
       "proposal_provider_profile": "claude-m5-llc-login"
     }
   ],
-  "provider_assignment": "docs/design-governance/provider-assignment.json"
+  "provider_assignment": "docs/design-governance/provider-assignment.json",
+  "display_name": "LLCBookKeepingPrivate"
 }
