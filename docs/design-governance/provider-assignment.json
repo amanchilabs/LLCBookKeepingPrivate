@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "product": "llcbookkeepingprivate",
+  "roles": {
+    "builder": {
+      "provider": "claude-code",
+      "profile": "claude-m5-llc-login",
+      "cli": "/Users/veerrajuamanchi/.local/bin/claude",
+      "adapter": "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "invocation_mode": "python-adapter-v1",
+      "authentication": "claude.ai",
+      "allow_paid_fallback": false
+    },
+    "design": {
+      "provider": "claude-code",
+      "profile": "claude-m5-llc-login",
+      "cli": "/Users/veerrajuamanchi/.local/bin/claude",
+      "adapter": "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+      "invocation_mode": "python-adapter-v1",
+      "authentication": "claude.ai",
+      "allow_paid_fallback": false
+    },
+    "reviewer": {
+      "provider": "claude-code",
+      "profile": "claude-m5-llc-review",
+      "cli": "/Users/veerrajuamanchi/.local/bin/claude",
+      "adapter": "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "invocation_mode": "python-adapter-v1",
+      "authentication": "claude.ai",
+      "allow_paid_fallback": false
+    }
+  },
+  "human_approval": {
+    "authority": "owner biometric presence; Secure Enclave signed receipt; no agent substitution"
+  },
+  "coordinator": {
+    "identity": "parent Codex session",
+    "scope": "Foundry framework and orchestration; application source edits dispatched through assigned builder",
+    "limitations": "cooperative same-UID host policy, not OS-enforced denial of direct filesystem writes"
+  },
+  "authorization": "Owner explicit provider assignment 2026-11-06; existing primary Codex API login approved 2026-11-05; no authentication/provider/billing fallback."
+}

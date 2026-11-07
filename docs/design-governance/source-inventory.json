@@ -1,0 +1,254 @@
+{
+  "method": "tracked source candidates plus provider navigation inspection; manually reconciled screen catalog",
+  "source": "ae6754baba017adea78fb43e755e468c1a09dbf9",
+  "roots": [
+    "apps/mobile/bookkeeping",
+    "App.tsx"
+  ],
+  "files": [
+    {
+      "path": "App.tsx",
+      "sha256": "6fdd2f64e72d97e9f36d5a1b800097049abd54f5c889921746655bb8deb7f2e2",
+      "candidates": [
+        "PreviewScreen",
+        "NativeProofScreen"
+      ],
+      "headings": []
+    },
+    {
+      "path": "apps/mobile/bookkeeping/AccountsScreen.tsx",
+      "sha256": "43c353ea8cd5c35e1a6792666661a796bd8229f2496827926b3f63bf48f2e19e",
+      "candidates": [
+        "AccountsScreen"
+      ],
+      "headings": [
+        "Accounts",
+        "Balances are calculated from posted journal lines. Opening balances use Opening Balance Equity as the offset.",
+        "Save account",
+        "Add chart account",
+        "Start reconciliation",
+        "Reopen",
+        "Complete reconciliation"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/BookkeepingApp.tsx",
+      "sha256": "f18896f24faeb70d6ccd56e176b10eceec72f2b957bd5b964ac9c15fd955f9d5",
+      "candidates": [
+        "BookkeepingApp"
+      ],
+      "headings": [
+        "Open storage recovery tools",
+        "Retry local storage",
+        "Search",
+        "Members",
+        "More",
+        "More"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/BookkeepingExchangePanel.tsx",
+      "sha256": "27d36c4e63de83976cdbdfef54b1187b0e1fb48d6d1c7d0e74685ff422c5014f",
+      "candidates": [],
+      "headings": []
+    },
+    {
+      "path": "apps/mobile/bookkeeping/BusinessSetupScreen.tsx",
+      "sha256": "5ad183a0c063396198f23806c79103e493aac273e2ad2a3c1a81e3473f9794fc",
+      "candidates": [
+        "BusinessSetupScreen"
+      ],
+      "headings": [
+        "Your LLC books, kept private.",
+        "Set up your business once, then keep its bookkeeping close at hand.",
+        "Get started",
+        "Your LLC",
+        "Enter the business facts used to identify this local bookkeeping workspace.",
+        "Members and ownership",
+        "Ownership interests must total exactly 100%. They do not automatically allocate income or profit.",
+        "Use suggested 40% / 20% / 20% / 20% interests",
+        "Add member",
+        "Your first account",
+        "An opening balance is recorded through Opening Balance Equity, not as income or an automatic member contribution.",
+        "Review your LLC",
+        "Check these details before creating the local bookkeeping workspace.",
+        "Business",
+        "Members and ownership",
+        "First account",
+        "Back",
+        "Your books are ready.",
+        "Go to dashboard",
+        "Back"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/DashboardScreen.tsx",
+      "sha256": "3a9c168dece39ef9c13bd5e42c75fbb68e92f87d6c0690742a5832b4fc2b2bb4",
+      "candidates": [
+        "DashboardScreen"
+      ],
+      "headings": [
+        "Books at a glance",
+        "Balances and totals come from this LLC\u2019s persisted journal.",
+        "Record income",
+        "Record expense",
+        "Transfer",
+        "View accounts",
+        "Reconcile",
+        "Manage",
+        "No bank or cash accounts yet",
+        "Create an account",
+        "All transactions",
+        "No activity recorded",
+        "Record income",
+        "Manage members",
+        "Manage",
+        "No open reminders",
+        "View reports"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/LoansScreen.tsx",
+      "sha256": "6dd2b517743091151eac218634d9bdcc17d3ed418f8c5366c42ab9870ea5393f",
+      "candidates": [
+        "LoansScreen"
+      ],
+      "headings": [
+        "Track member and third-party loan agreements, funded advances, principal, and actual interest payments in this local workspace."
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/MembersScreen.tsx",
+      "sha256": "ab7a9ee091523754f207522f435a0a69eb4856d0572e78a5477d140e82e2bd92",
+      "candidates": [
+        "MembersScreen"
+      ],
+      "headings": [
+        "Members",
+        "Edit member names and ownership interests. Every ownership change keeps its prior effective dates in the local history.",
+        "Add member",
+        "Confirm and save member changes",
+        "\uff0b Add allocation line",
+        "Reverse returned payment"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/MoreScreen.tsx",
+      "sha256": "22ec3a4d60a7952ae73bb6f27afeb1d54078ed732dacb4f12366de203faa1119",
+      "candidates": [
+        "MoreScreen"
+      ],
+      "headings": [
+        "More",
+        "Accounts, local settings, and recovery information for this LLC.",
+        "Accounts and reconciliation",
+        "Settings and privacy"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/RecurringTransactionsSection.tsx",
+      "sha256": "cda7bd814f6c5d3274524398f5f664d4a524cfee5a73b87ab3ed7b1e43f11f5d",
+      "candidates": [],
+      "headings": [
+        "\uff0b Schedule income or expense",
+        "Cancel",
+        "Edit"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/RemindersSection.tsx",
+      "sha256": "3c8c4b8a31037d06803286cd758da1d40835513be1e64e2f747a068d9ce16efd",
+      "candidates": [],
+      "headings": [
+        "Cancel reminder edit",
+        "Edit",
+        "Delete reminder"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/ReportsScreen.tsx",
+      "sha256": "fd2980a1205adbea443585d5f0d9ca3909506e6fb1e5109acd66f6bda12c796c",
+      "candidates": [
+        "ReportsScreen"
+      ],
+      "headings": [
+        "Reports",
+        "Cash-basis income and operating expenses are calculated from persisted journal lines. These reports are bookkeeping summaries, not tax returns."
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/SearchScreen.tsx",
+      "sha256": "404c09ead348c79b4269da97a010308dd7f747f5653a002e981fb8e467c6c2af",
+      "candidates": [
+        "SearchScreen"
+      ],
+      "headings": [
+        "Search",
+        "Clear search"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/SettingsScreen.tsx",
+      "sha256": "9d12061a6aee9f1b782a583ba3174133eca858380b2a67742b34370e69d3d741",
+      "candidates": [
+        "SettingsScreen"
+      ],
+      "headings": [
+        "Settings",
+        "This workspace stores the selected LLC\u2019s books on this device.",
+        "Open storage and recovery tools"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/TransactionCsvImportPanel.tsx",
+      "sha256": "7099f81563dc1a3a83ae8dc5c985dd78a04922320e7cb455afa9c587e74cac9c",
+      "candidates": [],
+      "headings": [
+        "Discard selected CSV"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/TransactionsScreen.tsx",
+      "sha256": "4879c0de76947e5003590ef390beface89b68f89b96e1a11ab070d3bd133edff",
+      "candidates": [
+        "TransactionsScreen"
+      ],
+      "headings": [
+        "Transactions",
+        "Income, expenses, and account transfers post balanced entries to the encrypted journal.",
+        "\uff0b Income",
+        "\uff0b Expense",
+        "\uff0b Transfer",
+        "Add category line",
+        "Split across categories",
+        "Cancel",
+        "Clear filters",
+        "Export all transactions as CSV",
+        "Close details",
+        "Reverse and replace",
+        "Details",
+        "Correct"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/WorkspacesSection.tsx",
+      "sha256": "062efbf6ba4f4bcf76a6d52a3ba0b9806d671ce4129a8b6702475e61e338ab34",
+      "candidates": [],
+      "headings": [
+        "Add another LLC"
+      ]
+    },
+    {
+      "path": "apps/mobile/bookkeeping/bookkeeping-exchange-panel.test.tsx",
+      "sha256": "aa33e44f00ef40978d15c5a5166ca4c317dc8e382f8c832a5c92e3aa9da1e860",
+      "candidates": [],
+      "headings": []
+    },
+    {
+      "path": "apps/mobile/bookkeeping/ui.tsx",
+      "sha256": "376b25be25d2508e06f66496a5ba1b1073b6b5e762e5e059bf7a13671191c182",
+      "candidates": [],
+      "headings": []
+    }
+  ]
+}
