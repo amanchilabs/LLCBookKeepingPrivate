@@ -2012,5 +2012,17 @@
     }
   ],
   "provider_assignment": "docs/design-governance/provider-assignment.json",
-  "display_name": "LLCBookKeepingPrivate"
+  "display_name": "LLCBookKeepingPrivate",
+  "approval_authority": {
+    "public_key_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+    "mechanism": "biometric-protected Secure Enclave P-256; hardware-sealed CryptoKit representation"
+  },
+  "ui_source_roots": [
+    "apps/mobile/bookkeeping",
+    "App.tsx"
+  ],
+  "non_visual_source_roots": [
+    "packages/domain",
+    "packages/storage-native"
+  ]
 }
