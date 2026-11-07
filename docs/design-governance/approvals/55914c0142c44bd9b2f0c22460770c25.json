@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T07:40:18.952545+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "af741de523b594f7b88b3d61d3ec7f63533babeb22edcb29f7e06be11f458bb9",
+  "id": "55914c0142c44bd9b2f0c22460770c25",
+  "note": "use /Users/veerrajuamanchi/Downloads/LLC Trial Balance Report Dashboard.png as a reference .  I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts. Replace the wide-table layout with the approved mobile-first design: emerald header, navy typography, white background, pale-green cards.\nUse three tabs: Overview, Accounts, Export. Overview shows As-of Date, total debits, total credits, difference, and balance status. Accounts shows searchable, tappable account rows with account code, type, and debit/credit balance. Export supports CSV/PDF.\nPreserve Update Report, existing ledger calculations, and account drill-down. Show In Balance only when actual unfiltered totals reconcile. No horizontal overflow, tiny text, or hard-coded figures. Verify on iOS and Android.\n\n",
+  "owner": "local-os-uid:501",
+  "previous": "b87780190c9ebd848fdba008bd2570879824c933e50572f61a6fb6d162f8398a",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "RP-04",
+  "sequence": 52,
+  "signature": "MEYCIQD7qtXMtfzu3bNhaZU0XyrJNYFvg9u9eKKgVBCh5mz7MwIhAItvUP5+SUd0s0r6Dj+nEHXlllzYwLJqkw84C13zPjiQ",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
