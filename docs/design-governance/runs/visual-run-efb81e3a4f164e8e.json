@@ -14,7 +14,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/pilots/parallel-20261105.md": "63e17b63fdf0bbc278760daba2486e9b35aea43243a30b82fee1a38c44703bd8"
   },
-  "head": "60d36c86161e1862fe152d5a0965227555a7d53c",
+  "head": "5054b8d5aa016b3454fbb64b0381bc08302bcdc0",
   "history": [
     {
       "at": "2026-11-07T01:09:05.645766+00:00",
@@ -27,6 +27,12 @@
       "event": "design_revision_superseded",
       "reason": "Owner requested reconciliation:35revised mobile proposals with57state artifacts, corrected references and full notes; no application implementation",
       "registry_hash": "3b5bc68fa7cf90a489eb82418cc5898abd63380619efdde2dedde8c687e9f754"
+    },
+    {
+      "at": "2026-11-07T11:54:31.195361+00:00",
+      "event": "design_revision_superseded",
+      "reason": "Independent review dashboard preservation and explicit evidence correction; all designs still unapproved",
+      "registry_hash": "a6ac4fefe37765298f075cc818a2172ad6b4c04bb3b7eb5678cd1a5962897820"
     }
   ],
   "id": "visual-run-efb81e3a4f164e8e",
@@ -107,7 +113,7 @@
     "timeout_seconds": 1800
   },
   "provider_assignment_hash": "29d4f0c3d64b905c7a271bc3f08aa868584a0ac1e28effc1c6889e62aeba9343",
-  "registry_hash": "a6ac4fefe37765298f075cc818a2172ad6b4c04bb3b7eb5678cd1a5962897820",
+  "registry_hash": "3914481d4115c3009e917a1479cd4d83510d33a0bf8ea48b4c717a246f612538",
   "resume_cursor": [
     "OB-01",
     "OB-02",
