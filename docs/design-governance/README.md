@@ -1,3 +1,15 @@
+# Revised visual review — proposal v3
+
+35 screens; 57 synthetic SVG proposals including tab/state variants. New designs are not implemented, approved or visually verified.
+
+Owner history: 64 signed events, {'REQUEST_CHANGES': 64}. Current exact change requests are preserved; the revised hashes require owner review.
+
+See [reconciliation matrix](reconciliation-20261107.md), [full structured matrix](reconciliation-20261107.json), and [complete saved notes](review-notes-full-20261107.json). Existing native images show old source only. No accounting, privacy, audit, security, persistence or authentication behavior changed.
+
+## Historical first-package catalog
+
+The following original record is retained for traceability; v3 above is current.
+
 # Chronological owner visual review
 
 Application implementation source: `ae6754baba017adea78fb43e755e468c1a09dbf9`. Application source remains unchanged.
