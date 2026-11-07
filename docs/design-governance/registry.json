@@ -643,10 +643,26 @@
           "sequence": 8,
           "signature": "MEUCICWqK82v6/AMVj5IrO79XJSjn5MHWnftg/NwgqTJOp2LAiEA9oiGnS5UzYbLKHIQunXGjr8uqnjQQBHcOZt+5KIWncs=",
           "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+        },
+        {
+          "at": "2026-11-07T07:08:27.596767+00:00",
+          "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+          "decision": "REQUEST_CHANGES",
+          "design_hash": "f6b25343cae18694191813fce748578323d8b625c6640ed201f12fdc1014c8af",
+          "id": "a528a118d72248219b69335c9cce8367",
+          "note": "use /Users/veerrajuamanchi/Downloads/LLC Finance Dashboard Overview.png as a reference . I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts.\n",
+          "owner": "local-os-uid:501",
+          "previous": "03d17c8420ea3097a98630fe6ac2f39ffa254f262413e5632e0a5579bf8b5ac3",
+          "product": "llcbookkeepingprivate",
+          "run": "visual-run-efb81e3a4f164e8e",
+          "screen": "SH-01",
+          "sequence": 36,
+          "signature": "MEQCIFojp4v76urEEdwFYUECWwbADj/6SqR5RydH4ZekovTVAiBfM23br4Ld4ebQGInw0ZR52YUPbk3hmtszRZ9jFv9Krw==",
+          "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
         }
       ],
       "approval_ledger": "docs/design-governance/approvals/",
-      "approval_timestamp": "2026-11-07T02:04:40.936830+00:00",
+      "approval_timestamp": "2026-11-07T07:08:27.596767+00:00",
       "approved_design_hash": null,
       "approved_design_revision": null,
       "capture_status": "CAPTURED_IOS_SYNTHETIC",
