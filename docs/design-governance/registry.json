@@ -2429,10 +2429,26 @@
           "sequence": 28,
           "signature": "MEUCIAMMDRLrxFzqXtzIlId/jXqdL/Xd/vxvHc9DFIB5Bz9QAiEAzf3qpSaYRbJ5JPKKzH0JTeik73ehWyTYLAdf3cxQWw0=",
           "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+        },
+        {
+          "at": "2026-11-07T07:57:35.440595+00:00",
+          "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+          "decision": "REQUEST_CHANGES",
+          "design_hash": "28e70872e76aac6dadb9d032e73ba3d2f7e10e5b65def41b37a2bca37aab27ab",
+          "id": "26b5a490ae9e4bec94fbd41e6d3c9b55",
+          "note": "use /Users/veerrajuamanchi/Downloads/LLC Loan Cash Workpaper Dashboard_v2.png as a reference .  I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts.I recommend a four-tab mobile-first redesign, keeping the exact emerald-green, navy, and white visual identity.\nTab\nWhat it should show\nOverview\nReporting period, filters, total outstanding principal, advances, principal repaid, and interest paid\nBy Loan\nIndividual loan cards with lender, beginning balance, advances, repayments, and ending principal\nActivity\nSearchable advances and payments, including principal/interest breakdowns and reconciliation\nExport\nCSV/PDF exports, report scope, and supporting workpapers\nAmortization should be accessible from an individual loan's detail screen, rather than occupying another crowded top-level tab.\nThis is a better mobile layout because it replaces the wide financial tables with readable loan cards and payment activity.\nFor implementation, I'd make one further adjustment: use Overview, By Loan, Activity, Export as the four tabs. Keep amortization and reconciliation as drill-down options within the relevant loan or activity screen.\nThe Overview should also show advances, because ending principal must reconcile as:\n\\[ \\text{Beginning Principal}+\\text{Advances}-\\text{Principal Repaid}+\\text{Adjustments}=\\text{Ending Principal} \\]\nThe example amounts are illustrative, not verified results. Actual values must come from posted loan activity, and scheduled payments must remain separate from cash actually paid.\n",
+          "owner": "local-os-uid:501",
+          "previous": "72fb45e52f90ac18b547681498b86594fcae0fd60de99a6118b3132fb6297801",
+          "product": "llcbookkeepingprivate",
+          "run": "visual-run-efb81e3a4f164e8e",
+          "screen": "RP-08",
+          "sequence": 56,
+          "signature": "MEUCIQCk3I63TnWULC+xC3JZ0IxD+YGT9X1U6YSESUjYEaL6UgIgMGcS2Y06V9FBvhONv7vY8oLq0fyHSB8Ny1T1ts/ZPMo=",
+          "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
         }
       ],
       "approval_ledger": "docs/design-governance/approvals/",
-      "approval_timestamp": "2026-11-07T03:36:42.574724+00:00",
+      "approval_timestamp": "2026-11-07T07:57:35.440595+00:00",
       "approved_design_hash": null,
       "approved_design_revision": null,
       "capture_status": "UNVERIFIED",
