@@ -1,0 +1,173 @@
+{
+  "branch": "feature/visual-review-20261106",
+  "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
+  "created_at": "2026-11-07T00:51:15.253767+00:00",
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design-governance/provider-assignment.json": "b6f7d7c3bfbd9370036e6dba40229112ac086a9ecaf24cff13ebdd3be894f23f",
+    "docs/design/implementation/feature-preservation-matrix.md": "959a773112673f6586d02efa6492fea76fd0693660ab6aeb39736a5b2d2c603c",
+    "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
+    "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
+    "docs/pilots/parallel-20261105.md": "63e17b63fdf0bbc278760daba2486e9b35aea43243a30b82fee1a38c44703bd8"
+  },
+  "head": "053997e9097f08b371c9b3da8eed909e01759696",
+  "history": [],
+  "id": "visual-run-efb81e3a4f164e8e",
+  "kind": "visual-review",
+  "owner": "f7b8f9f975334b90be3163286280852e",
+  "phase": "OWNER_REVIEW",
+  "product": {
+    "canonical_vision": "docs/design/proposed/design-decisions.md",
+    "execution_contract": "CLAUDE.md",
+    "execution_scope": "CAP-BOOK-EXCHANGE-001 exactly two Stories; owner 2026-11-05; no tax interpretation, accounting/security/persistence changes or merge",
+    "id": "llcbookkeepingprivate",
+    "progress_updates": "append",
+    "provider_assignment": "docs/design-governance/provider-assignment.json",
+    "records": {
+      "authorization": "docs/pilots/parallel-20261105.md",
+      "progress": "docs/design/implementation/feature-preservation-matrix.md",
+      "specification": "docs/design/proposed/screen-specifications.md"
+    },
+    "repository_path": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate",
+    "repository_remote": "https://github.com/amanchilabs/LLCBookKeepingPrivate.git",
+    "workspace_policy": "canonical"
+  },
+  "profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
+    "commands": {
+      "design": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+        "--provider",
+        "claude-code",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "--skill-dir",
+        "/Users/veerrajuamanchi/.claude/plugins/marketplaces/claude-plugins-official/plugins/frontend-design",
+        "design"
+      ],
+      "implement": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "implement"
+      ],
+      "review": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "review"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/.local/bin/claude",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/design-discovery-workflow.md"
+    ],
+    "id": "claude-m5-llc-login",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "help"
+      ]
+    ],
+    "provider": "claude-code",
+    "timeout_seconds": 1800
+  },
+  "provider_assignment_hash": "29d4f0c3d64b905c7a271bc3f08aa868584a0ac1e28effc1c6889e62aeba9343",
+  "registry_hash": "142cdcb5797e70db07e33c69cf4e23daa6c9c20f0d4df71654d865c90f82cc43",
+  "resume_cursor": [
+    "OB-01",
+    "OB-02",
+    "OB-03",
+    "OB-04",
+    "OB-05",
+    "OB-06",
+    "SH-01",
+    "DB-01",
+    "SR-01",
+    "TX-01",
+    "TX-02",
+    "TX-03",
+    "TX-04",
+    "TX-05",
+    "TX-06",
+    "MB-01",
+    "MB-02",
+    "MB-03",
+    "MB-04",
+    "RP-01",
+    "RP-02",
+    "RP-03",
+    "RP-04",
+    "RP-05",
+    "RP-06",
+    "RP-07",
+    "RP-08",
+    "RP-09",
+    "MO-01",
+    "AC-01",
+    "SET-01",
+    "OB-ADD",
+    "BOOT-03",
+    "BOOT-01",
+    "BOOT-02"
+  ],
+  "review_profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
+    "commands": {
+      "review": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "review"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/.local/bin/claude",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/design-discovery-workflow.md"
+    ],
+    "id": "claude-m5-llc-review",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "help"
+      ]
+    ],
+    "provider": "claude-code",
+    "timeout_seconds": 1800
+  },
+  "status": "WAITING_APPROVAL",
+  "workspace": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate"
+}
