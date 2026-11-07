@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T02:29:46.266580+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "6dfb77f777689440180f4d48c3ffac3de977754ab894db6765aa9a1e07d2854f",
+  "id": "c4d553823bd6420689d1261a722e419a",
+  "note": "use /Users/veerrajuamanchi/Downloads/LLC CSV Import and Transaction Review.png as a reference . It has two screens one for import and the other to review the txn's from the import. I want the screens and the functionality to look like the reference or the supplied mockup as-is and we should match the layout and color of the mock screenshot\n",
+  "owner": "local-os-uid:501",
+  "previous": "f98f338e9bafdb38f705bc8a42af271f98e32a1ad17f007692846db400e9b111",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "TX-06",
+  "sequence": 16,
+  "signature": "MEUCIHpkCL5Eo4ELXjEOADfCX1+pnzYpWrkYq6vhMBzKLK6qAiEA91sZ5D603V1SYtqHdpb445TJtHNyrPcukzSwUoqL4O4=",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
