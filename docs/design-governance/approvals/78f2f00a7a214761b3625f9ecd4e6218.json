@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T01:50:55.354193+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "ed9e6c017d69808b1ade170ed54c338704a94a3aada3e95836022a514a87fb0b",
+  "id": "78f2f00a7a214761b3625f9ecd4e6218",
+  "note": "I want the reference as-is",
+  "owner": "local-os-uid:501",
+  "previous": null,
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "OB-01",
+  "sequence": 1,
+  "signature": "MEYCIQCQzb21SjdwDpb7MbVVt/CWFOsw03/s/W7Olo0qyjxsCQIhAO2W1dZVmJWfEFGGUkxtgAiPbazChmmQCPME/WZAFIQ2",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
