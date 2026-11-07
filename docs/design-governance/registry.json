@@ -2574,16 +2574,33 @@
           "sha256": "bad1ce7611fab88c0dabad4c223cfdfd2a061a368f50da3a27bbd9bbf1727dbb"
         }
       ],
-      "approval_history": [],
+      "approval_history": [
+        {
+          "at": "2026-11-07T08:40:10.063813+00:00",
+          "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+          "decision": "REQUEST_CHANGES",
+          "design_hash": "8ccb5de9cf4b5485baf6542e68d0bf256d5507463b776cf412ea4cac21bde4a9",
+          "id": "d578c398295043538ad42d2d5c726ea7",
+          "note": "use /Users/veerrajuamanchi/Downloads/LLC Loan Cash Workpaper Dashboard.png as a reference .  I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts.\n",
+          "owner": "local-os-uid:501",
+          "previous": "aad6ad9c4d1baa8166f75b7f8a9e7a9ac9357eee04248b19da3a40270c420784",
+          "product": "llcbookkeepingprivate",
+          "run": "visual-run-efb81e3a4f164e8e",
+          "screen": "MO-01",
+          "sequence": 58,
+          "signature": "MEQCIFecAdNtNfjmlPQ87uc60CbHFCEOx+Dp6BYOZ04Dw31EAiBqfyL3V7mZe7Y6xqizfc9qsip2FGF4ArvKb/chs7i/ww==",
+          "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+        }
+      ],
       "approval_ledger": "docs/design-governance/approvals/",
-      "approval_timestamp": null,
+      "approval_timestamp": "2026-11-07T08:40:10.063813+00:00",
       "approved_design_hash": null,
       "approved_design_revision": null,
       "capture_status": "CAPTURED_IOS_SYNTHETIC",
       "depends_on": [],
-      "design_approval_status": "AWAITING_HUMAN_APPROVAL",
+      "design_approval_status": "CHANGES_REQUESTED",
       "design_hash": "8ccb5de9cf4b5485baf6542e68d0bf256d5507463b776cf412ea4cac21bde4a9",
-      "design_status": "AWAITING_HUMAN_APPROVAL",
+      "design_status": "CHANGES_REQUESTED",
       "id": "MO-01",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
       "implementation_source_paths": [
@@ -2599,8 +2616,8 @@
         "No verifiable owner approval found.",
         "Actual capture awaits owner visual review; no visual pass inferred."
       ],
-      "owner_approval_identity": null,
-      "owner_approval_source": null,
+      "owner_approval_identity": "local-os-uid:501",
+      "owner_approval_source": "macOS biometric-protected Secure Enclave ECDSA receipt",
       "platforms": [
         "ios",
         "android"
