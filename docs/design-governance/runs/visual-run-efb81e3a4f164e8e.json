@@ -1,4 +1,5 @@
 {
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
   "branch": "feature/visual-review-20261106",
   "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
   "created_at": "2026-11-07T00:51:15.253767+00:00",
@@ -11,8 +12,15 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/pilots/parallel-20261105.md": "63e17b63fdf0bbc278760daba2486e9b35aea43243a30b82fee1a38c44703bd8"
   },
-  "head": "053997e9097f08b371c9b3da8eed909e01759696",
-  "history": [],
+  "head": "a74fc5ecf33e3df6ed3dc7394b4f4aea6a702989",
+  "history": [
+    {
+      "at": "2026-11-07T01:09:05.645766+00:00",
+      "event": "design_revision_superseded",
+      "reason": "Register initialized hardware authority and UI source boundaries; screen proposals unchanged",
+      "registry_hash": "142cdcb5797e70db07e33c69cf4e23daa6c9c20f0d4df71654d865c90f82cc43"
+    }
+  ],
   "id": "visual-run-efb81e3a4f164e8e",
   "kind": "visual-review",
   "owner": "f7b8f9f975334b90be3163286280852e",
@@ -91,7 +99,7 @@
     "timeout_seconds": 1800
   },
   "provider_assignment_hash": "29d4f0c3d64b905c7a271bc3f08aa868584a0ac1e28effc1c6889e62aeba9343",
-  "registry_hash": "142cdcb5797e70db07e33c69cf4e23daa6c9c20f0d4df71654d865c90f82cc43",
+  "registry_hash": "3b5bc68fa7cf90a489eb82418cc5898abd63380619efdde2dedde8c687e9f754",
   "resume_cursor": [
     "OB-01",
     "OB-02",
