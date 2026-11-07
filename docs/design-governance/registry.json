@@ -2499,16 +2499,33 @@
         "Functional regression and exact-source independent review pass before VISUALLY_VERIFIED."
       ],
       "actual": [],
-      "approval_history": [],
+      "approval_history": [
+        {
+          "at": "2026-11-07T08:39:53.530204+00:00",
+          "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+          "decision": "REQUEST_CHANGES",
+          "design_hash": "f7a56fbd6707801d2acfcf47041e69fd323af2e4910875f0cee1297ef1c26635",
+          "id": "c5d474a2e54b4e7e89bbd3ecac71c3e4",
+          "note": "use /Users/veerrajuamanchi/Downloads/LLC Tax Data Exchange App Screens-1.png as a reference .  I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts.Tax Data Exchange is a much better name . I recommend replacing it with a four-tab mobile workflow, rather than shrinking the existing tables to fit.\nTab\nPurpose\n1. Overview\nSelect tax year and period, check bookkeeping readiness, and prepare the exchange.\n2. Data Review\nReview financial summaries, capital records, missing categories, and validation issues.\n3. Package\nChoose which bookkeeping records and workpapers to include.\n4. Export\nReview the package, create an encrypted export, and share it explicitly.\nEach tab should use vertically stacked cards, expandable details, and drill-down views instead of wide tables. The existing five-tab bottom navigation remains unchanged, with Reports selected.\nOne important boundary: Form 1065 calculations, K-1 previews, and tax allocations belong in the separate LLCBookKeepingTaxReturn product. This screen should prepare and transfer bookkeeping evidence, not calculate a tax return.\n",
+          "owner": "local-os-uid:501",
+          "previous": "bdfd567d903bafe3a384554f703a0ee7d23990aa35cfe38dd8f154b61812e5cd",
+          "product": "llcbookkeepingprivate",
+          "run": "visual-run-efb81e3a4f164e8e",
+          "screen": "RP-09",
+          "sequence": 57,
+          "signature": "MEYCIQCfcFWsE9+8PsoqiHLuAbqzrPsSSNrXLELaOCaHkD7UXAIhAKf8qwPV1fUMHI4R74b8zA1AfBR93ui/0eh67YYDT/GY",
+          "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+        }
+      ],
       "approval_ledger": "docs/design-governance/approvals/",
-      "approval_timestamp": null,
+      "approval_timestamp": "2026-11-07T08:39:53.530204+00:00",
       "approved_design_hash": null,
       "approved_design_revision": null,
       "capture_status": "UNVERIFIED",
       "depends_on": [],
-      "design_approval_status": "AWAITING_HUMAN_APPROVAL",
+      "design_approval_status": "CHANGES_REQUESTED",
       "design_hash": "f7a56fbd6707801d2acfcf47041e69fd323af2e4910875f0cee1297ef1c26635",
-      "design_status": "AWAITING_HUMAN_APPROVAL",
+      "design_status": "CHANGES_REQUESTED",
       "id": "RP-09",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
       "implementation_source_paths": [
@@ -2524,8 +2541,8 @@
         "No verifiable owner approval found.",
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
-      "owner_approval_identity": null,
-      "owner_approval_source": null,
+      "owner_approval_identity": "local-os-uid:501",
+      "owner_approval_source": "macOS biometric-protected Secure Enclave ECDSA receipt",
       "platforms": [
         "ios",
         "android"
