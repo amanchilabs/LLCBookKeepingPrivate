@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T08:51:32.081128+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "39fc8df9bafa742d00e5d698c21f2bc0fd72e4e84b71021d3397b9127497f369",
+  "id": "964d4b8b61d04e59a30fbee5b4840d9d",
+  "note": "use /Users/veerrajuamanchi/Downloads/LLC Bookkeeping Import Preview App.png as a reference .  I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts. It covers two connected screens:\n\u00a0\u00a0\u00a0\u00a01\u00a0\u00a0\u00a0\u00a0Loading Books \u2014 choose what existing bookkeeping information to import.\n\n\n\u00a0\u00a0\u00a0\u00a02\u00a0\u00a0\u00a0\u00a0Import Preview & Load \u2014 review the selected file, map columns, identify possible duplicates, and confirm the import.\n\n\n",
+  "owner": "local-os-uid:501",
+  "previous": "00c335b53a780ad98b69dc119ac4ed74b3f40f573572faf48be2acd3f7edf436",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "BOOT-01",
+  "sequence": 63,
+  "signature": "MEUCIQDPZ3FtzgJuIwVZ5oQ7U7KUe3UehRDL+bPUH4qxFy9e+AIgK7wb1IBoSWq8w/zeP64Hi/Vi78JpQN5HzfN241H7u98=",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
