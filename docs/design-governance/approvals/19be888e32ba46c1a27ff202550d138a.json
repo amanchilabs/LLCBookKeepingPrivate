@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T02:04:40.936830+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "f6b25343cae18694191813fce748578323d8b625c6640ed201f12fdc1014c8af",
+  "id": "19be888e32ba46c1a27ff202550d138a",
+  "note": "use /Users/veerrajuamanchi/Downloads/LLC Finance Dashboard Overview.png as a reference . I want the screen look like reference or the supplied mockup as-is and we should match the layout and color of the mock screenshot",
+  "owner": "local-os-uid:501",
+  "previous": "e9cd38dec29b48321a3a2f5b6096a9a59f20204e0ff0e982ab369b275d0d9cde",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "SH-01",
+  "sequence": 8,
+  "signature": "MEUCICWqK82v6/AMVj5IrO79XJSjn5MHWnftg/NwgqTJOp2LAiEA9oiGnS5UzYbLKHIQunXGjr8uqnjQQBHcOZt+5KIWncs=",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
