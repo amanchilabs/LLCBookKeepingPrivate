@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T02:11:18.538261+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "be7a1f9650cedd49ad1b9b98108a461a7806ad75e0e9f1dd0644a48721392214",
+  "id": "447b8a5e9eb642abaf95596a77a9de8d",
+  "note": "use /Users/veerrajuamanchi/Downloads/LLC Bookkeeping Global Search Screen.png as a reference . I want the screen to look like the reference or the supplied mockup as-is and we should match the layout and color of the mock screenshot",
+  "owner": "local-os-uid:501",
+  "previous": "6578a2c7f92e33fd61453954927a6094be48e8617e9b0841f5e9ea1851d8567c",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "SR-01",
+  "sequence": 10,
+  "signature": "MEQCIEPC3a3ZprrUOItPzOArU5KO/pH4XB8VSYk+Pqsq59w/AiBlDu+8cNkJBeNWvEOsJljEyA3TBUAyf2Tf10Rj0W8Cvw==",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
