@@ -1959,8 +1959,16 @@
       },
       "name": "Welcome",
       "native_evidence_gaps": [
-        "STD",
-        "Old capture docs/design-governance/captures/v2/book-welcome.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/v2/book-welcome.png\", \"sha256\": \"9db69518cdd2c08dede7eeb9210e08c2a56562f7aef15d6465b3374a39eb7ff2\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "The old cream card and 'On device' pill don't match the white, emerald-header direction. The reference uses a serif headline, Skip, a 5-dot carousel and the claims 'CPA-ready' and 'no data tracking'.",
@@ -1993,7 +2001,9 @@
         "Left-aligned sans-serif headline",
         "Setup step list card",
         "Mist privacy note"
-      ]
+      ],
+      "current_design_hash": "95e0d9e58dc5ae24721d163491cf73da092122850d1e393d1429f26545d40910",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2023,8 +2033,16 @@
       },
       "name": "Your LLC",
       "native_evidence_gaps": [
-        "STD",
-        "Old capture captures/v2/book-business.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/v2/book-business.png\", \"sha256\": \"19f55c1bebd3f1207a7247fd3c3eefa1b06f44e32a59b4dde3ac61d9f81f57a3\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "Old cream layout. The reference includes a tax-classification picker.",
@@ -2056,7 +2074,9 @@
         "Field styling",
         "Inline error placement",
         "Mist note"
-      ]
+      ],
+      "current_design_hash": "b2fb220294c6a7f4adf721b30b073bf43a3bdaa01dd0442c0df9afa69b929fe9",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2086,8 +2106,16 @@
       },
       "name": "Members and ownership setup",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "The reference has Skip, '3 of 5' steps and per-row overflow menus. The source has 4 steps and a confirmation checkbox.",
@@ -2121,7 +2149,9 @@
         "Sage template row",
         "Member card",
         "Worded total indicator"
-      ]
+      ],
+      "current_design_hash": "de28d033d774390aff7bb28f2046bd0aaa154d58536a2ed86f3830a0c1e4dee5",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2151,8 +2181,16 @@
       },
       "name": "First account (optional)",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "Old cream form styling only.",
@@ -2182,7 +2220,9 @@
       "visual_only_changes": [
         "Segmented controls",
         "Sage note"
-      ]
+      ],
+      "current_design_hash": "f2aebee1ce23d3b5770040080302bb1d3de0a14dbe07a20b835b1d23964b9849",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2210,8 +2250,16 @@
       },
       "name": "Review setup",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "Old styling only.",
@@ -2239,7 +2287,9 @@
       "visual_only_changes": [
         "Summary cards",
         "Header and step bar"
-      ]
+      ],
+      "current_design_hash": "bc187b2590faf19e5acf63e2d2bf7ee8f07a12b47bec0c9006a987de806841e8",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2265,8 +2315,16 @@
       },
       "name": "Ready",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "The reference has a 'Take a Quick Tour' button and mountain illustration.",
@@ -2292,7 +2350,9 @@
       "visual_only_changes": [
         "Check mark instead of the illustration",
         "Summary card"
-      ]
+      ],
+      "current_design_hash": "315183a8051b02382d1273d2e968e65a6c1caef333c8a038701f420a1051f0e8",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2324,8 +2384,16 @@
       },
       "name": "Navigation shell",
       "native_evidence_gaps": [
-        "STD",
-        "Old capture captures/book-dashboard.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/book-dashboard.png\", \"sha256\": \"d60a31805713626f04a1278ed5f3adf29b5bcd1351634edc9a4280fe98794620\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "The old header is white with a 'Search' text button. The reference has an emerald bar with bell and avatar.",
@@ -2355,13 +2423,22 @@
         "Emerald header color and layout",
         "Search as an icon button",
         "Sage tab pill style"
-      ]
+      ],
+      "current_design_hash": "5d07bbb1b768e3b06e45cd816f882ac9e6752a74b838b372b85d25edee5eab98",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
-        "Empty states use the existing copy and actions",
-        "Hero total equals the journal-derived cash balance",
-        "Common: native iOS and Android captures, VoiceOver/TalkBack, 200% text, 320-430pt widths, 44pt/48dp targets and regression pass before completion"
+        "Hero total equals the sum of journal-derived balances across bank and cash accounts",
+        "Cash-basis income, Cash-basis expenses and Net income tiles are visible and equal snapshot.cashBasis values without any new query or selector",
+        "Net income tile equals income minus expenses exactly in cents",
+        "View accounts and Reconcile both remain present and navigate to Accounts",
+        "Record income, Record expense and Transfer remain present and open the existing entry flows for their kind",
+        "Accounts, Recent activity, Members, Reminders and Reports cards remain reachable by scrolling with their existing actions and destinations",
+        "Empty states (no accounts, no activity, no open reminders) use the existing copy and actions",
+        "No period selector behavior ships without separate owner authorization and tests",
+        "All text is 13pt or larger; all controls are 48pt/48dp or larger; no text clipped at 320\u2013430pt widths or at 200% text size",
+        "Common: native iOS and Android captures, VoiceOver/TalkBack labels, 200% text, 320\u2013430pt widths, 44pt/48dp targets and a regression pass before completion"
       ],
       "committed_reference_artifacts": [
         {
@@ -2370,10 +2447,24 @@
         }
       ],
       "existing_supported_behavior": [
-        "Journal-derived cash total",
-        "Accounts, recent activity, members and reminders cards",
-        "Existing empty states",
-        "Navigation to Accounts, Transactions, Members, Settings and Reports"
+        "Cash hero = sum of balanceCents across accounts with kind 'bank' or 'cash', with 'Current book balance' and todayLocalDate()",
+        "View accounts button navigates to Accounts",
+        "Reconcile button navigates to Accounts (existing destination; no new reconciliation flow)",
+        "Cash-basis income tile = snapshot.cashBasis.incomeCents (existing, all recorded dates)",
+        "Cash-basis expenses tile = snapshot.cashBasis.expenseCents (existing, all recorded dates)",
+        "Net income tile = snapshot.cashBasis.netIncomeCents (existing, all recorded dates)",
+        "Record income calls onRecordTransaction('income')",
+        "Record expense calls onRecordTransaction('expense')",
+        "Transfer calls onRecordTransaction('transfer')",
+        "Accounts card lists every bank/cash account with name, type label and journal-derived balance; Manage navigates to Accounts",
+        "No-accounts empty state with existing copy and 'Create an account' that navigates to Accounts",
+        "Recent activity card: first 5 transactions, opening-balance role label, 'All transactions' navigates to Transactions",
+        "No-activity empty state with existing copy and 'Record income' action",
+        "Members card: ownership percent and book capital activity per member; 'Manage members' navigates to Members; ownership not presented as allocation",
+        "Reminders card: up to 4 open reminders with Overdue/Upcoming status; Manage navigates to Settings; 'No open reminders' empty state; reminders never post journal entries",
+        "Reports card with 'View reports' that navigates to Reports",
+        "Header Search action and five-tab navigation (Dashboard, Transactions, Members, Reports, More)",
+        "All amounts from persisted journal lines via fixed-precision cents and the existing Money formatter"
       ],
       "final_contract_run": "design-discovery-79d1188294a74094",
       "id": "DB-01",
@@ -2386,24 +2477,36 @@
       },
       "name": "Dashboard",
       "native_evidence_gaps": [
-        "STD",
-        "Old capture captures/book-dashboard.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/book-dashboard.png\", \"sha256\": \"d60a31805713626f04a1278ed5f3adf29b5bcd1351634edc9a4280fe98794620\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
-        "Income/Expense/Net income period tiles (new derived query)",
-        "FY/period selector"
+        "Fiscal-year / period selector on the Dashboard (rendered dashed as PROPOSED; default 'All dates' equals current behavior)",
+        "Period-scoped tile values: wiring the Dashboard tiles to cashBasisForPeriod(from, through) for the selected period, with tests that the tiles reconcile to the Cash-basis report for the same range",
+        "Fiscal-year definition/storage, if a fiscal year other than calendar dates is wanted"
       ],
       "old_layout_conflict": "The reference adds an FY selector, Income/Expense/Net tiles, a 'Record Journal' action and a decorative wave.",
       "order": 8,
       "outstanding_decisions": [
-        "Authorize the period income/expense tiles and period selector?"
+        "Authorize the FY/period selector and period-scoped tile values, or omit the selector and keep all-dates tiles only?",
+        "If authorized: calendar year or a stored fiscal-year start, and should the hero stay an as-of-today balance (proposed: yes)?",
+        "Accept moving the cash hero and summary tiles above 'Record an activity' (order-only change)?",
+        "Should Reconcile keep its current Accounts destination, or open a specific reconciliation screen later (separate authorization)?"
       ],
       "reference": {
         "path": "docs/design/proposed/screenshots/LLC Financial Dashboard Overview.png",
         "sha256": "67a34a3efca18c38664e772b8873e95202174660de21a6a0e4d69f6587b44a08",
         "status": "registry reference; not reopened. The related Downloads 'Finance' image was viewed."
       },
-      "revised_specification": "Dashboard tab. Title 'Dashboard'. Sage hero: cash across bank and cash accounts, derived from the journal, with the book-balance date. Three quick-action tiles: Record income, Record expense, Transfer. Cards, each with a header action: Accounts, Recent activity, Members, Reminders, and a Reports link. They navigate to Accounts, Transactions, Members, Settings/Reminders and Reports as today. Empty states use the existing copy and actions when there are no accounts or no activity. Proposed only if authorized: a period selector and Income / Expense / Net income tiles from a new derived period query; until then they are not shown. States: populated, no accounts, no activity.",
+      "revised_specification": "REVISED DESIGN PROPOSAL, NOT IMPLEMENTED OR APPROVED. Synthetic data only. Corrects the preservation defect in proposal-v3: the Cash-basis income, Cash-basis expenses, and Net income tiles and the Reconcile hero action already exist in apps/mobile/bookkeeping/DashboardScreen.tsx. They are not new, and they stay visible without any new query.\n\nLayout, top to bottom (390x844 portrait, scrolls vertically; the five-tab bar is fixed):\n1. App shell header: deep emerald band (#0E6B45) with the bar-mark, 'LLCBookKeepingPrivate' in white, and the existing Search action (48pt target). Shell behavior is unchanged.\n2. Title block on white: business name (snapshot.business), 'Dashboard' title, and the existing helper copy 'Balances and totals come from this LLC\u2019s persisted journal.' A period selector sits top-right with a dashed outline to mark it as PROPOSED. Its default and only pre-authorization state is 'All dates', which matches what the tiles show today.\n3. Cash hero card (pale-green surface, navy type): 'Cash across bank and cash accounts', a large amount equal to the sum of balanceCents across bank and cash accounts (the existing cashBalance computation), and 'Current book balance, <todayLocalDate()>'. Two 48pt buttons: 'View accounts' navigates to Accounts, and 'Reconcile' navigates to Accounts. Both destinations are unchanged.\n4. Three summary tiles in one row, each about 114pt wide, labels wrapping to two lines at 13pt or larger, no tiny columns: 'Cash-basis income' = snapshot.cashBasis.incomeCents, 'Cash-basis expenses' = snapshot.cashBasis.expenseCents, 'Net income' = snapshot.cashBasis.netIncomeCents. These come from the existing cashBasisForPeriod(database, businessId) call with no date bounds, so they cover all recorded dates. A 13pt caption below reads 'All recorded dates, from posted journal lines' so the scope is explicit. The tiles render today and need no new function.\n5. 'Record an activity': three 72pt-tall action tiles. 'Record income' is the primary emerald action and calls onRecordTransaction('income'). 'Record expense' calls onRecordTransaction('expense') and 'Transfer' calls onRecordTransaction('transfer'); both use the pale-green secondary style.\n6. Accounts card: title, 'Calculated from balanced journal lines', and a 'Manage' button (48pt) that navigates to Accounts. It lists every bank or cash account with its name, a 'Bank account'/'Cash account' label, and its journal-derived balance. When there are no accounts it shows the existing empty state: 'No bank or cash accounts yet' / 'Add an account to record income, expenses, or an opening balance.' with a 'Create an account' button that navigates to Accounts.\n7. Below the fold, rendered order unchanged, indicated in the proposal by the scroll pill 'Scroll for activity, members, reminders, reports':\n   a. Recent activity card: 'Posted transactions and opening balances', an 'All transactions' button that navigates to Transactions, and the first 5 transactions as TransactionSummaryRow (description, date, category, account, role with 'Opening balance' for opening-balance kind, amount). Empty state: 'No activity recorded' with a 'Record income' action.\n   b. Members card: helper 'Ownership interests are shown separately from capital activity.', a 'Manage members' button that navigates to Members, and a MemberSummaryCard per member showing ownership percent (basis-points formatting) and bookCapitalActivityCents. Ownership is not shown as an allocation.\n   c. Reminders card: 'Local notes only; reminders do not post journal entries.', a 'Manage' button that navigates to Settings, up to 4 open reminders with due date and Overdue/Upcoming status, and the empty state 'No open reminders'.\n   d. Reports card: 'Open a dated cash-basis or book-basis report from persisted records.' with a 'View reports' button that navigates to Reports.\n8. Tab bar: Dashboard (active, pale-green pill), Transactions, Members, Reports, More.\n\nVisual tokens: white #FFFFFF base; emerald #0E6B45 for the header and primary action; navy #14284B / #2E4566 for type; pale green #E8F4EC / #EEF7F1 surfaces with #CFE5D6 / #D3E6DA borders; muted #4A5873 helper text. All text is 13pt or larger. Every interactive control is 48pt or taller. Money uses the existing Money formatter and fixed-precision cents; there is no floating-point arithmetic.\n\nPeriod selector (NEW, requires authorization): when authorized, choosing a fiscal year or period would scope the three tiles to that range through a new dashboard wiring of the existing cashBasisForPeriod(from, through) path, and the caption would show the period and basis. The cash hero stays a current book balance and is not period-scoped. Until authorization, the selector is not interactive or is omitted, and the tiles keep showing all-dates values from snapshot.cashBasis.",
       "states": [
         "DEFAULT (first displayed proposal)",
         "Unrendered: no accounts",
@@ -2413,18 +2516,40 @@
         "5b8697fea1e444b9bfe4d516c612c7cc (seq 9)"
       ],
       "unrendered_states": [
-        "no accounts",
-        "no activity"
+        "No bank or cash accounts (existing empty state with 'Create an account')",
+        "No activity recorded (existing empty state with 'Record income')",
+        "No open reminders",
+        "Below-the-fold populated Recent activity, Members, Reminders and Reports cards (indicated only by the scroll pill)",
+        "Period selector open/selected states (new capability, unauthorized)",
+        "Negative net income and large-amount wrapping in tiles",
+        "200% Dynamic Type / font scale layout",
+        "Android rendering",
+        "Dark mode"
       ],
       "unsupported_or_excluded": [
-        "Record Journal (manual journal entry does not exist)",
-        "Decorative sparkline wave"
+        "Record Journal / manual journal-entry action (no such capability exists)",
+        "Decorative sparkline or wave in the cash hero",
+        "Income vs. Expenses chart and Ownership Allocation donut from the reference (ownership is not an allocation rule; no approved chart)",
+        "Notification bell, avatar, and LLC switcher dropdown from the reference (not existing behavior)",
+        "Per-row overflow menus on recent transactions (not existing behavior)",
+        "Any change to Reconcile's destination or a new reconciliation flow",
+        "Any change to accounting sources, cash-basis computation, or navigation targets",
+        "Application code edits, builds, native captures, TaxReturn work"
       ],
       "visual_only_changes": [
-        "Sage hero card",
-        "Quick-action tiles",
-        "Card headers"
-      ]
+        "Deep emerald app header band with white wordmark and Search action (shell styling only)",
+        "'Dashboard' title with the business name above it; existing 'Books at a glance' helper copy kept as the subtitle",
+        "Cash hero restyled as a pale-green card; amount formatted with thousands separator at larger size",
+        "View accounts and Reconcile restyled as equal-width 48pt outlined buttons inside the hero",
+        "Cash-basis income / expenses / Net income tiles restyled as one row of three equal tiles with small directional icons and two-line labels",
+        "Scope caption 'All recorded dates, from posted journal lines' under the tiles, describing existing all-dates behavior",
+        "Record income / Record expense / Transfer restyled as icon action tiles, with Record income as the emerald primary",
+        "Hero and tiles moved above 'Record an activity' (order change only; all actions retained)",
+        "Card headers with right-aligned 48pt action buttons for Accounts, Recent activity, Members, Reminders",
+        "Pale-green active pill on the Dashboard tab"
+      ],
+      "current_design_hash": "27a6ac4b1910eb32d7d217edac9fb5c84ee586f22fd0807f8da86384262264af",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2466,8 +2591,16 @@
       },
       "name": "Search and results",
       "native_evidence_gaps": [
-        "STD",
-        "Foundry captures book-search-empty.png show the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/book-search-empty.png\", \"sha256\": \"ea13e9dd12e917e85f7a11f38952222dd912582f5c7c2f2e792522899b63c2ee\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Per-kind counts in the category grid, chips and section headers",
@@ -2527,7 +2660,9 @@
         "Result cards",
         "48pt chips",
         "Mist read-only note"
-      ]
+      ],
+      "current_design_hash": "99e08ff665451c9945d8af5dc052704747f4ac40af23bf0d21c265e35ab4e79a",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2561,8 +2696,16 @@
       },
       "name": "Transaction history",
       "native_evidence_gaps": [
-        "STD",
-        "Foundry capture book-transactions.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/book-transactions.png\", \"sha256\": \"804fa29db51acc1e0365f128e675a66fb850e512eca480bd398b1b2f5800b2ab\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Period income/expense/net summary",
@@ -2604,7 +2747,9 @@
         "Role badges",
         "Chips and dropdowns instead of choice lists",
         "48pt sub-tab row"
-      ]
+      ],
+      "current_design_hash": "6303fea8305a47971e1bf9ad97e441aa493df8af2cdc4c4f62dc4d21f3807602",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2636,8 +2781,16 @@
       },
       "name": "Income, expense and transfer entry",
       "native_evidence_gaps": [
-        "STD",
-        "Foundry capture book-transaction-entry.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/book-transaction-entry.png\", \"sha256\": \"854a5f97e95aadc8c6ac2e16c69fb35288514f2c7b524c7fbf6f302ec94359ef\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Native date picker"
@@ -2678,7 +2831,9 @@
       "visual_only_changes": [
         "Type cards",
         "Field layout"
-      ]
+      ],
+      "current_design_hash": "750db15e7fb80a39e1eaf6339786ae910d424c837e3db39be72667d7070b1011",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2708,8 +2863,16 @@
       },
       "name": "Transaction detail",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Full balanced journal lines (shares work with RP-05 expansion)",
@@ -2752,7 +2915,9 @@
         "Cards",
         "Role badge",
         "Full-screen instead of an inline panel"
-      ]
+      ],
+      "current_design_hash": "6112957092e17fbb852bf2c113a83ee956d3d193a232fb6b7dd3f46f6516a0d2",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2780,8 +2945,16 @@
       },
       "name": "Reverse and replace",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Confirmation preview step with computed net effect",
@@ -2825,7 +2998,9 @@
       ],
       "visual_only_changes": [
         "Correction form restyle"
-      ]
+      ],
+      "current_design_hash": "103904601dd915fc3ec77175b75f66d6fc95ac697f78095162bfb0ee633900ea",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2856,8 +3031,16 @@
       },
       "name": "Recurring transactions",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Search over schedules",
@@ -2902,7 +3085,9 @@
         "Cards",
         "Status badges",
         "Action row"
-      ]
+      ],
+      "current_design_hash": "840667439a34dc9e66cb1297274d5eefb487e0ac0b210e68aa4de5e43c4bc186",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -2935,8 +3120,16 @@
       },
       "name": "CSV import and review",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Per-row include/exclude",
@@ -2985,7 +3178,9 @@
         "Stepper",
         "Summary tiles",
         "Row cards instead of a table"
-      ]
+      ],
+      "current_design_hash": "f2d2159363938cd69069b84b1f4dd75e885e1d9ad86e8bd62ac2358927c9c232",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3015,8 +3210,16 @@
       },
       "name": "Members and ownership history",
       "native_evidence_gaps": [
-        "STD",
-        "Foundry capture book-members.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/book-members.png\", \"sha256\": \"c4d661fba5f0b5e13ba3c2a0f0c5112aef59d2c66a2dd11634462dc9dab01c35\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "The reference has 'Managing Member' roles and a per-member 'Contributed' column.",
@@ -3048,7 +3251,9 @@
         "Ownership bar instead of a donut",
         "Member cards",
         "Sub-tab row"
-      ]
+      ],
+      "current_design_hash": "c5e5e712c095ae49f4efef223242e0e0bda278ea2907a790d8935ed60e6ee7cc",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3078,8 +3283,16 @@
       },
       "name": "Member capital",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Running capital balance per row",
@@ -3115,7 +3328,9 @@
       "visual_only_changes": [
         "Tiles",
         "Activity cards"
-      ]
+      ],
+      "current_design_hash": "4f7dd7406532b5b47617a041567af6af68706fb408a27c0413476773db31b0d7",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3146,8 +3361,16 @@
       },
       "name": "Obligations and actual payments",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Outstanding (obligation minus paid) figure",
@@ -3182,7 +3405,9 @@
       "visual_only_changes": [
         "Separated sections",
         "Cards"
-      ]
+      ],
+      "current_design_hash": "011219aee9b44d61227754aadaa096e059f5dbb12249f8e0a1bf4db6233de60a",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3213,8 +3438,16 @@
       },
       "name": "Member and third-party loans",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Term/maturity fields",
@@ -3249,7 +3482,9 @@
       "visual_only_changes": [
         "Tiles",
         "Cards instead of a wide table"
-      ]
+      ],
+      "current_design_hash": "a7fe8402490ba1092272003db1a2b30cf8ca153cc313cec70e84ec306cd14ea2",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3279,8 +3514,16 @@
       },
       "name": "Profit and loss",
       "native_evidence_gaps": [
-        "STD",
-        "Foundry capture book-reports.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/book-reports.png\", \"sha256\": \"02b2f65ae12b2a6b3cd3fb413201bd8c2ff559ad8bad7b46bfcc18b2f64e6042\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Per-category income/expense breakdown",
@@ -3322,7 +3565,9 @@
       "visual_only_changes": [
         "Picker chips",
         "Summary card"
-      ]
+      ],
+      "current_design_hash": "f2b151bf72ba6bb4413b2b0f7e36035f76555eda9208bf006b192b3beda865a2",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3352,7 +3597,16 @@
       },
       "name": "Cash movement",
       "native_evidence_gaps": [
-        "STD"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Single-account filter",
@@ -3394,7 +3648,9 @@
         "Tiles",
         "Reconciliation strip",
         "Account cards"
-      ]
+      ],
+      "current_design_hash": "75a32b3201fb03683bdb865582a9c82b63d4386680427efb53ba5d71806f4987",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3424,7 +3680,16 @@
       },
       "name": "Balance sheet",
       "native_evidence_gaps": [
-        "STD"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "The reference has a 'Final' badge, Compare tab, Print, Save Report and ownership % on capital lines.",
@@ -3464,7 +3729,9 @@
       "visual_only_changes": [
         "Section bands",
         "Reconciliation strip"
-      ]
+      ],
+      "current_design_hash": "9101403a57a22133f4e8c9ce6268a4ad37972ac052a5da5b6ea2be8f57779f41",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3499,7 +3766,16 @@
       },
       "name": "Trial balance",
       "native_evidence_gaps": [
-        "STD"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Account search and type filter",
@@ -3545,7 +3821,9 @@
         "Sub-tabs",
         "Account cards instead of three-column rows",
         "Reconciliation strip"
-      ]
+      ],
+      "current_design_hash": "018f325b5fa15a94b2785c2487fbc7172ea32acb3e673443678c0c08a8642a21",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3579,7 +3857,16 @@
       },
       "name": "General ledger",
       "native_evidence_gaps": [
-        "STD"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "From-date (period) filter and beginning balance",
@@ -3631,7 +3918,9 @@
       "visual_only_changes": [
         "Sub-tabs",
         "Entry cards"
-      ]
+      ],
+      "current_design_hash": "242d92ace93e60107d3fc899d3fc9607bec592496ce5e7caa624fcd2589fbde8",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3663,7 +3952,16 @@
       },
       "name": "Capital movement workpaper",
       "native_evidence_gaps": [
-        "STD"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Period beginning and ending capital, per member and in total",
@@ -3710,7 +4008,9 @@
         "Sub-tabs",
         "Member cards instead of a seven-column table",
         "Reconciliation strip"
-      ]
+      ],
+      "current_design_hash": "38172e7606c6fcd827c66353d7bb746a841481737ebf32a391f4d8f009d45dd4",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3740,7 +4040,16 @@
       },
       "name": "Payment cash workpaper",
       "native_evidence_gaps": [
-        "STD"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Combined cash aggregation across GP, distributions and loan principal/interest",
@@ -3788,7 +4097,9 @@
       "visual_only_changes": [
         "Sub-tabs",
         "Vertical payment cards instead of a wide table"
-      ]
+      ],
+      "current_design_hash": "87b66b43c06052bbfc8fe22a9de6c775f07bd82e90beb5ca2f9ee6a3458d9b11",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3820,7 +4131,16 @@
       },
       "name": "Loan cash workpaper",
       "native_evidence_gaps": [
-        "STD"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Period beginning principal, in total and per loan (rollforward)",
@@ -3867,7 +4187,9 @@
         "Sub-tabs",
         "Loan cards",
         "Reconciliation strip"
-      ]
+      ],
+      "current_design_hash": "d7a8446ca85fd56df10c5a5917e2bba4de44f26b884df8e47ba48d1669710ac8",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3900,7 +4222,16 @@
       },
       "name": "Tax Data Exchange",
       "native_evidence_gaps": [
-        "STD"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Tax-year selector",
@@ -3950,7 +4281,9 @@
         "Name 'Tax Data Exchange' (owner-requested)",
         "Sub-tabs",
         "Cards"
-      ]
+      ],
+      "current_design_hash": "0690e3673e7674bb87eea63b6953bc3b523a209d0ed1342d5460b3c243db8cbb",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -3980,8 +4313,16 @@
       },
       "name": "More",
       "native_evidence_gaps": [
-        "STD",
-        "Foundry capture book-more.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/book-more.png\", \"sha256\": \"bad1ce7611fab88c0dabad4c223cfdfd2a061a368f50da3a27bbd9bbf1727dbb\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Direct More > LLC workspaces row (owner-requested navigation)",
@@ -4020,7 +4361,9 @@
       "visual_only_changes": [
         "Grouped list",
         "Workspace card"
-      ]
+      ],
+      "current_design_hash": "9795c9512243b5b51f324c95ba5b5e9cfe7c110c1b7d9c0e5849e5bc69cdaab0",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -4052,8 +4395,16 @@
       },
       "name": "Accounts and reconciliation",
       "native_evidence_gaps": [
-        "STD",
-        "Foundry capture book-accounts.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/book-accounts.png\", \"sha256\": \"29071220003122c72614a8b0aee4c4119f3c88b1bb45ad4e78291f93b0211549\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Not-reconciled count and last-reconciled badge (derived)",
@@ -4097,7 +4448,9 @@
         "Sub-tabs",
         "Tiles",
         "Cards instead of a table"
-      ]
+      ],
+      "current_design_hash": "75d10feb2c54e62ad8cb9d8b7726f91e27b782cb775adebd0fe6d4c99131a167",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -4126,8 +4479,16 @@
       },
       "name": "Settings, workspaces and periods",
       "native_evidence_gaps": [
-        "STD",
-        "Foundry capture book-settings.png shows the OLD layout"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: [{\"path\": \"docs/design-governance/captures/v2/book-settings.png\", \"sha256\": \"faf0e0d4ee3fee2d1b435c34de66bf170cf275eec165bf8cb1adb9445c793a3a\"}]; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "The old screen is a long single column of panels.",
@@ -4168,7 +4529,9 @@
       "visual_only_changes": [
         "Cards instead of a long column of panels",
         "Lock status band"
-      ]
+      ],
+      "current_design_hash": "7a7b07dead43fdd0a9977875c0a7f485b1188ceaa68f4fc58d1b2b57ab6a4051",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -4198,8 +4561,16 @@
       },
       "name": "Add another LLC workspace",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Direct More > LLC workspaces route (owner-requested)",
@@ -4238,7 +4609,9 @@
       "visual_only_changes": [
         "Workspace cards",
         "Add form styling"
-      ]
+      ],
+      "current_design_hash": "79c2c417c65ccfd5d62c739ccf15e127f7791e355c71c4b33281e766eb93de0b",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -4270,8 +4643,16 @@
       },
       "name": "Storage and recovery tools",
       "native_evidence_gaps": [
-        "STD",
-        "Restore must be verified in both platform directions"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Certified user backup/restore of real books (production verification)",
@@ -4313,7 +4694,9 @@
       "visual_only_changes": [
         "Cards",
         "Caution chip"
-      ]
+      ],
+      "current_design_hash": "b3f0c2e62ea464247c6785522e75ee354ea4341ec93d80bc4826c590102a789a",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -4337,8 +4720,16 @@
       },
       "name": "Loading books",
       "native_evidence_gaps": [
-        "STD",
-        "No capture exists"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [],
       "old_layout_conflict": "None (simple loading). The owner note's 'Loading Books' import concept conflicts with this screen's role.",
@@ -4373,7 +4764,9 @@
         "Header",
         "Progress ring",
         "Copy"
-      ]
+      ],
+      "current_design_hash": "7b96a970c42f4963cab005a894134a426b14060f402049d201928006993c884a",
+      "current_design_revision": "proposal-v4-reconciliation"
     },
     {
       "acceptance_specific": [
@@ -4403,8 +4796,16 @@
       },
       "name": "Local books unavailable",
       "native_evidence_gaps": [
-        "STD",
-        "Requires a fault-injected native run on both platforms"
+        "Redesign not implemented, so there are no native captures of it",
+        "iOS simulator: pending",
+        "Android emulator: pending",
+        "Physical device: pending",
+        "VoiceOver/TalkBack: pending",
+        "Large text/font scale: pending",
+        "Existing native captures (docs/design-governance/captures/*, .foundry-host/visual-20261106/native/*) show the OLD implementation and are not proof of the redesign",
+        "Native widths320\u2013430pt and200% text: unverified",
+        "44pt iOS /48dp Android touch targets and focus/interaction behavior: unverified",
+        "Exact old-source capture artifacts: []; implementation source ae6754baba017adea78fb43e755e468c1a09dbf9"
       ],
       "new_capabilities_requiring_authorization": [
         "Deep link straight to restore",
@@ -4441,7 +4842,9 @@
       "visual_only_changes": [
         "Hierarchy",
         "Retry promoted to primary (owner-requested reorder of existing actions)"
-      ]
+      ],
+      "current_design_hash": "18065eaf1567163300daef8cba2b58457b2b95c4d159a768249954ce7a9c09e0",
+      "current_design_revision": "proposal-v4-reconciliation"
     }
   ],
   "source": "852ac0c32be15873a18c3cc8c40a9b32ea887fd3",
@@ -4450,5 +4853,12 @@
     "The discovered Global Search Package PNG supplies all five reference states. Earlier missing-three-mockups claim is superseded."
   ],
   "status": "AWAITING_HUMAN_APPROVAL; no app source changes",
-  "unverified": "All new-design native/Android/assistive-technology acceptance; nonpriority states not rendered as listed by Claude."
+  "unverified": "All new-design native/Android/assistive-technology acceptance; nonpriority states not rendered as listed by Claude.",
+  "dashboard_correction_run": "design-discovery-fae1c3cdad0149b6",
+  "review_findings_addressed": [
+    "DB-01 existing cash-basis tiles and Reconcile preserved",
+    "STD expanded to explicit unverified gates",
+    "Capture paths derived from exact actual artifacts"
+  ],
+  "prior_review_source": "7ae5d109f2ed71e7e10cc250b7ed831eb91c3880"
 }
