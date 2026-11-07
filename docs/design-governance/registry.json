@@ -2805,16 +2805,33 @@
         "Functional regression and exact-source independent review pass before VISUALLY_VERIFIED."
       ],
       "actual": [],
-      "approval_history": [],
+      "approval_history": [
+        {
+          "at": "2026-11-07T08:43:19.386795+00:00",
+          "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+          "decision": "REQUEST_CHANGES",
+          "design_hash": "34d4f61707dc1c9c06110f95bae58bcf3c3797972ded770a5b31beec81f38935",
+          "id": "6a4d7caa0ab24b56a589df739b694bc0",
+          "note": "use /Users/veerrajuamanchi/Downloads/LLC Workspace Management Screens.png as a reference .  I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts. This mockup covers two connected screens for LLCBookKeepingPrivate:\n\u00a0\u00a0\u00a0\u00a01\u00a0\u00a0\u00a0\u00a0Add Another LLC Workspace \u2014 create a separate bookkeeping workspace for an additional LLC.\n\n\n\u00a0\u00a0\u00a0\u00a02\u00a0\u00a0\u00a0\u00a0Your LLC Workspaces \u2014 view, switch between, and manage existing LLC workspaces.\n\n\nThe agent should treat the two panels as separate mobile screens and preserve the existing five-tab navigation, with workspace management accessible through More \u2192 LLC Workspaces.\n\n",
+          "owner": "local-os-uid:501",
+          "previous": "72da32ef4b6b150297ecea8ad2a572068333c5460be48821fc3125bef9fadfbc",
+          "product": "llcbookkeepingprivate",
+          "run": "visual-run-efb81e3a4f164e8e",
+          "screen": "OB-ADD",
+          "sequence": 61,
+          "signature": "MEQCIGdpOWjYHVH8szkzjwoIHBcAbdG3wQwzMX7JaWwVh5V0AiAD0HichE9bfIWw3Uj8MClFCz4iu9RNxrjWv6XkvAp0tA==",
+          "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+        }
+      ],
       "approval_ledger": "docs/design-governance/approvals/",
-      "approval_timestamp": null,
+      "approval_timestamp": "2026-11-07T08:43:19.386795+00:00",
       "approved_design_hash": null,
       "approved_design_revision": null,
       "capture_status": "UNVERIFIED",
       "depends_on": [],
-      "design_approval_status": "AWAITING_HUMAN_APPROVAL",
+      "design_approval_status": "CHANGES_REQUESTED",
       "design_hash": "34d4f61707dc1c9c06110f95bae58bcf3c3797972ded770a5b31beec81f38935",
-      "design_status": "AWAITING_HUMAN_APPROVAL",
+      "design_status": "CHANGES_REQUESTED",
       "id": "OB-ADD",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
       "implementation_source_paths": [
@@ -2830,8 +2847,8 @@
         "No verifiable owner approval found.",
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
-      "owner_approval_identity": null,
-      "owner_approval_source": null,
+      "owner_approval_identity": "local-os-uid:501",
+      "owner_approval_source": "macOS biometric-protected Secure Enclave ECDSA receipt",
       "platforms": [
         "ios",
         "android"
