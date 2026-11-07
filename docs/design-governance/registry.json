@@ -1556,16 +1556,33 @@
         "Functional regression and exact-source independent review pass before VISUALLY_VERIFIED."
       ],
       "actual": [],
-      "approval_history": [],
+      "approval_history": [
+        {
+          "at": "2026-11-07T02:42:01.331521+00:00",
+          "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+          "decision": "REQUEST_CHANGES",
+          "design_hash": "6f41f9007a226367426efa30abcb24f029ad353b8a81eeaa8d1315163bbb7962",
+          "id": "db36e2e7fdca4cd7a1e5296a514dd59d",
+          "note": "use /Users/veerrajuamanchi/Downloads/LLC Cash Movement.png as a reference . It has two screens one for import and the other to review the txn's from the import. I want the screens and the functionality to look like the reference or the supplied mockup as-is and we should match the layout and color of the mock screenshot\n",
+          "owner": "local-os-uid:501",
+          "previous": "e56f71432c7fdfaa70e4008a6f2c9978769c49ff4c9e2d1eba99ba9e9deb056c",
+          "product": "llcbookkeepingprivate",
+          "run": "visual-run-efb81e3a4f164e8e",
+          "screen": "RP-02",
+          "sequence": 22,
+          "signature": "MEQCIGfdRF3prHkVPO8HrUZr+2X3Vtn3Yw3Z2yN7PUVnU0auAiBYTAq/iwGSl3R8Um6SfpmAiqN17RQxTA1F1cg1bTgkNA==",
+          "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+        }
+      ],
       "approval_ledger": "docs/design-governance/approvals/",
-      "approval_timestamp": null,
+      "approval_timestamp": "2026-11-07T02:42:01.331521+00:00",
       "approved_design_hash": null,
       "approved_design_revision": null,
       "capture_status": "UNVERIFIED",
       "depends_on": [],
-      "design_approval_status": "AWAITING_HUMAN_APPROVAL",
+      "design_approval_status": "CHANGES_REQUESTED",
       "design_hash": "6f41f9007a226367426efa30abcb24f029ad353b8a81eeaa8d1315163bbb7962",
-      "design_status": "AWAITING_HUMAN_APPROVAL",
+      "design_status": "CHANGES_REQUESTED",
       "id": "RP-02",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
       "implementation_source_paths": [
@@ -1581,8 +1598,8 @@
         "No verifiable owner approval found.",
         "Native visual coverage incomplete; browser wireframe is not native evidence."
       ],
-      "owner_approval_identity": null,
-      "owner_approval_source": null,
+      "owner_approval_identity": "local-os-uid:501",
+      "owner_approval_source": "macOS biometric-protected Secure Enclave ECDSA receipt",
       "platforms": [
         "ios",
         "android"
