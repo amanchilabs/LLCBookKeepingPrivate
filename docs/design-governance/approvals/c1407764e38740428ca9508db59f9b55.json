@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T08:48:58.850181+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "7fbfebe81803516bfd092dd792e5224e0aaa225cd444bd232e1089285d922b41",
+  "id": "c1407764e38740428ca9508db59f9b55",
+  "note": "use /Users/veerrajuamanchi/Downloads/LLC Storage and Backup Recovery UI.png as a reference .  I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts.\n",
+  "owner": "local-os-uid:501",
+  "previous": "350573cb5330caa69d8b4eb2c1ce556b3222d5899853e9fae4bdb222408a3b02",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "BOOT-03",
+  "sequence": 62,
+  "signature": "MEUCIAxKrDB6tnaToqXhWu1m6PdhpMLcCxRaketlrZPI+a46AiEArPN2IX2FQ64DVV6xjW6ZIkbzpHfZVTqI+SUoa3wNjIM=",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
