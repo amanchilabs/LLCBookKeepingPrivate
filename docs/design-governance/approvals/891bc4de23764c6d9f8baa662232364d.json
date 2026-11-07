@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T08:40:22.425481+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "531eb7f7ad61304fc4492a8e59c485aa14c0e7c6e0ff77eda09a51422716b85c",
+  "id": "891bc4de23764c6d9f8baa662232364d",
+  "note": "use /Users/veerrajuamanchi/Downloads/LLC Loan Cash Workpaper Dashboard.png as a reference .  I want the screen to look like the reference or the supplied mockup as-is . You have to use the approved LLCBookKeepingPrivate design: deep emerald-green header, navy typography, white background, pale-green accents, and mobile-friendly layouts.\n",
+  "owner": "local-os-uid:501",
+  "previous": "23876858ff916454f1affe25abda5118cddaec9b92ae484f63143b4e6303c33f",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "SET-01",
+  "sequence": 60,
+  "signature": "MEUCIAr4Y5sD0jMDn7ehz+KMaSLPigtX4hTrMf+tTHnGNVnYAiEA3gAjgAcKnj4odr2yt/BYsRpyl4DG7wWYNs4I9+AgNv0=",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
