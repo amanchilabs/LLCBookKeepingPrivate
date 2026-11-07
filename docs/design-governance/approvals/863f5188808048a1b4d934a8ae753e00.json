@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T02:12:27.422230+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "3bb2bd8122d90aba082c3af4fafadef69a837f9167502daa6b3e5559e624246c",
+  "id": "863f5188808048a1b4d934a8ae753e00",
+  "note": "I want the screen and the functionality to look like the reference or the supplied mockup as-is and we should match the layout and color of the mock screenshot",
+  "owner": "local-os-uid:501",
+  "previous": "a652b54a2319e13d39bd7b88b98779474f1fd68d2eec8ec137e1db1d291cd687",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "TX-02",
+  "sequence": 12,
+  "signature": "MEQCIC0ifS3XYfcrKnztNurdUMkQfWCYaRpPgJJIECWKDovjAiBOo4aRXrlzY+7ttR2AfX6SAupiePQbZyIttEIUwY5xwg==",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}

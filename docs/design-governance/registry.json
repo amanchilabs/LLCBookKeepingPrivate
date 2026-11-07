@@ -817,16 +817,33 @@
           "sha256": "854a5f97e95aadc8c6ac2e16c69fb35288514f2c7b524c7fbf6f302ec94359ef"
         }
       ],
-      "approval_history": [],
+      "approval_history": [
+        {
+          "at": "2026-11-07T02:12:27.422230+00:00",
+          "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+          "decision": "REQUEST_CHANGES",
+          "design_hash": "3bb2bd8122d90aba082c3af4fafadef69a837f9167502daa6b3e5559e624246c",
+          "id": "863f5188808048a1b4d934a8ae753e00",
+          "note": "I want the screen and the functionality to look like the reference or the supplied mockup as-is and we should match the layout and color of the mock screenshot",
+          "owner": "local-os-uid:501",
+          "previous": "a652b54a2319e13d39bd7b88b98779474f1fd68d2eec8ec137e1db1d291cd687",
+          "product": "llcbookkeepingprivate",
+          "run": "visual-run-efb81e3a4f164e8e",
+          "screen": "TX-02",
+          "sequence": 12,
+          "signature": "MEQCIC0ifS3XYfcrKnztNurdUMkQfWCYaRpPgJJIECWKDovjAiBOo4aRXrlzY+7ttR2AfX6SAupiePQbZyIttEIUwY5xwg==",
+          "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+        }
+      ],
       "approval_ledger": "docs/design-governance/approvals/",
-      "approval_timestamp": null,
+      "approval_timestamp": "2026-11-07T02:12:27.422230+00:00",
       "approved_design_hash": null,
       "approved_design_revision": null,
       "capture_status": "CAPTURED_IOS_SYNTHETIC",
       "depends_on": [],
-      "design_approval_status": "AWAITING_HUMAN_APPROVAL",
+      "design_approval_status": "CHANGES_REQUESTED",
       "design_hash": "3bb2bd8122d90aba082c3af4fafadef69a837f9167502daa6b3e5559e624246c",
-      "design_status": "AWAITING_HUMAN_APPROVAL",
+      "design_status": "CHANGES_REQUESTED",
       "id": "TX-02",
       "implementation_commit": "ae6754baba017adea78fb43e755e468c1a09dbf9",
       "implementation_source_paths": [
@@ -842,8 +859,8 @@
         "No verifiable owner approval found.",
         "Actual capture awaits owner visual review; no visual pass inferred."
       ],
-      "owner_approval_identity": null,
-      "owner_approval_source": null,
+      "owner_approval_identity": "local-os-uid:501",
+      "owner_approval_source": "macOS biometric-protected Secure Enclave ECDSA receipt",
       "platforms": [
         "ios",
         "android"
