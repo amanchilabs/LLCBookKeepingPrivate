@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-07T02:26:00.724191+00:00",
+  "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "decision": "REQUEST_CHANGES",
+  "design_hash": "6a58231a2bbac941ee60d3b2a3f545e58a8a45d0d3ff83ae5accd35569747796",
+  "id": "b66525cca44744d3a072ee78ec46e4d1",
+  "note": "use /Users/veerrajuamanchi/Downloads/LLC Recurring Transactions Dashboard.png as a reference . I want the screen and the functionality to look like the reference or the supplied mockup as-is and we should match the layout and color of the mock screenshot\n",
+  "owner": "local-os-uid:501",
+  "previous": "0f56026fb488f376649ed53e35d6787c1dd3efd7be5b76a0ed2a5502b1b4f0cb",
+  "product": "llcbookkeepingprivate",
+  "run": "visual-run-efb81e3a4f164e8e",
+  "screen": "TX-05",
+  "sequence": 15,
+  "signature": "MEUCIDDxmZzOVO3zmdxIiO1UnBFbiLeBDQ9e4sIB8qAU5p9ZAiEA7sdzraCIK4AighfKeZCH1khZtWUa6r7AFeDa+6BI8Dg=",
+  "source": "macOS biometric-protected Secure Enclave ECDSA receipt"
+}
