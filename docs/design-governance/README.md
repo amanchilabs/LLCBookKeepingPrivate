@@ -1,10 +1,12 @@
-# Revised visual review — proposal v3
+# Revised visual review — proposal v4
 
 35 screens; 57 synthetic SVG proposals including tab/state variants. New designs are not implemented, approved or visually verified.
 
 Owner history: 64 signed events, {'REQUEST_CHANGES': 64}. Current exact change requests are preserved; the revised hashes require owner review.
 
 See [reconciliation matrix](reconciliation-20261107.md), [full structured matrix](reconciliation-20261107.json), and [complete saved notes](review-notes-full-20261107.json). Existing native images show old source only. No accounting, privacy, audit, security, persistence or authentication behavior changed.
+
+Independent review update: the dashboard preservation correction is committed; re-review is blocked by Claude usage limits. See independent-review-status-20261107.json. No implementation is authorized.
 
 ## Historical first-package catalog
 
