@@ -14,7 +14,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "0afe87849dd3f29c1fc7e7cb76e88a1786f3cc21",
+  "head": "b71cdf7520ceaa38df4289ea63934d886c158474",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -306,6 +306,12 @@
       "from": "agy-m5-llc-secondary",
       "head": "0afe87849dd3f29c1fc7e7cb76e88a1786f3cc21",
       "to": "agy-m5-llc-secondary"
+    },
+    {
+      "at": "2026-11-16T23:50:08.470298+00:00",
+      "event": "bounded_correction_requested",
+      "review_source": "de49ae74543b21d2968a074ecdc9b08b3c2181b4",
+      "story": "RECOVERY-002"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
@@ -799,7 +805,7 @@
         "stdout_sha256": "b34510562d65e52065e44b3169525e5fc04c5b3bdae39469e1bc863ef7b16cdb"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Passphrase-encrypted complete dataset backup APIs. Use RECOVERY-001 APIs to encode/decode a complete bookkeeping payload under the EXISTING authenticated portable AES-GCM/PBKDF2 envelope (600000 iterations and existing bounds), with a separate explicit bookkeeping payload discriminator/version so proof-only payloads cannot be restored as books or vice versa. Add pure non-UI create/decrypt backup APIs using an injected crypto interface and native adapter reusing existing crypto.native.ts production encrypt/decrypt implementation; browser unavailable behavior remains unchanged. Validate payload before encryption and strict decode/schema/manifest after authentication; enforce bounds before expensive work, zero transient plaintext buffers when owned, no keys/passphrases in logs/errors/payload. Restore works with passphrase and backup bytes, not original Keychain. Tests must perform real AES-GCM/PBKDF2 roundtrips using Node crypto adapter with identical production envelope/authenticated metadata; mock-only roundtrips are insufficient. Cover different ciphertext for same data, exact restored payload, wrong password, bit flips in header/salt/nonce/ciphertext/tag, truncation, unsupported envelope/payload/schema, oversized input, weak passwords and proof-payload rejection. Clearly label host crypto conformance tests versus unexecuted native implementation. Do not wire UI or replace proof backup.",
-      "resume_context": "Resume the existing implementation at 0afe87849dd3f29c1fc7e7cb76e88a1786f3cc21. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete.",
+      "resume_context": "Resume the existing implementation at 0afe87849dd3f29c1fc7e7cb76e88a1786f3cc21. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. BOUNDED CORRECTION atde49ae7, do not restart or broaden. Independent reviewer /root/recovery002_review found: (1) Hostadapter typecheck7errors node:crypto/Buffer unavailable, callbacksimplicitany. No newdependencies/configfiles/typecheck weakening or blankettsignore. RealNode24 globalThis.crypto.subtle WebCrypto is acceptable instead of nodeimports, still REAL AES256GCM/PBKDF2SHA256600000 with identical envelope/AAD; or use existing valid typed approach. Keep security bounds. (2) Fixture mathematically15rows (2business+2members+2interesthistory+4accounts+1journal+2lines+1transaction+1preference), not11; correct assertion tied to actual rows. (3) createBookkeepingBackup resolves encrypt function after plaintext allocation before try/finally(line222), so missing/throwing method leaks ownedplaintext. Include all paths after allocation in cleanup; add realAPI missingadapter/throwinggetter/encryptfailure ownedbuffer cleanup tests. (4) CurrentNode decrypt adapter intermediate decryptedPart/finalPart Buffers are never wiped, including unauthenticatedplaintext on final failure. Clear owned intermediates on success and failure, or eliminate unsafeintermediates with trusted authenticatedWebCrypto. Passphrase/KDF buffers cleanup on allpaths. (5) Oversizedcreate test430-451 tests selfdefinedmock, never actualcreateBookkeepingBackup. Replace with valid >8MiB syntheticdataset hitting publiccreateAPI; assert crypto notcalled and propererror, no testskips/relaxingbounds. Add genuine encrypt/decrypt cleanup failuretests and docs truth. Only5Story2files allowed. No commands/tests/Git/agents/native/UI/dependencychanges. Coordinator validates.",
       "review": {
         "findings": [
           {
