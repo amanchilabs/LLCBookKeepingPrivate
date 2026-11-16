@@ -46,46 +46,26 @@
     "stdout_sha256": "de5b7c9623b1bb3a388acbe0e4cdc7cb9ba35d57fabc5489356c2180ea61e60c"
   },
   "review": {
+    "bounded_review": "Prior cleanup and oversized-API-test findings resolved; no additional substantive issue. WebCrypto authenticates before returning plaintext; no duplicate plaintext Buffers. Not a passing certification.",
     "findings": [
       {
-        "issue": "Unavailable node:crypto/Buffer type definitions and implicit-any callbacks in adapter; no dependency changes allowed.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "Fixture actual15 rows; testline190 incorrectlyexpects11.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "createBookkeepingBackup resolves encrypt function after plaintext allocation but outside try/finally; missing/throwing adapter method leaves owned plaintext uncleared.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "Host adapter decrypt creates decryptedPart/finalPart Buffers then copies to Uint8Array without wiping originals, including decryptedPart on final authentication failure.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "Oversized-create testlines430-451 calls own size-checking mock, not createBookkeepingBackup; actualAPI bound lacks regression.",
+        "issue": "WebCrypto adapter typed Uint8Array<ArrayBufferLike> not assignable to BufferSource in TS6, at68,94,124,135,148,149.",
         "severity": "MEDIUM"
       }
     ],
     "implementation_ownership": false,
     "reviewer": "/root/recovery002_review",
-    "source": "de49ae74543b21d2968a074ecdc9b08b3c2181b4",
+    "source": "6e1ac363a87010ed7fdeae7ca98480f4dfbf3072",
     "tests": {
-      "controller_focused_crypto": {
-        "failed": 1,
-        "passed": 37,
-        "total": 38
-      },
-      "controller_typecheck": "FAIL:7 missing Node types/implicit any errors",
-      "fixture_inventory": "15 rows independently confirmed"
+      "controller_focused_crypto_passed": 42,
+      "controller_typecheck": "FAIL: BufferSource ArrayBuffer-backed views required"
     },
     "verdict": "FAIL"
   },
   "run": "run-c87cbdc3a56d458b",
   "source": "6e1ac363a87010ed7fdeae7ca98480f4dfbf3072",
-  "status": "FAILED_VALIDATION",
-  "timestamp": "2026-11-16T23:56:57.089783+00:00",
+  "status": "FAILED_REVIEW",
+  "timestamp": "2026-11-16T23:58:58.272181+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
