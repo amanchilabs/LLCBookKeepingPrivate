@@ -7,13 +7,13 @@
   "governance": {
     "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
     "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
-    "docs/design-governance/provider-assignment.json": "b6f7d7c3bfbd9370036e6dba40229112ac086a9ecaf24cff13ebdd3be894f23f",
+    "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
     "docs/design/implementation/feature-preservation-matrix.md": "959a773112673f6586d02efa6492fea76fd0693660ab6aeb39736a5b2d2c603c",
     "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "5a41db08f2f3f00d98a1b09fb490e1322800b2f4",
+  "head": "41aa2f36e44a42deacee842c8bb49e1f5845bb50",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -71,6 +71,28 @@
         ]
       },
       "remaining_work": "Independent adapter review, safe authoritative secondary registration/handoff integration, complete Story 1 coverage and review, then approved Stories 2/3."
+    },
+    {
+      "after_assignment": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
+      "at": "2026-11-16T19:29:44.879902+00:00",
+      "before_assignment": "29d4f0c3d64b905c7a271bc3f08aa868584a0ac1e28effc1c6889e62aeba9343",
+      "checkpoint": "38d789fbb873d90c5ff07878ede2b1afd00c749d",
+      "cursor_preserved": 0,
+      "event": "owner_authorized_secondary_builder",
+      "profile": "agy-m5-llc-secondary",
+      "review": {
+        "code_hashes": {
+          "foundry/__main__.py": "cd9b2300848c089eba79e993b4a61b27f60fe72368cf6579c70cdbdb397f32e3",
+          "foundry/agy.py": "c1c900bc7039f07df0805213bf163c5cba8f29f837de985a35c14f4fbc20258c",
+          "foundry/execution.py": "4ec6443a00175ca14a60aee871792261192c4ec3cec10342526f5e2ff7bca538",
+          "foundry/providers.py": "2921aefc05e4a92083ed4b3afb6ecbe991561f43498aeb50d3a1d2bfa0d9f4e3",
+          "foundry/runner.py": "71b1ceaf211010d5a4be1473e84c7a9782b311e1b7e940a84003d192b6218665",
+          "foundry/secondary.py": "1a94a52748043968d866cbed22067b490a8de635605164c6badeb3f07cb8cb2d"
+        },
+        "reviewer": "/root/agy_independent_review",
+        "source": "abf5824bd050d058af842f07b402aa441c65881b",
+        "verdict": "PASS"
+      }
     }
   ],
   "id": "run-c87cbdc3a56d458b",
@@ -276,7 +298,7 @@
     "provider": "claude-code",
     "timeout_seconds": 1800
   },
-  "provider_assignment_hash": "29d4f0c3d64b905c7a271bc3f08aa868584a0ac1e28effc1c6889e62aeba9343",
+  "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
   "review_profile": {
     "allow_paid_fallback": false,
     "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
