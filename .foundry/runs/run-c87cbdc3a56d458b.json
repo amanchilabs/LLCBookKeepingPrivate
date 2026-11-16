@@ -1,5 +1,6 @@
 {
   "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "blocker": "Review did not approve the exact source revision",
   "branch": "feature/bookkeeping-full-recovery-20261116",
   "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
   "created_at": "2026-11-16T06:52:19.603624+00:00",
@@ -12,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "b99d5e06c94ce2647e66d5d234142a4d6c2b6eb7",
+  "head": "2a43afe398cc93baa177543265b924dcf03e39ce",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -106,12 +107,19 @@
       "reviewer": "claude-m5-llc-review",
       "source": "b99d5e06c94ce2647e66d5d234142a4d6c2b6eb7",
       "verdict": "FAIL"
+    },
+    {
+      "at": "2026-11-16T19:44:33.623654+00:00",
+      "event": "profile_handoff",
+      "from": "agy-m5-llc-secondary",
+      "head": "2a43afe398cc93baa177543265b924dcf03e39ce",
+      "to": "agy-m5-llc-secondary"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
   "next": 0,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "READY_FOR_REVALIDATION",
+  "phase": "READY",
   "plan": {
     "id": "CAP-BOOK-RECOVERY-001",
     "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
@@ -350,7 +358,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "BLOCKED",
+  "status": "PAUSED",
   "stories": [
     {
       "checks": [
@@ -419,7 +427,7 @@
         "stdout_sha256": "cd8289d34b29b16ab1a0cb5976d8840e707fd75b320e9490fa1cc803ef5d2bd2"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete lossless dataset snapshot and isolated SQL import. Inventory every schema-13 bookkeeping table/column from ensureBookkeepingSchema and migrations, including all workspaces/preferences, business/member and ownership history, accounts/journals/lines, transactions/splits/correction roles/history, capital, loan agreements/advances/repayments/reversals, guaranteed obligations/installments/payments/allocations/reversals, recurring templates/occurrences, reminders, accounting periods and reconciliation items/events. Define a strict versioned portable payload and exported table inventory; reject unknown newer schema, malformed/duplicate rows, unsupported column shapes and unknown bookkeeping tables rather than silently dropping. Preserve integer cents/date/reference values losslessly and stable IDs. Consistent snapshot export must use a transaction, no destructive migrations on source. Isolated import must accept ONLY empty destination, create supported schema using existing function, use parameterized statements in FK-safe order/transaction, validate FK and integrity, compare complete rows/counts deterministically. Failure leaves existing source/target unchanged; reject nonempty target. Do not serialize device keys, proof records or arbitrary sqlite_master SQL. Test real file-backed SQLite with existing Node adapter pattern; validate all inventory tables exist and unknown schema/extra tables/columns fail closed. Add coverage document explicitly distinguishing supported bookkeeping dataset from external/nonexistent receipt storage. Expose APIs for subsequent encryption/restore Stories. Accounting schema version must remain 13; no modifying the existing schema or calculations.",
-      "resume_context": "Resume the existing implementation at fa8dde28d26c2661b39a9ca00f2ddde64627ca14. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. Owner 2026-11-16 explicitly authorizes AGY/Gemini as secondary builder; independent adapter/activation review PASSED at abf5824bd050d058af842f07b402aa441c65881b. This supersedes historical Claude-only provider naming, not implementation scope. Coordinator verified canonical workspace, branch, live remote, source and single writer. Do NOT run ANY commands, tests, Git or other agents; use file read/search/write tools only. Existing RECOVERY-001 code and 66 snapshot tests / 266 regression passes are preserved. Missing deliverable: docs/recovery/DATASET-COVERAGE.md. Inspect existing bookkeeping-dataset.ts, bookkeeping-snapshot.ts, snapshot tests and schema to document exact supported tables/columns/relationships, schema/version policy, proof exclusions, unsupported external data and current test limits. Do not rewrite/refactor working code or tests. State that encryption, native SQLCipher/device recovery, complete financial-report parity and activation remain later/unverified gates. Do not claim independent bookkeeping review or acceptance. Preserve source and signed UI receipts. If no concrete correctness defect exists, write ONLY the missing coverage document. End after this Story; coordinator runs checks and independent review. No UI/dependencies/accounting-semantic changes.",
+      "resume_context": "Resume the existing implementation at 2a43afe398cc93baa177543265b924dcf03e39ce. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete.",
       "review": {
         "findings": [
           {
@@ -485,7 +493,7 @@
       },
       "review_required": true,
       "source": "b99d5e06c94ce2647e66d5d234142a4d6c2b6eb7",
-      "status": "FAILED_REVIEW",
+      "status": "READY",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",
