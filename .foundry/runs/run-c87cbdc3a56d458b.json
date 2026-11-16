@@ -14,7 +14,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "bb7abb1ad5628d768a7244b91d084da17ef3c0b2",
+  "head": "f501655fde72e8245edd83b97df7ec34c732ddcc",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -227,6 +227,12 @@
       "from": "agy-m5-llc-secondary",
       "head": "bb7abb1ad5628d768a7244b91d084da17ef3c0b2",
       "to": "agy-m5-llc-secondary"
+    },
+    {
+      "at": "2026-11-16T23:25:16.541087+00:00",
+      "event": "bounded_correction_requested",
+      "review_source": "21597dd1f45e02bf9416299566751050284b63a2",
+      "story": "RECOVERY-001"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
@@ -612,7 +618,7 @@
         "stdout_sha256": "43f574ebe2f3ddb3733cb2084365ba66246dc2edc99a1a6789e8f359b85eefe1"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete lossless dataset snapshot and isolated SQL import. Inventory every schema-13 bookkeeping table/column from ensureBookkeepingSchema and migrations, including all workspaces/preferences, business/member and ownership history, accounts/journals/lines, transactions/splits/correction roles/history, capital, loan agreements/advances/repayments/reversals, guaranteed obligations/installments/payments/allocations/reversals, recurring templates/occurrences, reminders, accounting periods and reconciliation items/events. Define a strict versioned portable payload and exported table inventory; reject unknown newer schema, malformed/duplicate rows, unsupported column shapes and unknown bookkeeping tables rather than silently dropping. Preserve integer cents/date/reference values losslessly and stable IDs. Consistent snapshot export must use a transaction, no destructive migrations on source. Isolated import must accept ONLY empty destination, create supported schema using existing function, use parameterized statements in FK-safe order/transaction, validate FK and integrity, compare complete rows/counts deterministically. Failure leaves existing source/target unchanged; reject nonempty target. Do not serialize device keys, proof records or arbitrary sqlite_master SQL. Test real file-backed SQLite with existing Node adapter pattern; validate all inventory tables exist and unknown schema/extra tables/columns fail closed. Add coverage document explicitly distinguishing supported bookkeeping dataset from external/nonexistent receipt storage. Expose APIs for subsequent encryption/restore Stories. Accounting schema version must remain 13; no modifying the existing schema or calculations.",
-      "resume_context": "Resume the existing implementation at bb7abb1ad5628d768a7244b91d084da17ef3c0b2. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete.",
+      "resume_context": "Resume the existing implementation at bb7abb1ad5628d768a7244b91d084da17ef3c0b2. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. BOUNDED CORRECTION from independent reviewer at21597dd: operationFailed sentinel and frozen wrapper are correct; do NOT redesign them. (1) Remove cleanupErrorMessage introspection/coercion. New combined error must use fixed contextual message; keep originalError, cleanupError and cause references NON-ENUMERABLE. Do not copy arbitrary message,stack,name,code or inspect thrown objects/getters. Preserve unknown values opaquely (including Object.create(null), objects with throwing getters, undefined). Add focused synthetic tests proving neither wrapper message nor JSON.stringify leaks synthetic private marker; references retained; null-prototype and throwing-getter objects cannot prevent wrapping. Existing error-only rejection may preserve identity; combined failure wrapper must be safe. Update affected message assertions honestly. (2) Exactly3 new tests fail because multiple intended rollback-failure cases reuse same still-open transaction connection. Close/discard each poisoned connection, create fresh isolated connection for every faultcase. Preserve assertions; do not skip/weaken tests. Parent reproduced74pass/3fail of77 at lines725,767,1320. No broader implementation, accounting, UI or schema changes. Prefer simple implementation, no error-introspection helpers. Edit only originalStory1 files; no commands/tests/Git/agents. Coordinator validates.",
       "review": {
         "findings": [
           {
