@@ -45,11 +45,47 @@
     "stderr_sha256": "4c3f2f690f50ea026368372339c860a7f75afa41b84f4655266507d84be9f0e2",
     "stdout_sha256": "b34510562d65e52065e44b3169525e5fc04c5b3bdae39469e1bc863ef7b16cdb"
   },
-  "review": null,
+  "review": {
+    "findings": [
+      {
+        "issue": "Unavailable node:crypto/Buffer type definitions and implicit-any callbacks in adapter; no dependency changes allowed.",
+        "severity": "MEDIUM"
+      },
+      {
+        "issue": "Fixture actual15 rows; testline190 incorrectlyexpects11.",
+        "severity": "MEDIUM"
+      },
+      {
+        "issue": "createBookkeepingBackup resolves encrypt function after plaintext allocation but outside try/finally; missing/throwing adapter method leaves owned plaintext uncleared.",
+        "severity": "MEDIUM"
+      },
+      {
+        "issue": "Host adapter decrypt creates decryptedPart/finalPart Buffers then copies to Uint8Array without wiping originals, including decryptedPart on final authentication failure.",
+        "severity": "MEDIUM"
+      },
+      {
+        "issue": "Oversized-create testlines430-451 calls own size-checking mock, not createBookkeepingBackup; actualAPI bound lacks regression.",
+        "severity": "MEDIUM"
+      }
+    ],
+    "implementation_ownership": false,
+    "reviewer": "/root/recovery002_review",
+    "source": "de49ae74543b21d2968a074ecdc9b08b3c2181b4",
+    "tests": {
+      "controller_focused_crypto": {
+        "failed": 1,
+        "passed": 37,
+        "total": 38
+      },
+      "controller_typecheck": "FAIL:7 missing Node types/implicit any errors",
+      "fixture_inventory": "15 rows independently confirmed"
+    },
+    "verdict": "FAIL"
+  },
   "run": "run-c87cbdc3a56d458b",
   "source": "de49ae74543b21d2968a074ecdc9b08b3c2181b4",
-  "status": "FAILED_VALIDATION",
-  "timestamp": "2026-11-16T23:47:59.906906+00:00",
+  "status": "FAILED_REVIEW",
+  "timestamp": "2026-11-16T23:50:03.688946+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
