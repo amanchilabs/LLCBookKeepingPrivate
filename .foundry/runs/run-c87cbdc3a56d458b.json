@@ -13,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "caf9d87e776cbb2c88693db28372f63056c39c04",
+  "head": "de49ae74543b21d2968a074ecdc9b08b3c2181b4",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -272,7 +272,7 @@
   },
   "next": 1,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "READY",
+  "phase": "READY_FOR_REVALIDATION",
   "plan": {
     "id": "CAP-BOOK-RECOVERY-001",
     "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
@@ -459,7 +459,7 @@
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
   "provider_availability": {
     "builder": {
-      "at": "2026-11-16T23:34:27.572383+00:00",
+      "at": "2026-11-16T23:47:58.417832+00:00",
       "exit_code": 0,
       "profile": "agy-m5-llc-secondary",
       "status": "AVAILABLE"
@@ -520,7 +520,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "PAUSED",
+  "status": "BLOCKED",
   "stories": [
     {
       "checks": [
@@ -706,9 +706,26 @@
       "visual_screens": []
     },
     {
+      "checks": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          "exit_code": 2,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "787e69620da596599531c24e294510d14b70380c696b38da7694bf1719e5107e"
+        }
+      ],
       "depends_on": [
         "RECOVERY-001"
       ],
+      "evidence": ".foundry/evidence/CAP-BOOK-RECOVERY-001/run-c87cbdc3a56d458b/RECOVERY-002.json",
       "files": [
         "packages/backup/src/bookkeeping-backup.ts",
         "packages/backup/src/native-bookkeeping-backup.ts",
@@ -717,9 +734,27 @@
         "docs/recovery/BACKUP-FORMAT.md"
       ],
       "id": "RECOVERY-002",
+      "provider_result": {
+        "exit_code": 0,
+        "provider_usage": {
+          "credit_overages": false,
+          "model": "gemini-3.8-flash-high",
+          "provider": "agy",
+          "usage": {
+            "cache_read_tokens": 3203802,
+            "input_tokens": 222814,
+            "output_tokens": 77076,
+            "thinking_tokens": 55231,
+            "total_tokens": 299890
+          }
+        },
+        "stderr_sha256": "4c3f2f690f50ea026368372339c860a7f75afa41b84f4655266507d84be9f0e2",
+        "stdout_sha256": "b34510562d65e52065e44b3169525e5fc04c5b3bdae39469e1bc863ef7b16cdb"
+      },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Passphrase-encrypted complete dataset backup APIs. Use RECOVERY-001 APIs to encode/decode a complete bookkeeping payload under the EXISTING authenticated portable AES-GCM/PBKDF2 envelope (600000 iterations and existing bounds), with a separate explicit bookkeeping payload discriminator/version so proof-only payloads cannot be restored as books or vice versa. Add pure non-UI create/decrypt backup APIs using an injected crypto interface and native adapter reusing existing crypto.native.ts production encrypt/decrypt implementation; browser unavailable behavior remains unchanged. Validate payload before encryption and strict decode/schema/manifest after authentication; enforce bounds before expensive work, zero transient plaintext buffers when owned, no keys/passphrases in logs/errors/payload. Restore works with passphrase and backup bytes, not original Keychain. Tests must perform real AES-GCM/PBKDF2 roundtrips using Node crypto adapter with identical production envelope/authenticated metadata; mock-only roundtrips are insufficient. Cover different ciphertext for same data, exact restored payload, wrong password, bit flips in header/salt/nonce/ciphertext/tag, truncation, unsupported envelope/payload/schema, oversized input, weak passwords and proof-payload rejection. Clearly label host crypto conformance tests versus unexecuted native implementation. Do not wire UI or replace proof backup.",
       "review_required": true,
-      "status": "READY",
+      "source": "de49ae74543b21d2968a074ecdc9b08b3c2181b4",
+      "status": "FAILED_VALIDATION",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",
@@ -745,6 +780,7 @@
         ]
       ],
       "validation_resources": [],
+      "visual_contracts": [],
       "visual_screens": []
     },
     {
