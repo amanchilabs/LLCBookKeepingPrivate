@@ -1,6 +1,7 @@
 {
   "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
   "blocked_role": "reviewer",
+  "blocker": "REVIEW_BLOCKED_CAPACITY: Claude reviewer limit resets3:40pm America/Los_Angeles; corrected Story1 source not independently accepted. No dependent Story progression.",
   "branch": "feature/bookkeeping-full-recovery-20261116",
   "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
   "created_at": "2026-11-16T06:52:19.603624+00:00",
@@ -13,7 +14,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "8316cfd750593fbbca5b7f1f1c0db8d67f416626",
+  "head": "70d1b2d948a6dedf0a6fcbe58461f6ed1d13774c",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -133,6 +134,13 @@
       "review_only": true,
       "source": "e4105afa2174effe6da58452a7177bf593d10aa9",
       "verdict": "FAIL"
+    },
+    {
+      "at": "2026-11-16T22:58:55.856734+00:00",
+      "event": "profile_handoff",
+      "from": "agy-m5-llc-secondary",
+      "head": "70d1b2d948a6dedf0a6fcbe58461f6ed1d13774c",
+      "to": "agy-m5-llc-secondary"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
@@ -146,7 +154,7 @@
   },
   "next": 0,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "READY_FOR_REVALIDATION",
+  "phase": "READY",
   "plan": {
     "id": "CAP-BOOK-RECOVERY-001",
     "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
@@ -394,7 +402,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "BLOCKED",
+  "status": "PAUSED",
   "stories": [
     {
       "checks": [
@@ -528,7 +536,7 @@
         "stdout_sha256": "328b5f5b0abdf9fe937fc9a1f18e8cf4ab168f33686065d715c3f074ed137556"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete lossless dataset snapshot and isolated SQL import. Inventory every schema-13 bookkeeping table/column from ensureBookkeepingSchema and migrations, including all workspaces/preferences, business/member and ownership history, accounts/journals/lines, transactions/splits/correction roles/history, capital, loan agreements/advances/repayments/reversals, guaranteed obligations/installments/payments/allocations/reversals, recurring templates/occurrences, reminders, accounting periods and reconciliation items/events. Define a strict versioned portable payload and exported table inventory; reject unknown newer schema, malformed/duplicate rows, unsupported column shapes and unknown bookkeeping tables rather than silently dropping. Preserve integer cents/date/reference values losslessly and stable IDs. Consistent snapshot export must use a transaction, no destructive migrations on source. Isolated import must accept ONLY empty destination, create supported schema using existing function, use parameterized statements in FK-safe order/transaction, validate FK and integrity, compare complete rows/counts deterministically. Failure leaves existing source/target unchanged; reject nonempty target. Do not serialize device keys, proof records or arbitrary sqlite_master SQL. Test real file-backed SQLite with existing Node adapter pattern; validate all inventory tables exist and unknown schema/extra tables/columns fail closed. Add coverage document explicitly distinguishing supported bookkeeping dataset from external/nonexistent receipt storage. Expose APIs for subsequent encryption/restore Stories. Accounting schema version must remain 13; no modifying the existing schema or calculations.",
-      "resume_context": "Resume the existing implementation at 2a43afe398cc93baa177543265b924dcf03e39ce. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. Owner authorizes AGY as the registered secondary. Resolve ALL seven attached story.review.findings from the independent Claude review. This is a DOCUMENT-ONLY correction: edit docs/recovery/DATASET-COVERAGE.md and leave engine and tests byte-for-byte unchanged. Accurately list every column of all 27 tables with kind/nullability/PK-position/reference table from BOOKKEEPING_DATASET_TABLES, not merely table names. Correct timestamp/id/SQL/lock descriptions to match source; state current test limits exactly; remove completion/certification claims and unapproved bank-feed/CPA implications; fix proof/catalog exclusions and use repository-relative links. Do not add tests or behavior merely to conceal unverified limits; those belong to later authorized Stories. Coordinator runs validation/review. No commands, Git, other agents, native tools or UI changes. Use file tools only; write this single document. Do not restart implementation or rewrite source. ",
+      "resume_context": "Resume the existing implementation at 70d1b2d948a6dedf0a6fcbe58461f6ed1d13774c. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete.",
       "review": {
         "findings": [
           {
@@ -554,7 +562,7 @@
       },
       "review_required": true,
       "source": "e4105afa2174effe6da58452a7177bf593d10aa9",
-      "status": "FAILED_REVIEW",
+      "status": "READY",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",
