@@ -179,51 +179,28 @@ async function readDataset(database: BookkeepingSqlDatabase, allowExcludedTables
   return buildBookkeepingDatasetSnapshot(schemaVersion, rowsByTable);
 }
 
-function cleanupErrorMessage(cleanupError: unknown): string {
-  if (cleanupError instanceof Error && cleanupError.message) {
-    return cleanupError.message;
-  }
-  if (typeof cleanupError === 'string' && cleanupError.length > 0) {
-    return cleanupError;
-  }
-  if (cleanupError && typeof cleanupError === 'object' && 'message' in cleanupError) {
-    const msg = (cleanupError as { message?: unknown }).message;
-    if (typeof msg === 'string' && msg.length > 0) {
-      return msg;
-    }
-  }
-  if (cleanupError !== undefined && cleanupError !== null) {
-    const stringified = String(cleanupError);
-    if (stringified !== '[object Object]' && stringified.length > 0) {
-      return stringified;
-    }
-  }
-  return 'Rollback cleanup failed.';
-}
+const ROLLBACK_CLEANUP_FAILURE_MESSAGE = 'Rollback cleanup failed.';
 
 function createRollbackCleanupError(cleanupError: unknown, operationError: unknown): Error {
-  const message = cleanupErrorMessage(cleanupError);
-  const wrapper = new Error(message);
-  if (cleanupError instanceof Error) {
-    if (cleanupError.name) wrapper.name = cleanupError.name;
-    if (cleanupError.stack) wrapper.stack = cleanupError.stack;
-  }
-  if (cleanupError && typeof cleanupError === 'object' && 'code' in cleanupError) {
-    (wrapper as { code?: unknown }).code = (cleanupError as { code?: unknown }).code;
-  }
+  const wrapper = new Error(ROLLBACK_CLEANUP_FAILURE_MESSAGE);
   Object.defineProperty(wrapper, 'cleanupError', {
     value: cleanupError,
     writable: true,
     configurable: true,
-    enumerable: true,
+    enumerable: false,
   });
   Object.defineProperty(wrapper, 'originalError', {
     value: operationError,
     writable: true,
     configurable: true,
-    enumerable: true,
+    enumerable: false,
   });
-  (wrapper as { cause?: unknown }).cause = operationError;
+  Object.defineProperty(wrapper, 'cause', {
+    value: operationError,
+    writable: true,
+    configurable: true,
+    enumerable: false,
+  });
   return wrapper;
 }
 
@@ -233,13 +210,13 @@ function createRollbackCleanupError(cleanupError: unknown, operationError: unkno
  *
  * If rollback cleanup fails, the rejection is propagated so callers never
  * mistake a failed cleanup for success. If rollback fails while unwinding an
- * earlier operation error, both failures are preserved in a wrapper with the
- * rollback error on `.cleanupError`, the earlier operation error on
- * `.originalError` (and `.cause`), and a safe message without leaking record
- * values or mutating the cleanup error. If the operation fails and rollback
- * succeeds, the operation's rejection is preserved exactly (including undefined).
- * The caller owns the connection: if cleanup fails, the caller must close or
- * discard the unusable connection.
+ * earlier operation error, both failures are preserved in a wrapper with a
+ * fixed contextual message, non-enumerable references to the rollback failure
+ * on `.cleanupError` and the earlier operation error on `.originalError` (and
+ * `.cause`), without copying arbitrary properties or leaking record values.
+ * If the operation fails and rollback succeeds, the operation's rejection is
+ * preserved exactly (including undefined). The caller owns the connection: if
+ * cleanup fails, the caller must close or discard the unusable connection.
  */
 async function inReadOnlyTransaction<T>(database: BookkeepingSqlDatabase, operation: () => Promise<T>): Promise<T> {
   await database.execAsync('BEGIN IMMEDIATE;');

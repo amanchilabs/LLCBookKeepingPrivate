@@ -632,7 +632,8 @@ describe('bookkeeping dataset export', () => {
     }
 
     expect(capturedError).toBeInstanceOf(Error);
-    expect(capturedError.message).toBe('rollback cleanup failed during export error unwind');
+    expect(capturedError.message).toBe('Rollback cleanup failed.');
+    expect(capturedError.cleanupError).toBe(database.rollbackError);
     expect(capturedError.originalError).toBeDefined();
     expect(capturedError.originalError.code).toBe('unsupported-source-structure');
     expect(capturedError.cause).toBe(capturedError.originalError);
@@ -676,7 +677,7 @@ describe('bookkeeping dataset export', () => {
     }
 
     expect(capturedError).toBeInstanceOf(Error);
-    expect(capturedError.message).toBe('frozen rollback failure during export error unwind');
+    expect(capturedError.message).toBe('Rollback cleanup failed.');
     expect(capturedError.originalError).toBeDefined();
     expect(capturedError.originalError.code).toBe('unsupported-source-structure');
     expect(capturedError.cause).toBe(capturedError.originalError);
@@ -689,51 +690,59 @@ describe('bookkeeping dataset export', () => {
 
   it('preserves both failures on export when operation rejects undefined or primitive and rollback fails with frozen or primitive error', async () => {
     const path = await seededBooksPath();
-    const database = open(path, FaultInjectingDatabase);
-    database.failRollback = true;
+    const databaseA = open(path, FaultInjectingDatabase);
+    databaseA.failRollback = true;
 
     // Case A: operation rejects undefined, rollback throws frozen Error
     const frozenRollback = Object.freeze(new Error('frozen rollback with undefined operation rejection'));
-    database.rollbackError = frozenRollback;
-    database.getFirstAsync = async () => Promise.reject(undefined);
+    databaseA.rollbackError = frozenRollback;
+    databaseA.getFirstAsync = async () => Promise.reject(undefined);
 
     let capturedA = null;
     try {
-      await exportBookkeepingDataset(database);
+      await exportBookkeepingDataset(databaseA);
     } catch (error) {
       capturedA = error;
     }
     expect(capturedA).toBeInstanceOf(Error);
-    expect(capturedA.message).toBe('frozen rollback with undefined operation rejection');
+    expect(capturedA.message).toBe('Rollback cleanup failed.');
     expect('originalError' in capturedA).toBe(true);
     expect(capturedA.originalError).toBeUndefined();
     expect(capturedA.cause).toBeUndefined();
     expect(capturedA.cleanupError).toBe(frozenRollback);
     expect(Object.isFrozen(frozenRollback)).toBe(true);
 
+    databaseA.close();
+
     // Case B: operation rejects primitive, rollback throws primitive string
-    database.rollbackError = 'primitive rollback failure';
-    database.getFirstAsync = async () => Promise.reject('primitive adapter read failure');
+    const databaseB = open(path, FaultInjectingDatabase);
+    databaseB.failRollback = true;
+    databaseB.rollbackError = 'primitive rollback failure';
+    databaseB.getFirstAsync = async () => Promise.reject('primitive adapter read failure');
 
     let capturedB = null;
     try {
-      await exportBookkeepingDataset(database);
+      await exportBookkeepingDataset(databaseB);
     } catch (error) {
       capturedB = error;
     }
     expect(capturedB).toBeInstanceOf(Error);
-    expect(capturedB.message).toBe('primitive rollback failure');
+    expect(capturedB.message).toBe('Rollback cleanup failed.');
     expect(capturedB.originalError).toBe('primitive adapter read failure');
     expect(capturedB.cause).toBe('primitive adapter read failure');
     expect(capturedB.cleanupError).toBe('primitive rollback failure');
 
+    databaseB.close();
+
     // Case C: operation rejects undefined, rollback throws undefined
-    database.rollbackError = undefined;
-    database.getFirstAsync = async () => Promise.reject(undefined);
+    const databaseC = open(path, FaultInjectingDatabase);
+    databaseC.failRollback = true;
+    databaseC.rollbackError = undefined;
+    databaseC.getFirstAsync = async () => Promise.reject(undefined);
 
     let capturedC = null;
     try {
-      await exportBookkeepingDataset(database);
+      await exportBookkeepingDataset(databaseC);
     } catch (error) {
       capturedC = error;
     }
@@ -744,29 +753,167 @@ describe('bookkeeping dataset export', () => {
     expect(capturedC.cause).toBeUndefined();
     expect(capturedC.cleanupError).toBeUndefined();
 
-    database.close();
+    databaseC.close();
   });
 
   it('rejects when rollback fails with a frozen Error or primitive error after export operation succeeds', async () => {
     const path = await seededBooksPath();
+    const databaseA = open(path, FaultInjectingDatabase);
+    databaseA.failRollback = true;
+
+    const frozenError = Object.freeze(new Error('frozen rollback failure on export success'));
+    databaseA.rollbackError = frozenError;
+    await expect(exportBookkeepingDataset(databaseA)).rejects.toThrow('frozen rollback failure on export success');
+    expect(Object.isFrozen(frozenError)).toBe(true);
+
+    databaseA.close();
+
+    const databaseB = open(path, FaultInjectingDatabase);
+    databaseB.failRollback = true;
+    databaseB.rollbackError = 'primitive rollback string on export success';
+    let captured = null;
+    try {
+      await exportBookkeepingDataset(databaseB);
+    } catch (error) {
+      captured = error;
+    }
+    expect(captured).toBe('primitive rollback string on export success');
+
+    databaseB.close();
+  });
+
+  it('preserves non-enumerable references without leaking synthetic private markers in message or JSON.stringify', async () => {
+    const path = await seededBooksPath();
     const database = open(path, FaultInjectingDatabase);
     database.failRollback = true;
 
-    const frozenError = Object.freeze(new Error('frozen rollback failure on export success'));
-    database.rollbackError = frozenError;
-    await expect(exportBookkeepingDataset(database)).rejects.toThrow('frozen rollback failure on export success');
-    expect(Object.isFrozen(frozenError)).toBe(true);
+    const SECRET_MARKER = 'SYNTHETIC-PRIVATE-KEY-MARKER-987654321';
+    const cleanupError = new Error(`Cleanup failure containing ${SECRET_MARKER}`);
+    cleanupError.secretDetail = SECRET_MARKER;
+    const operationError = new Error(`Operation error containing ${SECRET_MARKER}`);
+    operationError.secretDetail = SECRET_MARKER;
 
-    database.rollbackError = 'primitive rollback string on export success';
+    database.rollbackError = cleanupError;
+    database.getFirstAsync = async () => Promise.reject(operationError);
+
     let captured = null;
     try {
       await exportBookkeepingDataset(database);
     } catch (error) {
       captured = error;
     }
-    expect(captured).toBe('primitive rollback string on export success');
+
+    expect(captured).toBeInstanceOf(Error);
+    expect(captured.message).toBe('Rollback cleanup failed.');
+    expect(captured.message).not.toContain(SECRET_MARKER);
+
+    // References are retained accurately
+    expect(captured.cleanupError).toBe(cleanupError);
+    expect(captured.originalError).toBe(operationError);
+    expect(captured.cause).toBe(operationError);
+
+    // Properties are non-enumerable and do not appear in Object.keys
+    expect(Object.keys(captured)).toEqual([]);
+    const cleanupDesc = Object.getOwnPropertyDescriptor(captured, 'cleanupError');
+    expect(cleanupDesc.enumerable).toBe(false);
+    const originalDesc = Object.getOwnPropertyDescriptor(captured, 'originalError');
+    expect(originalDesc.enumerable).toBe(false);
+    const causeDesc = Object.getOwnPropertyDescriptor(captured, 'cause');
+    expect(causeDesc.enumerable).toBe(false);
+
+    // JSON.stringify does not serialize non-enumerable properties or leak markers
+    const serialized = JSON.stringify(captured);
+    expect(serialized).not.toContain(SECRET_MARKER);
+    expect(serialized).toBe('{}');
 
     database.close();
+  });
+
+  it('safely wraps when errors are null-prototype objects or have throwing property getters', async () => {
+    const path = await seededBooksPath();
+
+    // Subcase 1: cleanupError is null-prototype object, operationError has throwing getters
+    const databaseA = open(path, FaultInjectingDatabase);
+    databaseA.failRollback = true;
+
+    const nullProtoCleanup = Object.create(null);
+    nullProtoCleanup.tag = 'null-prototype-cleanup';
+
+    const throwingOp = {
+      get message() {
+        throw new Error('thrown from message getter');
+      },
+      get stack() {
+        throw new Error('thrown from stack getter');
+      },
+      get name() {
+        throw new Error('thrown from name getter');
+      },
+      get code() {
+        throw new Error('thrown from code getter');
+      },
+    };
+
+    databaseA.rollbackError = nullProtoCleanup;
+    databaseA.getFirstAsync = async () => Promise.reject(throwingOp);
+
+    let capturedA = null;
+    try {
+      await exportBookkeepingDataset(databaseA);
+    } catch (error) {
+      capturedA = error;
+    }
+
+    expect(capturedA).toBeInstanceOf(Error);
+    expect(capturedA.message).toBe('Rollback cleanup failed.');
+    expect(capturedA.cleanupError).toBe(nullProtoCleanup);
+    expect(capturedA.originalError).toBe(throwingOp);
+    expect(capturedA.cause).toBe(throwingOp);
+    expect(Object.getPrototypeOf(capturedA.cleanupError)).toBeNull();
+    databaseA.close();
+
+    // Subcase 2: cleanupError has throwing getters, operationError is null-prototype object
+    const databaseB = open(path, FaultInjectingDatabase);
+    databaseB.failRollback = true;
+
+    const throwingCleanup = {
+      get message() {
+        throw new Error('thrown from cleanup message getter');
+      },
+      get stack() {
+        throw new Error('thrown from cleanup stack getter');
+      },
+      get name() {
+        throw new Error('thrown from cleanup name getter');
+      },
+      get code() {
+        throw new Error('thrown from cleanup code getter');
+      },
+      get toString() {
+        throw new Error('thrown from cleanup toString getter');
+      },
+    };
+
+    const nullProtoOp = Object.create(null);
+    nullProtoOp.tag = 'null-prototype-operation';
+
+    databaseB.rollbackError = throwingCleanup;
+    databaseB.getFirstAsync = async () => Promise.reject(nullProtoOp);
+
+    let capturedB = null;
+    try {
+      await exportBookkeepingDataset(databaseB);
+    } catch (error) {
+      capturedB = error;
+    }
+
+    expect(capturedB).toBeInstanceOf(Error);
+    expect(capturedB.message).toBe('Rollback cleanup failed.');
+    expect(capturedB.cleanupError).toBe(throwingCleanup);
+    expect(capturedB.originalError).toBe(nullProtoOp);
+    expect(capturedB.cause).toBe(nullProtoOp);
+    expect(Object.getPrototypeOf(capturedB.originalError)).toBeNull();
+    databaseB.close();
   });
 
   it('excludes the documented proof-only tables without serializing their records', async () => {
@@ -1220,7 +1367,8 @@ describe('isolated bookkeeping dataset import', () => {
     }
 
     expect(capturedError).toBeInstanceOf(Error);
-    expect(capturedError.message).toBe('rollback cleanup failed during verification error unwind');
+    expect(capturedError.message).toBe('Rollback cleanup failed.');
+    expect(capturedError.cleanupError).toBe(candidate.rollbackError);
     expect(capturedError.originalError).toBeDefined();
     expect(capturedError.originalError.code).toBe('restore-verification-failed');
     expect(capturedError.cause).toBe(capturedError.originalError);
@@ -1269,7 +1417,7 @@ describe('isolated bookkeeping dataset import', () => {
     }
 
     expect(capturedError).toBeInstanceOf(Error);
-    expect(capturedError.message).toBe('frozen rollback failure during verification error unwind');
+    expect(capturedError.message).toBe('Rollback cleanup failed.');
     expect(capturedError.originalError).toBeDefined();
     expect(capturedError.originalError.code).toBe('restore-verification-failed');
     expect(capturedError.cause).toBe(capturedError.originalError);
@@ -1282,53 +1430,61 @@ describe('isolated bookkeeping dataset import', () => {
 
   it('preserves both failures on verification when operation rejects undefined or primitive and rollback fails with frozen or primitive error', async () => {
     const snapshot = await exportBookkeepingDataset(open(await seededBooksPath()));
-    const candidate = open(emptyDatabasePath(), FaultInjectingDatabase);
-    await importBookkeepingDatasetIntoEmptyDatabase(candidate, snapshot);
-
-    candidate.failRollback = true;
+    const candidatePath = emptyDatabasePath();
+    const setupCandidate = open(candidatePath);
+    await importBookkeepingDatasetIntoEmptyDatabase(setupCandidate, snapshot);
+    setupCandidate.close();
 
     // Case A: operation rejects undefined, rollback throws frozen Error
+    const candidateA = open(candidatePath, FaultInjectingDatabase);
+    candidateA.failRollback = true;
     const frozenRollback = Object.freeze(new Error('frozen rollback with undefined verification operation rejection'));
-    candidate.rollbackError = frozenRollback;
-    candidate.getAllAsync = async () => Promise.reject(undefined);
+    candidateA.rollbackError = frozenRollback;
+    candidateA.getAllAsync = async () => Promise.reject(undefined);
 
     let capturedA = null;
     try {
-      await verifyBookkeepingDatasetInDatabase(candidate, snapshot);
+      await verifyBookkeepingDatasetInDatabase(candidateA, snapshot);
     } catch (error) {
       capturedA = error;
     }
     expect(capturedA).toBeInstanceOf(Error);
-    expect(capturedA.message).toBe('frozen rollback with undefined verification operation rejection');
+    expect(capturedA.message).toBe('Rollback cleanup failed.');
     expect('originalError' in capturedA).toBe(true);
     expect(capturedA.originalError).toBeUndefined();
     expect(capturedA.cause).toBeUndefined();
     expect(capturedA.cleanupError).toBe(frozenRollback);
     expect(Object.isFrozen(frozenRollback)).toBe(true);
+    candidateA.close();
 
     // Case B: operation rejects primitive, rollback throws primitive string
-    candidate.rollbackError = 'primitive verification rollback failure';
-    candidate.getAllAsync = async () => Promise.reject('primitive verification read failure');
+    const candidateB = open(candidatePath, FaultInjectingDatabase);
+    candidateB.failRollback = true;
+    candidateB.rollbackError = 'primitive verification rollback failure';
+    candidateB.getAllAsync = async () => Promise.reject('primitive verification read failure');
 
     let capturedB = null;
     try {
-      await verifyBookkeepingDatasetInDatabase(candidate, snapshot);
+      await verifyBookkeepingDatasetInDatabase(candidateB, snapshot);
     } catch (error) {
       capturedB = error;
     }
     expect(capturedB).toBeInstanceOf(Error);
-    expect(capturedB.message).toBe('primitive verification rollback failure');
+    expect(capturedB.message).toBe('Rollback cleanup failed.');
     expect(capturedB.originalError).toBe('primitive verification read failure');
     expect(capturedB.cause).toBe('primitive verification read failure');
     expect(capturedB.cleanupError).toBe('primitive verification rollback failure');
+    candidateB.close();
 
     // Case C: operation rejects undefined, rollback throws undefined
-    candidate.rollbackError = undefined;
-    candidate.getAllAsync = async () => Promise.reject(undefined);
+    const candidateC = open(candidatePath, FaultInjectingDatabase);
+    candidateC.failRollback = true;
+    candidateC.rollbackError = undefined;
+    candidateC.getAllAsync = async () => Promise.reject(undefined);
 
     let capturedC = null;
     try {
-      await verifyBookkeepingDatasetInDatabase(candidate, snapshot);
+      await verifyBookkeepingDatasetInDatabase(candidateC, snapshot);
     } catch (error) {
       capturedC = error;
     }
@@ -1338,7 +1494,6 @@ describe('isolated bookkeeping dataset import', () => {
     expect(capturedC.originalError).toBeUndefined();
     expect(capturedC.cause).toBeUndefined();
     expect(capturedC.cleanupError).toBeUndefined();
-
-    candidate.close();
+    candidateC.close();
   });
 });
