@@ -6,6 +6,9 @@
  * Scope limits (see docs/recovery/DATASET-COVERAGE.md):
  * - Callers must hold the existing storage serialization for the connection
  *   for the whole call; statements from another task must not interleave.
+ * - The caller owns the database connection: if rollback cleanup fails during
+ *   export or verification, the connection may retain an uncommitted
+ *   transaction or writer reservation and must be closed/discarded by the caller.
  * - Export never migrates or writes to the source. A source that is not
  *   already at the supported schema version is rejected unchanged.
  * - Import never activates a candidate and never touches a nonempty database.
@@ -176,14 +179,70 @@ async function readDataset(database: BookkeepingSqlDatabase, allowExcludedTables
   return buildBookkeepingDatasetSnapshot(schemaVersion, rowsByTable);
 }
 
-/** The transaction only reads, and always ends in ROLLBACK so it cannot persist anything. */
+/**
+ * Executes an operation inside a read-only transaction (BEGIN IMMEDIATE) and
+ * always concludes with ROLLBACK to ensure zero persistence.
+ *
+ * If rollback cleanup fails, the rejection is propagated so callers never
+ * mistake a failed cleanup for success. If rollback fails while unwinding an
+ * earlier operation error, the cleanup failure is rejected with the original
+ * error preserved on `.originalError` (and `.cause`) without leaking record
+ * values. The caller owns the connection: if cleanup fails, the caller must
+ * close or discard the unusable connection.
+ */
 async function inReadOnlyTransaction<T>(database: BookkeepingSqlDatabase, operation: () => Promise<T>): Promise<T> {
   await database.execAsync('BEGIN IMMEDIATE;');
+  let operationError: unknown;
+  let result: T | undefined;
   try {
-    return await operation();
-  } finally {
-    await database.execAsync('ROLLBACK;').catch(() => undefined);
+    result = await operation();
+  } catch (error) {
+    operationError = error;
   }
+
+  try {
+    await database.execAsync('ROLLBACK;');
+  } catch (cleanupError) {
+    let errorToThrow: unknown = cleanupError;
+    if (operationError !== undefined) {
+      if (cleanupError && (typeof cleanupError === 'object' || typeof cleanupError === 'function')) {
+        try {
+          Object.defineProperty(cleanupError, 'originalError', {
+            value: operationError,
+            writable: true,
+            configurable: true,
+            enumerable: false,
+          });
+        } catch {
+          // Ignore if property cannot be defined
+        }
+        if (!('cause' in cleanupError) || !(cleanupError as { cause?: unknown }).cause) {
+          try {
+            (cleanupError as { cause?: unknown }).cause = operationError;
+          } catch {
+            // Ignore if not assignable
+          }
+        }
+      } else {
+        const wrapped = new Error(String(cleanupError));
+        Object.defineProperty(wrapped, 'originalError', {
+          value: operationError,
+          writable: true,
+          configurable: true,
+          enumerable: false,
+        });
+        (wrapped as { cause?: unknown }).cause = operationError;
+        errorToThrow = wrapped;
+      }
+    }
+    throw errorToThrow;
+  }
+
+  if (operationError !== undefined) {
+    throw operationError;
+  }
+
+  return result as T;
 }
 
 async function assertDatabaseChecks(database: BookkeepingSqlDatabase): Promise<void> {
@@ -214,6 +273,10 @@ async function assertMatchesExpected(
  * The source is never migrated or modified. An unknown or newer schema, an
  * unknown table/column/view/trigger, an unsupported value shape, a duplicate
  * key or a dangling reference rejects the export; nothing is silently omitted.
+ *
+ * Operates inside a read-only transaction ending in ROLLBACK. If rollback
+ * cleanup fails, the call rejects with the cleanup error. The caller owns the
+ * database connection and must close/discard any connection whose cleanup failed.
  */
 export async function exportBookkeepingDataset(database: BookkeepingSqlDatabase): Promise<BookkeepingDatasetSnapshot> {
   return await inReadOnlyTransaction(database, () => readDataset(database, true));
@@ -222,6 +285,10 @@ export async function exportBookkeepingDataset(database: BookkeepingSqlDatabase)
 /**
  * Re-reads a database inside a read-only transaction and proves foreign keys,
  * SQLite integrity, and complete row/count equality with `expected`.
+ *
+ * Concludes with ROLLBACK. If rollback cleanup fails, the call rejects with the
+ * cleanup error. The caller owns the database connection and must close/discard
+ * any connection whose cleanup failed.
  */
 export async function verifyBookkeepingDatasetInDatabase(database: BookkeepingSqlDatabase, expected: unknown): Promise<void> {
   const snapshot = validateBookkeepingDatasetSnapshot(expected);

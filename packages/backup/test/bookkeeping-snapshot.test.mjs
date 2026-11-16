@@ -89,6 +89,18 @@ class RecordingDatabase extends TestDatabase {
   }
 }
 
+class FaultInjectingDatabase extends TestDatabase {
+  failRollback = false;
+  rollbackError = new Error('simulated rollback cleanup failure');
+
+  async execAsync(sql) {
+    if (this.failRollback && sql.trim() === 'ROLLBACK;') {
+      throw this.rollbackError;
+    }
+    return await super.execAsync(sql);
+  }
+}
+
 const AT = '2024-06-01T12:00:00.000Z';
 const LARGE_MINOR = '9007199254740993123'; // exceeds 2^53; must survive as exact text
 const UNICODE_DESCRIPTION = 'Café — synthetic résumé 📒 "quoted", comma';
@@ -584,6 +596,50 @@ describe('bookkeeping dataset export', () => {
     expect(await exportBookkeepingDataset(database)).toEqual(snapshot);
   });
 
+  it('rejects when rollback cleanup fails on export and prevents success leak', async () => {
+    const path = await seededBooksPath();
+    const database = open(path, FaultInjectingDatabase);
+    database.failRollback = true;
+
+    // Export must reject with the cleanup failure instead of resolving successfully.
+    await expect(exportBookkeepingDataset(database)).rejects.toThrow('simulated rollback cleanup failure');
+
+    // The caller owns the connection: because rollback failed, the transaction remained open,
+    // so starting a new transaction on this connection fails until the connection is discarded/closed.
+    await expect(database.execAsync('BEGIN IMMEDIATE;')).rejects.toThrow(/cannot start a transaction within a transaction/i);
+
+    // Discarding/closing the failed connection releases the lock, allowing clean access.
+    database.close();
+    const fresh = open(path);
+    await expectNoOpenTransaction(fresh);
+    const snapshot = await exportBookkeepingDataset(fresh);
+    expect(snapshot.tables.length).toBe(BOOKKEEPING_DATASET_TABLES.length);
+  });
+
+  it('rejects rollback cleanup failure while preserving an underlying export error', async () => {
+    const path = await seededBooksPath();
+    const database = open(path, FaultInjectingDatabase);
+    // Introduce an unknown table so readDataset encounters an unsupported-source-structure error
+    await database.execAsync('CREATE TABLE unexpected_test_table (id TEXT PRIMARY KEY NOT NULL);');
+    database.failRollback = true;
+    database.rollbackError = new Error('rollback cleanup failed during export error unwind');
+
+    let capturedError = null;
+    try {
+      await exportBookkeepingDataset(database);
+    } catch (error) {
+      capturedError = error;
+    }
+
+    expect(capturedError).toBeInstanceOf(Error);
+    expect(capturedError.message).toBe('rollback cleanup failed during export error unwind');
+    expect(capturedError.originalError).toBeDefined();
+    expect(capturedError.originalError.code).toBe('unsupported-source-structure');
+    expect(capturedError.cause).toBe(capturedError.originalError);
+
+    database.close();
+  });
+
   it('excludes the documented proof-only tables without serializing their records', async () => {
     const database = open(await seededBooksPath());
     const before = await exportBookkeepingDataset(database);
@@ -998,5 +1054,48 @@ describe('isolated bookkeeping dataset import', () => {
       code: 'restore-verification-failed',
       message: expect.stringMatching(/invalid record references/),
     });
+  });
+
+  it('rejects when rollback cleanup fails during verification and prevents success leak', async () => {
+    const snapshot = await exportBookkeepingDataset(open(await seededBooksPath()));
+    const candidate = open(emptyDatabasePath(), FaultInjectingDatabase);
+    await importBookkeepingDatasetIntoEmptyDatabase(candidate, snapshot);
+
+    candidate.failRollback = true;
+    candidate.rollbackError = new Error('simulated rollback cleanup failure on verification');
+
+    // Verification must reject rather than resolving successfully on failed rollback cleanup.
+    await expect(verifyBookkeepingDatasetInDatabase(candidate, snapshot))
+      .rejects.toThrow('simulated rollback cleanup failure on verification');
+
+    // The caller owns the connection: discarding/closing the broken connection allows clean access.
+    candidate.close();
+  });
+
+  it('rejects rollback cleanup failure while preserving an underlying verification error', async () => {
+    const snapshot = await exportBookkeepingDataset(open(await seededBooksPath()));
+    const candidate = open(emptyDatabasePath(), FaultInjectingDatabase);
+    await importBookkeepingDatasetIntoEmptyDatabase(candidate, snapshot);
+
+    // Modify data to cause restore-verification-failed
+    await candidate.execAsync(`UPDATE journal_lines SET debit_minor = '4001' WHERE id = 'je-expense-1-reversal:line:1'`);
+
+    candidate.failRollback = true;
+    candidate.rollbackError = new Error('rollback cleanup failed during verification error unwind');
+
+    let capturedError = null;
+    try {
+      await verifyBookkeepingDatasetInDatabase(candidate, snapshot);
+    } catch (error) {
+      capturedError = error;
+    }
+
+    expect(capturedError).toBeInstanceOf(Error);
+    expect(capturedError.message).toBe('rollback cleanup failed during verification error unwind');
+    expect(capturedError.originalError).toBeDefined();
+    expect(capturedError.originalError.code).toBe('restore-verification-failed');
+    expect(capturedError.cause).toBe(capturedError.originalError);
+
+    candidate.close();
   });
 });
