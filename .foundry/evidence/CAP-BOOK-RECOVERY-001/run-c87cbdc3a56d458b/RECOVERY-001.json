@@ -25,9 +25,19 @@
         "npm",
         "test"
       ],
-      "exit_code": 1,
-      "stderr_sha256": "303adf51da2a097af80bb43ecad264ef6aa382aaba0feb48ab8c223a665ea8d5",
-      "stdout_sha256": "90b96210c5dec6c0971dd38227cc779d8c69d884508f7b442b27e1e74ebb3875"
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "b43eacb293217d9c273fe8b492297846df9e10299ce6824da051774ef854f8b6"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
   "governance": {
@@ -48,52 +58,38 @@
       "model": "gemini-3.8-flash-high",
       "provider": "agy",
       "usage": {
-        "cache_read_tokens": 2250394,
-        "input_tokens": 140032,
-        "output_tokens": 50283,
-        "thinking_tokens": 42162,
-        "total_tokens": 190315
+        "cache_read_tokens": 2381069,
+        "input_tokens": 146205,
+        "output_tokens": 46700,
+        "thinking_tokens": 34407,
+        "total_tokens": 192905
       }
     },
-    "stderr_sha256": "7cd67ead5628315f61436a9943f54dcd5b3e026c60ef31511a58c0b23846b991",
-    "stdout_sha256": "43f574ebe2f3ddb3733cb2084365ba66246dc2edc99a1a6789e8f359b85eefe1"
+    "stderr_sha256": "224d2aa1ef8e8281ce4a9f6b0c2cb8ab27eeb32aac7495890d43d13fbbcc9582",
+    "stdout_sha256": "8cb57ed1dc60d063998befbe57dc098a0b18830f9b896d1e083fe9a9beafea23"
   },
   "review": {
-    "findings": [
-      {
-        "issue": "Wrapper copies arbitrary cleanup message/stack and enumerable originalError/cleanupError/cause. Synthetic private value appears in message and JSON serialization.",
-        "remedy": "Fixed contextual message, non-enumerable preserved references. Do not copy arbitrary name/message/stack/code.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "String(Object.create(null)) or throwing error getters can throw while wrapping and lose both original errors.",
-        "remedy": "Preserve unknown thrown values opaquely; no coercion or property inspection.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "Three new tests reuse poisoned connection after deliberately failed rollback; next BEGIN fails before intended fault.",
-        "remedy": "Fresh isolated connection per case and close unusable ones; retain assertions, no skipping/weakened tests.",
-        "severity": "MEDIUM"
-      }
-    ],
+    "coverage": "27-table schema13 inventory, columns/references, lossless snapshots, unknown-schema rejection, empty candidate, transactional import/verification, exact coverage documentation. Prior sentinel/frozen-wrapper/privacy/coercion/test-isolation findings resolved.",
+    "findings": [],
     "implementation_ownership": false,
+    "limits": "Host synthetic SQL only; no encryption/native/device/report orchestration certification.",
+    "provider": "codex-context",
+    "read_only": true,
     "reviewer": "/root/recovery001_exact_review",
-    "source": "21597dd1f45e02bf9416299566751050284b63a2",
+    "source": "1e8baa7c09a492eec87a5a8ea07942e63dc98fec",
     "tests": {
-      "controller_snapshot": {
-        "failed": 3,
-        "passed": 74,
-        "total": 77
-      },
-      "controller_typecheck": "PASS",
-      "independent_bounded_fault_probes": "REPRODUCED"
+      "additional_public_api_fault_probes_passed": 12,
+      "diff_check": "PASS",
+      "node": "24.22.2",
+      "snapshot_passed": 79,
+      "typecheck": "PASS"
     },
-    "verdict": "FAIL"
+    "verdict": "PASS"
   },
   "run": "run-c87cbdc3a56d458b",
-  "source": "21597dd1f45e02bf9416299566751050284b63a2",
-  "status": "FAILED_REVIEW",
-  "timestamp": "2026-11-16T23:25:12.425764+00:00",
+  "source": "1e8baa7c09a492eec87a5a8ea07942e63dc98fec",
+  "status": "VALIDATED",
+  "timestamp": "2026-11-16T23:36:45.372293+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
