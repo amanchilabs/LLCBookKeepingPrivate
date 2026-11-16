@@ -1,6 +1,6 @@
 {
   "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
-  "blocker": "Claude five-hour usage limit; diagnostic reports reset 3:40am America/Los_Angeles. RECOVERY-001 incomplete; tests and coverage documentation missing. No review or recovery acceptance.",
+  "blocker": "Claude five-hour usage limit; reset reported 3:40am America/Los_Angeles. RECOVERY-001 coverage documentation and independent review incomplete; RECOVERY-002/003 not started.",
   "branch": "feature/bookkeeping-full-recovery-20261116",
   "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
   "created_at": "2026-11-16T06:52:19.603624+00:00",
@@ -13,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "c3a249dd75396c3438324f809d40bf9c4d8c3925",
+  "head": "ceff8c2600ca8b75811a44204c7ef017a41bc126",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -24,8 +24,18 @@
         "reported_reset": "3:40am America/Los_Angeles"
       },
       "event": "provider_usage_limit_confirmed",
-      "next_action": "Complete missing RECOVERY-001 deliverables with assigned builder before validation; preserve authorized sequential Stories.",
+      "next_action": "Complete RECOVERY-001 coverage documentation and independent review with assigned provider after availability returns; then continue authorized Stories.",
       "source": "e3786939633f11acb662ab57372ee33e7b9c854f"
+    },
+    {
+      "at": "2026-11-16T07:07:45.889840+00:00",
+      "event": "partial_host_validation_recorded",
+      "independent_review": "NOT_RUN",
+      "no_acceptance_inferred": true,
+      "regression_tests_passed": 266,
+      "snapshot_tests_passed": 66,
+      "source": "e3786939633f11acb662ab57372ee33e7b9c854f",
+      "typecheck_exit": 0
     }
   ],
   "id": "run-c87cbdc3a56d458b",
