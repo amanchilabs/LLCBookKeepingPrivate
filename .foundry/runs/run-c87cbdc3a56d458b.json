@@ -13,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "db3f01661e332db0986669cf031918698cc3ddb2",
+  "head": "21597dd1f45e02bf9416299566751050284b63a2",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -198,7 +198,7 @@
   },
   "next": 0,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "READY",
+  "phase": "READY_FOR_REVALIDATION",
   "plan": {
     "id": "CAP-BOOK-RECOVERY-001",
     "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
@@ -385,7 +385,7 @@
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
   "provider_availability": {
     "builder": {
-      "at": "2026-11-16T23:07:45.986978+00:00",
+      "at": "2026-11-16T23:24:15.343442+00:00",
       "exit_code": 0,
       "profile": "agy-m5-llc-secondary",
       "status": "AVAILABLE"
@@ -446,7 +446,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "PAUSED",
+  "status": "BLOCKED",
   "stories": [
     {
       "checks": [
@@ -473,19 +473,9 @@
             "npm",
             "test"
           ],
-          "exit_code": 0,
-          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          "stdout_sha256": "0453b6e85a8f405213f0e2cb105b999811930392e3f6df3a3fb10987c462b3f3"
-        },
-        {
-          "argv": [
-            "git",
-            "diff",
-            "--check"
-          ],
-          "exit_code": 0,
-          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+          "exit_code": 1,
+          "stderr_sha256": "303adf51da2a097af80bb43ecad264ef6aa382aaba0feb48ab8c223a665ea8d5",
+          "stdout_sha256": "90b96210c5dec6c0971dd38227cc779d8c69d884508f7b442b27e1e74ebb3875"
         }
       ],
       "depends_on": [],
@@ -569,15 +559,15 @@
           "model": "gemini-3.8-flash-high",
           "provider": "agy",
           "usage": {
-            "cache_read_tokens": 2473281,
-            "input_tokens": 148882,
-            "output_tokens": 39418,
-            "thinking_tokens": 32248,
-            "total_tokens": 188300
+            "cache_read_tokens": 2250394,
+            "input_tokens": 140032,
+            "output_tokens": 50283,
+            "thinking_tokens": 42162,
+            "total_tokens": 190315
           }
         },
-        "stderr_sha256": "2ecd10dfd2884015111e25829f19c6eaac6c777d7454d44e83e130ba09048bcb",
-        "stdout_sha256": "a4367d00d6cc80e67c5dc11b872388a82e0402d838018ce727cf5c584ce0f4c3"
+        "stderr_sha256": "7cd67ead5628315f61436a9943f54dcd5b3e026c60ef31511a58c0b23846b991",
+        "stdout_sha256": "43f574ebe2f3ddb3733cb2084365ba66246dc2edc99a1a6789e8f359b85eefe1"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete lossless dataset snapshot and isolated SQL import. Inventory every schema-13 bookkeeping table/column from ensureBookkeepingSchema and migrations, including all workspaces/preferences, business/member and ownership history, accounts/journals/lines, transactions/splits/correction roles/history, capital, loan agreements/advances/repayments/reversals, guaranteed obligations/installments/payments/allocations/reversals, recurring templates/occurrences, reminders, accounting periods and reconciliation items/events. Define a strict versioned portable payload and exported table inventory; reject unknown newer schema, malformed/duplicate rows, unsupported column shapes and unknown bookkeeping tables rather than silently dropping. Preserve integer cents/date/reference values losslessly and stable IDs. Consistent snapshot export must use a transaction, no destructive migrations on source. Isolated import must accept ONLY empty destination, create supported schema using existing function, use parameterized statements in FK-safe order/transaction, validate FK and integrity, compare complete rows/counts deterministically. Failure leaves existing source/target unchanged; reject nonempty target. Do not serialize device keys, proof records or arbitrary sqlite_master SQL. Test real file-backed SQLite with existing Node adapter pattern; validate all inventory tables exist and unknown schema/extra tables/columns fail closed. Add coverage document explicitly distinguishing supported bookkeeping dataset from external/nonexistent receipt storage. Expose APIs for subsequent encryption/restore Stories. Accounting schema version must remain 13; no modifying the existing schema or calculations.",
       "resume_context": "Resume the existing implementation at f71fbb1ac79a3f61d470572337f2768931976912. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. Independent exact-source review FAIL at4e6f789 (record in history). BOUNDED CORRECTION ONLY: (1) operationError !== undefined is not a failure sentinel: adapters may reject undefined. Use explicit failure state and ensure both export/verify reject even undefined, including when rollback succeeds. Add actual public-API regression tests. (2) rollback errors may be frozen or primitive. Preserve both operation and rollback failures without relying on mutating the cleanup error object; tests for frozen cleanup Error plus undefined/primitive operation/cleanup rejections. Keep new error messages free of financial record/passphrase values. Simplify cleanup handling where possible, update exact docs. Preserve every existing schema/record/isolation behavior and tests. No unrelated changes. You may edit only existing Story1 allowed files. Do not run commands/tests/Git/agents; coordinator validates. Return naturally after edits.",
@@ -605,8 +595,8 @@
         "verdict": "FAIL"
       },
       "review_required": true,
-      "source": "4e6f7898b80c80647f16eaae0a30488f7f6f55b7",
-      "status": "READY",
+      "source": "21597dd1f45e02bf9416299566751050284b63a2",
+      "status": "FAILED_VALIDATION",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",

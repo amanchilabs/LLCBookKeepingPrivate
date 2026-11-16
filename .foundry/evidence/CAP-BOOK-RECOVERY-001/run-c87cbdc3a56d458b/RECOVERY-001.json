@@ -25,19 +25,9 @@
         "npm",
         "test"
       ],
-      "exit_code": 0,
-      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stdout_sha256": "0453b6e85a8f405213f0e2cb105b999811930392e3f6df3a3fb10987c462b3f3"
-    },
-    {
-      "argv": [
-        "git",
-        "diff",
-        "--check"
-      ],
-      "exit_code": 0,
-      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "exit_code": 1,
+      "stderr_sha256": "303adf51da2a097af80bb43ecad264ef6aa382aaba0feb48ab8c223a665ea8d5",
+      "stdout_sha256": "90b96210c5dec6c0971dd38227cc779d8c69d884508f7b442b27e1e74ebb3875"
     }
   ],
   "governance": {
@@ -58,15 +48,15 @@
       "model": "gemini-3.8-flash-high",
       "provider": "agy",
       "usage": {
-        "cache_read_tokens": 2473281,
-        "input_tokens": 148882,
-        "output_tokens": 39418,
-        "thinking_tokens": 32248,
-        "total_tokens": 188300
+        "cache_read_tokens": 2250394,
+        "input_tokens": 140032,
+        "output_tokens": 50283,
+        "thinking_tokens": 42162,
+        "total_tokens": 190315
       }
     },
-    "stderr_sha256": "2ecd10dfd2884015111e25829f19c6eaac6c777d7454d44e83e130ba09048bcb",
-    "stdout_sha256": "a4367d00d6cc80e67c5dc11b872388a82e0402d838018ce727cf5c584ce0f4c3"
+    "stderr_sha256": "7cd67ead5628315f61436a9943f54dcd5b3e026c60ef31511a58c0b23846b991",
+    "stdout_sha256": "43f574ebe2f3ddb3733cb2084365ba66246dc2edc99a1a6789e8f359b85eefe1"
   },
   "review": {
     "findings": [
@@ -92,9 +82,9 @@
     "verdict": "FAIL"
   },
   "run": "run-c87cbdc3a56d458b",
-  "source": "4e6f7898b80c80647f16eaae0a30488f7f6f55b7",
-  "status": "FAILED_REVIEW",
-  "timestamp": "2026-11-16T23:16:52.266329+00:00",
+  "source": "21597dd1f45e02bf9416299566751050284b63a2",
+  "status": "FAILED_VALIDATION",
+  "timestamp": "2026-11-16T23:24:19.492652+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
