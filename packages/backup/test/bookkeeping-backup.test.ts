@@ -14,7 +14,7 @@
  * - Synthetic Data Only: All datasets exercised are synthetic.
  */
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   BOOKKEEPING_DATASET_FORMAT,
   BOOKKEEPING_DATASET_FORMAT_VERSION,
@@ -187,9 +187,10 @@ describe('complete bookkeeping backup — host crypto conformance', () => {
     expect(result.snapshot).toEqual(dataset);
     expect(result.manifest.schemaVersion).toBe(BOOKKEEPING_BACKUP_SCHEMA_VERSION);
     expect(result.manifest.tableCount).toBe(27);
-    expect(result.manifest.totalRowCount).toBe(11);
+    expect(result.manifest.totalRowCount).toBe(15);
     expect(result.manifest.tableRowCounts['businesses']).toBe(2);
     expect(result.manifest.tableRowCounts['members']).toBe(2);
+    expect(result.manifest.tableRowCounts['member_interest_history']).toBe(2);
     expect(result.manifest.tableRowCounts['accounts']).toBe(4);
     expect(result.manifest.tableRowCounts['journal_entries']).toBe(1);
     expect(result.manifest.tableRowCounts['journal_lines']).toBe(2);
@@ -408,13 +409,17 @@ describe('complete bookkeeping backup — host crypto conformance', () => {
       await expect(decryptBookkeepingBackup(oversizedBackup, SYNTHETIC_PASSPHRASE, crypto)).rejects.toThrow();
     });
 
-    it('rejects plaintext payload exceeding 8 MiB limit during backup creation', async () => {
-      // Mock crypto adapter that attempts to encrypt oversized payload
-      const oversizedCrypto: BookkeepingBackupCrypto = {
-        async encryptBackupPayload(plaintext) {
-          if (plaintext.length + 16 > BACKUP_MAX_BYTES - 52) {
-            throw new Error('Backup payload exceeds the 8 MiB file limit.');
-          }
+    it('rejects plaintext payload exceeding 8 MiB limit during backup creation via public API', async () => {
+      // Build a valid synthetic schema-13 dataset where a text column exceeds 8 MiB
+      const baseDataset = buildSyntheticDataset();
+      // Pad the name of business-1 with portable text so the serialized JSON exceeds 8 MiB (BACKUP_MAX_BYTES = 8 * 1024 * 1024)
+      const oversizedBusinessName = 'Northstar Studio LLC ' + 'A'.repeat(8 * 1024 * 1024 + 1024);
+      baseDataset.tables[0].rows[0][1] = oversizedBusinessName;
+
+      let cryptoCalled = false;
+      const cryptoSpy: BookkeepingBackupCrypto = {
+        async encryptBackupPayload() {
+          cryptoCalled = true;
           return new Uint8Array(0);
         },
         async decryptBackupPayload() {
@@ -422,11 +427,39 @@ describe('complete bookkeeping backup — host crypto conformance', () => {
         },
       };
 
-      // Plaintext exceeding limit throws
-      const oversizedPlaintext = new Uint8Array(BACKUP_MAX_BYTES - 52);
-      await expect(oversizedCrypto.encryptBackupPayload(oversizedPlaintext, SYNTHETIC_PASSPHRASE)).rejects.toThrow(
-        '8 MiB file limit',
-      );
+      await expect(
+        createBookkeepingBackup(baseDataset, SYNTHETIC_PASSPHRASE, cryptoSpy),
+      ).rejects.toThrow(BookkeepingBackupError);
+
+      await expect(
+        createBookkeepingBackup(baseDataset, SYNTHETIC_PASSPHRASE, cryptoSpy),
+      ).rejects.toThrow('Backup payload exceeds the 8 MiB file limit.');
+
+      expect(cryptoCalled).toBe(false);
+    });
+
+    it('zeros transient plaintext buffer when createBookkeepingBackup rejects oversized payload', async () => {
+      const baseDataset = buildSyntheticDataset();
+      baseDataset.tables[0].rows[0][1] = 'Northstar Studio LLC ' + 'A'.repeat(8 * 1024 * 1024 + 1024);
+
+      let capturedBuffer: Uint8Array | null = null;
+      const originalEncode = TextEncoder.prototype.encode;
+      const encodeSpy = vi.spyOn(TextEncoder.prototype, 'encode').mockImplementation(function (this: TextEncoder, input?: string) {
+        const result = originalEncode.call(this, input);
+        capturedBuffer = result;
+        return result;
+      });
+
+      try {
+        await expect(
+          createBookkeepingBackup(baseDataset, SYNTHETIC_PASSPHRASE, crypto),
+        ).rejects.toThrow('Backup payload exceeds the 8 MiB file limit.');
+
+        expect(capturedBuffer).not.toBeNull();
+        expect(capturedBuffer!.every((byte) => byte === 0)).toBe(true);
+      } finally {
+        encodeSpy.mockRestore();
+      }
     });
   });
 
@@ -568,6 +601,82 @@ describe('complete bookkeeping backup — host crypto conformance', () => {
       expect(capturedPlaintext).not.toBeNull();
       // After createBookkeepingBackup completes, the plaintext buffer must have been zeroed
       expect(capturedPlaintext!.every((byte) => byte === 0)).toBe(true);
+    });
+
+    it('zeros transient plaintext buffers when encryptBackupPayload fails', async () => {
+      let capturedPlaintext: Uint8Array | null = null;
+      const failingCrypto: BookkeepingBackupCrypto = {
+        async encryptBackupPayload(plaintext) {
+          capturedPlaintext = plaintext;
+          throw new Error('Simulated crypto hardware failure');
+        },
+        async decryptBackupPayload() {
+          return new Uint8Array(0);
+        },
+      };
+
+      const dataset = buildSyntheticDataset();
+      await expect(
+        createBookkeepingBackup(dataset, SYNTHETIC_PASSPHRASE, failingCrypto),
+      ).rejects.toThrow('Simulated crypto hardware failure');
+
+      expect(capturedPlaintext).not.toBeNull();
+      expect(capturedPlaintext!.every((byte) => byte === 0)).toBe(true);
+    });
+
+    it('zeros transient plaintext buffers when crypto adapter has a throwing getter', async () => {
+      let capturedBuffer: Uint8Array | null = null;
+      const originalEncode = TextEncoder.prototype.encode;
+      const encodeSpy = vi.spyOn(TextEncoder.prototype, 'encode').mockImplementation(function (this: TextEncoder, input?: string) {
+        const result = originalEncode.call(this, input);
+        capturedBuffer = result;
+        return result;
+      });
+
+      const throwingCrypto: BookkeepingBackupCrypto = {
+        get encryptBackupPayload(): never {
+          throw new Error('Throwing getter during adapter resolution');
+        },
+        async decryptBackupPayload() {
+          return new Uint8Array(0);
+        },
+      };
+
+      try {
+        const dataset = buildSyntheticDataset();
+        await expect(
+          createBookkeepingBackup(dataset, SYNTHETIC_PASSPHRASE, throwingCrypto),
+        ).rejects.toThrow('Throwing getter during adapter resolution');
+
+        expect(capturedBuffer).not.toBeNull();
+        expect(capturedBuffer!.every((byte) => byte === 0)).toBe(true);
+      } finally {
+        encodeSpy.mockRestore();
+      }
+    });
+
+    it('zeros transient plaintext buffers when crypto adapter is missing encrypt method', async () => {
+      let capturedBuffer: Uint8Array | null = null;
+      const originalEncode = TextEncoder.prototype.encode;
+      const encodeSpy = vi.spyOn(TextEncoder.prototype, 'encode').mockImplementation(function (this: TextEncoder, input?: string) {
+        const result = originalEncode.call(this, input);
+        capturedBuffer = result;
+        return result;
+      });
+
+      const missingCrypto = {} as BookkeepingBackupCrypto;
+
+      try {
+        const dataset = buildSyntheticDataset();
+        await expect(
+          createBookkeepingBackup(dataset, SYNTHETIC_PASSPHRASE, missingCrypto),
+        ).rejects.toThrow(BookkeepingBackupError);
+
+        expect(capturedBuffer).not.toBeNull();
+        expect(capturedBuffer!.every((byte) => byte === 0)).toBe(true);
+      } finally {
+        encodeSpy.mockRestore();
+      }
     });
   });
 

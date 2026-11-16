@@ -22,7 +22,7 @@
 This document defines the exact binary layout, cryptographic parameters, payload contract, post-authentication verification pipeline, and execution boundaries for portable encrypted backups delivered under Story **RECOVERY-002**.
 
 ### Evidence Boundaries & Unverified Gates
-- **Host Conformance Evidence Only**: Current automated validation runs in Node via [`packages/backup/test/bookkeeping-crypto-adapter.ts`](../../packages/backup/test/bookkeeping-crypto-adapter.ts) using Node's standard `node:crypto` library. This exercises real PBKDF2-HMAC-SHA-256 (600,000 iterations), real AES-256-GCM authenticated encryption/decryption, envelope tamper rejection, bit-flip detection, truncation rejection, and strict canonical payload decoding on host runtimes.
+- **Host Conformance Evidence Only**: Current automated validation runs in Node via [`packages/backup/test/bookkeeping-crypto-adapter.ts`](../../packages/backup/test/bookkeeping-crypto-adapter.ts) using the standard Web Cryptography API (`globalThis.crypto.subtle`) in Node 24. This exercises real PBKDF2-HMAC-SHA-256 (600,000 iterations), real AES-256-GCM authenticated encryption/decryption, envelope tamper rejection, bit-flip detection, truncation rejection, strict canonical payload decoding, and zero-leak memory hygiene on host runtimes.
 - **Unexecuted Native Platform Implementation**: The native adapter in [`packages/backup/src/native-bookkeeping-backup.ts`](../../packages/backup/src/native-bookkeeping-backup.ts) and native cryptography in [`packages/backup/src/crypto.native.ts`](../../packages/backup/src/crypto.native.ts) depend on `react-native-quick-crypto` and `expo-crypto`. These modules require physical devices or compiled development builds and are **not** executed on host test runtimes.
 - **No Native or Physical-Device Certification**: Host tests **do not** certify native SQLCipher encryption, iOS Keychain, Android Keystore, device power-loss resilience, or physical-device recovery.
 - **Subsequent Story Gate**:
@@ -155,8 +155,9 @@ Both creation and decryption follow strict fail-closed validation pipelines:
 2. **Snapshot Validation**: Invokes `validateBookkeepingDatasetSnapshot(dataset)` to verify schema version 13, all 27 tables, column definitions, data types, and referential integrity.
 3. **Manifest Parity**: Verifies that table count equals 27 and row counts match row arrays (`assertBookkeepingBackupManifest`).
 4. **Canonical Serialization**: Serializes via `serializeBookkeepingDataset(snapshot)`, ensuring deterministic key ordering, table sequence, and code-unit primary key ordering.
-5. **Payload Size Enforced**: Proves `plaintext.length + 16 <= 8,388,608 - 52`. Oversized payloads throw `payload-too-large`.
-6. **Encryption & Memory Zeroing**: Invokes the injected crypto adapter. Zeros transient plaintext buffer (`fill(0)`) in a `finally` block.
+5. **Enclosed Lifecycle Allocation**: Plaintext is encoded into a UTF-8 `Uint8Array`. Immediately upon allocation, execution enters a `try / finally` block ensuring `plaintext.fill(0)` is executed on every completion or failure path.
+6. **Payload Size Enforced**: Proves `plaintext.length + 16 <= 8,388,608 - 52`. Oversized payloads throw `payload-too-large`.
+7. **Protected Adapter Resolution & Encryption**: Resolves `encryptBackupPayload` from the injected crypto boundary within the protected lifecycle (so missing methods or throwing getters trigger cleanup), invokes the cipher, and wipes plaintext in `finally`.
 
 ### 5.2 Backup Decryption Pipeline (`decryptBookkeepingBackup`)
 1. **Envelope Bounds Pre-Check**: Proves input is `Uint8Array`, length between 68 bytes and 8 MiB, and passphrase is valid string before invoking KDF.
@@ -173,7 +174,8 @@ Both creation and decryption follow strict fail-closed validation pipelines:
 
 - **Keychain Independence**: Decryption requires **only** the user passphrase and backup bytes. It does not access, read, or require the original device's Keychain or Keystore keys. A backup created on one device can be decrypted on any other device without access to the source device's hardware secrets.
 - **No Keys in Logs or Errors**: Error messages never embed the user passphrase, derived key material, plaintext content, or financial amounts.
-- **Zero Transient Plaintext Buffers**: Plaintext buffers created during encryption and decryption are explicitly overwritten with zeroes (`buffer.fill(0)`) in `finally` blocks when owned.
+- **Zero Transient Plaintext Buffers**: Plaintext buffers created during encryption and decryption are explicitly overwritten with zeroes (`buffer.fill(0)`) in `finally` blocks when owned. This includes all failure modes: missing crypto adapter methods, throwing getters during resolution, oversized payload rejection, and encryption/decryption failures.
+- **Atomic Authenticated Decryption**: Decryption via WebCrypto (`globalThis.crypto.subtle`) performs atomic authenticated decryption where unauthenticated plaintext is never released if authentication tag verification fails, eliminating unsafe intermediate plaintext buffers. Passphrase buffers are wiped (`passphraseBytes.fill(0)`) on all execution paths.
 
 ---
 
@@ -196,7 +198,7 @@ Both creation and decryption follow strict fail-closed validation pipelines:
 +---------v-------------------------+       +-----------------v------------------+
 | native-bookkeeping-backup.ts      |       | bookkeeping-crypto-adapter.ts      |
 | Production Native Adapter         |       | Host Node Crypto Adapter           |
-| (QuickCrypto + expo-crypto)       |       | (Standard node:crypto)             |
+| (QuickCrypto + expo-crypto)       |       | (Standard Node 24 WebCrypto)       |
 | Uses crypto.native.ts on device;  |       | Used in host automated test        |
 | crypto.web.ts on browser preview. |       | suites; real 600,000 PBKDF2 round- |
 | Status: UNEXECUTED IN HOST TESTS  |       | trips with production envelope.    |
@@ -213,7 +215,7 @@ The host conformance test suite in [`packages/backup/test/bookkeeping-backup.tes
 | :--- | :--- | :--- |
 | **Real Cryptography** | PBKDF2 (600,000 iter) + AES-256-GCM roundtrip | Full roundtrip succeeds under production envelope |
 | **Randomization** | Different ciphertext for same data | Fresh random salt and nonce produce distinct bytes |
-| **Parity** | Exact restored payload & manifest | Restored dataset has 0 differences via `compareBookkeepingDatasets` |
+| **Parity** | Exact restored payload & manifest | Restored dataset has 0 differences via `compareBookkeepingDatasets`; manifest confirms 15 rows across 8 tables (2 businesses, 2 members, 2 member_interest_history, 4 accounts, 1 journal_entry, 2 journal_lines, 1 transaction, 1 preference) |
 | **Empty Dataset** | Complete empty schema-13 dataset | All 27 tables round-trip with 0 rows |
 | **Authentication** | Wrong passphrase | Fails with `Backup authentication failed` |
 | **Tampering** | Bit flip in header magic (`LLCBKUP\0`) | Throws corrupt signature error |
@@ -235,13 +237,17 @@ The host conformance test suite in [`packages/backup/test/bookkeeping-backup.tes
 | **Bounds** | Empty or non-string passphrase | Rejected before expensive PBKDF2 work |
 | **Bounds** | Passphrase > 1,024 bytes | Rejected before expensive PBKDF2 work |
 | **Bounds** | Backup > 8 MiB file limit | Rejected before expensive PBKDF2 work |
-| **Bounds** | Plaintext payload > 8 MiB limit | Rejected before encryption |
+| **Bounds** | Plaintext payload > 8 MiB limit | Tested against public `createBookkeepingBackup` API with valid >8 MiB synthetic dataset; asserts `payload-too-large` error before crypto is called |
 | **Schema** | Schema version < 13 (`12`) | Rejected with `only version 13 can be captured or restored` |
 | **Schema** | Schema version > 13 (`14`) | Rejected with `newer than the supported version 13` |
 | **Schema** | Dataset format version != 1 | Rejected with `format version is unsupported` |
 | **Schema** | Malformed tables / missing tables | Rejected fail-closed |
 | **Isolation** | Proof-only payload (`RestoredProofSnapshot`) | Decryption rejects with `proof-payload-rejected` |
-| **Data Hygiene** | Zeroing transient plaintext buffers | Verifies plaintext buffer zeroed after operation |
+| **Data Hygiene** | Zeroing transient plaintext buffers | Verifies plaintext buffer zeroed after successful backup creation |
+| **Data Hygiene** | Zeroing plaintext on oversized failure | Verifies transient plaintext buffer zeroed when payload exceeds 8 MiB |
+| **Data Hygiene** | Zeroing plaintext on encryption failure | Verifies plaintext buffer zeroed when crypto adapter encrypt method rejects |
+| **Data Hygiene** | Zeroing plaintext on throwing getter | Verifies plaintext buffer zeroed when adapter resolution encounters throwing getter |
+| **Data Hygiene** | Zeroing plaintext on missing adapter | Verifies plaintext buffer zeroed when adapter lacks required encryption method |
 | **Privacy** | Sensitive data in errors | Error messages do not contain passphrases or keys |
 | **Boundary** | Host vs native implementation | Explicit test banner documenting unexecuted native implementation |
 

@@ -209,18 +209,16 @@ export async function createBookkeepingBackup(
   assertBookkeepingBackupManifest(snapshot);
   const serialized = serializeBookkeepingDataset(snapshot);
   const plaintext = new TextEncoder().encode(serialized);
-
-  // Enforce envelope payload bounds: 52-byte prefix + ciphertext (plaintext + 16-byte tag) <= 8 MiB
-  if (plaintext.length + BACKUP_TAG_BYTES > BACKUP_MAX_BYTES - 52) {
-    plaintext.fill(0);
-    throw new BookkeepingBackupError(
-      'payload-too-large',
-      'Backup payload exceeds the 8 MiB file limit.',
-    );
-  }
-
-  const encrypt = resolveEncryptFn(crypto);
   try {
+    // Enforce envelope payload bounds: 52-byte prefix + ciphertext (plaintext + 16-byte tag) <= 8 MiB
+    if (plaintext.length + BACKUP_TAG_BYTES > BACKUP_MAX_BYTES - 52) {
+      throw new BookkeepingBackupError(
+        'payload-too-large',
+        'Backup payload exceeds the 8 MiB file limit.',
+      );
+    }
+
+    const encrypt = resolveEncryptFn(crypto);
     return await encrypt(plaintext, passphrase);
   } finally {
     plaintext.fill(0);

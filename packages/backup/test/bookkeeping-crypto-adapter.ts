@@ -1,10 +1,19 @@
 /**
  * Host crypto adapter for complete bookkeeping backup conformance tests.
  *
- * Implements real PBKDF2-HMAC-SHA-256 (600,000 iterations) and AES-256-GCM
- * using Node's standard `node:crypto` library under the exact same envelope,
- * header parameters, and additional authenticated data (AAD) as the native
- * implementation in `crypto.native.ts`.
+ * Implements real PBKDF2-HMAC-SHA-256 (600,000 iterations) and real AES-256-GCM
+ * using the standard Web Cryptography API (`globalThis.crypto.subtle`) available in
+ * Node 24. It operates under the exact same envelope, header parameters, and
+ * additional authenticated data (AAD) as the native implementation in `crypto.native.ts`.
+ *
+ * Security & Memory Hygiene:
+ * - Atomic Authenticated Decryption: WebCrypto AES-GCM performs atomic decryption,
+ *   releasing plaintext only after tag verification succeeds. This eliminates
+ *   intermediate unauthenticated plaintext buffers on decryption failure.
+ * - Key Material: Derived keys are unextractable CryptoKey instances managed by
+ *   the runtime engine, avoiding raw intermediate key buffers in user JS.
+ * - Passphrase Cleanup: Transient passphrase byte arrays are explicitly zeroed
+ *   (`fill(0)`) in finally blocks on all execution paths.
  *
  * Limitations:
  * - This is host Node crypto conformance evidence only.
@@ -12,7 +21,6 @@
  *   Android Keystore, or physical-device recovery durability.
  */
 
-import { pbkdf2, randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 import {
   authenticatedMetadata,
   BACKUP_ITERATIONS,
@@ -27,6 +35,13 @@ import {
 } from '../src/format';
 import type { BookkeepingBackupCrypto } from '../src/bookkeeping-backup';
 
+function getSubtleCrypto(): SubtleCrypto {
+  if (typeof globalThis.crypto === 'undefined' || typeof globalThis.crypto.subtle === 'undefined') {
+    throw new Error('WebCrypto (globalThis.crypto.subtle) is not available in this environment.');
+  }
+  return globalThis.crypto.subtle;
+}
+
 export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
   private readonly iterations: number;
 
@@ -38,76 +53,113 @@ export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
     if (plaintext.length + BACKUP_TAG_BYTES > BACKUP_MAX_BYTES - 52) {
       throw new Error('Backup payload exceeds the 8 MiB file limit.');
     }
-    const passphraseBytes = validateBackupPassphrase(passphrase);
-    const salt = randomBytes(BACKUP_SALT_BYTES);
-    const nonce = randomBytes(BACKUP_NONCE_BYTES);
 
-    const derivedKey = await new Promise<Buffer>((resolve, reject) => {
-      pbkdf2(passphraseBytes, salt, this.iterations, 32, 'sha256', (err, key) => {
-        if (err) reject(err);
-        else resolve(key);
-      });
-    });
-    passphraseBytes.fill(0);
-
+    const subtle = getSubtleCrypto();
+    let passphraseBytes: Uint8Array | null = null;
     try {
+      passphraseBytes = validateBackupPassphrase(passphrase);
+      const salt = new Uint8Array(BACKUP_SALT_BYTES);
+      globalThis.crypto.getRandomValues(salt);
+      const nonce = new Uint8Array(BACKUP_NONCE_BYTES);
+      globalThis.crypto.getRandomValues(nonce);
+
+      const baseKey = await subtle.importKey(
+        'raw',
+        passphraseBytes,
+        'PBKDF2',
+        false,
+        ['deriveKey'],
+      );
+      passphraseBytes.fill(0);
+      passphraseBytes = null;
+
+      const derivedKey = await subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt,
+          iterations: this.iterations,
+          hash: 'SHA-256',
+        },
+        baseKey,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt'],
+      );
+
       const metadata = authenticatedMetadata(salt, nonce, plaintext.length + BACKUP_TAG_BYTES);
-      const cipher = createCipheriv('aes-256-gcm', derivedKey, nonce);
-      cipher.setAAD(metadata);
-      const ciphertextPart = cipher.update(plaintext);
-      const finalPart = cipher.final();
-      const tag = cipher.getAuthTag();
+      const encrypted = await subtle.encrypt(
+        {
+          name: 'AES-GCM',
+          iv: nonce,
+          additionalData: metadata,
+          tagLength: 128,
+        },
+        derivedKey,
+        plaintext,
+      );
 
-      const ciphertext = new Uint8Array(ciphertextPart.length + finalPart.length + tag.length);
-      ciphertext.set(ciphertextPart, 0);
-      ciphertext.set(finalPart, ciphertextPart.length);
-      ciphertext.set(tag, ciphertextPart.length + finalPart.length);
-
+      const ciphertext = new Uint8Array(encrypted);
       const envelope: BackupEnvelope = {
-        salt: new Uint8Array(salt),
-        nonce: new Uint8Array(nonce),
+        salt,
+        nonce,
         ciphertext,
       };
       return encodeBackupEnvelope(envelope);
     } finally {
-      derivedKey.fill(0);
+      if (passphraseBytes) {
+        passphraseBytes.fill(0);
+      }
     }
   }
 
   async decryptBackupPayload(backup: Uint8Array, passphrase: string): Promise<Uint8Array> {
     const envelope = decodeBackupEnvelope(backup);
-    const passphraseBytes = validateBackupPassphrase(passphrase);
+    const subtle = getSubtleCrypto();
 
-    const derivedKey = await new Promise<Buffer>((resolve, reject) => {
-      pbkdf2(passphraseBytes, envelope.salt, this.iterations, 32, 'sha256', (err, key) => {
-        if (err) reject(err);
-        else resolve(key);
-      });
-    });
-    passphraseBytes.fill(0);
-
+    let passphraseBytes: Uint8Array | null = null;
     try {
-      if (envelope.ciphertext.length < BACKUP_TAG_BYTES) {
-        throw new Error('Backup ciphertext is shorter than authentication tag.');
-      }
-      const rawCiphertext = envelope.ciphertext.subarray(0, envelope.ciphertext.length - BACKUP_TAG_BYTES);
-      const tag = envelope.ciphertext.subarray(envelope.ciphertext.length - BACKUP_TAG_BYTES);
+      passphraseBytes = validateBackupPassphrase(passphrase);
+      const baseKey = await subtle.importKey(
+        'raw',
+        passphraseBytes,
+        'PBKDF2',
+        false,
+        ['deriveKey'],
+      );
+      passphraseBytes.fill(0);
+      passphraseBytes = null;
 
-      const decipher = createDecipheriv('aes-256-gcm', derivedKey, envelope.nonce);
-      decipher.setAAD(envelope.authenticatedMetadata);
-      decipher.setAuthTag(tag);
+      const derivedKey = await subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: envelope.salt,
+          iterations: this.iterations,
+          hash: 'SHA-256',
+        },
+        baseKey,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['decrypt'],
+      );
 
-      const decryptedPart = decipher.update(rawCiphertext);
-      const finalPart = decipher.final();
+      const decrypted = await subtle.decrypt(
+        {
+          name: 'AES-GCM',
+          iv: envelope.nonce,
+          additionalData: envelope.authenticatedMetadata,
+          tagLength: 128,
+        },
+        derivedKey,
+        envelope.ciphertext,
+      );
 
-      const plaintext = new Uint8Array(decryptedPart.length + finalPart.length);
-      plaintext.set(decryptedPart, 0);
-      plaintext.set(finalPart, decryptedPart.length);
-      return plaintext;
+      return new Uint8Array(decrypted);
     } catch {
       throw new Error('Backup authentication failed. The passphrase may be incorrect or the file may be damaged.');
     } finally {
-      derivedKey.fill(0);
+      if (passphraseBytes) {
+        passphraseBytes.fill(0);
+      }
     }
   }
 
