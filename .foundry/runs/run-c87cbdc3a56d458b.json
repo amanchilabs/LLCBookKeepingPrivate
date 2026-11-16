@@ -13,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "c91ea701ca438d2aadf0da3a2945787c353e2940",
+  "head": "f71fbb1ac79a3f61d470572337f2768931976912",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -172,6 +172,13 @@
         "typecheck": "PASS"
       },
       "verdict": "FAIL"
+    },
+    {
+      "at": "2026-11-16T23:16:55.589406+00:00",
+      "event": "profile_handoff",
+      "from": "agy-m5-llc-secondary",
+      "head": "f71fbb1ac79a3f61d470572337f2768931976912",
+      "to": "agy-m5-llc-secondary"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
@@ -185,7 +192,7 @@
   },
   "next": 0,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "READY_FOR_REVALIDATION",
+  "phase": "READY",
   "plan": {
     "id": "CAP-BOOK-RECOVERY-001",
     "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
@@ -433,7 +440,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "BLOCKED",
+  "status": "PAUSED",
   "stories": [
     {
       "checks": [
@@ -567,7 +574,7 @@
         "stdout_sha256": "a4367d00d6cc80e67c5dc11b872388a82e0402d838018ce727cf5c584ce0f4c3"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete lossless dataset snapshot and isolated SQL import. Inventory every schema-13 bookkeeping table/column from ensureBookkeepingSchema and migrations, including all workspaces/preferences, business/member and ownership history, accounts/journals/lines, transactions/splits/correction roles/history, capital, loan agreements/advances/repayments/reversals, guaranteed obligations/installments/payments/allocations/reversals, recurring templates/occurrences, reminders, accounting periods and reconciliation items/events. Define a strict versioned portable payload and exported table inventory; reject unknown newer schema, malformed/duplicate rows, unsupported column shapes and unknown bookkeeping tables rather than silently dropping. Preserve integer cents/date/reference values losslessly and stable IDs. Consistent snapshot export must use a transaction, no destructive migrations on source. Isolated import must accept ONLY empty destination, create supported schema using existing function, use parameterized statements in FK-safe order/transaction, validate FK and integrity, compare complete rows/counts deterministically. Failure leaves existing source/target unchanged; reject nonempty target. Do not serialize device keys, proof records or arbitrary sqlite_master SQL. Test real file-backed SQLite with existing Node adapter pattern; validate all inventory tables exist and unknown schema/extra tables/columns fail closed. Add coverage document explicitly distinguishing supported bookkeeping dataset from external/nonexistent receipt storage. Expose APIs for subsequent encryption/restore Stories. Accounting schema version must remain 13; no modifying the existing schema or calculations.",
-      "resume_context": "Resume the existing implementation at 70d1b2d948a6dedf0a6fcbe58461f6ed1d13774c. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. Owner authorizes AGY secondary implementation and fresh independent Codex recovery reviews. Correct ONLY the attached independent Codex MEDIUM cleanup defect, not prior already-corrected documentation. Existing engine/tests/docs remain; do not restart or refactor. inReadOnlyTransaction currently suppresses ROLLBACK errors. Make export and verification reject cleanup failures, including when unwinding another error; preserve or safely wrap errors without leaking record values. The caller owns the connection: document it must close/discard a connection whose cleanup failed; do not invent a close method on DatabaseLease or change accounting/schema semantics. Add targeted regression tests in the existing snapshot test file for export, verification and cleanup during an existing error; ensure no success leaks. Update the existing coverage document only as needed for corrected behavior/test limits. Keep unrelated documented limitations and later Story2/3/native/device gates explicit. Do not rewrite column inventory or already-passing behavior. No shell commands/tests/builds/Git/agents/native tools or UI; use file tools only. Coordinator runs tests and the fresh independent Codex context re-reviews corrected exact source. ",
+      "resume_context": "Resume the existing implementation at f71fbb1ac79a3f61d470572337f2768931976912. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete.",
       "review": {
         "findings": [
           {
@@ -593,7 +600,7 @@
       },
       "review_required": true,
       "source": "4e6f7898b80c80647f16eaae0a30488f7f6f55b7",
-      "status": "FAILED_REVIEW",
+      "status": "READY",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",
