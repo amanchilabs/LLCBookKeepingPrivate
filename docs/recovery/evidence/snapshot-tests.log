@@ -1,0 +1,8 @@
+
+ RUN  v5.0.5 /Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate
+
+
+ Test Files  1 passed (1)
+      Tests  66 passed (66)
+   Start at  23:06:35
+   Duration  452ms (tests 82%, transform 12%, import 5%, worker 1%)

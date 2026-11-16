@@ -1,0 +1,20 @@
+{
+  "bookkeeping": {
+    "url": "http://127.0.0.1:62079",
+    "first": [
+      "OB-01"
+    ],
+    "entries": 35,
+    "images": 101,
+    "bad": []
+  },
+  "taxreturn": {
+    "url": "http://127.0.0.1:52858",
+    "first": [
+      "W01"
+    ],
+    "entries": 26,
+    "images": 25,
+    "bad": []
+  }
+}

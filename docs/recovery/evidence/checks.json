@@ -1,0 +1,45 @@
+{
+  "source": "e3786939633f11acb662ab57372ee33e7b9c854f",
+  "typecheck": {
+    "argv": [
+      "/opt/homebrew/bin/fnm",
+      "exec",
+      "--using",
+      "24.22.2",
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "exit_code": 0
+  },
+  "snapshot_tests": {
+    "passed": 66,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "full_regression": {
+    "groups": [
+      2,
+      83,
+      57,
+      43,
+      81
+    ],
+    "passed": 266,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "independent_review": "NOT_RUN_PROVIDER_USAGE_LIMIT",
+  "native_sqlcipher": "NOT_RUN",
+  "encrypted_full_dataset_roundtrip": "NOT_IMPLEMENTED",
+  "hashes": {
+    "packages/backup/src/bookkeeping-dataset.ts": "dfe4b34ca8c90f0e6a3523bdd1734209ef0da0225c6bcdc6421e680f3c861601",
+    "packages/backup/src/bookkeeping-snapshot.ts": "2df1fabc42767652a6c425b24305221d20a0394dd12fc9f5dd3c3e26175cc398",
+    "packages/backup/test/bookkeeping-snapshot.test.mjs": "9b03f5019fcd471d836357348ffa4d4613e59d3ce0895d62cfdfba269d78c2f7",
+    "docs/recovery/evidence/snapshot-tests.log": "8da0d5bacdc8acba223be1f6bccc7eb6169e572c944a8859dd33373e826ad4c9",
+    "docs/recovery/evidence/regression.log": "15a28bb7df6930763b1f739534d3291d2a0d32eb9cba1c6b23424180bdbb4328",
+    "docs/recovery/evidence/provider-diagnostic.json": "908b31dccbcaf8b0ce6ce8d344e318fc7179f11c35f2f2c79520cb0a0729e633",
+    "docs/recovery/evidence/gallery-verification.json": "1c7df49acbfcd8020d55131a8ea7b4649b7d28953f4135433a440ce720012a5f"
+  },
+  "log_normalization": "Tracked text logs omit trailing blank lines; raw local copies remain preserved."
+}
