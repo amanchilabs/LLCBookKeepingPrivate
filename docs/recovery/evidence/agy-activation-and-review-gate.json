@@ -1,0 +1,136 @@
+{
+  "run": "run-c87cbdc3a56d458b",
+  "builder": "agy-m5-llc-secondary",
+  "preferred_builder": "claude-m5-llc-login",
+  "reviewer": "claude-m5-llc-review",
+  "source": "e4105afa2174effe6da58452a7177bf593d10aa9",
+  "current_story": "RECOVERY-001",
+  "cursor": 0,
+  "review_status": "BLOCKED_CAPACITY",
+  "review_diagnostic": {
+    "is_error": true,
+    "result": "You've hit your 5-hour limit \u00b7 resets 3:40pm (America/Los_Angeles)",
+    "exit_code": 1
+  },
+  "adapter_review": {
+    "source": "abf5824bd050d058af842f07b402aa441c65881b",
+    "verdict": "PASS",
+    "reviewer": "/root/agy_independent_review",
+    "code_hashes": {
+      "foundry/agy.py": "c1c900bc7039f07df0805213bf163c5cba8f29f837de985a35c14f4fbc20258c",
+      "foundry/secondary.py": "1a94a52748043968d866cbed22067b490a8de635605164c6badeb3f07cb8cb2d",
+      "foundry/providers.py": "2921aefc05e4a92083ed4b3afb6ecbe991561f43498aeb50d3a1d2bfa0d9f4e3",
+      "foundry/runner.py": "71b1ceaf211010d5a4be1473e84c7a9782b311e1b7e940a84003d192b6218665",
+      "foundry/execution.py": "4ec6443a00175ca14a60aee871792261192c4ec3cec10342526f5e2ff7bca538",
+      "foundry/__main__.py": "cd9b2300848c089eba79e993b4a61b27f60fe72368cf6579c70cdbdb397f32e3"
+    }
+  },
+  "handoff": {
+    "handoff_sha": "8f933cedb0dc5510fa0221674a674280d4ca12a3",
+    "run": "run-c87cbdc3a56d458b",
+    "cursor": 0,
+    "profile": "agy-m5-llc-secondary",
+    "review_profile": "claude-m5-llc-review"
+  },
+  "actual_worker": {
+    "run": "run-c87cbdc3a56d458b",
+    "wrapper_pid": 92238,
+    "observed_at": "2026-11-16T19:33:31.099452+00:00",
+    "workers": [
+      {
+        "pid": 92245,
+        "parent_pid": 92238,
+        "argv_prefix_without_prompt": "/Users/veerrajuamanchi/.local/bin/agy --model gemini-3.8-flash-high --mode accept-edits --sandbox --settings {\"useG1Credits\":false,\"permissions\":{\"deny\":[\"command(*)\",\"unsandboxed(*)\",\"mcp(*)\",\"read_url(*)\",\"execute_url(*)\",\"download_url(*)\",\"write_file(.git/)\",\"write_file(docs/design-governance/)\",\"write_file(App.tsx)\",\"write_file(apps/mobile/)\",\"write_file(AGENTS.md)\",\"write_file(CLAUDE.md)\",\"write_file(GEMINI.md)\"],\"allow\":[\"write_file(packages/backup/src/bookkeeping-snapshot.ts)\",\"write_file(packages/backup/src/bookkeeping-dataset.ts)\",\"write_file(packages/backup/test/bookkeeping-snapshot.test.mjs)\",\"write_file(docs/recovery/DATASET-COVERAGE.md)\"],\"ask\":[]}} --output-format json --print-timeout 15m",
+        "cwd": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate",
+        "credit_overages_disabled": true,
+        "permission_bypass": false
+      }
+    ]
+  },
+  "worker_results": [
+    {
+      "source": "b99d5e06c94ce2647e66d5d234142a4d6c2b6eb7",
+      "result": {
+        "exit_code": 0,
+        "provider_usage": {
+          "credit_overages": false,
+          "model": "gemini-3.8-flash-high",
+          "provider": "agy",
+          "usage": {
+            "cache_read_tokens": 1639875,
+            "input_tokens": 125211,
+            "output_tokens": 20051,
+            "thinking_tokens": 12218,
+            "total_tokens": 145262
+          }
+        },
+        "stderr_sha256": "078aee888a39949e4bc604c9ba655db893c802d8aeb54c766d7f0a9512e0685d",
+        "stdout_sha256": "cd8289d34b29b16ab1a0cb5976d8840e707fd75b320e9490fa1cc803ef5d2bd2"
+      }
+    },
+    {
+      "source": "e4105afa2174effe6da58452a7177bf593d10aa9",
+      "result": {
+        "exit_code": 0,
+        "provider_usage": {
+          "credit_overages": false,
+          "model": "gemini-3.8-flash-high",
+          "provider": "agy",
+          "usage": {
+            "cache_read_tokens": 901861,
+            "input_tokens": 127026,
+            "output_tokens": 51158,
+            "thinking_tokens": 35152,
+            "total_tokens": 178184
+          }
+        },
+        "stderr_sha256": "c0c115d5ee2e883197f2b0053b94eaf7fbb6d00b1e661bdb9d7607ae77ecb834",
+        "stdout_sha256": "328b5f5b0abdf9fe937fc9a1f18e8cf4ab168f33686065d715c3f074ed137556"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/fnm",
+        "exec",
+        "--using",
+        "24.22.2",
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0e30b28a5b9e47f41458c247c54bd2e0daf0604feb46a73476c81e7412f0f986"
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/fnm",
+        "exec",
+        "--using",
+        "24.22.2",
+        "npm",
+        "test"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "fae29a6d237393e14f46d501a95d9f2bc3fec1468186cbcbb75cff8545e03dfe"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "dollar_cost": "Not exposed; existing account quota, API billing and AI-credit overages prohibited",
+  "remaining_stories": {
+    "RECOVERY-002": "NOT_STARTED_DEPENDS_ON_STORY1",
+    "RECOVERY-003": "NOT_STARTED_DEPENDS_ON_STORY2"
+  }
+}
