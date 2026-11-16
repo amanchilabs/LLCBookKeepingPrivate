@@ -61,30 +61,39 @@
   "review": {
     "findings": [
       {
-        "issue": "operationError !== undefined silently converts Promise.reject(undefined) from read adapter into successful export/verification with undefined result. Independently reproduced through both public APIs.",
-        "remedy": "Explicit operation-failed boolean independent of rejection value; preserve rejection even undefined. Regression export and verify.",
-        "severity": "HIGH"
+        "issue": "Wrapper copies arbitrary cleanup message/stack and enumerable originalError/cleanupError/cause. Synthetic private value appears in message and JSON serialization.",
+        "remedy": "Fixed contextual message, non-enumerable preserved references. Do not copy arbitrary name/message/stack/code.",
+        "severity": "MEDIUM"
       },
       {
-        "issue": "Frozen rollback Error cannot be mutated to retain originalError/cause; catch suppresses that failure and loses original read failure, contradicting documented guarantee.",
-        "remedy": "Safely preserve both failures in a new wrapper rather than relying on mutating cleanup error; cover frozen cleanup Error and primitive/undefined thrown values. No sensitive record values in new error messages.",
+        "issue": "String(Object.create(null)) or throwing error getters can throw while wrapping and lose both original errors.",
+        "remedy": "Preserve unknown thrown values opaquely; no coercion or property inspection.",
+        "severity": "MEDIUM"
+      },
+      {
+        "issue": "Three new tests reuse poisoned connection after deliberately failed rollback; next BEGIN fails before intended fault.",
+        "remedy": "Fresh isolated connection per case and close unusable ones; retain assertions, no skipping/weakened tests.",
         "severity": "MEDIUM"
       }
     ],
     "implementation_ownership": false,
     "reviewer": "/root/recovery001_exact_review",
-    "source": "4e6f7898b80c80647f16eaae0a30488f7f6f55b7",
+    "source": "21597dd1f45e02bf9416299566751050284b63a2",
     "tests": {
-      "diff_check": "PASS",
-      "snapshot_passed": 70,
-      "typecheck": "PASS"
+      "controller_snapshot": {
+        "failed": 3,
+        "passed": 74,
+        "total": 77
+      },
+      "controller_typecheck": "PASS",
+      "independent_bounded_fault_probes": "REPRODUCED"
     },
     "verdict": "FAIL"
   },
   "run": "run-c87cbdc3a56d458b",
   "source": "21597dd1f45e02bf9416299566751050284b63a2",
-  "status": "FAILED_VALIDATION",
-  "timestamp": "2026-11-16T23:24:19.492652+00:00",
+  "status": "FAILED_REVIEW",
+  "timestamp": "2026-11-16T23:25:12.425764+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
