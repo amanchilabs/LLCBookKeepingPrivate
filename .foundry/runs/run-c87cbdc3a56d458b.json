@@ -1,0 +1,388 @@
+{
+  "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "branch": "feature/bookkeeping-full-recovery-20261116",
+  "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
+  "created_at": "2026-11-16T06:52:19.603624+00:00",
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design-governance/provider-assignment.json": "b6f7d7c3bfbd9370036e6dba40229112ac086a9ecaf24cff13ebdd3be894f23f",
+    "docs/design/implementation/feature-preservation-matrix.md": "959a773112673f6586d02efa6492fea76fd0693660ab6aeb39736a5b2d2c603c",
+    "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
+    "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
+    "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
+  },
+  "head": "9c3294cd823f94f0e1dcced6e3d0105c74c1f494",
+  "history": [],
+  "id": "run-c87cbdc3a56d458b",
+  "next": 0,
+  "owner": "f7b8f9f975334b90be3163286280852e",
+  "phase": "READY",
+  "plan": {
+    "id": "CAP-BOOK-RECOVERY-001",
+    "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
+    "stories": [
+      {
+        "depends_on": [],
+        "files": [
+          "packages/backup/src/bookkeeping-snapshot.ts",
+          "packages/backup/src/bookkeeping-dataset.ts",
+          "packages/backup/test/bookkeeping-snapshot.test.mjs",
+          "docs/recovery/DATASET-COVERAGE.md"
+        ],
+        "id": "RECOVERY-001",
+        "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete lossless dataset snapshot and isolated SQL import. Inventory every schema-13 bookkeeping table/column from ensureBookkeepingSchema and migrations, including all workspaces/preferences, business/member and ownership history, accounts/journals/lines, transactions/splits/correction roles/history, capital, loan agreements/advances/repayments/reversals, guaranteed obligations/installments/payments/allocations/reversals, recurring templates/occurrences, reminders, accounting periods and reconciliation items/events. Define a strict versioned portable payload and exported table inventory; reject unknown newer schema, malformed/duplicate rows, unsupported column shapes and unknown bookkeeping tables rather than silently dropping. Preserve integer cents/date/reference values losslessly and stable IDs. Consistent snapshot export must use a transaction, no destructive migrations on source. Isolated import must accept ONLY empty destination, create supported schema using existing function, use parameterized statements in FK-safe order/transaction, validate FK and integrity, compare complete rows/counts deterministically. Failure leaves existing source/target unchanged; reject nonempty target. Do not serialize device keys, proof records or arbitrary sqlite_master SQL. Test real file-backed SQLite with existing Node adapter pattern; validate all inventory tables exist and unknown schema/extra tables/columns fail closed. Add coverage document explicitly distinguishing supported bookkeeping dataset from external/nonexistent receipt storage. Expose APIs for subsequent encryption/restore Stories. Accounting schema version must remain 13; no modifying the existing schema or calculations.",
+        "review_required": true,
+        "validation": [
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "test"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ]
+        ],
+        "validation_resources": [],
+        "visual_screens": []
+      },
+      {
+        "depends_on": [
+          "RECOVERY-001"
+        ],
+        "files": [
+          "packages/backup/src/bookkeeping-backup.ts",
+          "packages/backup/src/native-bookkeeping-backup.ts",
+          "packages/backup/test/bookkeeping-backup.test.ts",
+          "packages/backup/test/bookkeeping-crypto-adapter.ts",
+          "docs/recovery/BACKUP-FORMAT.md"
+        ],
+        "id": "RECOVERY-002",
+        "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Passphrase-encrypted complete dataset backup APIs. Use RECOVERY-001 APIs to encode/decode a complete bookkeeping payload under the EXISTING authenticated portable AES-GCM/PBKDF2 envelope (600000 iterations and existing bounds), with a separate explicit bookkeeping payload discriminator/version so proof-only payloads cannot be restored as books or vice versa. Add pure non-UI create/decrypt backup APIs using an injected crypto interface and native adapter reusing existing crypto.native.ts production encrypt/decrypt implementation; browser unavailable behavior remains unchanged. Validate payload before encryption and strict decode/schema/manifest after authentication; enforce bounds before expensive work, zero transient plaintext buffers when owned, no keys/passphrases in logs/errors/payload. Restore works with passphrase and backup bytes, not original Keychain. Tests must perform real AES-GCM/PBKDF2 roundtrips using Node crypto adapter with identical production envelope/authenticated metadata; mock-only roundtrips are insufficient. Cover different ciphertext for same data, exact restored payload, wrong password, bit flips in header/salt/nonce/ciphertext/tag, truncation, unsupported envelope/payload/schema, oversized input, weak passwords and proof-payload rejection. Clearly label host crypto conformance tests versus unexecuted native implementation. Do not wire UI or replace proof backup.",
+        "review_required": true,
+        "validation": [
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "test"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ]
+        ],
+        "validation_resources": [],
+        "visual_screens": []
+      },
+      {
+        "depends_on": [
+          "RECOVERY-002"
+        ],
+        "files": [
+          "packages/backup/src/bookkeeping-recovery.ts",
+          "packages/backup/src/native-bookkeeping-recovery.ts",
+          "packages/backup/test/bookkeeping-recovery.test.mjs",
+          "packages/backup/test/bookkeeping-recovery-fixture.mjs",
+          "docs/recovery/VALIDATION.md"
+        ],
+        "id": "RECOVERY-003",
+        "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete recovery parity, isolated lifecycle and failure injection. Build non-UI restore orchestration around new modules. Always authenticate+validate before requesting isolated fresh candidate. Candidate local key comes from destination provisioning, never source key. No active catalog/device DB mutation or production activation in this milestone; return verified candidate only through explicit lifecycle contract, dispose rejected candidates and leave active source unchanged. Add native factory/non-UI integration if possible using existing SQLCipher/storage lease APIs WITHOUT altering proof store or UI; do not invent unsafe default adapter. A checked candidate must have complete row/relationship/history parity and balanced existing journal/report/reconciliation totals before eligibility. Create deterministic multi-workspace synthetic fixtures via existing domain/store APIs covering every supported table including reversal/correction, capital, guaranteed payments, loans/reversals, recurring, splits, reconciliation events and closed/reopened periods. Restore an actual encrypted backup into an isolated fresh file-backed DB with different synthetic destination key identity; compare complete rows and existing cash/P&L, balance/trial/general ledger and reconciliation reports. Tests inject failures at decrypt, candidate provision, schema, row import, verification and cleanup; verify original files/rows not modified, rejected target not published, cleanup failure surfaced and no active switch. Exercise meaningful supported legacy schema migration using existing migrations only on isolated candidate; unsupported newer schemas fail closed and source bytes stay unchanged. If legacy payload migration is not implemented, reject explicitly and document rather than claiming support. Document host plain SQLite versus native SQLCipher/device limits and exact reproducible coordinator validation commands. No user accessible controls; no simulator/physical-device commands or modifications.",
+        "review_required": true,
+        "validation": [
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "run",
+            "typecheck"
+          ],
+          [
+            "/opt/homebrew/bin/fnm",
+            "exec",
+            "--using",
+            "24.22.2",
+            "npm",
+            "test"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ]
+        ],
+        "validation_resources": [],
+        "visual_screens": []
+      }
+    ]
+  },
+  "product": {
+    "canonical_vision": "docs/design/proposed/design-decisions.md",
+    "execution_contract": "CLAUDE.md",
+    "execution_scope": "Owner 2026-11-16: CAP-BOOK-RECOVERY-001, non-UI complete dataset recovery only; authorized base 5676110 including foundation/exchange. No UI, tax semantics, dependencies, infrastructure, merge or release.",
+    "id": "llcbookkeepingprivate",
+    "progress_updates": "append",
+    "provider_assignment": "docs/design-governance/provider-assignment.json",
+    "records": {
+      "authorization": "docs/recovery/AUTHORIZATION-20261116.md",
+      "progress": "docs/design/implementation/feature-preservation-matrix.md",
+      "specification": "docs/design/proposed/screen-specifications.md"
+    },
+    "repository_path": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate",
+    "repository_remote": "https://github.com/amanchilabs/LLCBookKeepingPrivate.git",
+    "workspace_policy": "canonical"
+  },
+  "profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
+    "commands": {
+      "design": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+        "--provider",
+        "claude-code",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "--skill-dir",
+        "/Users/veerrajuamanchi/.claude/plugins/marketplaces/claude-plugins-official/plugins/frontend-design",
+        "design"
+      ],
+      "implement": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "implement"
+      ],
+      "review": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "review"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/.local/bin/claude",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/design-discovery-workflow.md"
+    ],
+    "id": "claude-m5-llc-login",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "help"
+      ]
+    ],
+    "provider": "claude-code",
+    "timeout_seconds": 1800
+  },
+  "provider_assignment_hash": "29d4f0c3d64b905c7a271bc3f08aa868584a0ac1e28effc1c6889e62aeba9343",
+  "review_profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
+    "commands": {
+      "review": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "review"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/.local/bin/claude",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/design-discovery-workflow.md"
+    ],
+    "id": "claude-m5-llc-review",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "help"
+      ]
+    ],
+    "provider": "claude-code",
+    "timeout_seconds": 1800
+  },
+  "schema_version": 1,
+  "status": "READY",
+  "stories": [
+    {
+      "depends_on": [],
+      "files": [
+        "packages/backup/src/bookkeeping-snapshot.ts",
+        "packages/backup/src/bookkeeping-dataset.ts",
+        "packages/backup/test/bookkeeping-snapshot.test.mjs",
+        "docs/recovery/DATASET-COVERAGE.md"
+      ],
+      "id": "RECOVERY-001",
+      "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete lossless dataset snapshot and isolated SQL import. Inventory every schema-13 bookkeeping table/column from ensureBookkeepingSchema and migrations, including all workspaces/preferences, business/member and ownership history, accounts/journals/lines, transactions/splits/correction roles/history, capital, loan agreements/advances/repayments/reversals, guaranteed obligations/installments/payments/allocations/reversals, recurring templates/occurrences, reminders, accounting periods and reconciliation items/events. Define a strict versioned portable payload and exported table inventory; reject unknown newer schema, malformed/duplicate rows, unsupported column shapes and unknown bookkeeping tables rather than silently dropping. Preserve integer cents/date/reference values losslessly and stable IDs. Consistent snapshot export must use a transaction, no destructive migrations on source. Isolated import must accept ONLY empty destination, create supported schema using existing function, use parameterized statements in FK-safe order/transaction, validate FK and integrity, compare complete rows/counts deterministically. Failure leaves existing source/target unchanged; reject nonempty target. Do not serialize device keys, proof records or arbitrary sqlite_master SQL. Test real file-backed SQLite with existing Node adapter pattern; validate all inventory tables exist and unknown schema/extra tables/columns fail closed. Add coverage document explicitly distinguishing supported bookkeeping dataset from external/nonexistent receipt storage. Expose APIs for subsequent encryption/restore Stories. Accounting schema version must remain 13; no modifying the existing schema or calculations.",
+      "review_required": true,
+      "status": "READY",
+      "validation": [
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "test"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ]
+      ],
+      "validation_resources": [],
+      "visual_screens": []
+    },
+    {
+      "depends_on": [
+        "RECOVERY-001"
+      ],
+      "files": [
+        "packages/backup/src/bookkeeping-backup.ts",
+        "packages/backup/src/native-bookkeeping-backup.ts",
+        "packages/backup/test/bookkeeping-backup.test.ts",
+        "packages/backup/test/bookkeeping-crypto-adapter.ts",
+        "docs/recovery/BACKUP-FORMAT.md"
+      ],
+      "id": "RECOVERY-002",
+      "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Passphrase-encrypted complete dataset backup APIs. Use RECOVERY-001 APIs to encode/decode a complete bookkeeping payload under the EXISTING authenticated portable AES-GCM/PBKDF2 envelope (600000 iterations and existing bounds), with a separate explicit bookkeeping payload discriminator/version so proof-only payloads cannot be restored as books or vice versa. Add pure non-UI create/decrypt backup APIs using an injected crypto interface and native adapter reusing existing crypto.native.ts production encrypt/decrypt implementation; browser unavailable behavior remains unchanged. Validate payload before encryption and strict decode/schema/manifest after authentication; enforce bounds before expensive work, zero transient plaintext buffers when owned, no keys/passphrases in logs/errors/payload. Restore works with passphrase and backup bytes, not original Keychain. Tests must perform real AES-GCM/PBKDF2 roundtrips using Node crypto adapter with identical production envelope/authenticated metadata; mock-only roundtrips are insufficient. Cover different ciphertext for same data, exact restored payload, wrong password, bit flips in header/salt/nonce/ciphertext/tag, truncation, unsupported envelope/payload/schema, oversized input, weak passwords and proof-payload rejection. Clearly label host crypto conformance tests versus unexecuted native implementation. Do not wire UI or replace proof backup.",
+      "review_required": true,
+      "status": "READY",
+      "validation": [
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "test"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ]
+      ],
+      "validation_resources": [],
+      "visual_screens": []
+    },
+    {
+      "depends_on": [
+        "RECOVERY-002"
+      ],
+      "files": [
+        "packages/backup/src/bookkeeping-recovery.ts",
+        "packages/backup/src/native-bookkeeping-recovery.ts",
+        "packages/backup/test/bookkeeping-recovery.test.mjs",
+        "packages/backup/test/bookkeeping-recovery-fixture.mjs",
+        "docs/recovery/VALIDATION.md"
+      ],
+      "id": "RECOVERY-003",
+      "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete recovery parity, isolated lifecycle and failure injection. Build non-UI restore orchestration around new modules. Always authenticate+validate before requesting isolated fresh candidate. Candidate local key comes from destination provisioning, never source key. No active catalog/device DB mutation or production activation in this milestone; return verified candidate only through explicit lifecycle contract, dispose rejected candidates and leave active source unchanged. Add native factory/non-UI integration if possible using existing SQLCipher/storage lease APIs WITHOUT altering proof store or UI; do not invent unsafe default adapter. A checked candidate must have complete row/relationship/history parity and balanced existing journal/report/reconciliation totals before eligibility. Create deterministic multi-workspace synthetic fixtures via existing domain/store APIs covering every supported table including reversal/correction, capital, guaranteed payments, loans/reversals, recurring, splits, reconciliation events and closed/reopened periods. Restore an actual encrypted backup into an isolated fresh file-backed DB with different synthetic destination key identity; compare complete rows and existing cash/P&L, balance/trial/general ledger and reconciliation reports. Tests inject failures at decrypt, candidate provision, schema, row import, verification and cleanup; verify original files/rows not modified, rejected target not published, cleanup failure surfaced and no active switch. Exercise meaningful supported legacy schema migration using existing migrations only on isolated candidate; unsupported newer schemas fail closed and source bytes stay unchanged. If legacy payload migration is not implemented, reject explicitly and document rather than claiming support. Document host plain SQLite versus native SQLCipher/device limits and exact reproducible coordinator validation commands. No user accessible controls; no simulator/physical-device commands or modifications.",
+      "review_required": true,
+      "status": "READY",
+      "validation": [
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "run",
+          "typecheck"
+        ],
+        [
+          "/opt/homebrew/bin/fnm",
+          "exec",
+          "--using",
+          "24.22.2",
+          "npm",
+          "test"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ]
+      ],
+      "validation_resources": [],
+      "visual_screens": []
+    }
+  ],
+  "workspace": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate"
+}
