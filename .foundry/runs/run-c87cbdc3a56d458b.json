@@ -1,6 +1,6 @@
 {
   "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
-  "blocker": "Review did not approve the exact source revision",
+  "blocked_role": "reviewer",
   "branch": "feature/bookkeeping-full-recovery-20261116",
   "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
   "created_at": "2026-11-16T06:52:19.603624+00:00",
@@ -13,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "fdddaea5fda4f73a14c153f5928055071c87d061",
+  "head": "a2d8b9ecec0b7bde667a5dd0be432aa2f066ce88",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -114,12 +114,21 @@
       "from": "agy-m5-llc-secondary",
       "head": "2a43afe398cc93baa177543265b924dcf03e39ce",
       "to": "agy-m5-llc-secondary"
+    },
+    {
+      "at": "2026-11-16T19:57:32.685839+00:00",
+      "builder_status": "AVAILABLE_LAST_INVOCATION_SUCCEEDED",
+      "cursor_preserved": 0,
+      "event": "independent_reviewer_capacity_exhausted",
+      "reported_reset": "3:40pm America/Los_Angeles",
+      "reviewer": "claude-m5-llc-review",
+      "source": "e4105afa2174effe6da58452a7177bf593d10aa9"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
   "next": 0,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "READY",
+  "phase": "READY_FOR_REVALIDATION",
   "plan": {
     "id": "CAP-BOOK-RECOVERY-001",
     "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
@@ -306,16 +315,18 @@
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
   "provider_availability": {
     "builder": {
-      "at": "2026-11-16T19:36:32.619685+00:00",
+      "at": "2026-11-16T19:51:20.653890+00:00",
       "exit_code": 0,
       "profile": "agy-m5-llc-secondary",
       "status": "AVAILABLE"
     },
     "reviewer": {
-      "at": "2026-11-16T19:37:49.416623+00:00",
-      "exit_code": 0,
+      "at": "2026-11-16T19:51:52.915601+00:00",
+      "exit_code": 1,
       "profile": "claude-m5-llc-review",
-      "status": "AVAILABLE"
+      "reported_reset": "3:40pm America/Los_Angeles",
+      "status": "WAITING_CAPACITY",
+      "verified_at": "2026-11-16T19:57:32.685481+00:00"
     }
   },
   "review_profile": {
@@ -358,7 +369,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "PAUSED",
+  "status": "BLOCKED",
   "stories": [
     {
       "checks": [
@@ -387,7 +398,7 @@
           ],
           "exit_code": 0,
           "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          "stdout_sha256": "2212bbdd49a4ab177047f0e9a24b3d34690b2406293b3c57254eb3a1a5a77444"
+          "stdout_sha256": "fae29a6d237393e14f46d501a95d9f2bc3fec1468186cbcbb75cff8545e03dfe"
         },
         {
           "argv": [
@@ -409,6 +420,71 @@
         "docs/recovery/DATASET-COVERAGE.md"
       ],
       "id": "RECOVERY-001",
+      "prior_reviews": [
+        {
+          "findings": [
+            {
+              "issue": "docs/recovery/DATASET-COVERAGE.md section 3 is titled 'Complete Schema-13 Table & Column Inventory' (L44-92) but lists only table names, primary keys and foreign-key column names. It does not enumerate the supported columns of any table, their kinds, or nullability (for example transactions.amount_minor/description/created_at, loan_agreements.commitment_minor/annual_rate_basis_points/day_count, and the nullable member_capital_activity.cash_account_id never appear). Most FK rows also omit the referenced table. The Story requires the document to state the exact supported tables, columns and relationships; the only complete inventory is the code at packages/backup/src/bookkeeping-dataset.ts:144-267.",
+              "remedy": "Within DATASET-COVERAGE.md only, add a per-table column listing for all 27 tables in inventory order: column name, kind, nullable, primary-key position and referenced table, transcribed from BOOKKEEPING_DATASET_TABLES. Alternatively retitle the section and state explicitly that bookkeeping-dataset.ts:144-267 is the authoritative column inventory, but the per-table listing is what the Story asked for.",
+              "screen": "NON_UI",
+              "severity": "IMPORTANT"
+            },
+            {
+              "issue": "The coverage document misstates the value contract enforced by source. (a) L89 says `timestamp` is an 'ISO 8601 UTC date-time string', but bookkeeping-dataset.ts:349-351 accepts any non-empty portable text and never validates a timestamp format. (b) L86 says `id` 'Cannot be null', but nullable reference columns of kind `id` exist (dataset.ts:127-128, used for cash_account_id, property_asset_account_id, loan_agreements.member_id, account_reconciliation_events.transaction_id, target_close_event_id). (c) L139 says 'No string interpolation or raw DDL execution is permitted', but bookkeeping-snapshot.ts interpolates inventory identifiers into SQL (L150-165, L245, L268) and executes DDL through ensureBookkeepingSchema (L296) and DROP TABLE cleanup (L245). (d) L131 says BEGIN IMMEDIATE acquires 'an exclusive write lock'; it takes a RESERVED lock that blocks other writers only, which is what the test at test L550-585 demonstrates.",
+              "remedy": "Correct the document to match source: timestamp is a non-empty text value preserved exactly as stored with no format validation; id is non-empty and nullable only where the inventory marks a reference nullable; row values are always bound parameters while identifiers come only from the fixed inventory through quoteIdentifier, and DDL is limited to ensureBookkeepingSchema plus cleanup DROP TABLE of inventory tables; BEGIN IMMEDIATE blocks concurrent writers, not readers. No code change is needed.",
+              "screen": "NON_UI",
+              "severity": "IMPORTANT"
+            },
+            {
+              "issue": "The document certifies its own completion before validation and independent review. L3 reads 'Status: Complete for RECOVERY-001' and L206 reads 'With RECOVERY-001 complete', and L18 says host tests 'certif[y]' SQL logic. The Story is in VALIDATION at a commit titled 'WIP: RECOVERY-001 bounded implementation', and docs/recovery/STATUS-20261116.md still records the milestone as 'BLOCKED, incomplete' with no independent review performed. A builder-authored document must not read as acceptance.",
+              "remedy": "Change the status line to something like 'Builder-delivered for RECOVERY-001; coordinator validation and independent review pending; host SQLite synthetic evidence only', reword L206 to 'Subsequent Stories build on these APIs once RECOVERY-001 is independently accepted', and replace 'certifies' with 'exercises'. The coordinator records completion elsewhere after a PASS.",
+              "screen": "NON_UI",
+              "severity": "IMPORTANT"
+            },
+            {
+              "issue": "Section 8 is titled 'Test Coverage & Validation Limits' (L178-200) but lists only what is covered; the required current test limits are missing. Limits verifiable from source and not stated: the 'destination-cleanup-failed' path (bookkeeping-snapshot.ts:305-315) has no test; a post-insert verification mismatch inside the import and a malformed bookkeeping_schema version record (snapshot.ts:77-79) are untested; no import test starts from an older or migrated schema; export checks declared type, primary key and hidden flag only (snapshot.ts:84-104), not source NOT NULL, CHECK, UNIQUE or FK declarations; journal balance per entry is not validated by the payload contract; schema creation runs outside the insert transaction (snapshot.ts:296-297), so a process kill mid-import leaves an empty schema-13 candidate that must never be activated without verifyBookkeepingDatasetInDatabase. L199 'complete double-entry journal balance parity' overstates a per-account debit/credit sum comparison (test L884-889).",
+              "remedy": "Add an explicit 'Known limits and untested paths' subsection to DATASET-COVERAGE.md listing the items above and stating that crash/interruption, migration, report parity and activation safety belong to RECOVERY-003 and native gates and remain unverified. Reword L199 to 'per-account debit and credit totals from journal_lines match'. Optionally, inside the Story's test file only, add a cleanup-failure test and a malformed-version-record test; these are not required for a document-only correction.",
+              "screen": "NON_UI",
+              "severity": "IMPORTANT"
+            },
+            {
+              "issue": "Section 6 describes the excluded tables inaccurately (L154-155). proof_records is not a 'test fixture table': packages/storage-native/src/native-storage-proof.ts:24-36 creates it in the active encrypted database from application source. restore_manifest is not used by 'legacy restore coordinators': the current proof-only NativeRestoreStore creates it (packages/backup/src/native-restore-store.ts:105-128) and startup validation reads it (packages/storage-native/src/storage-access.ts:101-104). L159 'Device encryption keys and Keychain secrets are never stored in SQLite' is a system-wide claim this Story does not verify; the document also omits that the separate catalog database (restore_generations, restore_control, restore_journal with key aliases) is outside the dataset.",
+              "remedy": "Describe both tables as belonging to the existing synthetic proof-only storage and restore utilities that can share the active database file. Narrow L159 to 'this payload and these two modules never read or write device keys', and add one line that the generation catalog database is a separate file not covered by the dataset.",
+              "screen": "NON_UI",
+              "severity": "MINOR"
+            },
+            {
+              "issue": "L23 says 'Real financial records, actual banking feeds, and production deployment remain strictly barred pending full gate completion'. This implies bank feeds become allowed once gates pass, which contradicts the product contract in CLAUDE.md (no bank connection is authorized at all). L24 also names 'CPA verification' as a gate that no governance document defines.",
+              "remedy": "Remove 'actual banking feeds' from the gated list, or state that bank connections are not authorized under any gate; drop or rephrase 'CPA verification' to match the gates actually named in the authorization and plan.",
+              "screen": "NON_UI",
+              "severity": "MINOR"
+            },
+            {
+              "issue": "All source links in the document (L7-9, L18, L46, L127, L180) are absolute file:///Users/<local-user>/... URLs. They break on GitHub and on any other workstation and commit a local home-directory path, unlike the relative links used in other repository documents. L6 'Source Modules:' also lacks its list marker.",
+              "remedy": "Replace them with repository-relative links, for example ../../packages/backup/src/bookkeeping-dataset.ts, and fix the list marker.",
+              "screen": "NON_UI",
+              "severity": "MINOR"
+            }
+          ],
+          "reviewed_inputs": [
+            "docs/recovery/AUTHORIZATION-20261116.md",
+            "docs/recovery/IMPLEMENTATION-PLAN-20261116.md",
+            "docs/recovery/STATUS-20261116.md",
+            "docs/recovery/DATASET-COVERAGE.md",
+            "packages/backup/src/bookkeeping-dataset.ts",
+            "packages/backup/src/bookkeeping-snapshot.ts",
+            "packages/backup/test/bookkeeping-snapshot.test.mjs",
+            "packages/storage-native/src/bookkeeping-store.ts (ensureBookkeepingSchema and migrations V1-V13, lines 640-1425)",
+            "packages/storage-native/src/native-storage-proof.ts",
+            "packages/storage-native/src/storage-access.ts (lines 60-150)",
+            "packages/backup/src/native-restore-store.ts (lines 55-140)",
+            "CLAUDE.md (execution contract, as supplied)",
+            "Story manifest check records (typecheck, npm test, git diff --check: exit 0 as reported by coordinator; not re-executed by this review)"
+          ],
+          "source": "b99d5e06c94ce2647e66d5d234142a4d6c2b6eb7",
+          "verdict": "FAIL"
+        }
+      ],
       "provider_result": {
         "exit_code": 0,
         "provider_usage": {
@@ -416,84 +492,31 @@
           "model": "gemini-3.8-flash-high",
           "provider": "agy",
           "usage": {
-            "cache_read_tokens": 1639875,
-            "input_tokens": 125211,
-            "output_tokens": 20051,
-            "thinking_tokens": 12218,
-            "total_tokens": 145262
+            "cache_read_tokens": 901861,
+            "input_tokens": 127026,
+            "output_tokens": 51158,
+            "thinking_tokens": 35152,
+            "total_tokens": 178184
           }
         },
-        "stderr_sha256": "078aee888a39949e4bc604c9ba655db893c802d8aeb54c766d7f0a9512e0685d",
-        "stdout_sha256": "cd8289d34b29b16ab1a0cb5976d8840e707fd75b320e9490fa1cc803ef5d2bd2"
+        "stderr_sha256": "c0c115d5ee2e883197f2b0053b94eaf7fbb6d00b1e661bdb9d7607ae77ecb834",
+        "stdout_sha256": "328b5f5b0abdf9fe937fc9a1f18e8cf4ab168f33686065d715c3f074ed137556"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete lossless dataset snapshot and isolated SQL import. Inventory every schema-13 bookkeeping table/column from ensureBookkeepingSchema and migrations, including all workspaces/preferences, business/member and ownership history, accounts/journals/lines, transactions/splits/correction roles/history, capital, loan agreements/advances/repayments/reversals, guaranteed obligations/installments/payments/allocations/reversals, recurring templates/occurrences, reminders, accounting periods and reconciliation items/events. Define a strict versioned portable payload and exported table inventory; reject unknown newer schema, malformed/duplicate rows, unsupported column shapes and unknown bookkeeping tables rather than silently dropping. Preserve integer cents/date/reference values losslessly and stable IDs. Consistent snapshot export must use a transaction, no destructive migrations on source. Isolated import must accept ONLY empty destination, create supported schema using existing function, use parameterized statements in FK-safe order/transaction, validate FK and integrity, compare complete rows/counts deterministically. Failure leaves existing source/target unchanged; reject nonempty target. Do not serialize device keys, proof records or arbitrary sqlite_master SQL. Test real file-backed SQLite with existing Node adapter pattern; validate all inventory tables exist and unknown schema/extra tables/columns fail closed. Add coverage document explicitly distinguishing supported bookkeeping dataset from external/nonexistent receipt storage. Expose APIs for subsequent encryption/restore Stories. Accounting schema version must remain 13; no modifying the existing schema or calculations.",
       "resume_context": "Resume the existing implementation at 2a43afe398cc93baa177543265b924dcf03e39ce. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. Owner authorizes AGY as the registered secondary. Resolve ALL seven attached story.review.findings from the independent Claude review. This is a DOCUMENT-ONLY correction: edit docs/recovery/DATASET-COVERAGE.md and leave engine and tests byte-for-byte unchanged. Accurately list every column of all 27 tables with kind/nullability/PK-position/reference table from BOOKKEEPING_DATASET_TABLES, not merely table names. Correct timestamp/id/SQL/lock descriptions to match source; state current test limits exactly; remove completion/certification claims and unapproved bank-feed/CPA implications; fix proof/catalog exclusions and use repository-relative links. Do not add tests or behavior merely to conceal unverified limits; those belong to later authorized Stories. Coordinator runs validation/review. No commands, Git, other agents, native tools or UI changes. Use file tools only; write this single document. Do not restart implementation or rewrite source. ",
-      "review": {
-        "findings": [
-          {
-            "issue": "docs/recovery/DATASET-COVERAGE.md section 3 is titled 'Complete Schema-13 Table & Column Inventory' (L44-92) but lists only table names, primary keys and foreign-key column names. It does not enumerate the supported columns of any table, their kinds, or nullability (for example transactions.amount_minor/description/created_at, loan_agreements.commitment_minor/annual_rate_basis_points/day_count, and the nullable member_capital_activity.cash_account_id never appear). Most FK rows also omit the referenced table. The Story requires the document to state the exact supported tables, columns and relationships; the only complete inventory is the code at packages/backup/src/bookkeeping-dataset.ts:144-267.",
-            "remedy": "Within DATASET-COVERAGE.md only, add a per-table column listing for all 27 tables in inventory order: column name, kind, nullable, primary-key position and referenced table, transcribed from BOOKKEEPING_DATASET_TABLES. Alternatively retitle the section and state explicitly that bookkeeping-dataset.ts:144-267 is the authoritative column inventory, but the per-table listing is what the Story asked for.",
-            "screen": "NON_UI",
-            "severity": "IMPORTANT"
-          },
-          {
-            "issue": "The coverage document misstates the value contract enforced by source. (a) L89 says `timestamp` is an 'ISO 8601 UTC date-time string', but bookkeeping-dataset.ts:349-351 accepts any non-empty portable text and never validates a timestamp format. (b) L86 says `id` 'Cannot be null', but nullable reference columns of kind `id` exist (dataset.ts:127-128, used for cash_account_id, property_asset_account_id, loan_agreements.member_id, account_reconciliation_events.transaction_id, target_close_event_id). (c) L139 says 'No string interpolation or raw DDL execution is permitted', but bookkeeping-snapshot.ts interpolates inventory identifiers into SQL (L150-165, L245, L268) and executes DDL through ensureBookkeepingSchema (L296) and DROP TABLE cleanup (L245). (d) L131 says BEGIN IMMEDIATE acquires 'an exclusive write lock'; it takes a RESERVED lock that blocks other writers only, which is what the test at test L550-585 demonstrates.",
-            "remedy": "Correct the document to match source: timestamp is a non-empty text value preserved exactly as stored with no format validation; id is non-empty and nullable only where the inventory marks a reference nullable; row values are always bound parameters while identifiers come only from the fixed inventory through quoteIdentifier, and DDL is limited to ensureBookkeepingSchema plus cleanup DROP TABLE of inventory tables; BEGIN IMMEDIATE blocks concurrent writers, not readers. No code change is needed.",
-            "screen": "NON_UI",
-            "severity": "IMPORTANT"
-          },
-          {
-            "issue": "The document certifies its own completion before validation and independent review. L3 reads 'Status: Complete for RECOVERY-001' and L206 reads 'With RECOVERY-001 complete', and L18 says host tests 'certif[y]' SQL logic. The Story is in VALIDATION at a commit titled 'WIP: RECOVERY-001 bounded implementation', and docs/recovery/STATUS-20261116.md still records the milestone as 'BLOCKED, incomplete' with no independent review performed. A builder-authored document must not read as acceptance.",
-            "remedy": "Change the status line to something like 'Builder-delivered for RECOVERY-001; coordinator validation and independent review pending; host SQLite synthetic evidence only', reword L206 to 'Subsequent Stories build on these APIs once RECOVERY-001 is independently accepted', and replace 'certifies' with 'exercises'. The coordinator records completion elsewhere after a PASS.",
-            "screen": "NON_UI",
-            "severity": "IMPORTANT"
-          },
-          {
-            "issue": "Section 8 is titled 'Test Coverage & Validation Limits' (L178-200) but lists only what is covered; the required current test limits are missing. Limits verifiable from source and not stated: the 'destination-cleanup-failed' path (bookkeeping-snapshot.ts:305-315) has no test; a post-insert verification mismatch inside the import and a malformed bookkeeping_schema version record (snapshot.ts:77-79) are untested; no import test starts from an older or migrated schema; export checks declared type, primary key and hidden flag only (snapshot.ts:84-104), not source NOT NULL, CHECK, UNIQUE or FK declarations; journal balance per entry is not validated by the payload contract; schema creation runs outside the insert transaction (snapshot.ts:296-297), so a process kill mid-import leaves an empty schema-13 candidate that must never be activated without verifyBookkeepingDatasetInDatabase. L199 'complete double-entry journal balance parity' overstates a per-account debit/credit sum comparison (test L884-889).",
-            "remedy": "Add an explicit 'Known limits and untested paths' subsection to DATASET-COVERAGE.md listing the items above and stating that crash/interruption, migration, report parity and activation safety belong to RECOVERY-003 and native gates and remain unverified. Reword L199 to 'per-account debit and credit totals from journal_lines match'. Optionally, inside the Story's test file only, add a cleanup-failure test and a malformed-version-record test; these are not required for a document-only correction.",
-            "screen": "NON_UI",
-            "severity": "IMPORTANT"
-          },
-          {
-            "issue": "Section 6 describes the excluded tables inaccurately (L154-155). proof_records is not a 'test fixture table': packages/storage-native/src/native-storage-proof.ts:24-36 creates it in the active encrypted database from application source. restore_manifest is not used by 'legacy restore coordinators': the current proof-only NativeRestoreStore creates it (packages/backup/src/native-restore-store.ts:105-128) and startup validation reads it (packages/storage-native/src/storage-access.ts:101-104). L159 'Device encryption keys and Keychain secrets are never stored in SQLite' is a system-wide claim this Story does not verify; the document also omits that the separate catalog database (restore_generations, restore_control, restore_journal with key aliases) is outside the dataset.",
-            "remedy": "Describe both tables as belonging to the existing synthetic proof-only storage and restore utilities that can share the active database file. Narrow L159 to 'this payload and these two modules never read or write device keys', and add one line that the generation catalog database is a separate file not covered by the dataset.",
-            "screen": "NON_UI",
-            "severity": "MINOR"
-          },
-          {
-            "issue": "L23 says 'Real financial records, actual banking feeds, and production deployment remain strictly barred pending full gate completion'. This implies bank feeds become allowed once gates pass, which contradicts the product contract in CLAUDE.md (no bank connection is authorized at all). L24 also names 'CPA verification' as a gate that no governance document defines.",
-            "remedy": "Remove 'actual banking feeds' from the gated list, or state that bank connections are not authorized under any gate; drop or rephrase 'CPA verification' to match the gates actually named in the authorization and plan.",
-            "screen": "NON_UI",
-            "severity": "MINOR"
-          },
-          {
-            "issue": "All source links in the document (L7-9, L18, L46, L127, L180) are absolute file:///Users/<local-user>/... URLs. They break on GitHub and on any other workstation and commit a local home-directory path, unlike the relative links used in other repository documents. L6 'Source Modules:' also lacks its list marker.",
-            "remedy": "Replace them with repository-relative links, for example ../../packages/backup/src/bookkeeping-dataset.ts, and fix the list marker.",
-            "screen": "NON_UI",
-            "severity": "MINOR"
-          }
-        ],
-        "reviewed_inputs": [
-          "docs/recovery/AUTHORIZATION-20261116.md",
-          "docs/recovery/IMPLEMENTATION-PLAN-20261116.md",
-          "docs/recovery/STATUS-20261116.md",
-          "docs/recovery/DATASET-COVERAGE.md",
-          "packages/backup/src/bookkeeping-dataset.ts",
-          "packages/backup/src/bookkeeping-snapshot.ts",
-          "packages/backup/test/bookkeeping-snapshot.test.mjs",
-          "packages/storage-native/src/bookkeeping-store.ts (ensureBookkeepingSchema and migrations V1-V13, lines 640-1425)",
-          "packages/storage-native/src/native-storage-proof.ts",
-          "packages/storage-native/src/storage-access.ts (lines 60-150)",
-          "packages/backup/src/native-restore-store.ts (lines 55-140)",
-          "CLAUDE.md (execution contract, as supplied)",
-          "Story manifest check records (typecheck, npm test, git diff --check: exit 0 as reported by coordinator; not re-executed by this review)"
-        ],
-        "source": "b99d5e06c94ce2647e66d5d234142a4d6c2b6eb7",
-        "verdict": "FAIL"
+      "review_blocker": {
+        "diagnostic": {
+          "exit_code": 1,
+          "is_error": true,
+          "result": "You've hit your 5-hour limit \u00b7 resets 3:40pm (America/Los_Angeles)"
+        },
+        "profile": "claude-m5-llc-review",
+        "reported_reset": "3:40pm America/Los_Angeles",
+        "source": "e4105afa2174effe6da58452a7177bf593d10aa9"
       },
       "review_required": true,
-      "source": "b99d5e06c94ce2647e66d5d234142a4d6c2b6eb7",
-      "status": "READY",
+      "source": "e4105afa2174effe6da58452a7177bf593d10aa9",
+      "status": "REVIEW_BLOCKED_CAPACITY",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",
