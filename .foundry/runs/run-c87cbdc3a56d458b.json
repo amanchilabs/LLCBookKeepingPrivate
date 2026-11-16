@@ -14,7 +14,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "5f41f923e4aac30794d49904c44f81669937ed94",
+  "head": "96fbbe7468856b6cb4e6a45c82bbd76beaabc27d",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -337,6 +337,13 @@
       "event": "profile_handoff",
       "from": "agy-m5-llc-secondary",
       "head": "5f41f923e4aac30794d49904c44f81669937ed94",
+      "to": "claude-m5-llc-login"
+    },
+    {
+      "at": "2026-11-16T23:59:02.730107+00:00",
+      "event": "preferred_provider_retry_after_reported_reset",
+      "from": "agy-m5-llc-secondary",
+      "safe_checkpoint": "96fbbe7468856b6cb4e6a45c82bbd76beaabc27d",
       "to": "claude-m5-llc-login"
     }
   ],
@@ -847,7 +854,7 @@
         "stdout_sha256": "de5b7c9623b1bb3a388acbe0e4cdc7cb9ba35d57fabc5489356c2180ea61e60c"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Passphrase-encrypted complete dataset backup APIs. Use RECOVERY-001 APIs to encode/decode a complete bookkeeping payload under the EXISTING authenticated portable AES-GCM/PBKDF2 envelope (600000 iterations and existing bounds), with a separate explicit bookkeeping payload discriminator/version so proof-only payloads cannot be restored as books or vice versa. Add pure non-UI create/decrypt backup APIs using an injected crypto interface and native adapter reusing existing crypto.native.ts production encrypt/decrypt implementation; browser unavailable behavior remains unchanged. Validate payload before encryption and strict decode/schema/manifest after authentication; enforce bounds before expensive work, zero transient plaintext buffers when owned, no keys/passphrases in logs/errors/payload. Restore works with passphrase and backup bytes, not original Keychain. Tests must perform real AES-GCM/PBKDF2 roundtrips using Node crypto adapter with identical production envelope/authenticated metadata; mock-only roundtrips are insufficient. Cover different ciphertext for same data, exact restored payload, wrong password, bit flips in header/salt/nonce/ciphertext/tag, truncation, unsupported envelope/payload/schema, oversized input, weak passwords and proof-payload rejection. Clearly label host crypto conformance tests versus unexecuted native implementation. Do not wire UI or replace proof backup.",
-      "resume_context": "Resume the existing implementation at 5f41f923e4aac30794d49904c44f81669937ed94. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete.",
+      "resume_context": "Resume the existing implementation at 5f41f923e4aac30794d49904c44f81669937ed94. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. PREFERRED CLAUDE bounded correction after reported3:40pm reset; no active AGYworker, sourceandcursorpreserved. Story001DONE, do not repeat. Story002current6e1ac363 hostcrypto42/42PASS; independentCodexreview found prior plaintextcleanup and oversizeAPItestissuesresolved, no other substantive finding. ONLYremainingknownblocker TS6 BufferSource: adapter lines68,94,124,135,148,149 uses Uint8Array<ArrayBufferLike> where WebCrypto requires ArrayBuffer-backedview. Correct precise typing/runtimebuffers safely, preserve600000iterations/AES256GCM/AAD/envelope and wipe anyownedcopies. No newdependencies/configchanges/typecheck weakening/blankettsignore/unsafe assertions to hide mismatch. Prefer small proper ArrayBuffer-backedcopies/types at boundary, testrepresentativeinputs ifneeded. Preserve existing implementation and tests. Only original5Story002filesallowed; no UI/accounting/native/agents/Git/commits/push/tests/buildcommands. Coordinatorvalidates exactsource and independentCodexreviewfollows. Stopnaturally afterboundedcorrection.",
       "review": {
         "bounded_review": "Prior cleanup and oversized-API-test findings resolved; no additional substantive issue. WebCrypto authenticates before returning plaintext; no duplicate plaintext Buffers. Not a passing certification.",
         "findings": [
