@@ -68,11 +68,33 @@
     "stderr_sha256": "c0c115d5ee2e883197f2b0053b94eaf7fbb6d00b1e661bdb9d7607ae77ecb834",
     "stdout_sha256": "328b5f5b0abdf9fe937fc9a1f18e8cf4ab168f33686065d715c3f074ed137556"
   },
-  "review": null,
+  "review": {
+    "findings": [
+      {
+        "file": "packages/backup/src/bookkeeping-snapshot.ts",
+        "issue": "inReadOnlyTransaction suppresses ROLLBACK failures, so export/verification can resolve successfully while retaining an open transaction and writer reservation. Independent actual-TS/node:sqlite fault injection reproduced the lock.",
+        "line": 185,
+        "remedy": "Reject when rollback cleanup fails; propagate or safely wrap cleanup error. Document caller must close/discard the unusable connection. Add regressions for export, verification and cleanup while unwinding another error. No accounting/UI changes.",
+        "severity": "MEDIUM"
+      }
+    ],
+    "implementation_ownership": false,
+    "reviewer": "/root/recovery001_independent",
+    "source": "e4105afa2174effe6da58452a7177bf593d10aa9",
+    "tests": {
+      "inventory_columns": 200,
+      "inventory_mismatches": 0,
+      "inventory_tables": 27,
+      "snapshot_passed": 66,
+      "storage_domain_passed": 87,
+      "typecheck": "PASS"
+    },
+    "verdict": "FAIL"
+  },
   "run": "run-c87cbdc3a56d458b",
   "source": "e4105afa2174effe6da58452a7177bf593d10aa9",
-  "status": "REVIEW_BLOCKED_CAPACITY",
-  "timestamp": "2026-11-16T19:57:35.111692+00:00",
+  "status": "FAILED_REVIEW",
+  "timestamp": "2026-11-16T22:58:53.484550+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
