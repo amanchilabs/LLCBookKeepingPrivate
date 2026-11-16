@@ -1,6 +1,7 @@
 {
   "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
   "blocked_role": "reviewer",
+  "blocker": "REVIEW_BLOCKED_CAPACITY: Claude reviewer limit resets3:40pm America/Los_Angeles; corrected Story1 source not independently accepted. No dependent Story progression.",
   "branch": "feature/bookkeeping-full-recovery-20261116",
   "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
   "created_at": "2026-11-16T06:52:19.603624+00:00",
@@ -13,7 +14,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "a2d8b9ecec0b7bde667a5dd0be432aa2f066ce88",
+  "head": "5f7947a8b4470ab95c5316d0a9041fc0a7b03143",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
