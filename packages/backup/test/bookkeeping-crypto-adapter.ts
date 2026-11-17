@@ -14,6 +14,12 @@
  *   the runtime engine, avoiding raw intermediate key buffers in user JS.
  * - Passphrase Cleanup: Transient passphrase byte arrays are explicitly zeroed
  *   (`fill(0)`) in finally blocks on all execution paths.
+ * - WebCrypto Boundary Copies: WebCrypto's `BufferSource` requires views backed by
+ *   a plain `ArrayBuffer`, while the backup APIs accept any `Uint8Array` (which may
+ *   be `SharedArrayBuffer`-backed). Inputs are therefore copied into fresh
+ *   `ArrayBuffer`-backed views at the WebCrypto boundary. Every such copy is owned
+ *   by this adapter and zeroed in a finally block; caller-owned inputs are never
+ *   modified here.
  *
  * Limitations:
  * - This is host Node crypto conformance evidence only.
@@ -42,6 +48,23 @@ function getSubtleCrypto(): SubtleCrypto {
   return globalThis.crypto.subtle;
 }
 
+/**
+ * Copies bytes into a fresh view backed by a plain `ArrayBuffer`, as required by
+ * WebCrypto's `BufferSource`. The caller owns the returned copy and must wipe it.
+ */
+function toOwnedArrayBufferView(bytes: Uint8Array): Uint8Array<ArrayBuffer> {
+  const copy = new Uint8Array(new ArrayBuffer(bytes.byteLength));
+  copy.set(bytes);
+  return copy;
+}
+
+function wipeAll(owned: Uint8Array[]): void {
+  for (const bytes of owned) {
+    bytes.fill(0);
+  }
+  owned.length = 0;
+}
+
 export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
   private readonly iterations: number;
 
@@ -55,9 +78,12 @@ export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
     }
 
     const subtle = getSubtleCrypto();
-    let passphraseBytes: Uint8Array | null = null;
+    const owned: Uint8Array[] = [];
     try {
-      passphraseBytes = validateBackupPassphrase(passphrase);
+      const passphraseBytes = validateBackupPassphrase(passphrase);
+      owned.push(passphraseBytes);
+      const passphraseKeyBytes = toOwnedArrayBufferView(passphraseBytes);
+      owned.push(passphraseKeyBytes);
       const salt = new Uint8Array(BACKUP_SALT_BYTES);
       globalThis.crypto.getRandomValues(salt);
       const nonce = new Uint8Array(BACKUP_NONCE_BYTES);
@@ -65,13 +91,13 @@ export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
 
       const baseKey = await subtle.importKey(
         'raw',
-        passphraseBytes,
+        passphraseKeyBytes,
         'PBKDF2',
         false,
         ['deriveKey'],
       );
       passphraseBytes.fill(0);
-      passphraseBytes = null;
+      passphraseKeyBytes.fill(0);
 
       const derivedKey = await subtle.deriveKey(
         {
@@ -86,7 +112,12 @@ export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
         ['encrypt'],
       );
 
-      const metadata = authenticatedMetadata(salt, nonce, plaintext.length + BACKUP_TAG_BYTES);
+      // AAD is public envelope metadata; it is copied only for the BufferSource type.
+      const metadata = toOwnedArrayBufferView(
+        authenticatedMetadata(salt, nonce, plaintext.length + BACKUP_TAG_BYTES),
+      );
+      const plaintextCopy = toOwnedArrayBufferView(plaintext);
+      owned.push(plaintextCopy);
       const encrypted = await subtle.encrypt(
         {
           name: 'AES-GCM',
@@ -95,7 +126,7 @@ export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
           tagLength: 128,
         },
         derivedKey,
-        plaintext,
+        plaintextCopy,
       );
 
       const ciphertext = new Uint8Array(encrypted);
@@ -106,9 +137,7 @@ export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
       };
       return encodeBackupEnvelope(envelope);
     } finally {
-      if (passphraseBytes) {
-        passphraseBytes.fill(0);
-      }
+      wipeAll(owned);
     }
   }
 
@@ -116,23 +145,34 @@ export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
     const envelope = decodeBackupEnvelope(backup);
     const subtle = getSubtleCrypto();
 
-    let passphraseBytes: Uint8Array | null = null;
+    const owned: Uint8Array[] = [];
     try {
-      passphraseBytes = validateBackupPassphrase(passphrase);
+      const passphraseBytes = validateBackupPassphrase(passphrase);
+      owned.push(passphraseBytes);
+      const passphraseKeyBytes = toOwnedArrayBufferView(passphraseBytes);
+      owned.push(passphraseKeyBytes);
       const baseKey = await subtle.importKey(
         'raw',
-        passphraseBytes,
+        passphraseKeyBytes,
         'PBKDF2',
         false,
         ['deriveKey'],
       );
       passphraseBytes.fill(0);
-      passphraseBytes = null;
+      passphraseKeyBytes.fill(0);
+
+      // Envelope fields are public (salt, nonce, AAD, ciphertext); the copies exist
+      // only to satisfy WebCrypto's ArrayBuffer-backed BufferSource requirement.
+      const salt = toOwnedArrayBufferView(envelope.salt);
+      const nonce = toOwnedArrayBufferView(envelope.nonce);
+      const metadata = toOwnedArrayBufferView(envelope.authenticatedMetadata);
+      const ciphertext = toOwnedArrayBufferView(envelope.ciphertext);
+      owned.push(salt, nonce, metadata, ciphertext);
 
       const derivedKey = await subtle.deriveKey(
         {
           name: 'PBKDF2',
-          salt: envelope.salt,
+          salt,
           iterations: this.iterations,
           hash: 'SHA-256',
         },
@@ -145,21 +185,19 @@ export class NodeBookkeepingCryptoAdapter implements BookkeepingBackupCrypto {
       const decrypted = await subtle.decrypt(
         {
           name: 'AES-GCM',
-          iv: envelope.nonce,
-          additionalData: envelope.authenticatedMetadata,
+          iv: nonce,
+          additionalData: metadata,
           tagLength: 128,
         },
         derivedKey,
-        envelope.ciphertext,
+        ciphertext,
       );
 
       return new Uint8Array(decrypted);
     } catch {
       throw new Error('Backup authentication failed. The passphrase may be incorrect or the file may be damaged.');
     } finally {
-      if (passphraseBytes) {
-        passphraseBytes.fill(0);
-      }
+      wipeAll(owned);
     }
   }
 
