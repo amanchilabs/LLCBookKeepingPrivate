@@ -1,0 +1,171 @@
+{
+  "tier": "Browser design prototype; synthetic only",
+  "timestamp": "2026-11-17T03:11:58.909Z",
+  "results": [
+    {
+      "name": "Initial visible welcome and blank synthetic draft",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Empty form blocks Continue",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "State picker exposes readable California and stores CA",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Name retained when dates missing",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Formation calendar day selection",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Books calendar supports earlier date than formation",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Classification selector neutral explicit choice",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Earlier books date accepted without invented order rule",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Back and Continue preserve entered business values",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Template never confirms ownership or infers classification",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Editing clears explicit confirmation",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Strict invalid percentages disable progression",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Blank names block valid total; values retained",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Quoted name safe; explicit confirmation completes first workspace",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Second LLC starts empty distinct identity",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Saved first workspace untouched after second draft edit",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Complete second LLC through controls",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Workspace selector restores first data; second remains distinct",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Skip cannot silently save or bypass incomplete business setup",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Skip cannot bypass explicit ownership confirmation",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Workspace name is literal text, not injected markup",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Calendar days are keyboard-operable controls",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Keyboard Enter selects calendar day and closes picker",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Escape closes picker and returns focus to trigger",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Missing state marks state control rather than valid business name",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Validation message is announced and retained name unchanged",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Classification picker has named modal dialog semantics",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Tab and Shift-Tab remain inside open classification picker",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "OB02 completed specimen contains completed business fields",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Classification control fits inside form frame",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Default ownership total does not overlap Add Member",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Ownership error does not overlap information, confirmation or Continue",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Long ownership percentage error keeps confirmation and actions clear",
+      "pass": true,
+      "actual": true
+    }
+  ]
+}

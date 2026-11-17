@@ -1,0 +1,428 @@
+{
+  "tier": "Browser design measurements only",
+  "reference": "Approximate manually inspected app-screen anchors at372x732CSS, photographic bezel excluded; no universal similarity score",
+  "screens": {
+    "OB-01": [
+      {
+        "name": "logo",
+        "selector": ".ob01-logo-squircle",
+        "reference": [
+          132,
+          68,
+          108,
+          100
+        ],
+        "actual": [
+          131,
+          68,
+          110,
+          100
+        ],
+        "delta": [
+          -1,
+          0,
+          2,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgba(0, 0, 0, 0)",
+        "fontSize": "16px",
+        "fontFamily": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+      },
+      {
+        "name": "hero",
+        "selector": ".ob01-hero",
+        "reference": [
+          0,
+          242,
+          372,
+          68
+        ],
+        "actual": [
+          0,
+          242,
+          372,
+          68
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgba(0, 0, 0, 0)",
+        "fontSize": "31px",
+        "fontFamily": "\"New York\", Georgia, \"Times New Roman\", serif"
+      },
+      {
+        "name": "feature1",
+        "selector": ".ob01-card:nth-child(1)",
+        "reference": [
+          30,
+          378,
+          318,
+          52
+        ],
+        "actual": [
+          30,
+          378,
+          318,
+          52
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(255, 255, 255)",
+        "fontSize": "16px",
+        "fontFamily": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+      },
+      {
+        "name": "feature2",
+        "selector": ".ob01-card:nth-child(2)",
+        "reference": [
+          30,
+          442,
+          318,
+          52
+        ],
+        "actual": [
+          30,
+          442,
+          318,
+          52
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(255, 255, 255)",
+        "fontSize": "16px",
+        "fontFamily": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+      },
+      {
+        "name": "feature3",
+        "selector": ".ob01-card:nth-child(3)",
+        "reference": [
+          30,
+          504,
+          318,
+          62
+        ],
+        "actual": [
+          30,
+          504,
+          318,
+          62
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(255, 255, 255)",
+        "fontSize": "16px",
+        "fontFamily": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+      },
+      {
+        "name": "CTA",
+        "selector": ".ob01-cta",
+        "reference": [
+          24,
+          619,
+          324,
+          48
+        ],
+        "actual": [
+          24,
+          619,
+          324,
+          48
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(255, 255, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "fontSize": "16px",
+        "fontFamily": "Arial"
+      }
+    ],
+    "OB-02": [
+      {
+        "name": "form",
+        "selector": ".form-card",
+        "reference": [
+          14,
+          201,
+          346,
+          292
+        ],
+        "actual": [
+          14,
+          201,
+          346,
+          292
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(255, 255, 255)",
+        "fontSize": "16px",
+        "fontFamily": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+      },
+      {
+        "name": "formation date",
+        "selector": "#formation-date-trigger",
+        "reference": [
+          29,
+          373,
+          153,
+          40
+        ],
+        "actual": [
+          29,
+          373,
+          153,
+          40
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(255, 255, 255)",
+        "fontSize": "14.5px",
+        "fontFamily": "Arial"
+      },
+      {
+        "name": "books date",
+        "selector": "#books-date-trigger",
+        "reference": [
+          191,
+          373,
+          153,
+          40
+        ],
+        "actual": [
+          192,
+          373,
+          153,
+          40
+        ],
+        "delta": [
+          1,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(255, 255, 255)",
+        "fontSize": "14.5px",
+        "fontFamily": "Arial"
+      },
+      {
+        "name": "info",
+        "selector": ".info-banner",
+        "reference": [
+          14,
+          507,
+          344,
+          50
+        ],
+        "actual": [
+          14,
+          507,
+          346,
+          50
+        ],
+        "delta": [
+          0,
+          0,
+          2,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(238, 247, 242)",
+        "fontSize": "16px",
+        "fontFamily": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+      },
+      {
+        "name": "CTA",
+        "selector": ".screen-cta",
+        "reference": [
+          24,
+          627,
+          324,
+          48
+        ],
+        "actual": [
+          24,
+          627,
+          324,
+          48
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(255, 255, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "fontSize": "16px",
+        "fontFamily": "Arial"
+      }
+    ],
+    "OB-03": [
+      {
+        "name": "member list",
+        "selector": "#members-container",
+        "reference": [
+          17,
+          285,
+          338,
+          160
+        ],
+        "actual": [
+          17,
+          285,
+          338,
+          160
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(255, 255, 255)",
+        "fontSize": "16px",
+        "fontFamily": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+      },
+      {
+        "name": "total",
+        "selector": "#total-ownership-indicator",
+        "reference": [
+          0,
+          457,
+          372,
+          20
+        ],
+        "actual": [
+          17,
+          457,
+          338,
+          18
+        ],
+        "delta": [
+          17,
+          0,
+          -34,
+          -2
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgba(0, 0, 0, 0)",
+        "fontSize": "13.5px",
+        "fontFamily": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+      },
+      {
+        "name": "add member",
+        "selector": "#add-member-btn",
+        "reference": [
+          73,
+          484,
+          230,
+          36
+        ],
+        "actual": [
+          73,
+          484,
+          230,
+          36
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(247, 250, 248)",
+        "fontSize": "13.5px",
+        "fontFamily": "Arial"
+      },
+      {
+        "name": "info",
+        "selector": ".info-banner",
+        "reference": [
+          14,
+          534,
+          344,
+          50
+        ],
+        "actual": [
+          17,
+          534,
+          338,
+          50
+        ],
+        "delta": [
+          3,
+          0,
+          -6,
+          0
+        ],
+        "color": "rgb(7, 21, 47)",
+        "background": "rgb(238, 247, 242)",
+        "fontSize": "16px",
+        "fontFamily": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif"
+      },
+      {
+        "name": "CTA",
+        "selector": ".screen-cta",
+        "reference": [
+          24,
+          635,
+          324,
+          44
+        ],
+        "actual": [
+          24,
+          635,
+          324,
+          44
+        ],
+        "delta": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "color": "rgb(255, 255, 255)",
+        "background": "rgba(0, 0, 0, 0)",
+        "fontSize": "16px",
+        "fontFamily": "Arial"
+      }
+    ]
+  }
+}
