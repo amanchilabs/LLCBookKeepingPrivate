@@ -27,6 +27,6 @@
 - **Discrepancy**: Authoritative reference mockups show 5-stage progress nodes and 6 dots on Welcome, whereas native onboarding implements 4 steps (`setupStepLabels`).
 - **Skip Semantics**: Skip does not authorize silently creating invalid records. In the prototype, Skip on `OB-02`/`OB-03` validates required fields and blocks incomplete setup without creating a workspace, preserving entered values.
 
-## 6. Viewport 372×732 Target & Narrow Viewport (320px) Limitation
-- **Status**: Architectural limitation disclosure.
-- **Specification**: Prototype target viewport is strictly 372×732 CSS pixels matching the cropped reference frame. For viewports narrower than 372px (e.g. 320px or 347px), horizontal scrolling is expected in normal review mode. 320px zero-scroll is NOT certified.
+## 6. Viewport 372×732 Target & Responsive Viewport Fit (320px–430px)
+- **Status**: Architectural presentation disclosure.
+- **Specification**: Prototype capture specimen is strictly 372×732 CSS pixels matching the reference frame. Normal review mode responsively scales outer wrapper and phone presentation to fit viewports from true 320px through 430px without horizontal clipping or scrolling, keeping 372px logical design. No mobile, device, or accessibility certification is claimed.

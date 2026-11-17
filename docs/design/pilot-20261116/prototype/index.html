@@ -73,6 +73,8 @@
       font-size: 14px;
       font-weight: 700;
       color: var(--navy);
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
     .btn-group {
       display: flex;
@@ -133,6 +135,63 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      transform-origin: top center;
+    }
+
+    /* Responsive normal mode: fit 320px, 372px, 375px, 430px viewports without horizontal clipping/scrolling */
+    @media (max-width: 410px) {
+      body {
+        padding: 12px 6px;
+      }
+      .review-header {
+        padding: 10px 8px;
+        margin-bottom: 12px;
+      }
+      .toolbar-row {
+        gap: 6px;
+      }
+      .toolbar-title {
+        font-size: 13px;
+      }
+      .btn {
+        padding: 4px 7px;
+        font-size: 11.5px;
+      }
+      .btn-group {
+        gap: 4px;
+      }
+      .phone-viewport {
+        min-width: unset;
+        max-width: 100%;
+        zoom: 0.82;
+        zoom: calc((100vw - 16px) / 392);
+      }
+    }
+    @media (max-width: 350px) {
+      body {
+        padding: 8px 4px;
+      }
+      .review-header {
+        padding: 8px 6px;
+        margin-bottom: 8px;
+      }
+      .toolbar-title {
+        font-size: 12px;
+      }
+      .btn {
+        padding: 4px 6px;
+        font-size: 11px;
+      }
+      .state-info-badge {
+        font-size: 10.5px;
+        padding: 2px 5px;
+      }
+      .phone-viewport {
+        min-width: unset;
+        max-width: 100%;
+        zoom: 0.74;
+        zoom: calc((100vw - 12px) / 392);
+      }
     }
 
     /* Capture mode: strict 0,0 positioning, no frame, no toolbar */
@@ -155,6 +214,12 @@
       margin: 0 !important;
       width: 372px !important;
       height: 732px !important;
+      min-width: 372px !important;
+      min-height: 732px !important;
+      max-width: 372px !important;
+      max-height: 732px !important;
+      zoom: 1 !important;
+      transform: none !important;
     }
 
     /* Simulated iOS status bar */

@@ -8,7 +8,7 @@
 
 ## 2. Geometric Anchors & Raster Reconstruction
 - **Viewport**: Fixed `372 × 732 CSS pixels` (DPR2 `744 × 1464`), mapping the (140, 36, 744, 1464) reference app screen crop.
-- **Narrow Viewport (320px) Limitation**: Target viewport is fixed 372px. In review mode on viewports narrower than 372px (e.g. 320px mobile or 347px test frames), horizontal scrolling occurs unless scaled. 320px zero-scroll is an explicit limitation, NOT certified.
+- **Responsive Viewport Fit (320px–430px)**: Target capture specimen remains strictly 372×732 CSS pixels. In normal review mode, the outer wrapper and phone bounds responsively scale to fit viewports down to true 320px (and 375/372/430px) without horizontal clipping or scrolling, while preserving 372px logical design. No mobile, device, or accessibility certification is claimed.
 - **Key Measured Anchors**:
   - `OB-01`: Logo squircle at (132, 68), brand title y≈178, emerald accent bar width 52px (corrected from outdated 36px), serif hero headline y≈242 (font 31/line 34), feature cards x30/y378/442/504 (h52/52/62), primary CTA x24/y619 (w324, h48), 5 pager dots at y680. Mid-wave features a vertical gradient fading to near-white behind cards.
   - `OB-02`: Nav at top (h54); progress track at y98; icon at (20,125); title at (87,133); form card at (14,201,w346,h292); name label y220/input y236; state label y289/input y305; paired dates labels y357/inputs y373; classification label y427/input y445 (h40, ends at 485 within card bottom 493); info banner at y507; CTA at (24,627,w324,h48).
