@@ -14,7 +14,7 @@ This matrix documents every visual element, form field, interactive control, and
 
 | Ref Location | Element / Control | Prototype Behavior | Native Implementation | Class | Future Persistence Gap | Test / State Verification |
 |---|---|---|---|:---:|---|---|
-| **OB-01 (132,68)** | App Logo Squircle | Displays `assets/welcome-mark.png` with fallback vector SVG squircle | No welcome screen route in current app (`BusinessSetupScreen` starts at step 1) | A | None (static visual asset) | `window.pilot.goto('OB-01', 'default')` |
+| **OB-01 (132,68)** | App Logo Squircle | Displays `assets/welcome-mark.png` with fallback vector SVG squircle | Native `BusinessSetupScreen` includes a 'welcome' step with 'Get started' action | A | None (static visual asset) | `window.pilot.goto('OB-01', 'default')` |
 | **OB-01 (186,178)** | Brand Title | Centered bold navy label `LLCBookKeepingPrivate` | None | A | None | Measured DOM anchor at y≈178px |
 | **OB-01 (186,187)** | Brand Accent Bar | 36×3.5px emerald pill bar `#009c3f` | None | A | None | Render check |
 | **OB-01 (186,242)** | Hero Headline | Serif title `Private bookkeeping for your LLC` | None | A | None | Checks serif font family and line wrap |
@@ -26,13 +26,13 @@ This matrix documents every visual element, form field, interactive control, and
 | **OB-01 (330,14)** | Skip Action | Green top-right link; advances to `OB-02` without creating records | None | C | No silent record creation | Navigates to OB-02 with empty fields |
 | **OB-01 (186,680)** | Pager Indicator | 5 dots with active first dot | None | A | Visual parity | Dot index 0 active |
 | **OB-02 (20,14)** | Back Chevron | Navigates back to `OB-01` | `back()` | A | Preserves draft values | Back button click preserves state |
-| **OB-02 (186,14)** | Step Indicator | Text `2 of 5` | `setupStepLabels` (1 of 4 in native) | C | Harmonizes reference 5-step with wizard | Text verification |
+| **OB-02 (186,14)** | Step Indicator | Text `2 of 5` | `setupStepLabels` (step 1 of 4 in native wizard) | C | Unresolved 5-stage reference vs 4-step native wizard (PENDING Owner C Decision) | Text verification |
 | **OB-02 (186,98)** | Step Progress Bar | 5 nodes (Node 1 checkmark, Node 2 active, Nodes 3-5 gray) | `SetupProgress` component | A | Presentation only | Progress width 25% |
 | **OB-02 (20,125)** | Header Icon | 52×52px squircle with bank/building icon | None | A | Visual parity | Render check |
 | **OB-02 (87,133)** | Header Title | `Your LLC` and subtitle | `Heading` component | A | Visual parity | Render check |
 | **OB-02 (14,201)** | Legal Name Input | Text input for legal LLC name; updates draft in real-time | `Field` name input | A | Stored in `BusinessSetupInput.name` | `updateDraft('name', 'Acme LLC')` |
 | **OB-02 (14,270)** | Formation State Trigger | Dropdown button displaying selected state; opens modal | Text input for 2-letter code | B | Stored in `formationState` (normalized 2-letter) | `openModal('state')` |
-| **OB-02 (Modal)** | State Picker Modal | Searchable list of 50 states + DC + grouped territories | None (native typed 2 letters) | B | Normalizes state name to 2-letter code | `selectState('DE')` updates display and code |
+| **OB-02 (Modal)** | State Picker Modal | Searchable list of 50 states + DC + grouped territories | None (native text field typed 2 letters) | B | Normalizes state name to 2-letter code | State picker modal selection updates display and code |
 | **OB-02 (14,338)** | Formation Date Trigger | Calendar picker trigger showing `Jan 15, 2024` | Text input `YYYY-MM-DD` | B | Stored as ISO `YYYY-MM-DD` | `openModal('formation-date')` |
 | **OB-02 (Modal)** | Formation Calendar | Interactive month calendar with prev/next controls | None | B | Validated via `assertValidCalendarDate` | Day cell click sets date and closes modal |
 | **OB-02 (186,338)** | Books Start Date Trigger | Calendar picker trigger showing `Jan 1, 2025` | Text input `YYYY-MM-DD` | B | Stored as ISO `YYYY-MM-DD` | `openModal('books-date')` |
@@ -43,7 +43,7 @@ This matrix documents every visual element, form field, interactive control, and
 | **OB-02 (24,627)** | Continue CTA | Validates business name; advances to `OB-03` | `continueFromCurrentStep()` | A | In-memory draft progression | Advances to OB-03 on valid input |
 | **OB-02 (Error)** | Inline Validation Banner | Displays error when name is missing; keeps valid inputs | `FormError` | A | Non-destructive validation | `goto('OB-02', 'validation-error')` |
 | **OB-03 (20,14)** | Back Chevron | Navigates back to `OB-02` without data loss | `back()` | A | Preserves draft values | Back button click preserves state |
-| **OB-03 (186,14)** | Step Indicator | Text `3 of 5` | Step 2 of 4 in native | C | Harmonized 5-step model | Text verification |
+| **OB-03 (186,14)** | Step Indicator | Text `3 of 5` | Step 2 of 4 in native wizard | C | Unresolved 5-stage reference vs 4-step native wizard (PENDING Owner C Decision) | Text verification |
 | **OB-03 (186,98)** | Step Progress Bar | Node 1 check, Node 2 check, Node 3 active | `SetupProgress` | A | Progress width 50% | Render check |
 | **OB-03 (17,115)** | Header Icon | 52×52px squircle with members icon | None | A | Visual parity | Render check |
 | **OB-03 (82,120)** | Header Title | `Members & Ownership` | `Heading` component | A | Visual parity | Render check |

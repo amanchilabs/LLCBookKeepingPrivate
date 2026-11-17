@@ -1,4 +1,6 @@
-# Visual Design Pilot Decisions (2026-11-16)
+# Visual Design Pilot Decision Recommendations (2026-11-16)
+
+> **Notice**: All items in this document represent builder decision recommendations and prototype proposals submitted for Owner review. None of these items constitute approved Owner decisions, legal advice, tax determinations, or accessibility certifications.
 
 ## 1. CPA Workpapers and Privacy/Security Representation Claims (PENDING Owner C Decision)
 - **Status**: Proposal only — PENDING Owner C Decision. Not settled or legally defensible.
@@ -10,7 +12,7 @@
 - **Status**: Metadata proposal only — PENDING Owner C Decision. Not settled or legally determined.
 - **Proposal**: Retain the visual tax-classification selector on screen `OB-02` per the Owner's explicit 2026-11-16 instruction, with an honest unset choice: "Unknown / not yet determined".
 - **Governance Rationale**: Single-member and multi-member LLCs have distinct default classifications under IRS rules, but owners may elect corporate taxation. Classification options are strictly self-reported metadata proposals pending Owner C decision.
-- **Data Architecture**: No database schema migration or automatic tax determination is implemented.
+- **Data Architecture & Persistence**: Tax classification is self-reported metadata only; future persistence is classified B/C. No native database schema migration or automatic tax determination is implemented.
 
 ## 3. Strict Separation of Ownership from Tax and Confirmation Placement (PENDING Owner C Decision)
 - **Status**: UI placement proposal only — PENDING Owner C Decision. Not settled.
@@ -18,15 +20,14 @@
 - **Governance Rationale**: Partnership tax rules permit special allocations differing from equity percentages. Confirmation placement and exact policy remain pending Owner C approval.
 - **Implementation**: `OB-03` positions the functional confirmation checkbox near y594 with disclaimer banners explaining ownership is not an allocation rule.
 
-## 4. Historical Bookkeeping Start Date & Pre-Formation Expenses
-- **Decision**: Allow the bookkeeping start date to precede the legal formation date.
-- **Governance Rationale**: LLC founders frequently incur legitimate pre-formation startup expenses (e.g. state filing fees, legal fees, domain registrations) before the state officially stamps the certificate of formation. Forbidding an earlier books start date forces founders to misdate initial transactions.
-- **Implementation**: The date pickers enforce valid ISO calendar dates (`YYYY-MM-DD`) but do not reject bookkeeping start dates prior to legal formation.
+## 4. Bookkeeping Start Date and Formation Date (Existing Native Domain Rule)
+- **Status**: Reflection of existing native domain behavior, NOT a new business rule or prototype decision.
+- **Specification**: In existing native `assertValidBusinessSetup`, dates are validated as valid calendar dates without requiring bookkeeping start to follow formation date. The prototype reflects this existing domain validation without inventing new ordering constraints.
 
-## 5. Progress Indicator Harmonization (5-Step Model)
-- **Decision**: Present the 5-stage progress indicator matching the canonical screenshots (1: Welcome, 2: Your LLC, 3: Members & Ownership, 4: First Account, 5: Review), concluding the 3-screen pilot at `OB-03` and summarizing results in an interactive draft view.
-- **Governance Rationale**: Reconciles the visual mockup's 5-stage progress nodes with the current 4-step native wizard. Screens 4 (First Account) and 5 (Review) remain future native onboarding steps.
-- **Skip Navigation**: Clicking `Skip` on `OB-01` advances to `OB-02` with empty fields and does not create silent records.
+## 5. Progress Indicator and Skip Semantics (UNRESOLVED Discrepancy — PENDING Owner C Decision)
+- **Status**: Discrepancy unresolved — PENDING Owner C Decision (NOT harmonized or approved).
+- **Discrepancy**: Canonical reference mockups show 5-stage progress nodes and 6 dots on Welcome, whereas the native onboarding wizard implements 4 steps (`setupStepLabels`). This discrepancy is documented as unresolved pending Owner decision.
+- **Skip Semantics**: Exact Skip semantics remain PENDING Owner C Decision. Reference Skip does not authorize silently creating invalid records. In the prototype, clicking Skip on `OB-02` or `OB-03` validates required fields and blocks incomplete setup without creating a workspace, preserving entered values and providing inline explanation.
 
 ## 6. Asset Packaging & DOM Vector Rendering
 - **Decision**: Implement all cards, forms, waves, icons, and buttons as real CSS, SVG, and DOM elements rather than embedding full-screen reference screenshots.

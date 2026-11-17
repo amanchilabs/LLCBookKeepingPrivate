@@ -1,14 +1,14 @@
 {
-  "source_package_sha256": "f50ef0782260ff09c36b340f15b451dffa7bc0b67617efe362d5f77abaa55983",
-  "authoring_source": "c056a69a08b9d1d0023637c19e1d6fe7c7d193c5",
+  "source_package_sha256": "3ebd825d581a44f11bc80790b1358650bdf8067aad0d9aef32fd1884f8842672",
+  "authoring_source": "22299a929ac05cbb99edf5a81818d3fc07a74d1f",
   "builder": "agy-m5-llc-secondary",
   "materialization": "Literal strings copied, coordinator did not author prototype UI",
   "files": {
-    "index.html": "aaad299982b90494167372dedbc8851884ae9e4146ee42d5aad40b107aba7717",
+    "index.html": "2eb146807397dd2bbd0e529c3a5b22d0740acfe75df14959c11df4e53921e9e8",
     "RATIONALE.md": "8e7ae54f45b22741a5cc135a14d35f3dd7023c41f7dd981c8667703163db0b66",
-    "COVERAGE.md": "ddb55050c6fd42b7f5d641d680df3b2053240efcdfe8987b26f42d0f3c87332c",
-    "DECISIONS.md": "c1b35c078a0ef334408fadd3b80373cac040b4c9445d9f5551ee615a33e1ca94",
+    "COVERAGE.md": "5ae68f22ff8b7220c1d84527d1ef146e624dffc71500badb579248ffdb24a552",
+    "DECISIONS.md": "313934ecdbfe93b30c973ce71a5c8b07be6a317774940d193fb5b3c9852a9d73",
     "assets/welcome-mark.png": "ac2c55bc3afeb67215f70d9aad26135abfa21844e0a405499eea8dedb7f2ef8f"
   },
-  "prototype_revision": "5bdc5c08639e0eb2b6728a58c7fa430936aa44b32cd4a6303d2dcec3bc70b918"
+  "prototype_revision": "783740cace2c05e00e28dd498d4f9e27c2733cc2d8f988b8b0e486289b4b8510"
 }

@@ -995,6 +995,11 @@
       border-radius: 6px;
       cursor: pointer;
       border: 1px solid transparent;
+      background: none;
+      font-family: inherit;
+      color: inherit;
+      padding: 0;
+      outline: none;
     }
     .cal-cell:hover {
       background: #eef7f2;
@@ -1009,7 +1014,7 @@
       font-weight: 700;
     }
 
-    /* R2b Layout & Geometry Overrides (Faithful 372x732) */
+    /* R2c Layout & Geometry Overrides (Faithful 372x732) */
     /* OB-01 Welcome */
     .ob01-skip {
       top: 52px !important;
@@ -1033,7 +1038,7 @@
       object-fit: contain !important;
     }
     .ob01-hero {
-      margin-top: 14px !important;
+      margin-top: 27.5px !important;
       font-family: var(--font-serif) !important;
       font-size: 31px !important;
       line-height: 34px !important;
@@ -1160,21 +1165,35 @@
       top: 201px !important;
       width: 346px !important;
       height: 292px !important;
-      padding: 12px 14px !important;
+      padding: 19px 14px 7px !important;
       margin: 0 !important;
       box-sizing: border-box !important;
-      gap: 8px !important;
+      gap: 0 !important;
     }
     #screen-ob-02 .form-group {
+      gap: 1px !important;
+      margin-bottom: 13px !important;
+    }
+    #screen-ob-02 .form-row-2col {
+      margin-bottom: 14px !important;
+    }
+    #screen-ob-02 .form-card > .form-group:last-child {
       gap: 3px !important;
+      margin-bottom: 0 !important;
+    }
+    #screen-ob-02 .form-label {
+      height: 15px !important;
+      font-size: 12.5px !important;
+      line-height: 15px !important;
     }
     #screen-ob-02 .form-input,
     #screen-ob-02 .form-select-trigger {
-      height: 38px !important;
+      height: 40px !important;
     }
     #screen-ob-02 .form-row-2col .form-label {
-      font-size: 12px !important;
-      line-height: 14px !important;
+      font-size: 11px !important;
+      line-height: 15px !important;
+      letter-spacing: -0.2px !important;
       white-space: nowrap !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
@@ -1284,12 +1303,20 @@
       padding: 0 8px !important;
       margin: 0 !important;
       box-sizing: border-box !important;
+      gap: 0 !important;
     }
     #screen-ob-03 .member-row {
       height: 40px !important;
       min-height: 40px !important;
+      max-height: 40px !important;
+      flex: 0 0 40px !important;
       padding: 0 !important;
+      margin: 0 !important;
       box-sizing: border-box !important;
+      border-bottom: 1px solid #f0f4f2 !important;
+    }
+    #screen-ob-03 .member-row:last-child {
+      border-bottom: none !important;
     }
     .member-name-input {
       border: none !important;
@@ -1448,12 +1475,12 @@
     <svg class="bg-waves" viewBox="0 0 372 732" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="wave-bottom-fade" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#edf7f1" stop-opacity="0.85"/>
-          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.95"/>
+          <stop offset="0%" stop-color="#cef0d2" stop-opacity="0.9"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.98"/>
         </linearGradient>
       </defs>
-      <path d="M0,281 C100,278 125,345 230,280 C285,230 325,195 372,180 L372,732 L0,732 Z" fill="#f2f8f4" fill-opacity="0.5"/>
-      <path d="M0,604 C80,565 96,584 170,597 C240,615 278,571 372,570 L372,732 L0,732 Z" fill="url(#wave-bottom-fade)"/>
+      <path id="wave-mid" d="M0,281 C100,278 125,345 230,280 C285,230 325,195 372,180 L372,732 L0,732 Z" fill="#cef0d2" fill-opacity="0.5"/>
+      <path id="wave-bottom" d="M0,604 C80,565 96,584 170,597 C240,615 278,571 372,570 L372,732 L0,732 Z" fill="url(#wave-bottom-fade)"/>
     </svg>
 
     <!-- ==================== SCREEN 1: OB-01 WELCOME ==================== -->
@@ -1552,7 +1579,7 @@
       <div class="screen-nav">
         <button class="nav-back" onclick="window.pilot.goto('OB-01', 'default')">‹</button>
         <span class="nav-step-title">2 of 5</span>
-        <button class="nav-skip" onclick="window.pilot.goto('OB-03', 'multi')">Skip</button>
+        <button class="nav-skip" onclick="window.pilot.skipOB02()">Skip</button>
       </div>
 
       <div class="progress-bar-container">
@@ -1610,7 +1637,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">
-              Bookkeeping start <span class="form-label-required">*</span>
+              Bookkeeping start date <span class="form-label-required">*</span>
             </label>
             <button id="books-date-trigger" class="form-select-trigger" onclick="window.pilot.openModal('books-date')">
               <span id="books-date-display">Select date</span>
@@ -1650,7 +1677,7 @@
       <div class="screen-nav">
         <button class="nav-back" onclick="window.pilot.goto('OB-02', 'default')">‹</button>
         <span class="nav-step-title">3 of 5</span>
-        <button class="nav-skip" onclick="window.pilot.goto('COMPLETE', 'summary')">Skip</button>
+        <button class="nav-skip" onclick="window.pilot.skipOB03()">Skip</button>
       </div>
 
       <div class="progress-bar-container">
@@ -2127,6 +2154,24 @@
         this.goto('OB-02', 'default');
       },
 
+      skipOB02() {
+        // Skip blocked for incomplete setup; does not create workspace; exact Skip semantics PENDING Owner C decision
+        this.submitOB02();
+        if (state.errors.name) {
+          state.errors.name = 'Setup incomplete: required fields must be completed. Skip is blocked without creating workspace (semantics PENDING Owner C Decision).';
+          this.renderErrors();
+        }
+      },
+
+      skipOB03() {
+        // Skip blocked for incomplete setup; does not create workspace; exact Skip semantics PENDING Owner C decision
+        this.submitOB03();
+        if (state.errors.members) {
+          state.errors.members = 'Setup incomplete: valid member ownership totaling 100% and confirmation required. Skip is blocked without creating workspace (semantics PENDING Owner C Decision).';
+          this.renderErrors();
+        }
+      },
+
       submitOB02() {
         state.errors = {};
         const name = (state.draft.name || '').trim();
@@ -2312,20 +2357,38 @@
       },
 
       openModal(modalId) {
+        state.activeTrigger = document.activeElement;
         state.openPicker = modalId;
         document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
         const target = document.getElementById('modal-' + modalId);
         if (target) {
           target.classList.add('active');
-          if (modalId === 'state') this.renderStateList();
-          if (modalId === 'formation-date') this.renderCalendar('formation');
-          if (modalId === 'books-date') this.renderCalendar('books');
+          if (modalId === 'state') {
+            this.renderStateList();
+            const searchInput = document.getElementById('state-search-input');
+            if (searchInput) searchInput.focus();
+          } else if (modalId === 'formation-date') {
+            this.renderCalendar('formation');
+            const firstDay = target.querySelector('.cal-cell:not(.empty)');
+            if (firstDay) firstDay.focus();
+          } else if (modalId === 'books-date') {
+            this.renderCalendar('books');
+            const firstDay = target.querySelector('.cal-cell:not(.empty)');
+            if (firstDay) firstDay.focus();
+          } else if (modalId === 'tax-classification') {
+            const firstItem = target.querySelector('.modal-item');
+            if (firstItem) firstItem.focus();
+          }
         }
       },
 
       closeModals() {
         state.openPicker = null;
         document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+        if (state.activeTrigger && typeof state.activeTrigger.focus === 'function') {
+          state.activeTrigger.focus();
+        }
+        state.activeTrigger = null;
       },
 
       renderStateList(filter = '') {
@@ -2409,7 +2472,8 @@
         const selectedDateStr = calKey === 'formation' ? state.draft.formationDate : state.draft.bookkeepingStartDate;
 
         for (let d = 1; d <= daysInMonth; d++) {
-          const cell = document.createElement('div');
+          const cell = document.createElement('button');
+          cell.type = 'button';
           const isoStr = `${view.year}-${String(view.month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
           cell.className = 'cal-cell' + (isoStr === selectedDateStr ? ' selected' : '');
           cell.textContent = d;
@@ -2527,7 +2591,13 @@
             const isActive = w.id === state.activeWorkspaceId;
             btn.className = 'btn' + (isActive ? ' active' : '');
             btn.style.cssText = 'text-align:left; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; font-size:13px; cursor:pointer;';
-            btn.innerHTML = `<span>${w.name || '(Unnamed LLC)'}</span><span style="font-size:11px; opacity:0.8;">${w.formationState || 'Unset'} ${isActive ? '• Active' : ''}</span>`;
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = w.name || '(Unnamed LLC)';
+            const infoSpan = document.createElement('span');
+            infoSpan.style.cssText = 'font-size:11px; opacity:0.8;';
+            infoSpan.textContent = `${w.formationState || 'Unset'}${isActive ? ' • Active' : ''}`;
+            btn.appendChild(nameSpan);
+            btn.appendChild(infoSpan);
             btn.onclick = () => window.pilot.switchWorkspace(w.id);
             wsContainer.appendChild(btn);
           });
@@ -2550,6 +2620,21 @@
         if (sKey === 'ob03') sKey = 'ob-03';
         const activeScreenEl = document.getElementById('screen-' + sKey) || document.getElementById('screen-' + sKey.replace('-', '')) || document.getElementById('screen-' + state.currentScreen.toLowerCase()) || document.getElementById(state.currentScreen);
         if (activeScreenEl) activeScreenEl.classList.add('active');
+
+        // Setup screens white upper background: show mid-wave only on welcome screen
+        const midWave = document.getElementById('wave-mid');
+        if (midWave) {
+          midWave.style.display = (sKey === 'ob-01' || state.currentScreen === 'OB-01') ? 'block' : 'none';
+        }
+
+        if (!this._keyBound) {
+          this._keyBound = true;
+          document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && state.openPicker) {
+              window.pilot.closeModals();
+            }
+          });
+        }
 
         // Update Review toolbar buttons
         document.querySelectorAll('.review-header .btn-group:first-child .btn').forEach((btn, idx) => {
