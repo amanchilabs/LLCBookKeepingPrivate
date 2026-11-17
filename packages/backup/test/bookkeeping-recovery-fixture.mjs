@@ -126,6 +126,7 @@ export class FaultInjectingHostDatabase extends HostDatabase {
   }
 
   async getAllAsync(sql, ...parameters) {
+    if (this.faults.failGetAll && this.faults.failGetAll.test(sql)) throw this.injectedError;
     const rows = await super.getAllAsync(sql, ...parameters);
     if (this.faults.corruptRead && this.faults.corruptRead.test(sql) && rows.length > 0) {
       const [first, ...rest] = rows;
@@ -738,6 +739,9 @@ export class HostCandidateStore {
         this.events.push('close');
         this.openConnections.delete(database);
         database.close();
+        if (this.options.failCloseOnCall === this.openCalls) {
+          throw this.options.failClose || new Error('synthetic injected candidate connection close failure');
+        }
       },
     };
   }

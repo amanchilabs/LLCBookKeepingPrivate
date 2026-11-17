@@ -1,6 +1,6 @@
 # Complete Bookkeeping Recovery Validation & Verification Specification
 
-- Status: **Builder-delivered for RECOVERY-003; coordinator validation and independent review pending; host SQLite synthetic evidence only**
+- Status: **Builder-delivered for RECOVERY-003; review findings addressed; coordinator validation and independent review pending; host SQLite synthetic evidence only**
 - Milestone / Capability: **CAP-BOOK-RECOVERY-001 — Complete Bookkeeping Recovery**
 - Story: **RECOVERY-003 — Complete dataset recovery parity, isolated restore lifecycle, failure injection, legacy migration, and native storage integration**
 - Authorization: **Owner authorization 2026-11-16 ([`AUTHORIZATION-20261116.md`](AUTHORIZATION-20261116.md))**
@@ -69,14 +69,20 @@ Recovery enforces a strict lifecycle contract ensuring that no active database o
 ```
 
 ### Lifecycle Invariants
-1. **Authenticate Before Provision**: The backup envelope is decrypted and authenticated against PBKDF2/AES-GCM credentials before requesting a candidate database or key identity from storage. Unauthenticated attempts never create or touch files.
+1. **Authenticate Before Provision & Genuine Branding**: The backup envelope is decrypted and authenticated against PBKDF2/AES-GCM credentials before requesting a candidate database or key identity from storage. Plaintext snapshots cannot be branded as genuine via the public `AuthenticatedBookkeepingBackup` constructor; only the internal authentication factory marks an envelope genuine. Unauthenticated or runtime forged attempts fail closed with `lifecycle-violation` and candidate outcome `not-requested`, never creating or touching candidate files.
 2. **Destination Key Provisioning**: Destination keys are provisioned locally on the destination device with fresh synthetic/hardware identities. The payload never contains source device keys, and the restore process never uses source device keys.
-3. **Candidate Isolation**: If the candidate store provisions an active database path, reuses a protected active key identity, or opens a candidate file that already contains database objects, the restore fails closed with `candidate-not-isolated` and candidate outcome `not-touched`. The preexisting database is never modified or disposed.
+3. **Candidate Isolation**: If the candidate store provisions an active database path, reuses a protected active key identity, or opens a candidate file that already contains database objects, the restore fails closed with `candidate-not-isolated` and candidate outcome `not-touched`. Preexisting and protected active databases are never modified or disposed.
 4. **Terminal Transitions**: A candidate in state `verified-unpublished` allows exactly one terminal transition:
    - `handOff()`: transitions to `handed-off` and returns `{ candidateId, keyIdentity }`. The candidate is left untouched beside the active database without performing activation. Subsequent calls to `handOff()` or `discard()` throw `lifecycle-violation`.
    - `discard()`: transitions to `discarded` and disposes the candidate file and key from destination storage. Subsequent calls throw `lifecycle-violation`.
-5. **Cleanup Failure Preservation**: If candidate disposal fails following an import or verification error, a `BookkeepingRecoveryError` with code `candidate-cleanup-failed` and outcome `cleanup-failed` is thrown. The error preserves both the original failure on `.cause` and the disposal failure on `.cleanupError`, with an explicit message that the candidate must not be activated.
+5. **Cleanup Failure & Resource Failure Preservation**:
+   - The initial `sqlite_master` emptiness check after opening connection 1 is strictly protected: if the query fails, connection 1 is closed, the candidate is disposed, and both errors are surfaced.
+   - On import failure, candidate connection 1 is closed before calling destination candidate store disposal.
+   - On verification failure, candidate connection 2 is closed before disposal. If closing connection 2 fails, the close error is preserved and surfaces `candidate-cleanup-failed` with outcome `cleanup-failed`. It is never swallowed or reported clean.
+   - All errors are normalized to safe Error objects with non-enumerable `cause` and `cleanupError` properties to prevent data leakage and preserve failure context.
+   - If candidate disposal fails following an import or verification error, a `BookkeepingRecoveryError` with code `candidate-cleanup-failed` and outcome `cleanup-failed` is thrown, with an explicit message that the candidate must not be activated.
 6. **Retryable Discard**: If `discard()` on a verified candidate fails, the state transitions to `discard-failed`. `handOff()` is disallowed, but `discard()` can be retried until disposal succeeds.
+7. **Isolated Migration Cleanup Preservation**: When migrating legacy databases on an isolated copy, if migration fails and copy disposal also fails, both errors are surfaced under `candidate-cleanup-failed` with outcome `cleanup-failed`, rather than swallowing disposal errors.
 
 ---
 
@@ -99,6 +105,7 @@ A candidate database is only eligible for `verified-unpublished` status after pa
    - Reconciliations (`getBookkeepingSnapshotFromDatabase`): matching draft and completed reconciliation statuses, cleared movements, and zero difference on completed statements.
 4. **Balanced Accounting Assertion (`assertBookkeepingAccountingBalanced`)**:
    - Overall journal entries: `totalDebitsCents === totalCreditsCents`.
+   - **Per-Journal Entry Balancing**: Debits must equal credits for EACH individual journal entry in the database. Two offsetting unbalanced entries within the same business are strictly rejected.
    - Trial balance debits equal credits for each workspace.
    - Balance sheet difference is zero (`totalAssetsCents - totalLiabilitiesCents - totalEquityCents === 0n`).
    - Cash basis net income equals balance sheet current earnings.
@@ -121,6 +128,13 @@ A candidate database is only eligible for `verified-unpublished` status after pa
 - Guaranteed payment reversals (`guaranteed_payment_reversals`) and cash transaction corrections (`transaction_corrections`, `transaction_correction_roles`) are fully covered and verified.
 - Loan reversals are not part of the current bookkeeping domain model or store workflows and are therefore omitted from fixtures.
 
+### 4.4 Native Candidate Store Security & Isolation Contract
+- **Internally Issued Identities Only**: `NativeBookkeepingCandidateStore` tracks and verifies internally provisioned identities (`issuedIdentities`). Unowned or arbitrary identities passed to `open()` or `dispose()` are rejected with access denied.
+- **Strict Format & Traversal Prevention**: Candidate database IDs must conform strictly to `candidate-<timestamp>-<counter>-<hex>.db`. Path traversal characters (`..`, `/`, `\`) and active database names are rejected.
+- **Owned Connection Tracking**: The native candidate store tracks active database leases and releases/closes all open connections before deleting database files upon disposal.
+- **Sidecar Cleanup**: Disposal deletes the primary candidate database and all SQLite sidecars (`-wal`, `-shm`, `-journal`).
+- **Surface Cleanup Failures**: File deletion, SecureStore key deletion, and connection close errors are strictly surfaced; cleanup failures throw `Error` and prevent the candidate from being considered disposed.
+
 ---
 
 ## 5. Failure Injection & Resilience Matrix
@@ -132,22 +146,27 @@ A candidate database is only eligible for `verified-unpublished` status after pa
 | **Authenticate** | Payload truncation | `backup-rejected` | `not-requested` | Incomplete ciphertext rejected |
 | **Authenticate** | Legacy payload schema (v12) | `backup-rejected` | `not-requested` | Fail closed; no payload migration assumed |
 | **Authenticate** | Proof payload (`records` field) | `backup-rejected` | `not-requested` | Proof backup payloads rejected as books |
+| **Authenticate** | Plaintext snapshot constructor forgery | `lifecycle-violation` | `not-requested` | Plaintext snapshot cannot be branded genuine |
 | **Provision** | Injected storage provision error | `candidate-provision-failed` | `not-created` | Candidate not created; active DB untouched |
 | **Provision** | Candidate is active DB | `candidate-not-isolated` | `not-touched` | Active DB protected; candidate not disposed |
 | **Provision** | Candidate reuses source key | `candidate-not-isolated` | `not-touched` | Source key not reused; active DB untouched |
 | **Provision** | Candidate file already has tables | `candidate-not-isolated` | `not-touched` | Preexisting data preserved; not disposed |
-| **Import** | Injected schema creation error | `candidate-import-failed` | `disposed` | Candidate database and key wiped |
-| **Import** | Injected row insert error | `candidate-import-failed` | `disposed` | Incomplete candidate discarded |
-| **Import** | In-transaction verification fail | `candidate-verification-failed` | `disposed` | Corrupted write caught before commit |
+| **Provision** | Candidate sqlite_master query fails | `candidate-import-failed` | `disposed` | Connection closed; candidate disposed safely |
+| **Import** | Injected schema creation error | `candidate-import-failed` | `disposed` | Connection closed; candidate database and key wiped |
+| **Import** | Injected row insert error | `candidate-import-failed` | `disposed` | Connection closed; incomplete candidate discarded |
+| **Import** | In-transaction verification fail | `candidate-verification-failed` | `disposed` | Connection closed; corrupted write caught |
 | **Reopen** | Candidate open failure on call 2 | `candidate-verification-failed` | `disposed` | Reopen failure caught; candidate disposed |
-| **Verification** | Post-close external write | `candidate-verification-failed` | `disposed` | External modification detected; candidate disposed |
+| **Verification** | Post-close external write | `candidate-verification-failed` | `disposed` | External modification detected; connection closed and disposed |
 | **Verification** | Unbalanced journal lines | `candidate-verification-failed` | `disposed` | Unbalanced books rejected from eligibility |
+| **Verification** | Offsetting unbalanced journal entries | `candidate-verification-failed` | `disposed` | Per-journal entry balancing enforced |
 | **Verification** | Unbalanced reconciliation | `candidate-verification-failed` | `disposed` | Corrupt reconciliation rejected from eligibility |
+| **Verification** | Connection close failure on call 2 | `candidate-cleanup-failed` | `cleanup-failed` | Close failure not swallowed; surfaced |
 | **Cleanup** | Injected disposal failure | `candidate-cleanup-failed` | `cleanup-failed` | Both errors surfaced; activation barred |
 | **Source Migration**| Newer source schema (v14) | `unsupported-source-schema` | `not-requested` | Source untouched; copy not requested |
 | **Source Migration**| Isolated copy is source | `candidate-not-isolated` | `not-touched` | Copy provider safety check |
 | **Source Migration**| Migration SQL fails on copy | `source-migration-failed` | `disposed` | Source file byte-identical; copy disposed |
 | **Source Migration**| Isolated copy disposal fails | `candidate-cleanup-failed` | `cleanup-failed` | Cleanup failure surfaced; source untouched |
+| **Source Migration**| Migration fails AND disposal fails | `candidate-cleanup-failed` | `cleanup-failed` | Both failures surfaced; source untouched |
 
 ---
 

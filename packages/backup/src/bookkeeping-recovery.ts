@@ -78,8 +78,8 @@ export class BookkeepingRecoveryError extends Error {
   readonly code: BookkeepingRecoveryErrorCode;
   readonly candidateOutcome: BookkeepingRecoveryCandidateOutcome;
   readonly stage?: BookkeepingRecoveryStage;
-  readonly cleanupError?: unknown;
-  readonly cause?: unknown;
+  declare readonly cleanupError?: unknown;
+  declare readonly cause?: unknown;
 
   constructor(
     code: BookkeepingRecoveryErrorCode,
@@ -96,13 +96,36 @@ export class BookkeepingRecoveryError extends Error {
     this.code = code;
     this.candidateOutcome = options.candidateOutcome;
     this.stage = options.stage;
-    if (options.cause !== undefined) {
-      this.cause = options.cause;
+    if ('cause' in options && options.cause !== undefined) {
+      Object.defineProperty(this, 'cause', {
+        value: options.cause,
+        writable: true,
+        configurable: true,
+        enumerable: false,
+      });
     }
-    if (options.cleanupError !== undefined) {
-      this.cleanupError = options.cleanupError;
+    if ('cleanupError' in options && options.cleanupError !== undefined) {
+      Object.defineProperty(this, 'cleanupError', {
+        value: options.cleanupError,
+        writable: true,
+        configurable: true,
+        enumerable: false,
+      });
     }
   }
+}
+
+export function toSafeRecoveryError(error: unknown, fallbackMessage: string): Error {
+  if (error instanceof Error) {
+    return error;
+  }
+  if (error !== null && typeof error === 'object' && 'message' in error && typeof (error as { message: unknown }).message === 'string') {
+    return new Error((error as { message: string }).message);
+  }
+  if (typeof error === 'string' && error.trim().length > 0) {
+    return new Error(error);
+  }
+  return new Error(fallbackMessage);
 }
 
 export interface BookkeepingCandidateIdentity {
@@ -147,26 +170,35 @@ export interface BookkeepingBusinessAccounting {
   reconciliations: AccountReconciliationRecord[];
 }
 
+export interface BookkeepingUnbalancedJournalEntry {
+  journalEntryId: string;
+  debitsCents: bigint;
+  creditsCents: bigint;
+}
+
 export interface BookkeepingAccountingSummary {
   journalEntryCount: number;
   journalLineCount: number;
   totalDebitsCents: bigint;
   totalCreditsCents: bigint;
+  unbalancedJournalEntries?: BookkeepingUnbalancedJournalEntry[];
   businesses: BookkeepingBusinessAccounting[];
 }
 
 const genuineSnapshots = new WeakMap<AuthenticatedBookkeepingBackup, BookkeepingDatasetSnapshot>();
 const stagedInstances = new WeakSet<AuthenticatedBookkeepingBackup>();
 const releasedInstances = new WeakSet<AuthenticatedBookkeepingBackup>();
+const genuineBrand = Symbol('genuine-authenticated-backup');
 
 export class AuthenticatedBookkeepingBackup {
   readonly manifest: BookkeepingBackupManifest;
 
-  constructor(manifest: BookkeepingBackupManifest, snapshot?: BookkeepingDatasetSnapshot) {
+  constructor(manifest: BookkeepingBackupManifest, _brand?: unknown) {
     this.manifest = manifest;
-    if (snapshot) {
-      genuineSnapshots.set(this, snapshot);
-    }
+    // Public constructor NEVER registers snapshots into genuineSnapshots.
+    // Even if a caller passes a snapshot to new AuthenticatedBookkeepingBackup(manifest, snapshot),
+    // it will be ignored because _brand !== genuineBrand.
+    // Only authenticateBookkeepingBackupForRecovery can register genuine snapshots.
   }
 
   release(): void {
@@ -249,23 +281,25 @@ export async function authenticateBookkeepingBackupForRecovery(
 ): Promise<AuthenticatedBookkeepingBackup> {
   try {
     const { snapshot, manifest } = await decryptBookkeepingBackupWithManifest(backup, passphrase, crypto);
-    return new AuthenticatedBookkeepingBackup(manifest, snapshot);
+    const instance = new AuthenticatedBookkeepingBackup(manifest, genuineBrand);
+    genuineSnapshots.set(instance, snapshot);
+    return instance;
   } catch (error) {
     if (error instanceof BookkeepingRecoveryError) {
       throw error;
     }
-    const message = error instanceof Error ? error.message : 'Backup authentication failed.';
-    throw new BookkeepingRecoveryError('backup-rejected', message, {
+    const safeError = toSafeRecoveryError(error, 'Backup authentication failed.');
+    throw new BookkeepingRecoveryError('backup-rejected', safeError.message, {
       candidateOutcome: 'not-requested',
       stage: 'authenticate',
-      cause: error,
+      cause: safeError,
     });
   }
 }
 
 /**
  * Reads accounting reports, general ledgers, trial balance, cash basis, and reconciliations
- * to verify complete financial parity.
+ * to verify complete financial parity. Also checks every individual journal entry.
  */
 export async function readBookkeepingAccountingSummary(
   database: BookkeepingSqlDatabase,
@@ -315,14 +349,35 @@ export async function readBookkeepingAccountingSummary(
       (SELECT COUNT(*) FROM journal_entries) AS entryCount,
       (SELECT COUNT(*) FROM journal_lines) AS lineCount`,
   );
-  const lines = await database.getAllAsync<{ debit_minor: string; credit_minor: string }>(
-    'SELECT debit_minor, credit_minor FROM journal_lines',
+  const lines = await database.getAllAsync<{ journal_entry_id: string; debit_minor: string; credit_minor: string }>(
+    'SELECT journal_entry_id, debit_minor, credit_minor FROM journal_lines',
   );
   let totalDebitsCents = 0n;
   let totalCreditsCents = 0n;
+  const entryDebits = new Map<string, bigint>();
+  const entryCredits = new Map<string, bigint>();
+
   for (const line of lines) {
-    totalDebitsCents += BigInt(line.debit_minor);
-    totalCreditsCents += BigInt(line.credit_minor);
+    const debit = BigInt(line.debit_minor);
+    const credit = BigInt(line.credit_minor);
+    totalDebitsCents += debit;
+    totalCreditsCents += credit;
+    entryDebits.set(line.journal_entry_id, (entryDebits.get(line.journal_entry_id) ?? 0n) + debit);
+    entryCredits.set(line.journal_entry_id, (entryCredits.get(line.journal_entry_id) ?? 0n) + credit);
+  }
+
+  const allEntries = await database.getAllAsync<{ id: string }>('SELECT id FROM journal_entries');
+  const unbalancedJournalEntries: BookkeepingUnbalancedJournalEntry[] = [];
+  for (const entry of allEntries) {
+    const debits = entryDebits.get(entry.id) ?? 0n;
+    const credits = entryCredits.get(entry.id) ?? 0n;
+    if (debits !== credits) {
+      unbalancedJournalEntries.push({
+        journalEntryId: entry.id,
+        debitsCents: debits,
+        creditsCents: credits,
+      });
+    }
   }
 
   return {
@@ -330,18 +385,27 @@ export async function readBookkeepingAccountingSummary(
     journalLineCount: Number(counts?.lineCount ?? 0),
     totalDebitsCents,
     totalCreditsCents,
+    unbalancedJournalEntries,
     businesses: businessSummaries,
   };
 }
 
 /**
- * Asserts that journal entries and reconciliation reports are fully balanced across the books.
+ * Asserts that journal entries and reconciliation reports are fully balanced across the books,
+ * including individual journal entry balancing.
  */
 export function assertBookkeepingAccountingBalanced(accounting: BookkeepingAccountingSummary): void {
   if (accounting.totalDebitsCents !== accounting.totalCreditsCents) {
     throw new BookkeepingDatasetError(
       'restore-verification-failed',
       `Journal total debits (${accounting.totalDebitsCents}) do not match total credits (${accounting.totalCreditsCents}).`,
+    );
+  }
+  if (accounting.unbalancedJournalEntries && accounting.unbalancedJournalEntries.length > 0) {
+    const first = accounting.unbalancedJournalEntries[0];
+    throw new BookkeepingDatasetError(
+      'restore-verification-failed',
+      `Journal entry ${first.journalEntryId} does not balance: debits (${first.debitsCents}) do not match credits (${first.creditsCents}).`,
     );
   }
   for (const business of accounting.businesses) {
@@ -429,10 +493,11 @@ export async function stageAuthenticatedBookkeepingRecovery(
   try {
     connection1 = await options.candidateStore.open(identity);
   } catch (openError) {
+    const safeOpenError = toSafeRecoveryError(openError, 'Failed to open candidate database for import.');
     const earlierError = new BookkeepingRecoveryError(
       'candidate-import-failed',
-      openError instanceof Error ? openError.message : 'Failed to open candidate database for import.',
-      { candidateOutcome: 'disposed', stage: 'import', cause: openError },
+      safeOpenError.message,
+      { candidateOutcome: 'disposed', stage: 'import', cause: safeOpenError },
     );
     try {
       await options.candidateStore.dispose(identity);
@@ -440,15 +505,55 @@ export async function stageAuthenticatedBookkeepingRecovery(
       throw new BookkeepingRecoveryError(
         'candidate-cleanup-failed',
         'Candidate disposal failed after open failure. The candidate database and key must not be activated.',
-        { candidateOutcome: 'cleanup-failed', stage: 'cleanup', cause: earlierError, cleanupError },
+        { candidateOutcome: 'cleanup-failed', stage: 'cleanup', cause: earlierError, cleanupError: toSafeRecoveryError(cleanupError, 'Candidate disposal failed.') },
       );
     }
     throw earlierError;
   }
 
-  const existingObjects = await connection1.database.getAllAsync<{ type: string; name: string }>(
-    "SELECT type, name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'",
-  );
+  let existingObjects: { type: string; name: string }[];
+  try {
+    existingObjects = await connection1.database.getAllAsync<{ type: string; name: string }>(
+      "SELECT type, name FROM sqlite_master WHERE name NOT LIKE 'sqlite_%'",
+    );
+  } catch (queryError) {
+    const safeQueryError = toSafeRecoveryError(queryError, 'Failed to query candidate database sqlite_master.');
+    let closeError: unknown = undefined;
+    try {
+      await connection1.close();
+    } catch (err) {
+      closeError = toSafeRecoveryError(err, 'Failed to close candidate connection after sqlite_master query failure.');
+    }
+    let disposeError: unknown = undefined;
+    try {
+      await options.candidateStore.dispose(identity);
+    } catch (err) {
+      disposeError = toSafeRecoveryError(err, 'Failed to dispose candidate database after sqlite_master query failure.');
+    }
+    if (closeError || disposeError) {
+      const earlierError = new BookkeepingRecoveryError(
+        'candidate-import-failed',
+        safeQueryError.message,
+        { candidateOutcome: 'cleanup-failed', stage: 'import', cause: safeQueryError },
+      );
+      throw new BookkeepingRecoveryError(
+        'candidate-cleanup-failed',
+        'Candidate cleanup failed after sqlite_master query failure. The candidate database and key must not be activated.',
+        {
+          candidateOutcome: 'cleanup-failed',
+          stage: 'cleanup',
+          cause: earlierError,
+          cleanupError: closeError ?? disposeError,
+        },
+      );
+    }
+    throw new BookkeepingRecoveryError(
+      'candidate-import-failed',
+      safeQueryError.message,
+      { candidateOutcome: 'disposed', stage: 'import', cause: safeQueryError },
+    );
+  }
+
   if (existingObjects.length > 0) {
     await connection1.close();
     throw new BookkeepingRecoveryError(
@@ -462,25 +567,39 @@ export async function stageAuthenticatedBookkeepingRecovery(
     await importBookkeepingDatasetIntoEmptyDatabase(connection1.database, snapshot);
     await connection1.close();
   } catch (importError) {
+    const safeImportError = toSafeRecoveryError(importError, 'Candidate database import failed.');
+    let closeError: unknown = undefined;
+    try {
+      await connection1.close();
+    } catch (err) {
+      closeError = toSafeRecoveryError(err, 'Failed to close candidate connection after import failure.');
+    }
+
     const isVerification =
       (importError as { code?: string })?.code === 'restore-verification-failed' ||
       ((importError as { cause?: { code?: string } })?.cause?.code === 'restore-verification-failed');
     const code: BookkeepingRecoveryErrorCode = isVerification
       ? 'candidate-verification-failed'
       : 'candidate-import-failed';
-    const rootCause = (importError as { cause?: unknown })?.cause ?? importError;
+    const rootCause = (importError as { cause?: unknown })?.cause ?? safeImportError;
     const earlierError = new BookkeepingRecoveryError(
       code,
-      importError instanceof Error ? importError.message : 'Candidate database import failed.',
+      safeImportError.message,
       {
         candidateOutcome: 'disposed',
         stage: 'import',
         cause: rootCause,
       },
     );
+
+    let disposeError: unknown = undefined;
     try {
       await options.candidateStore.dispose(identity);
-    } catch (cleanupError) {
+    } catch (err) {
+      disposeError = toSafeRecoveryError(err, 'Candidate disposal failed after import failure.');
+    }
+
+    if (closeError || disposeError) {
       throw new BookkeepingRecoveryError(
         'candidate-cleanup-failed',
         'Candidate disposal failed after import failure. The candidate database and key must not be activated.',
@@ -488,7 +607,7 @@ export async function stageAuthenticatedBookkeepingRecovery(
           candidateOutcome: 'cleanup-failed',
           stage: 'cleanup',
           cause: earlierError,
-          cleanupError,
+          cleanupError: closeError ?? disposeError,
         },
       );
     }
@@ -499,10 +618,11 @@ export async function stageAuthenticatedBookkeepingRecovery(
   try {
     connection2 = await options.candidateStore.open(identity);
   } catch (reopenError) {
+    const safeReopenError = toSafeRecoveryError(reopenError, 'Candidate database could not be reopened for verification.');
     const earlierError = new BookkeepingRecoveryError(
       'candidate-verification-failed',
-      reopenError instanceof Error ? reopenError.message : 'Candidate database could not be reopened for verification.',
-      { candidateOutcome: 'disposed', stage: 'reopen-candidate', cause: reopenError },
+      safeReopenError.message,
+      { candidateOutcome: 'disposed', stage: 'reopen-candidate', cause: safeReopenError },
     );
     try {
       await options.candidateStore.dispose(identity);
@@ -510,7 +630,7 @@ export async function stageAuthenticatedBookkeepingRecovery(
       throw new BookkeepingRecoveryError(
         'candidate-cleanup-failed',
         'Candidate disposal failed after reopen failure. The candidate database and key must not be activated.',
-        { candidateOutcome: 'cleanup-failed', stage: 'cleanup', cause: earlierError, cleanupError },
+        { candidateOutcome: 'cleanup-failed', stage: 'cleanup', cause: earlierError, cleanupError: toSafeRecoveryError(cleanupError, 'Candidate disposal failed.') },
       );
     }
     throw earlierError;
@@ -523,23 +643,32 @@ export async function stageAuthenticatedBookkeepingRecovery(
     assertBookkeepingAccountingBalanced(accounting);
     await connection2.close();
   } catch (verifyError) {
+    const safeVerifyError = toSafeRecoveryError(verifyError, 'Candidate verification failed.');
+    let closeError: unknown = undefined;
     try {
-      await connection2.close().catch(() => undefined);
-    } catch {
-      // ignore
+      await connection2.close();
+    } catch (err) {
+      closeError = toSafeRecoveryError(err, 'Failed to close candidate connection after verification failure.');
     }
+
     const earlierError = new BookkeepingRecoveryError(
       'candidate-verification-failed',
-      verifyError instanceof Error ? verifyError.message : 'Candidate verification failed.',
+      safeVerifyError.message,
       {
         candidateOutcome: 'disposed',
         stage: 'verification',
-        cause: verifyError,
+        cause: safeVerifyError,
       },
     );
+
+    let disposeError: unknown = undefined;
     try {
       await options.candidateStore.dispose(identity);
-    } catch (cleanupError) {
+    } catch (err) {
+      disposeError = toSafeRecoveryError(err, 'Candidate disposal failed after verification failure.');
+    }
+
+    if (closeError || disposeError) {
       throw new BookkeepingRecoveryError(
         'candidate-cleanup-failed',
         'Candidate disposal failed after verification failure. The candidate database and key must not be activated.',
@@ -547,7 +676,7 @@ export async function stageAuthenticatedBookkeepingRecovery(
           candidateOutcome: 'cleanup-failed',
           stage: 'cleanup',
           cause: earlierError,
-          cleanupError,
+          cleanupError: closeError ?? disposeError,
         },
       );
     }
@@ -646,18 +775,43 @@ export async function exportBookkeepingDatasetWithIsolatedMigration(
     await ensureBookkeepingSchema(copy.database);
     snapshot = await exportBookkeepingDataset(copy.database);
   } catch (error) {
+    const safeMigrationError = toSafeRecoveryError(error, 'Source migration failed on isolated copy.');
+    let disposeError: unknown = undefined;
     try {
       await copy.dispose();
-    } catch {
-      // ignore disposal failure during unwinding
+    } catch (cleanupError) {
+      disposeError = toSafeRecoveryError(cleanupError, 'Disposal of the isolated migration copy failed.');
     }
+
+    if (disposeError) {
+      const earlierError = new BookkeepingRecoveryError(
+        'source-migration-failed',
+        safeMigrationError.message,
+        {
+          candidateOutcome: 'cleanup-failed',
+          stage: 'migrate-source',
+          cause: safeMigrationError,
+        },
+      );
+      throw new BookkeepingRecoveryError(
+        'candidate-cleanup-failed',
+        'Disposal of the isolated migration copy failed after migration failure.',
+        {
+          candidateOutcome: 'cleanup-failed',
+          stage: 'cleanup',
+          cause: earlierError,
+          cleanupError: disposeError,
+        },
+      );
+    }
+
     throw new BookkeepingRecoveryError(
       'source-migration-failed',
-      error instanceof Error ? error.message : 'Source migration failed on isolated copy.',
+      safeMigrationError.message,
       {
         candidateOutcome: 'disposed',
         stage: 'migrate-source',
-        cause: error,
+        cause: safeMigrationError,
       },
     );
   }
@@ -671,7 +825,7 @@ export async function exportBookkeepingDatasetWithIsolatedMigration(
       {
         candidateOutcome: 'cleanup-failed',
         stage: 'cleanup',
-        cleanupError,
+        cleanupError: toSafeRecoveryError(cleanupError, 'Disposal of the isolated migration copy failed.'),
       },
     );
   }

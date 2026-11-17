@@ -504,6 +504,18 @@ describe('isolated recovery of a real encrypted backup', () => {
     );
     expect(scenario.store.provisionCalls).toBe(0);
 
+    // Runtime forgery attempt: passing a valid snapshot directly to the public constructor
+    // must not brand plaintext as genuine; only authenticateBookkeepingBackupForRecovery may register it.
+    const forgedWithSnapshot = new AuthenticatedBookkeepingBackup(
+      { schemaVersion: 13, tableCount: 27, totalRowCount: sourceSnapshot.tables.reduce((sum, table) => sum + table.rowCount, 0), tableRowCounts: {} },
+      sourceSnapshot,
+    );
+    expectRecoveryError(
+      await rejectionOf(stageAuthenticatedBookkeepingRecovery(forgedWithSnapshot, recoveryOptions(scenario.store))),
+      'lifecycle-violation', 'not-requested',
+    );
+    expect(scenario.store.provisionCalls).toBe(0);
+
     const authenticated = await authenticateBookkeepingBackupForRecovery(backupBytes, PASSPHRASE, crypto);
     expect(authenticated.manifest.totalRowCount).toBe(sourceSnapshot.tables.reduce((sum, table) => sum + table.rowCount, 0));
     const candidate = await stageAuthenticatedBookkeepingRecovery(authenticated, recoveryOptions(scenario.store));
@@ -624,10 +636,22 @@ describe('failure injection leaves the source, the backup and the active databas
       expect(error.stage, label).toBe('import');
       if (causeIsInjected) expect(error.cause.message, label).toBe('synthetic injected storage fault');
       else expect(error.cause.code, label).toBe('restore-verification-failed');
-      expect(scenario.store.events, label).toEqual(['provision', 'open', 'dispose']);
+      expect(scenario.store.events, label).toEqual(['provision', 'open', 'close', 'dispose']);
       expect(scenario.store.keystore.size, label).toBe(0);
       expectNothingChanged(scenario);
     }
+  }, CRYPTO_TEST_TIMEOUT_MS);
+
+  it('candidate provision: sqlite_master emptiness query failure closes connection and disposes candidate', async () => {
+    const scenario = newScenario({
+      databaseFaults: (openCall) => (openCall === 1 ? { failGetAll: /sqlite_master/ } : undefined),
+    });
+    const error = await rejectionOf(prepareBookkeepingRecoveryCandidate(backupBytes, PASSPHRASE, recoveryOptions(scenario.store)));
+    expectRecoveryError(error, 'candidate-import-failed', 'disposed');
+    expect(error.stage).toBe('import');
+    expect(scenario.store.events).toEqual(['provision', 'open', 'close', 'dispose']);
+    expect(scenario.store.keystore.size).toBe(0);
+    expectNothingChanged(scenario);
   }, CRYPTO_TEST_TIMEOUT_MS);
 
   it('verification: a candidate that cannot be reopened, or changed after it was closed, is disposed', async () => {
@@ -650,8 +674,22 @@ describe('failure injection leaves the source, the backup and the active databas
     expectRecoveryError(changedError, 'candidate-verification-failed', 'disposed');
     expect(changedError.stage).toBe('verification');
     expect(changedError.cause.code).toBe('restore-verification-failed');
-    expect(changed.store.events).toEqual(['provision', 'open', 'close', 'open', 'dispose']);
+    expect(changed.store.events).toEqual(['provision', 'open', 'close', 'open', 'close', 'dispose']);
     expectNothingChanged(changed);
+  }, CRYPTO_TEST_TIMEOUT_MS);
+
+  it('verification: connection close failure during verification is not swallowed and surfaces cleanup-failed', async () => {
+    const closeFailure = new Error('synthetic injected verification close failure');
+    const scenario = newScenario({
+      failCloseOnCall: 2,
+      failClose: closeFailure,
+    });
+    const error = await rejectionOf(prepareBookkeepingRecoveryCandidate(backupBytes, PASSPHRASE, recoveryOptions(scenario.store)));
+    expectRecoveryError(error, 'candidate-cleanup-failed', 'cleanup-failed');
+    expect(error.stage).toBe('cleanup');
+    expect(error.cleanupError).toBe(closeFailure);
+    expect(scenario.store.events).toEqual(['provision', 'open', 'close', 'open', 'close', 'dispose']);
+    expectNothingChanged(scenario);
   }, CRYPTO_TEST_TIMEOUT_MS);
 
   it('verification: an authentic backup whose journal or reconciliation totals do not balance is not eligible', async () => {
@@ -672,9 +710,30 @@ describe('failure injection leaves the source, the backup and the active databas
       const error = await rejectionOf(prepareBookkeepingRecoveryCandidate(unbalancedBackup, PASSPHRASE, recoveryOptions(scenario.store)));
       expectRecoveryError(error, 'candidate-verification-failed', 'disposed');
       expect(error.stage, label).toBe('verification');
-      expect(scenario.store.events, label).toEqual(['provision', 'open', 'close', 'open', 'dispose']);
+      expect(scenario.store.events, label).toEqual(['provision', 'open', 'close', 'open', 'close', 'dispose']);
       expectNothingChanged(scenario);
     }
+  }, CRYPTO_TEST_TIMEOUT_MS);
+
+  it('verification: rejects authentic backup with two offsetting unbalanced journal entries in the same business', async () => {
+    // In business Alpha, perturb two journal lines in different journal entries by offsetting amounts (+100 and -100).
+    // Aggregate debits and credits across the business still balance, but individual journal entries do not balance.
+    const unbalancedPath = copyOfFile(sourcePath, 'offsetting-unbalanced.db');
+    const raw = openFile(unbalancedPath);
+    raw.database.exec(`UPDATE journal_lines SET debit_minor = CAST(CAST(debit_minor AS INTEGER) + 100 AS TEXT) WHERE id = 'alpha-income-1-je:line:1';`);
+    raw.database.exec(`UPDATE journal_lines SET credit_minor = CAST(CAST(credit_minor AS INTEGER) + 100 AS TEXT) WHERE id = 'alpha-expense-1-replacement-je:line:1';`);
+    const unbalancedSnapshot = await exportBookkeepingDataset(raw);
+    raw.close();
+
+    const unbalancedBackup = await createBookkeepingBackup(unbalancedSnapshot, PASSPHRASE, crypto);
+    const scenario = newScenario();
+    const error = await rejectionOf(prepareBookkeepingRecoveryCandidate(unbalancedBackup, PASSPHRASE, recoveryOptions(scenario.store)));
+    expectRecoveryError(error, 'candidate-verification-failed', 'disposed');
+    expect(error.stage).toBe('verification');
+    expect(error.cause.code).toBe('restore-verification-failed');
+    expect(error.cause.message).toMatch(/journal entry .* does not balance/i);
+    expect(scenario.store.events).toEqual(['provision', 'open', 'close', 'open', 'close', 'dispose']);
+    expectNothingChanged(scenario);
   }, CRYPTO_TEST_TIMEOUT_MS);
 
   it('cleanup: a failed disposal is surfaced with both failures and the candidate is never returned', async () => {
@@ -753,7 +812,7 @@ describe('schema versions and legacy migration', () => {
     expect(provider.calls).toBe(1);
     expect(provider.disposed).toBe(1);
     expect(destinationState.length).toBe(1);
-    expect(tableOf(result.snapshot, 'transactions').rowCount).toBe(6);
+    expect(tableOf(result.snapshot, 'transactions').rowCount).toBe(7);
     expect(tableOf(result.snapshot, 'transaction_corrections').rowCount).toBe(1);
     // Tables introduced by migrations 9-13 exist and are empty, not invented.
     for (const name of ['transaction_splits', 'recurring_transaction_templates', 'accounting_period_events', 'bookkeeping_reminders', 'bookkeeping_preferences']) {
@@ -845,6 +904,27 @@ describe('schema versions and legacy migration', () => {
     expect(error.cleanupError).toBe(disposeFailure);
     expect(sha256File(legacyPath)).toBe(legacySha256);
   });
+
+  it('surfaces both migration error and cleanup error when copy disposal fails after migration failure', async () => {
+    const legacyPath = await createSeededFile(seedLegacyV8Books, 'legacy-v8-dual-fail.db');
+    const legacySha256 = sha256File(legacyPath);
+    const disposeFailure = new Error('synthetic injected copy disposal failure after migration error');
+    const provider = new HostIsolatedCopyProvider(legacyPath, {
+      faults: { failExec: /CREATE TABLE IF NOT EXISTS recurring_transaction_templates/ },
+      failDispose: disposeFailure,
+    });
+    const source = openFile(legacyPath);
+
+    const error = await rejectionOf(exportBookkeepingDatasetWithIsolatedMigration(source, provider));
+    source.close();
+    expectRecoveryError(error, 'candidate-cleanup-failed', 'cleanup-failed');
+    expect(error.stage).toBe('cleanup');
+    expect(error.cleanupError).toBe(disposeFailure);
+    expect(error.cause).toBeInstanceOf(BookkeepingRecoveryError);
+    expect(error.cause.code).toBe('source-migration-failed');
+    expect(error.cause.cause.message).toBe('synthetic injected storage fault');
+    expect(sha256File(legacyPath)).toBe(legacySha256);
+  });
 });
 
 describe('native integration boundary (static source check only; the native module is not executed on the host)', () => {
@@ -868,5 +948,22 @@ describe('native integration boundary (static source check only; the native modu
     for (const forbidden of ['expo-', 'react-native', 'SecureStore', 'keyHex', 'PRAGMA key']) {
       expect(pureSource, forbidden).not.toContain(forbidden);
     }
+  });
+
+  it('native store contract: requires internally issued identities, rejects path traversal and unowned identities, closes connections, deletes sidecars, surfaces failures', () => {
+    // Internally issued identities check
+    expect(nativeSource).toMatch(/assertOwnedIdentity/);
+    expect(nativeSource).toMatch(/issuedIdentities/);
+    // Path traversal / regex validation
+    expect(nativeSource).toMatch(/CANDIDATE_ID_PATTERN/);
+    expect(nativeSource).toContain('..');
+    // Sidecars deletion: DB + WAL + SHM + journal
+    expect(nativeSource).toContain('-wal');
+    expect(nativeSource).toContain('-shm');
+    expect(nativeSource).toContain('-journal');
+    // Connection closing before file deletion
+    expect(nativeSource).toMatch(/openLeases/);
+    // Does not swallow SecureStore or file errors on dispose
+    expect(nativeSource).not.toMatch(/deleteItemAsync.*\.catch\(\(\)\s*=>\s*undefined\)/);
   });
 });
