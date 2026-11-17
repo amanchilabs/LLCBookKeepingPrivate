@@ -1,0 +1,28 @@
+{
+  "at": "2026-11-17T03:27:07.709436+00:00",
+  "artifact_builder": "agy-m5-llc-secondary",
+  "original_authoring_run": "run-bcdf9179cdbb491c",
+  "correction_runs": {
+    "book-r2-run.json": "run-466c23f623444780",
+    "book-layout-run.json": "run-b807e87196474b01",
+    "book-hardening-run.json": "run-2f4f165917484e5e",
+    "book-final-correction-run.json": "run-ba8c3f6a7656417f",
+    "book-final-touchup-run.json": "run-89830e05a40145f0",
+    "book-responsive-run.json": "run-f794a70fc90e4ae8"
+  },
+  "actual_argv_observation": {
+    "pid": 37117,
+    "observed_active_executable": true,
+    "useG1Credits_false_in_actual_argv": true,
+    "sandbox_flag": true,
+    "json_output": true,
+    "permission_bypass_flag": false,
+    "argv_sha256": "b553c7d81f32e5be215c033f095dc25c34e03d474999715f99e4f2da764ec0b4"
+  },
+  "argv_observation_scope": "Observed during this pilot; process naturally completed. No prompts/credentials captured in this record. Existing adapter pins settings on every invocation.",
+  "independent_reviewer": "fresh read-only Codex /root/book_pilot_review",
+  "reviewed_source": "ca107a67c8368742911aeb6b0ab6bf099d443a47",
+  "native_implementation": false,
+  "billing": "Existing subscription profile only; useG1Credits false. No new API/credit mode. Usage/cost not additionally probed.",
+  "materialization": "Validated exact-base unique literal patches authored by AGY; coordinator copied literal package contents, no native UI authoring."
+}
