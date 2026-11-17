@@ -14,7 +14,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "be96beb952579cac2b5beeb94c2e353235617557",
+  "head": "9ce1559a63b1131608d04712efed6d54a2dedfc5",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -492,6 +492,12 @@
       "from": "agy-m5-llc-secondary",
       "head": "be96beb952579cac2b5beeb94c2e353235617557",
       "to": "agy-m5-llc-secondary"
+    },
+    {
+      "at": "2026-11-17T00:44:31.462446+00:00",
+      "basis": "Approved manifest requires safe integration only if possible, otherwise failclosed; native/device gate remains HOLD.",
+      "event": "conditional_native_integration_withheld_unsafe_default",
+      "story": "RECOVERY-003"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
@@ -1113,7 +1119,7 @@
         "stdout_sha256": "88ee8c477e8eb879a141f4879f9e1ad52bfadc22c687a1069210da8d3cacb28b"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete recovery parity, isolated lifecycle and failure injection. Build non-UI restore orchestration around new modules. Always authenticate+validate before requesting isolated fresh candidate. Candidate local key comes from destination provisioning, never source key. No active catalog/device DB mutation or production activation in this milestone; return verified candidate only through explicit lifecycle contract, dispose rejected candidates and leave active source unchanged. Add native factory/non-UI integration if possible using existing SQLCipher/storage lease APIs WITHOUT altering proof store or UI; do not invent unsafe default adapter. A checked candidate must have complete row/relationship/history parity and balanced existing journal/report/reconciliation totals before eligibility. Create deterministic multi-workspace synthetic fixtures via existing domain/store APIs covering every supported table including reversal/correction, capital, guaranteed payments, loans/reversals, recurring, splits, reconciliation events and closed/reopened periods. Restore an actual encrypted backup into an isolated fresh file-backed DB with different synthetic destination key identity; compare complete rows and existing cash/P&L, balance/trial/general ledger and reconciliation reports. Tests inject failures at decrypt, candidate provision, schema, row import, verification and cleanup; verify original files/rows not modified, rejected target not published, cleanup failure surfaced and no active switch. Exercise meaningful supported legacy schema migration using existing migrations only on isolated candidate; unsupported newer schemas fail closed and source bytes stay unchanged. If legacy payload migration is not implemented, reject explicitly and document rather than claiming support. Document host plain SQLite versus native SQLCipher/device limits and exact reproducible coordinator validation commands. No user accessible controls; no simulator/physical-device commands or modifications.",
-      "resume_context": "Resume the existing implementation at be96beb952579cac2b5beeb94c2e353235617557. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete.",
+      "resume_context": "Resume the existing implementation at be96beb952579cac2b5beeb94c2e353235617557. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. FINAL BOUNDED CORRECTION at0f010aa6; do notredo core, independentreview confirms prior purecoreissuesfixed. (1) REMOVE unsafe native defaultcandidate storage. Reviewer actualhostmock showed mutating issuedidentity deletesmainkeyalias and failedclose loseslease. Approvedmanifest says nativeintegration onlyIFSAFE, doNOTinventunsafe default. Replace NativeBookkeepingCandidateStore with explicitly unavailable FAIL-CLOSED implementation: provision/open/dispose reject fixed clear native-unavailable error; NO filesystem/Keychain/database access or deletion, no hiddenunsafeimplementation retained. Preserve exportednonUI APIshape and nativecrypto reuse; createNativeBookkeepingRecoveryCandidate may operate onlywith explicit injectedcandidateStore throughgenericverifiedcore; absentstore mustfailclosed, notclaimrealnative recovery. DocumentnativecandidateintegrationHOLD until separatelyverified storageownership/closure/devicework, no physicalcertification; this milestone certifieshostgenericrestoration only. Addhostmocktests for defaultunavailability andzero resourceeffects wherepossible inexistingtestfile; independentreviewwillprobeactualmodule in-memory. (2) Exactly2 testsfail/33: test691 expectsoneclose butactualretryclose appropriatelyruns; correctexpectedsequence includesbothcloseattempts, keepcleanup-failureassertion. Test724 addscredit todebitline violatingrowCHECK, so chooseactualNONZEROcreditline inanotherjournal SAMEbusiness tooffsetfirstdebitline; assertper-entryimbalance withglobal/business totalsstillbalanced, thenpublicrecoverymustreject. Do notrelaxchecks orskiptests. Preserve existing33testsandcoverage. (3) docs truthful nativegap, hostgenericrestore financialparity anderrors; no claiming nativeintegrationcomplete. Only5Story003files, nonewdeps/UI/accounting/nativecommands/agents/Git/tests/buildcommands. Coordinatorvalidates and independentreview follows.",
       "review": {
         "findings": [
           {
