@@ -1,0 +1,10 @@
+{
+  "patch_packet": "corrections-r2d.json",
+  "packet_sha256": "7e883502f9c59e69f2997f41338d8f9ad277953d303ea442d74a1b077088332c",
+  "base_package_sha256": "3ebd825d581a44f11bc80790b1358650bdf8067aad0d9aef32fd1884f8842672",
+  "result_package_sha256": "95cd5df270b1753744ed602f262b4e9dcda8a6eea63d0fd22a8ba0682c3a2267",
+  "patch_count": 11,
+  "document_count": 3,
+  "author": "agy-m5-llc-secondary",
+  "application": "Validated unique literal replacements only; no coordinator-authored UI code"
+}
