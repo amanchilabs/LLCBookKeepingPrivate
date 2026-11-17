@@ -1,0 +1,25 @@
+{
+  "revision": "r2d",
+  "source": "4dd0b1dca7fd72208fe4835bbd987400d1cfe6ae",
+  "approval": "NOT_APPROVED",
+  "tier": "Browser design prototype only; no native implementation proof",
+  "artifacts": {
+    "rendered-r2d/OB-02-real-validation-retained.png": "27b6c233e7a0e87269ecef8f7972cc4cef3df16e864a82350bec1aa94e0c1d91",
+    "rendered-r2d/OB-02-validation-error.png": "b8eed986ea02c0777293931fc78f580b10db11e330cac4605ccfa3d6eb3355c0",
+    "rendered-r2d/OB-02-state-picker-open.png": "07dcaa3c6707637c1aab39603ec4ee31b4ce64c247139a22ec42feeb9e5693a7",
+    "rendered-r2d/OB-02-classification-picker-open.png": "283d63c0da6d6850ee81ce070fe21732bd0f851e5d7a17d8ef08107078eaf394",
+    "rendered-r2d/OB-03-default.png": "43b21429e71c1f02a84470877a6331785ddbe5a815058018d855c0c395439d49",
+    "rendered-r2d/OB-03-validation-error.png": "f71c8f28ec28f04c9cd0978a1aa8e1fb236a8cd3cadb0bc18f8f1f38bca3d75c",
+    "rendered-r2d/OB-02-completed.png": "af06291942d92013bf9b5fa8671eba4da9717eac5b81597ca18a1d6241dbbc18",
+    "rendered-r2d/OB-02-formation-picker-open.png": "13326fd016a464ea415fa52ef31059cc60b432bf46385372b4d5e3db61073dd7",
+    "rendered-r2d/OB-03-completed.png": "65569fc91447435ee17b301ebb2b3f920de99bd16519c41956a8ea8e7a52fab4",
+    "rendered-r2d/OB-03-two-workspaces-complete.png": "57af38847954f52baffbad4e249c98f6ee2c997dcc153b64deb42551b02ad030",
+    "rendered-r2d/OB-01-default.png": "c988222fff3812e0a013393792de936a671c3bf81b6e64eaa85c2fe066a62209",
+    "rendered-r2d/OB-02-selected.png": "af06291942d92013bf9b5fa8671eba4da9717eac5b81597ca18a1d6241dbbc18",
+    "rendered-r2d/OB-02-books-picker-open.png": "60daf7e20457b8d3edb06e3e1823d7bf95bf8db3309343cfb6d8a8648de09284",
+    "rendered-r2d/OB-02-default.png": "66ebdcf676b76e86ebc749bda59e797f0ca4265f1507ce355acd9b220a0cf2c9",
+    "rendered-r2d/OB-03-selected.png": "12e3e1eeeecc0a812d6c9f2370e96eec0236df166bd8e119b033b6aaf5c2082f",
+    "render-evidence-r2d.json": "7ab2c376c98bd347313c5a4e36561213ee3744c55f68fbb001005c0c37594995",
+    "interactions-r2d.json": "b54a9377b811853827a26c29eb5a7a33471a66bb1d2c45d79240dd3bbf3e3154"
+  }
+}
