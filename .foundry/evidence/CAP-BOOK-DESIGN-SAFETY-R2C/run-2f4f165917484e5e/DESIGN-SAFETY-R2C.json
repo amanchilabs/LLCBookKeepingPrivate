@@ -1,0 +1,58 @@
+{
+  "branch": "feature/reference-design-pilot-20261116",
+  "capability": "CAP-BOOK-DESIGN-SAFETY-R2C",
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2c.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} for p in x['patches'])"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
+    "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
+  },
+  "id": "DESIGN-SAFETY-R2C",
+  "profile": "agy-m5-llc-secondary",
+  "provider_result": {
+    "exit_code": 0,
+    "provider_usage": {
+      "credit_overages": false,
+      "model": "gemini-3.8-flash-high",
+      "provider": "agy",
+      "usage": {
+        "cache_read_tokens": 4303619,
+        "input_tokens": 255423,
+        "output_tokens": 110667,
+        "thinking_tokens": 72921,
+        "total_tokens": 366090
+      }
+    },
+    "stderr_sha256": "b2483b8b68a121ffabd5f04c1e0d7972120d2b2fda8aef8800f1564949843029",
+    "stdout_sha256": "6d1133a3ff7ff7515bf406e991eabee8ce9c525e88e35c46911c10dd09956117"
+  },
+  "review": null,
+  "run": "run-2f4f165917484e5e",
+  "source": "08359bf5d7794d0c6443cbfb5cc97ea327fcb02d",
+  "status": "VALIDATED",
+  "timestamp": "2026-11-17T02:46:55.820717+00:00",
+  "visual_contracts": [],
+  "visual_verification": null
+}

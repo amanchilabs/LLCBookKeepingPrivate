@@ -9,10 +9,10 @@
     "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
     "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
   },
-  "head": "c36df878cf790fcc056cc9b86c7fdc8fee18b8a2",
+  "head": "08359bf5d7794d0c6443cbfb5cc97ea327fcb02d",
   "history": [],
   "id": "run-2f4f165917484e5e",
-  "next": 0,
+  "next": 1,
   "owner": "f7b8f9f975334b90be3163286280852e",
   "phase": "READY",
   "plan": {
@@ -99,6 +99,14 @@
     "timeout_seconds": 1000
   },
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
+  "provider_availability": {
+    "builder": {
+      "at": "2026-11-17T02:46:55.680875+00:00",
+      "exit_code": 0,
+      "profile": "agy-m5-llc-secondary",
+      "status": "AVAILABLE"
+    }
+  },
   "review_profile": {
     "allow_paid_fallback": false,
     "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
@@ -139,17 +147,58 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "READY",
+  "status": "COMPLETE",
   "stories": [
     {
+      "checks": [
+        {
+          "argv": [
+            "python3",
+            "-c",
+            "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2c.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} for p in x['patches'])"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
       "depends_on": [],
+      "evidence": ".foundry/evidence/CAP-BOOK-DESIGN-SAFETY-R2C/run-2f4f165917484e5e/DESIGN-SAFETY-R2C.json",
       "files": [
         "docs/design/pilot-20261116/corrections-r2c.json"
       ],
       "id": "DESIGN-SAFETY-R2C",
+      "provider_result": {
+        "exit_code": 0,
+        "provider_usage": {
+          "credit_overages": false,
+          "model": "gemini-3.8-flash-high",
+          "provider": "agy",
+          "usage": {
+            "cache_read_tokens": 4303619,
+            "input_tokens": 255423,
+            "output_tokens": 110667,
+            "thinking_tokens": 72921,
+            "total_tokens": 366090
+          }
+        },
+        "stderr_sha256": "b2483b8b68a121ffabd5f04c1e0d7972120d2b2fda8aef8800f1564949843029",
+        "stdout_sha256": "6d1133a3ff7ff7515bf406e991eabee8ce9c525e88e35c46911c10dd09956117"
+      },
       "purpose": "OWNER-AUTHORIZED SMALL DESIGN PROTOTYPE PATCH ONLY. No nativeUI/schema/appimplementation. WriteONLY docs/design/pilot-20261116/corrections-r2c.json JSON {\"base_package_sha256\":\"f50ef0782260ff09c36b340f15b451dffa7bc0b67617efe362d5f77abaa55983\",\"patches\":[{\"file\":\"index.html\",\"old\":\"unique exact literal\",\"new\":\"replacement\"}]}. Read relevant prototype/index.html and prototype/*.md only. Coordinator appliesliterals to packagefiles; filevaluesindex.html/RATIONALE.md/COVERAGE.md/DECISIONS.md. No commands/Git/tests/agents. Smallfocusedfixes (doNOTrewritewholepackage): (1) renderSummary currently inserts user-suppliedworkspace w.name into innerHTML: useDOMtextContent forbusinessname/code; markupmustnotbeinterpreted. (2) OB02andOB03Skipcurrentlygotoaftervalidationbypass; preservevisibleSkip,but blockincompletesetupwithoutcreatingworkspace. Useexisting submitvalidationandexplicitinlineexplanationwhere needed, preserveenteredvalues; documentexactSkipsemanticsasPENDINGownerC since referenceSkipdoesnotauthorize silentlysavinginvalidsetup. Do notalterexistingnativebehavior. (3) Calendar daycellsinteractiveDIVnotkeyboard; makeactualbutton(orrole/tabindex+EnterSpace) preservingCSSappearance. Add basicEscapecloseandfocusrestorationforpickers; forward Tab fromtriggerreachableactualselectablecontrols. Do notclaimfullaccessibilitycertification. (4) Correctdocumentationfalseclaims: decisionrecommendationsnotownerdecisions, CPA/privacy/securitywordingPENDINGexplicitC, classmetadata futurepersistenceB/C (noschema), no tax/legalcertification, existingdatevalidationnoorderingNOTnewbusinessrule, step5v4/referencedotscountunresolvednot'harmonizedapproved'. COVERAGEnativeapphaswelcome route? Inspectactualapps/mobile/src/screens/BusinessSetupScreen.tsx/onboarding-flowifneededread-only tocorrectclaim; no inventednativefunctionselectState. Existingbrowser17checks useactualcontrols. Updateoldcoordinates/geometryclaimsifnecessarycitecomparisonmeasurementnotfalsecertification. Nativecurrentstorage/recoveryunchanged, all64receiptsunchanged. PatchesmustmatcholduniqueONCE; max~12smallpatches, preferparagraph/linecorrectionsnotfullMDreprint. ReturnnaturallyafterwritingJSON. FINAL ACTUAL-RENDER FIXES R2b: memberlistframecorrect17,285,338,160 BUT rowsstill48CSSdueflex/minheight/padding sofourthrowclipped; requirefour40pxrowsALLnamesfullyvisible within160, correctminheight/flex/boxsizing/padding, permitlistinternal scrollONLY>4. OB01heromeasuredy228.5versusreference242; movehero+introdown~13.5px preservingcardsy378. OB02formframecorrect14,201,346,292 BUTdateinputsactualy361h38vsreference373h40; classactual~427? label410/input427vsref427/445. Fixinnerfieldspacing/explicitanchors: nameinput236h40, statedrop305h40, dateinputs373h40 BOTH, classinput445h40; labels220/289/357/427. User wants Bookkeeping Start Date label actualfieldmeaningpreserved, compactfontifneeded. Backgroundwavecurrentlyflatpale#eef7f2, targetreferencepalesageregreenapprox#cef0d2 fadingwhite; welcomeonlymidwave, setupscreenswhiteupperbackground(bottomwaveonly). ActualreferenceOB03 lastmemberElenaRuizmustnotclip. Preserveall17workingbrowserchecks. Theseareboundedcorrectionsoftheexisting3screenpilot, notnewdesignscope. Keepoutputsmall enough15minlimit.",
       "review_required": false,
-      "status": "READY",
+      "source": "08359bf5d7794d0c6443cbfb5cc97ea327fcb02d",
+      "status": "DONE",
       "validation": [
         [
           "python3",
@@ -163,6 +212,7 @@
         ]
       ],
       "validation_resources": [],
+      "visual_contracts": [],
       "visual_screens": []
     }
   ],
