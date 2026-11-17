@@ -25,9 +25,19 @@
         "npm",
         "test"
       ],
-      "exit_code": 1,
-      "stderr_sha256": "8bb1c44d405a1dca8b30da8fbf3a44b63148c55f6f10556534dd482abc4962d5",
-      "stdout_sha256": "1be6c1a58b5f6d04ca7c9e1193d740eabb3be5a5f1e673d588e4fa04becf12d6"
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "685845abf0d5ad7f6e161bdfb4f0fdf487d4a0bc286f8069af6fdc58c18dc25f"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ],
   "governance": {
@@ -48,50 +58,37 @@
       "model": "gemini-3.8-flash-high",
       "provider": "agy",
       "usage": {
-        "cache_read_tokens": 9084418,
-        "input_tokens": 285657,
-        "output_tokens": 82079,
-        "thinking_tokens": 53466,
-        "total_tokens": 367736
+        "cache_read_tokens": 7219690,
+        "input_tokens": 246334,
+        "output_tokens": 60135,
+        "thinking_tokens": 47591,
+        "total_tokens": 306469
       }
     },
-    "stderr_sha256": "636325f4a7a518fed9844dcf650903a0ae5867fb4ff33dda3c6789acfa06acd9",
-    "stdout_sha256": "88ee8c477e8eb879a141f4879f9e1ad52bfadc22c687a1069210da8d3cacb28b"
+    "stderr_sha256": "980f7eaa7499b07cf2d0b9b6ca4b75ea96f7be6209ae4c7048292ac6bfa105d3",
+    "stdout_sha256": "20cc0385d028882c9e248fdf853d56df54a52b85ec7017fc08c012b399b061ae"
   },
   "review": {
-    "findings": [
-      {
-        "issue": "Native provision stores and returns same mutable identity; modifying keyIdentity alters ownership map and permits deleting activekeyalias.",
-        "severity": "HIGH"
-      },
-      {
-        "issue": "Native close drops/marksreleased lease before actualclose success; underlying lease also marksreleased before rawclose succeeds, allowing false cleanupsuccess.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "Test691 must expect retryclose; offsettingjournalfixture724 violates one-sided row constraint instead of reaching recoveryAPI.",
-        "severity": "MEDIUM"
-      }
-    ],
+    "coverage": "All27 populatedtables, exactdatasets, histories, financialreports, per-entrybalance includingoffsettingcorruption, isolation/failurecleanup andschema8 isolatedmigration. Allpriorreviewfindingsresolved.",
+    "findings": [],
     "implementation_ownership": false,
-    "prior_findings": "Purecore authforgery/querycleanup/importclose/perentrybalance/migrationcleanup corrected in source. Native unavailable failclosed permitted by manifest conditional safe integration.",
+    "limits": "PASS only approvedhostscope. Nativecandidate storageintegration explicitlyHOLD/incomplete; defaultunavailablefailclosed. NativeSQLCipher/device/realdata/production/UI notcertified.",
+    "provider": "codex-context",
+    "read_only": true,
     "reviewer": "/root/recovery003_review",
-    "source": "0f010aa6fa77ffd7cc466b3366e7bcb74d693290",
+    "source": "664a4983e0c5e2f25aed26d7b5fd37918d07024e",
     "tests": {
-      "controller_typecheck": "PASS",
-      "independent_host_mock_native_probe": "Actual native module transpiled in memory with stubs, no native operations: mutating issued identity allowed active key alias deletion; failed close lost lease and dispose falsely succeeded.",
-      "parent_restore": {
-        "failed": 2,
-        "passed": 31,
-        "total": 33
-      }
+      "host_mock_native_module": "All3 storemethods anddefaultfactory reject; zeroresourceimports; explicitstore/cryptoforwarding+nativecryptoreuseverified. Actualmodule transpiledinmemory, no nativeoperations.",
+      "node": "24.22.2",
+      "restore_passed": 33,
+      "typecheck": "PASS"
     },
-    "verdict": "FAIL"
+    "verdict": "PASS"
   },
   "run": "run-c87cbdc3a56d458b",
-  "source": "0f010aa6fa77ffd7cc466b3366e7bcb74d693290",
-  "status": "FAILED_REVIEW",
-  "timestamp": "2026-11-17T00:44:26.982714+00:00",
+  "source": "664a4983e0c5e2f25aed26d7b5fd37918d07024e",
+  "status": "VALIDATED",
+  "timestamp": "2026-11-17T00:55:19.177540+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
