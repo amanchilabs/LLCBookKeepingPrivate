@@ -1,0 +1,77 @@
+{
+  "OB-01": {
+    "original": {
+      "path": "docs/design/proposed/screenshots/Private LLC Bookkeeping Onboarding.png",
+      "sha256": "5ac131a8f76b0f3c4be5207cc3313f520cbfbfda613111994ee9f90861dc6eca"
+    },
+    "original_size": [
+      1024,
+      1536
+    ],
+    "crop": [
+      140,
+      36,
+      744,
+      1464
+    ],
+    "css_viewport": [
+      372,
+      732
+    ],
+    "device_scale_factor": 2,
+    "crop_sha256": "2adfc409d6f598f9a4581856a544ba327d8673d3443ed177d83ee2ac002ef43f"
+  },
+  "OB-02": {
+    "original": {
+      "path": "docs/design/proposed/screenshots/LLC Setup Onboarding Screen.png",
+      "sha256": "a04c4cbe12bfdef882d09812d0ff7d93fa415806f3e87062a43e96f9f241c235"
+    },
+    "original_size": [
+      1024,
+      1536
+    ],
+    "crop": [
+      140,
+      36,
+      744,
+      1464
+    ],
+    "css_viewport": [
+      372,
+      732
+    ],
+    "device_scale_factor": 2,
+    "crop_sha256": "d17bf1aa0ecbed0ba596a814f6768b6fc259dc3f9b8e4c37d219cb731dba7e4d"
+  },
+  "OB-03": {
+    "original": {
+      "path": "docs/design/proposed/screenshots/LLC Members and Ownership Setup.png",
+      "sha256": "009f67fdbcf2f3c61477e59d1ece29a8f7d00d48311f5f5de8f51c617b25ea57"
+    },
+    "original_size": [
+      1024,
+      1536
+    ],
+    "crop": [
+      140,
+      36,
+      744,
+      1464
+    ],
+    "css_viewport": [
+      372,
+      732
+    ],
+    "device_scale_factor": 2,
+    "crop_sha256": "b2511311543fd650e43f2a0db8313cc1ccd9c4586252a5347123d864c72d0afb"
+  },
+  "welcome_art": {
+    "original_crop": [
+      402,
+      171,
+      220,
+      200
+    ],
+    "sha256": "ac2c55bc3afeb67215f70d9aad26135abfa21844e0a405499eea8dedb7f2ef8f"
+  }
+}
