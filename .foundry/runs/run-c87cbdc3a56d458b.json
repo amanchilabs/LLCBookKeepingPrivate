@@ -13,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "b6d083c613b80584806a891690e489b08fa8fc40",
+  "head": "933e35f84eb712e8d7fced0799125bca79cfb726",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -392,6 +392,53 @@
       "event": "resume_partial_story_after_preferred_capacity",
       "partial_source": "9419544d80a5a5f14a0f0ad4fe5d008a787af9df",
       "story": "RECOVERY-003"
+    },
+    {
+      "at": "2026-11-17T00:28:59.343801+00:00",
+      "event": "independent_context_review_result",
+      "findings": [
+        {
+          "issue": "Native dispose suppresses key deletion failure and omits SQLite sidecars; import failure disposes without closing connection. May falsely report disposed with live resources.",
+          "severity": "HIGH"
+        },
+        {
+          "issue": "Native open/dispose accept arbitrary identities without issuance/ownership check, weakening isolation; cannot permit access/deletion of active database/key.",
+          "severity": "HIGH"
+        },
+        {
+          "issue": "Public AuthenticatedBookkeepingBackup constructor(snapshot) inserts plaintext snapshot into genuineSnapshots and bypasses auth; existing forged test omits snapshot.",
+          "severity": "MEDIUM"
+        },
+        {
+          "issue": "sqlite_master emptiness query afteropen outside protectedcleanup leaks connection/candidate on rejection.",
+          "severity": "MEDIUM"
+        },
+        {
+          "issue": "Isolated migration catch suppresses dispose error and falsely reports disposed; preserve both failures.",
+          "severity": "MEDIUM"
+        },
+        {
+          "issue": "Aggregate journal/business balances can hide two offsetting unbalanced entries; verify each journal.",
+          "severity": "MEDIUM"
+        },
+        {
+          "issue": "Tests653,675 must expect close beforedispose; legacyfixture756 must expect7transactions independentlyconfirmed.",
+          "severity": "MEDIUM"
+        }
+      ],
+      "implementation_ownership": false,
+      "reviewer": "/root/recovery003_review",
+      "source": "b6d083c613b80584806a891690e489b08fa8fc40",
+      "tests": {
+        "controller_typecheck": "PASS",
+        "independent_method": "Source review; known failing test run not duplicated.",
+        "parent_focused_restore": {
+          "failed": 3,
+          "passed": 25,
+          "total": 28
+        }
+      },
+      "verdict": "FAIL"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
@@ -1014,9 +1061,54 @@
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete recovery parity, isolated lifecycle and failure injection. Build non-UI restore orchestration around new modules. Always authenticate+validate before requesting isolated fresh candidate. Candidate local key comes from destination provisioning, never source key. No active catalog/device DB mutation or production activation in this milestone; return verified candidate only through explicit lifecycle contract, dispose rejected candidates and leave active source unchanged. Add native factory/non-UI integration if possible using existing SQLCipher/storage lease APIs WITHOUT altering proof store or UI; do not invent unsafe default adapter. A checked candidate must have complete row/relationship/history parity and balanced existing journal/report/reconciliation totals before eligibility. Create deterministic multi-workspace synthetic fixtures via existing domain/store APIs covering every supported table including reversal/correction, capital, guaranteed payments, loans/reversals, recurring, splits, reconciliation events and closed/reopened periods. Restore an actual encrypted backup into an isolated fresh file-backed DB with different synthetic destination key identity; compare complete rows and existing cash/P&L, balance/trial/general ledger and reconciliation reports. Tests inject failures at decrypt, candidate provision, schema, row import, verification and cleanup; verify original files/rows not modified, rejected target not published, cleanup failure surfaced and no active switch. Exercise meaningful supported legacy schema migration using existing migrations only on isolated candidate; unsupported newer schemas fail closed and source bytes stay unchanged. If legacy payload migration is not implemented, reject explicitly and document rather than claiming support. Document host plain SQLite versus native SQLCipher/device limits and exact reproducible coordinator validation commands. No user accessible controls; no simulator/physical-device commands or modifications.",
       "resume_context": "Resume the existing implementation at 283a7061778ca554a30af800ae5f111caff35901. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. Claude produced packages/backup/test/bookkeeping-recovery-fixture.mjs (797lines) at9419544 beforefivehourlimit,reset8:50pm. Preserve and use existing fixture; do not regenerate fromscratch. Story001and002already independentlyPASS; reuse them. Complete ONLY missing Story003modules/tests/docs. Must authenticate+validate backup before candidateprovision, isolatefresh target fromsource/catalog; compare exactdataset and actual accounting/report/reconciliation integrity before eligibility (notmerely successfuldecrypt). Safelydispose rejectedcandidate and surfacecleanupfailures without losing originalerror. Complete synthetic file-backed restoretestwithdifferentdestinationkeyidentity (labelplainSQLitehostnotSQLCipher); all27supportedtablecoverage/history and financialreports parity. Meaningful isolatedcandidate legacy schema migration usingexistingmigrations, unsupportedpayloadversions explicitlyreject. Native nonUI adapter only ifsafeexistingstoragecontracts; never invent unsafeactivecatalogswitch or editUI. Testfailurepaths genuinelythroughpublicAPI, assertactive/sourceunchanged. Use5originalStory003files only. No commands/tests/Git/agents/dependencies/native operations; coordinatorvalidates. Preserveallpartialwork; no providerprobeorrepeateddiscovery.",
+      "review": {
+        "findings": [
+          {
+            "issue": "Native dispose suppresses key deletion failure and omits SQLite sidecars; import failure disposes without closing connection. May falsely report disposed with live resources.",
+            "severity": "HIGH"
+          },
+          {
+            "issue": "Native open/dispose accept arbitrary identities without issuance/ownership check, weakening isolation; cannot permit access/deletion of active database/key.",
+            "severity": "HIGH"
+          },
+          {
+            "issue": "Public AuthenticatedBookkeepingBackup constructor(snapshot) inserts plaintext snapshot into genuineSnapshots and bypasses auth; existing forged test omits snapshot.",
+            "severity": "MEDIUM"
+          },
+          {
+            "issue": "sqlite_master emptiness query afteropen outside protectedcleanup leaks connection/candidate on rejection.",
+            "severity": "MEDIUM"
+          },
+          {
+            "issue": "Isolated migration catch suppresses dispose error and falsely reports disposed; preserve both failures.",
+            "severity": "MEDIUM"
+          },
+          {
+            "issue": "Aggregate journal/business balances can hide two offsetting unbalanced entries; verify each journal.",
+            "severity": "MEDIUM"
+          },
+          {
+            "issue": "Tests653,675 must expect close beforedispose; legacyfixture756 must expect7transactions independentlyconfirmed.",
+            "severity": "MEDIUM"
+          }
+        ],
+        "implementation_ownership": false,
+        "reviewer": "/root/recovery003_review",
+        "source": "b6d083c613b80584806a891690e489b08fa8fc40",
+        "tests": {
+          "controller_typecheck": "PASS",
+          "independent_method": "Source review; known failing test run not duplicated.",
+          "parent_focused_restore": {
+            "failed": 3,
+            "passed": 25,
+            "total": 28
+          }
+        },
+        "verdict": "FAIL"
+      },
       "review_required": true,
       "source": "b6d083c613b80584806a891690e489b08fa8fc40",
-      "status": "FAILED_VALIDATION",
+      "status": "FAILED_REVIEW",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",

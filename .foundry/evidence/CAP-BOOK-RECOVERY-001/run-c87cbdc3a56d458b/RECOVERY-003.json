@@ -58,11 +58,55 @@
     "stderr_sha256": "c23c2a8ba80046cc5862be1f2555f3057e8189c4554d13f1586d3347f3de8607",
     "stdout_sha256": "d0eaeb43b57cfbeb250f6a3a8406b8088f6792e6766c859f2cf535e3ec023dbd"
   },
-  "review": null,
+  "review": {
+    "findings": [
+      {
+        "issue": "Native dispose suppresses key deletion failure and omits SQLite sidecars; import failure disposes without closing connection. May falsely report disposed with live resources.",
+        "severity": "HIGH"
+      },
+      {
+        "issue": "Native open/dispose accept arbitrary identities without issuance/ownership check, weakening isolation; cannot permit access/deletion of active database/key.",
+        "severity": "HIGH"
+      },
+      {
+        "issue": "Public AuthenticatedBookkeepingBackup constructor(snapshot) inserts plaintext snapshot into genuineSnapshots and bypasses auth; existing forged test omits snapshot.",
+        "severity": "MEDIUM"
+      },
+      {
+        "issue": "sqlite_master emptiness query afteropen outside protectedcleanup leaks connection/candidate on rejection.",
+        "severity": "MEDIUM"
+      },
+      {
+        "issue": "Isolated migration catch suppresses dispose error and falsely reports disposed; preserve both failures.",
+        "severity": "MEDIUM"
+      },
+      {
+        "issue": "Aggregate journal/business balances can hide two offsetting unbalanced entries; verify each journal.",
+        "severity": "MEDIUM"
+      },
+      {
+        "issue": "Tests653,675 must expect close beforedispose; legacyfixture756 must expect7transactions independentlyconfirmed.",
+        "severity": "MEDIUM"
+      }
+    ],
+    "implementation_ownership": false,
+    "reviewer": "/root/recovery003_review",
+    "source": "b6d083c613b80584806a891690e489b08fa8fc40",
+    "tests": {
+      "controller_typecheck": "PASS",
+      "independent_method": "Source review; known failing test run not duplicated.",
+      "parent_focused_restore": {
+        "failed": 3,
+        "passed": 25,
+        "total": 28
+      }
+    },
+    "verdict": "FAIL"
+  },
   "run": "run-c87cbdc3a56d458b",
   "source": "b6d083c613b80584806a891690e489b08fa8fc40",
-  "status": "FAILED_VALIDATION",
-  "timestamp": "2026-11-17T00:27:05.437446+00:00",
+  "status": "FAILED_REVIEW",
+  "timestamp": "2026-11-17T00:28:59.353165+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
