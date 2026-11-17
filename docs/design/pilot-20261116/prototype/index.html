@@ -1068,7 +1068,7 @@
     </svg>
 
     <!-- ==================== SCREEN 1: OB-01 WELCOME ==================== -->
-    <div id="screen-ob01" class="screen active" data-screen="OB-01">
+    <div id="screen-ob-01" class="screen active" data-screen="OB-01">
       <a class="ob01-skip" onclick="window.pilot.skipWelcome()">Skip</a>
 
       <div data-region="logo" class="ob01-logo-container">
@@ -1159,7 +1159,7 @@
     </div>
 
     <!-- ==================== SCREEN 2: OB-02 YOUR LLC ==================== -->
-    <div id="screen-ob02" class="screen" data-screen="OB-02">
+    <div id="screen-ob-02" class="screen" data-screen="OB-02">
       <div class="screen-nav">
         <button class="nav-back" onclick="window.pilot.goto('OB-01', 'default')">‹</button>
         <span class="nav-step-title">2 of 5</span>
@@ -1204,7 +1204,7 @@
             Formation state <span class="form-label-required">*</span>
           </label>
           <button id="state-select-trigger" class="form-select-trigger" onclick="window.pilot.openModal('state')">
-            <span id="state-display">Delaware</span>
+            <span id="state-display">Select state</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
         </div>
@@ -1215,7 +1215,7 @@
               Formation date <span class="form-label-required">*</span>
             </label>
             <button id="formation-date-trigger" class="form-select-trigger" onclick="window.pilot.openModal('formation-date')">
-              <span id="formation-date-display">Jan 15, 2024</span>
+              <span id="formation-date-display">Select date</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             </button>
           </div>
@@ -1224,7 +1224,7 @@
               Bookkeeping start date <span class="form-label-required">*</span>
             </label>
             <button id="books-date-trigger" class="form-select-trigger" onclick="window.pilot.openModal('books-date')">
-              <span id="books-date-display">Jan 1, 2025</span>
+              <span id="books-date-display">Select date</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             </button>
           </div>
@@ -1236,7 +1236,7 @@
             <span title="Self-reported classification for CPA reports" style="cursor:pointer; color:var(--navy-muted); font-size:12px;">ⓘ</span>
           </label>
           <button id="tax-classification-trigger" class="form-select-trigger" onclick="window.pilot.openModal('tax-classification')">
-            <span id="tax-classification-display">Unknown / not yet determined</span>
+            <span id="tax-classification-display">Not selected</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
         </div>
@@ -1257,7 +1257,7 @@
     </div>
 
     <!-- ==================== SCREEN 3: OB-03 MEMBERS & OWNERSHIP ==================== -->
-    <div id="screen-ob03" class="screen" data-screen="OB-03">
+    <div id="screen-ob-03" class="screen" data-screen="OB-03">
       <div class="screen-nav">
         <button class="nav-back" onclick="window.pilot.goto('OB-02', 'default')">‹</button>
         <span class="nav-step-title">3 of 5</span>
@@ -1383,6 +1383,11 @@
         </div>
       </div>
 
+      <div id="workspaces-section" style="margin: 0 16px 10px;">
+        <div style="font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">Saved Workspaces (<span id="workspaces-count">0</span>)</div>
+        <div id="workspaces-list" style="display: flex; flex-direction: column; gap: 6px; max-height: 120px; overflow-y: auto;"></div>
+      </div>
+
       <div class="workspace-actions">
         <button class="btn btn-emerald" style="height:42px; font-size:14px;" onclick="window.pilot.addAnotherLLC()">
           + Add Another LLC (Test Isolation)
@@ -1459,13 +1464,13 @@
           <button class="modal-item" onclick="window.pilot.selectTaxClassification('unknown', 'Unknown / not yet determined')">
             <span>Unknown / not yet determined</span>
           </button>
-          <button class="modal-item" onclick="window.pilot.selectTaxClassification('disregarded_entity', 'Disregarded entity (single member)')">
+          <button class="modal-item" onclick="window.pilot.selectTaxClassification('disregarded_entity', 'Disregarded entity')">
             <span>Disregarded entity</span>
           </button>
-          <button class="modal-item" onclick="window.pilot.selectTaxClassification('partnership', 'Partnership (multiple members)')">
+          <button class="modal-item" onclick="window.pilot.selectTaxClassification('partnership', 'Partnership')">
             <span>Partnership</span>
           </button>
-          <button class="modal-item" onclick="window.pilot.selectTaxClassification('corporation', 'Corporation (C-Corp or S-Corp election)')">
+          <button class="modal-item" onclick="window.pilot.selectTaxClassification('corporation', 'Corporation')">
             <span>Corporation</span>
           </button>
         </div>
@@ -1545,24 +1550,60 @@
       return 'id-' + Math.random().toString(36).substring(2, 9);
     }
 
+    function formatReadableDate(isoStr) {
+      if (!isoStr || !/^\d{4}-\d{2}-\d{2}$/.test(isoStr)) return '';
+      const [y, m, d] = isoStr.split('-').map(Number);
+      if (m < 1 || m > 12) return '';
+      return `${MONTH_SHORT[m - 1]} ${d}, ${y}`;
+    }
+
+    function isValidIsoDate(str) {
+      if (!str || typeof str !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(str)) return false;
+      const [y, m, d] = str.split('-').map(Number);
+      if (m < 1 || m > 12 || d < 1 || d > 31) return false;
+      const dt = new Date(y, m - 1, d);
+      return dt.getFullYear() === y && dt.getMonth() === m - 1 && dt.getDate() === d;
+    }
+
+    function parseBasisPoints(percentStr) {
+      const str = String(percentStr ?? '').trim();
+      if (!str) return null;
+      const match = str.match(/^(\d+)(?:\.(\d+))?$/);
+      if (!match) return null;
+      const intPart = parseInt(match[1], 10);
+      const decPart = match[2] || '';
+      if (decPart.length > 2) return null;
+      const bp = intPart * 100 + (decPart.length === 1 ? parseInt(decPart, 10) * 10 : (decPart.length === 2 ? parseInt(decPart, 10) : 0));
+      if (bp < 0 || bp > 10000) return null;
+      return bp;
+    }
+
+    function calculateTotalBasisPoints(members) {
+      if (!members || !members.length) return null;
+      let totalBp = 0;
+      for (const m of members) {
+        const bp = parseBasisPoints(m.percent);
+        if (bp === null) return null;
+        totalBp += bp;
+      }
+      return totalBp;
+    }
+
     function createDefaultDraft() {
       return {
         id: makeId(),
         name: '',
-        formationState: 'DE',
-        formationStateDisplay: 'Delaware',
-        formationDate: '2024-01-15',
-        bookkeepingStartDate: '2025-01-01',
-        taxClassification: 'unknown',
-        taxClassificationDisplay: 'Unknown / not yet determined',
+        formationState: '',
+        formationStateDisplay: '',
+        formationDate: '',
+        bookkeepingStartDate: '',
+        taxClassification: 'not_selected',
+        taxClassificationDisplay: 'Not selected',
         memberMode: 'multi',
         members: [
-          { id: makeId(), name: 'John Taylor', percent: '40.0' },
-          { id: makeId(), name: 'Sarah Lee', percent: '20.0' },
-          { id: makeId(), name: 'Michael Davis', percent: '20.0' },
-          { id: makeId(), name: 'Elena Ruiz', percent: '20.0' }
+          { id: makeId(), name: '', percent: '' }
         ],
-        ownershipConfirmed: true
+        ownershipConfirmed: false
       };
     }
 
@@ -1584,34 +1625,74 @@
     // Prototype Controller
     window.pilot = {
       goto(screenId, statePreset) {
-        state.currentScreen = screenId;
-        state.currentState = statePreset || 'default';
+        let normScreen = (screenId || 'OB-01').toUpperCase().replace(/^SCREEN-/, '');
+        if (normScreen === 'OB01') normScreen = 'OB-01';
+        if (normScreen === 'OB02') normScreen = 'OB-02';
+        if (normScreen === 'OB03') normScreen = 'OB-03';
+        if (normScreen === 'SUMMARY' || normScreen === 'COMPLETE') normScreen = 'COMPLETE';
+
+        let preset = statePreset || 'default';
+
+        if (normScreen === 'SELECTED') {
+          normScreen = 'OB-02';
+          preset = 'selected';
+        } else if (normScreen === 'COMPLETED') {
+          normScreen = 'COMPLETE';
+          preset = 'completed';
+        } else if (normScreen === 'ERROR') {
+          normScreen = 'OB-02';
+          preset = 'validation-error';
+        }
+
+        state.currentScreen = normScreen;
+        state.currentState = preset;
         state.openPicker = null;
         state.errors = {};
 
-        // Apply state presets
-        if (screenId === 'OB-02') {
-          if (statePreset === 'populated') {
+        // Apply state presets (separate demo presets from actual empty flow)
+        if (normScreen === 'OB-02') {
+          if (preset === 'populated' || preset === 'selected') {
             state.draft.name = 'Northstar Ventures LLC';
             state.draft.formationState = 'DE';
             state.draft.formationStateDisplay = 'Delaware';
             state.draft.formationDate = '2024-01-15';
             state.draft.bookkeepingStartDate = '2025-01-01';
-          } else if (statePreset === 'validation-error') {
+            state.draft.taxClassification = 'unknown';
+            state.draft.taxClassificationDisplay = 'Unknown / not yet determined';
+          } else if (preset === 'validation-error' || preset === 'error') {
             state.draft.name = '';
             state.errors = { name: 'Legal business name is required.' };
           }
-        } else if (screenId === 'OB-03') {
-          if (statePreset === 'template-applied') {
+        } else if (normScreen === 'OB-03') {
+          if (preset === 'template-applied' || preset === 'selected') {
             this.applyTemplate();
-          } else if (statePreset === 'single') {
+          } else if (preset === 'single') {
             this.setMemberMode('single');
-          } else if (statePreset === 'blocked') {
-            state.draft.members[0].percent = '30.0';
+          } else if (preset === 'blocked' || preset === 'error') {
+            state.draft.members = [
+              { id: makeId(), name: 'John Taylor', percent: '30.0' },
+              { id: makeId(), name: 'Sarah Lee', percent: '20.0' }
+            ];
             state.draft.ownershipConfirmed = false;
-            state.errors = { members: 'Member ownership interests must total 100% (currently 90.0%).' };
-          } else if (statePreset === 'confirmed') {
+            state.errors = { members: 'Member ownership interests must total 100% (currently 50.00%).' };
+          } else if (preset === 'confirmed') {
+            if (!state.draft.members || !state.draft.members.length || !state.draft.members[0].name) {
+              this.applyTemplate();
+            }
             state.draft.ownershipConfirmed = true;
+          }
+        } else if (normScreen === 'COMPLETE') {
+          if (preset === 'completed' || preset === 'summary') {
+            if (!state.draft.name) {
+              state.draft.name = 'Northstar Ventures LLC';
+              state.draft.formationState = 'DE';
+              state.draft.formationStateDisplay = 'Delaware';
+              state.draft.formationDate = '2024-01-15';
+              state.draft.bookkeepingStartDate = '2025-01-01';
+              state.draft.taxClassification = 'unknown';
+              state.draft.taxClassificationDisplay = 'Unknown / not yet determined';
+            }
+            this.saveCurrentWorkspace();
           }
         }
 
@@ -1619,10 +1700,10 @@
         this.closeModals();
 
         // Open modal if preset specifies
-        if (statePreset === 'state-picker-open') this.openModal('state');
-        if (statePreset === 'formation-picker-open') this.openModal('formation-date');
-        if (statePreset === 'books-picker-open') this.openModal('books-date');
-        if (statePreset === 'classification-picker-open') this.openModal('tax-classification');
+        if (preset === 'state-picker-open') this.openModal('state');
+        if (preset === 'formation-picker-open') this.openModal('formation-date');
+        if (preset === 'books-picker-open') this.openModal('books-date');
+        if (preset === 'classification-picker-open') this.openModal('tax-classification');
       },
 
       getState() {
@@ -1661,14 +1742,46 @@
           this.renderErrors();
           return;
         }
-        this.goto('OB-03', 'multi');
+        const stateCode = (state.draft.formationState || '').toUpperCase().trim();
+        const validState = US_STATES.find(s => s.code === stateCode);
+        if (!stateCode || !validState) {
+          state.errors.name = 'Please select a supported U.S. formation state or territory.';
+          this.renderErrors();
+          return;
+        }
+        state.draft.formationState = validState.code;
+        state.draft.formationStateDisplay = validState.name;
+
+        if (!isValidIsoDate(state.draft.formationDate)) {
+          state.errors.name = 'Please select a valid formation date (YYYY-MM-DD).';
+          this.renderErrors();
+          return;
+        }
+        if (!isValidIsoDate(state.draft.bookkeepingStartDate)) {
+          state.errors.name = 'Please select a valid bookkeeping start date (YYYY-MM-DD).';
+          this.renderErrors();
+          return;
+        }
+        // Domain rule: no formation/start date ordering check
+        this.goto('OB-03', state.draft.memberMode || 'default');
       },
 
       submitOB03() {
         state.errors = {};
-        const total = this.calculateTotalPercent();
-        if (Math.abs(total - 100) > 0.001) {
-          state.errors.members = `Total ownership is ${total.toFixed(1)}%. It must equal exactly 100.0%.`;
+        const emptyMember = state.draft.members.some(m => !(m.name || '').trim());
+        if (emptyMember) {
+          state.errors.members = 'All members must have a legal name.';
+          this.renderErrors();
+          return;
+        }
+        const bp = calculateTotalBasisPoints(state.draft.members);
+        if (bp === null) {
+          state.errors.members = 'Member ownership interests must be valid percentages between 0 and 100 with at most 2 decimal places.';
+          this.renderErrors();
+          return;
+        }
+        if (bp !== 10000) {
+          state.errors.members = `Total ownership is ${(bp / 100).toFixed(2)}%. It must equal exactly 100.0%.`;
           this.renderErrors();
           return;
         }
@@ -1677,14 +1790,13 @@
           this.renderErrors();
           return;
         }
-        // Save workspace to in-memory list
         this.saveCurrentWorkspace();
         this.goto('COMPLETE', 'summary');
       },
 
       saveCurrentWorkspace() {
-        const existingIdx = state.workspaces.findIndex(w => w.id === state.draft.id);
         const copy = JSON.parse(JSON.stringify(state.draft));
+        const existingIdx = state.workspaces.findIndex(w => w.id === copy.id);
         if (existingIdx >= 0) {
           state.workspaces[existingIdx] = copy;
         } else {
@@ -1693,11 +1805,20 @@
         state.activeWorkspaceId = copy.id;
       },
 
+      switchWorkspace(id) {
+        this.saveCurrentWorkspace();
+        const target = state.workspaces.find(w => w.id === id);
+        if (target) {
+          state.draft = JSON.parse(JSON.stringify(target));
+          state.activeWorkspaceId = target.id;
+          this.render();
+        }
+      },
+
       addAnotherLLC() {
         this.saveCurrentWorkspace();
         state.draft = createDefaultDraft();
-        state.draft.name = '';
-        state.draft.id = makeId();
+        state.activeWorkspaceId = state.draft.id;
         this.goto('OB-02', 'default');
       },
 
@@ -1705,10 +1826,15 @@
         state.draft.memberMode = mode;
         state.draft.ownershipConfirmed = false;
         if (mode === 'single') {
-          const firstName = state.draft.members[0]?.name || 'Primary Member';
+          const firstName = state.draft.members[0]?.name || '';
           state.draft.members = [{ id: makeId(), name: firstName, percent: '100.0' }];
         } else {
-          this.applyTemplate();
+          if (state.draft.members.length <= 1) {
+            state.draft.members = [
+              { id: makeId(), name: state.draft.members[0]?.name || '', percent: '' },
+              { id: makeId(), name: '', percent: '' }
+            ];
+          }
         }
         this.render();
       },
@@ -1721,12 +1847,12 @@
           { id: makeId(), name: 'Michael Davis', percent: '20.0' },
           { id: makeId(), name: 'Elena Ruiz', percent: '20.0' }
         ];
-        state.draft.ownershipConfirmed = true;
+        state.draft.ownershipConfirmed = false;
         this.render();
       },
 
       addMember() {
-        state.draft.members.push({ id: makeId(), name: '', percent: '0.0' });
+        state.draft.members.push({ id: makeId(), name: '', percent: '' });
         state.draft.ownershipConfirmed = false;
         this.render();
       },
@@ -1754,11 +1880,12 @@
       },
 
       calculateTotalPercent() {
-        return state.draft.members.reduce((acc, m) => acc + (parseFloat(m.percent) || 0), 0);
+        const bp = calculateTotalBasisPoints(state.draft.members);
+        return bp === null ? 0 : bp / 100;
       },
 
       renderMemberCalculations() {
-        const total = this.calculateTotalPercent();
+        const bp = calculateTotalBasisPoints(state.draft.members);
         const ind = document.getElementById('total-ownership-indicator');
         const icon = document.getElementById('total-icon');
         const text = document.getElementById('total-text');
@@ -1767,21 +1894,27 @@
 
         if (chk) chk.checked = !!state.draft.ownershipConfirmed;
 
-        const isValid = Math.abs(total - 100) < 0.001;
+        const allNamesEntered = state.draft.members.length > 0 && state.draft.members.every(m => (m.name || '').trim().length > 0);
+        const isValid = bp === 10000;
+
         if (isValid) {
           ind.className = 'total-ownership-row';
           icon.textContent = '✓';
           icon.style.color = 'var(--emerald-start)';
-          text.textContent = 'Total ownership: 100.0 %';
+          text.textContent = 'Total ownership: 100.00 %';
         } else {
           ind.className = 'total-ownership-row invalid';
           icon.textContent = '⚠';
           icon.style.color = 'var(--error)';
-          text.textContent = `Total ownership: ${total.toFixed(1)} % (Must equal 100.0%)`;
+          if (bp === null) {
+            text.textContent = 'Total ownership: Invalid format (use 0-100, max 2 decimals)';
+          } else {
+            text.textContent = `Total ownership: ${(bp / 100).toFixed(2)} % (Must equal 100.0%)`;
+          }
         }
 
         if (cta) {
-          cta.disabled = !isValid || !state.draft.ownershipConfirmed;
+          cta.disabled = !isValid || !state.draft.ownershipConfirmed || !allNamesEntered;
         }
       },
 
@@ -1935,13 +2068,14 @@
           const row = document.createElement('div');
           row.className = 'member-row';
 
-          const initials = (member.name || '').trim().split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'M' + (idx + 1);
+          const nameTrimmed = (member.name || '').trim();
+          const initials = nameTrimmed.split(/\s+/).filter(Boolean).map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'M' + (idx + 1);
 
           row.innerHTML = `
-            <div class="member-avatar">${initials}</div>
-            <input class="member-name-input" type="text" value="${member.name}" placeholder="Member name" oninput="window.pilot.updateMember(${idx}, 'name', this.value)" />
+            <div class="member-avatar"></div>
+            <input class="member-name-input" type="text" placeholder="Member name" />
             <div class="member-percent-container">
-              <input class="member-percent-input" type="text" value="${member.percent}" oninput="window.pilot.updateMember(${idx}, 'percent', this.value)" />
+              <input class="member-percent-input" type="text" />
               <span style="font-size:12.5px; color:var(--navy-muted);">%</span>
             </div>
             <button class="member-menu-btn" onclick="this.nextElementSibling.classList.toggle('active')">⋮</button>
@@ -1949,6 +2083,13 @@
               <button class="member-menu-item" onclick="window.pilot.removeMember(${idx})">Remove Member</button>
             </div>
           `;
+          row.querySelector('.member-avatar').textContent = initials;
+          const nameInp = row.querySelector('.member-name-input');
+          nameInp.value = member.name || '';
+          nameInp.oninput = (e) => window.pilot.updateMember(idx, 'name', e.target.value);
+          const pctInp = row.querySelector('.member-percent-input');
+          pctInp.value = member.percent != null ? String(member.percent) : '';
+          pctInp.oninput = (e) => window.pilot.updateMember(idx, 'percent', e.target.value);
           container.appendChild(row);
         });
 
@@ -1974,11 +2115,30 @@
 
       renderSummary() {
         document.getElementById('summary-name').textContent = state.draft.name || '(Unspecified LLC)';
-        document.getElementById('summary-state').textContent = `${state.draft.formationStateDisplay} (${state.draft.formationState})`;
-        document.getElementById('summary-formation-date').textContent = state.draft.formationDate;
-        document.getElementById('summary-books-date').textContent = state.draft.bookkeepingStartDate;
-        document.getElementById('summary-classification').textContent = state.draft.taxClassificationDisplay;
-        document.getElementById('summary-members-count').textContent = `${state.draft.members.length} member${state.draft.members.length > 1 ? 's' : ''} (${this.calculateTotalPercent().toFixed(1)}%)`;
+        const st = state.draft.formationStateDisplay ? `${state.draft.formationStateDisplay} (${state.draft.formationState})` : 'Not entered';
+        document.getElementById('summary-state').textContent = st;
+        document.getElementById('summary-formation-date').textContent = state.draft.formationDate || 'Not entered';
+        document.getElementById('summary-books-date').textContent = state.draft.bookkeepingStartDate || 'Not entered';
+        document.getElementById('summary-classification').textContent = state.draft.taxClassificationDisplay || 'Not selected';
+        const bp = calculateTotalBasisPoints(state.draft.members);
+        const pctStr = bp === null ? '0.0%' : (bp / 100).toFixed(1) + '%';
+        document.getElementById('summary-members-count').textContent = `${state.draft.members.length} member${state.draft.members.length > 1 ? 's' : ''} (${pctStr})`;
+
+        const wsContainer = document.getElementById('workspaces-list');
+        const wsCount = document.getElementById('workspaces-count');
+        if (wsCount) wsCount.textContent = state.workspaces.length;
+        if (wsContainer) {
+          wsContainer.innerHTML = '';
+          state.workspaces.forEach(w => {
+            const btn = document.createElement('button');
+            const isActive = w.id === state.activeWorkspaceId;
+            btn.className = 'btn' + (isActive ? ' active' : '');
+            btn.style.cssText = 'text-align:left; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; font-size:13px; cursor:pointer;';
+            btn.innerHTML = `<span>${w.name || '(Unnamed LLC)'}</span><span style="font-size:11px; opacity:0.8;">${w.formationState || 'Unset'} ${isActive ? '• Active' : ''}</span>`;
+            btn.onclick = () => window.pilot.switchWorkspace(w.id);
+            wsContainer.appendChild(btn);
+          });
+        }
       },
 
       updateBadge() {
@@ -1991,7 +2151,11 @@
       render() {
         // Switch visible screen container
         document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-        const activeScreenEl = document.getElementById('screen-' + state.currentScreen.toLowerCase());
+        let sKey = state.currentScreen.toLowerCase().replace(/^screen-/, '');
+        if (sKey === 'ob01') sKey = 'ob-01';
+        if (sKey === 'ob02') sKey = 'ob-02';
+        if (sKey === 'ob03') sKey = 'ob-03';
+        const activeScreenEl = document.getElementById('screen-' + sKey) || document.getElementById('screen-' + sKey.replace('-', '')) || document.getElementById('screen-' + state.currentScreen.toLowerCase()) || document.getElementById(state.currentScreen);
         if (activeScreenEl) activeScreenEl.classList.add('active');
 
         // Update Review toolbar buttons
@@ -2001,11 +2165,17 @@
           else btn.classList.remove('active');
         });
 
-        // Update OB-02 values
+        // Initialize actual visible fields from state
         const nameInput = document.getElementById('llc-name-input');
         if (nameInput) nameInput.value = state.draft.name || '';
         const stateDisp = document.getElementById('state-display');
-        if (stateDisp) stateDisp.textContent = state.draft.formationStateDisplay || 'Delaware';
+        if (stateDisp) stateDisp.textContent = state.draft.formationStateDisplay || 'Select state';
+        const formDateDisp = document.getElementById('formation-date-display');
+        if (formDateDisp) formDateDisp.textContent = formatReadableDate(state.draft.formationDate) || 'Select date';
+        const booksDateDisp = document.getElementById('books-date-display');
+        if (booksDateDisp) booksDateDisp.textContent = formatReadableDate(state.draft.bookkeepingStartDate) || 'Select date';
+        const classDisp = document.getElementById('tax-classification-display');
+        if (classDisp) classDisp.textContent = state.draft.taxClassificationDisplay || 'Not selected';
 
         // Update OB-03
         this.renderMembers();
@@ -2021,18 +2191,30 @@
 
       init() {
         const params = new URLSearchParams(window.location.search);
-        const screenParam = params.get('screen');
-        const stateParam = params.get('state');
+        let screenParam = params.get('screen');
+        let stateParam = params.get('state');
         const captureParam = params.get('capture');
 
         if (captureParam === '1') {
           document.body.classList.add('capture-mode');
         }
 
+        // Support query aliases as BRIEF
+        if (screenParam === 'selected') {
+          screenParam = 'OB-02';
+          stateParam = stateParam || 'selected';
+        } else if (screenParam === 'completed') {
+          screenParam = 'COMPLETE';
+          stateParam = stateParam || 'completed';
+        } else if (screenParam === 'error') {
+          screenParam = 'OB-02';
+          stateParam = stateParam || 'validation-error';
+        }
+
         if (screenParam) {
           this.goto(screenParam, stateParam || 'default');
         } else {
-          this.goto('OB-01', 'default');
+          this.goto('OB-01', stateParam || 'default');
         }
       }
     };
