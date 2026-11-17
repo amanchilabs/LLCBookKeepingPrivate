@@ -1,0 +1,81 @@
+{
+  "tier": "Browser design prototype; synthetic only",
+  "timestamp": "2026-11-17T02:23:30.706Z",
+  "results": [
+    {
+      "name": "Initial visible welcome and blank synthetic draft",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Empty form blocks Continue",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "State picker exposes readable California and stores CA",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Name retained when dates missing",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Formation calendar day selection",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Books calendar supports earlier date than formation",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Classification selector neutral explicit choice",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Earlier books date accepted without invented order rule",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Template never confirms ownership or infers classification",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Editing clears explicit confirmation",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Strict invalid percentages disable progression",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Blank names block valid total; values retained",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Quoted name safe; explicit confirmation completes first workspace",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Second LLC starts empty distinct identity",
+      "pass": true,
+      "actual": true
+    },
+    {
+      "name": "Saved first workspace untouched after second draft edit",
+      "pass": true,
+      "actual": true
+    }
+  ]
+}

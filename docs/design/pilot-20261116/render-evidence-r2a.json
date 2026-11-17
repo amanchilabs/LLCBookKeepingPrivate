@@ -1,0 +1,3519 @@
+{
+  "viewport": {
+    "width": 372,
+    "height": 732,
+    "deviceScaleFactor": 2
+  },
+  "screens": {
+    "OB-01": {
+      "default": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-01&state=default&capture=1",
+        "state": {
+          "currentScreen": "OB-01",
+          "currentState": "default",
+          "draft": {
+            "id": "id-xkrp8sa",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-om3chxl",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": null
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 68,
+            "width": 372,
+            "height": 98,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 166,
+            "width": 372,
+            "height": 185.5,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 371.5,
+            "width": 372,
+            "height": 174,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 545.5,
+            "width": 372,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Get Started\n→",
+            "value": ""
+          }
+        ]
+      }
+    },
+    "OB-02": {
+      "default": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-02&state=default&capture=1",
+        "state": {
+          "currentScreen": "OB-02",
+          "currentState": "default",
+          "draft": {
+            "id": "id-7rebdyv",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-dc1t089",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": null
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 74,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 14,
+            "y": 184,
+            "width": 344,
+            "height": 322,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 518,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "llc-name-input",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "state-select-trigger",
+            "type": "submit",
+            "text": "Select state",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "formation-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "books-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "tax-classification-trigger",
+            "type": "submit",
+            "text": "Not selected",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          }
+        ]
+      },
+      "selected": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-02&state=selected&capture=1",
+        "state": {
+          "currentScreen": "OB-02",
+          "currentState": "selected",
+          "draft": {
+            "id": "id-4a7q1u5",
+            "name": "Northstar Ventures LLC",
+            "formationState": "DE",
+            "formationStateDisplay": "Delaware",
+            "formationDate": "2024-01-15",
+            "bookkeepingStartDate": "2025-01-01",
+            "taxClassification": "unknown",
+            "taxClassificationDisplay": "Unknown / not yet determined",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-vo79c6b",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": null
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 74,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 14,
+            "y": 184,
+            "width": 344,
+            "height": 322,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 518,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "llc-name-input",
+            "type": "text",
+            "text": "",
+            "value": "Northstar Ventures LLC"
+          },
+          {
+            "tag": "BUTTON",
+            "id": "state-select-trigger",
+            "type": "submit",
+            "text": "Delaware",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "formation-date-trigger",
+            "type": "submit",
+            "text": "Jan 15, 2024",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "books-date-trigger",
+            "type": "submit",
+            "text": "Jan 1, 2025",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "tax-classification-trigger",
+            "type": "submit",
+            "text": "Unknown / not yet determined",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          }
+        ]
+      },
+      "state-picker-open": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-02&state=state-picker-open&capture=1",
+        "state": {
+          "currentScreen": "OB-02",
+          "currentState": "state-picker-open",
+          "draft": {
+            "id": "id-wsh2ch9",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-eynjhe0",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": "state"
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 74,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 14,
+            "y": 184,
+            "width": 344,
+            "height": 322,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 518,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "llc-name-input",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "state-select-trigger",
+            "type": "submit",
+            "text": "Select state",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "formation-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "books-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "tax-classification-trigger",
+            "type": "submit",
+            "text": "Not selected",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "✕",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "state-search-input",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Alabama\nAL",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Alaska\nAK",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Arizona\nAZ",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Arkansas\nAR",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "California\nCA",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Colorado\nCO",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Connecticut\nCT",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Delaware\nDE",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Florida\nFL",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Georgia\nGA",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Hawaii\nHI",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Idaho\nID",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Illinois\nIL",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Indiana\nIN",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Iowa\nIA",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Kansas\nKS",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Kentucky\nKY",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Louisiana\nLA",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Maine\nME",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Maryland\nMD",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Massachusetts\nMA",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Michigan\nMI",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Minnesota\nMN",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Mississippi\nMS",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Missouri\nMO",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Montana\nMT",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Nebraska\nNE",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Nevada\nNV",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "New Hampshire\nNH",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "New Jersey\nNJ",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "New Mexico\nNM",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "New York\nNY",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "North Carolina\nNC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "North Dakota\nND",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Ohio\nOH",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Oklahoma\nOK",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Oregon\nOR",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Pennsylvania\nPA",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Rhode Island\nRI",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "South Carolina\nSC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "South Dakota\nSD",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Tennessee\nTN",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Texas\nTX",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Utah\nUT",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Vermont\nVT",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Virginia\nVA",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Washington\nWA",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "West Virginia\nWV",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Wisconsin\nWI",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Wyoming\nWY",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "District of Columbia\nDC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "American Samoa\nAS",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Guam\nGU",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Northern Mariana Islands\nMP",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Puerto Rico\nPR",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "U.S. Virgin Islands\nVI",
+            "value": ""
+          }
+        ]
+      },
+      "formation-picker-open": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-02&state=formation-picker-open&capture=1",
+        "state": {
+          "currentScreen": "OB-02",
+          "currentState": "formation-picker-open",
+          "draft": {
+            "id": "id-bnf3whu",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-2cdryv5",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": "formation-date"
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 74,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 14,
+            "y": 184,
+            "width": 344,
+            "height": 322,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 518,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "llc-name-input",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "state-select-trigger",
+            "type": "submit",
+            "text": "Select state",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "formation-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "books-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "tax-classification-trigger",
+            "type": "submit",
+            "text": "Not selected",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "✕",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹ Prev",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Next ›",
+            "value": ""
+          }
+        ]
+      },
+      "books-picker-open": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-02&state=books-picker-open&capture=1",
+        "state": {
+          "currentScreen": "OB-02",
+          "currentState": "books-picker-open",
+          "draft": {
+            "id": "id-mpv5mab",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-3su2za2",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": "books-date"
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 74,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 14,
+            "y": 184,
+            "width": 344,
+            "height": 322,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 518,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "llc-name-input",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "state-select-trigger",
+            "type": "submit",
+            "text": "Select state",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "formation-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "books-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "tax-classification-trigger",
+            "type": "submit",
+            "text": "Not selected",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "✕",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹ Prev",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Next ›",
+            "value": ""
+          }
+        ]
+      },
+      "classification-picker-open": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-02&state=classification-picker-open&capture=1",
+        "state": {
+          "currentScreen": "OB-02",
+          "currentState": "classification-picker-open",
+          "draft": {
+            "id": "id-mfd3b5e",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-43g22qy",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": "tax-classification"
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 74,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 14,
+            "y": 184,
+            "width": 344,
+            "height": 322,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 518,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "llc-name-input",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "state-select-trigger",
+            "type": "submit",
+            "text": "Select state",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "formation-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "books-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "tax-classification-trigger",
+            "type": "submit",
+            "text": "Not selected",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "✕",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Not selected",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Unknown / not yet determined",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Disregarded entity",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Partnership",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Corporation",
+            "value": ""
+          }
+        ]
+      },
+      "validation-error": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-02&state=validation-error&capture=1",
+        "state": {
+          "currentScreen": "OB-02",
+          "currentState": "validation-error",
+          "draft": {
+            "id": "id-2642lww",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-ii0uld5",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {
+            "name": "Legal business name is required."
+          },
+          "openPicker": null
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 74,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 14,
+            "y": 184,
+            "width": 344,
+            "height": 322,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 518,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "llc-name-input",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "state-select-trigger",
+            "type": "submit",
+            "text": "Select state",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "formation-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "books-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "tax-classification-trigger",
+            "type": "submit",
+            "text": "Not selected",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          }
+        ]
+      },
+      "completed": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-02&state=completed&capture=1",
+        "state": {
+          "currentScreen": "OB-02",
+          "currentState": "completed",
+          "draft": {
+            "id": "id-fs50acl",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-24pd949",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": null
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 74,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 14,
+            "y": 184,
+            "width": 344,
+            "height": 322,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 518,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "llc-name-input",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "state-select-trigger",
+            "type": "submit",
+            "text": "Select state",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "formation-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "books-date-trigger",
+            "type": "submit",
+            "text": "Select date",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "tax-classification-trigger",
+            "type": "submit",
+            "text": "Not selected",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          }
+        ]
+      }
+    },
+    "OB-03": {
+      "default": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-03&state=default&capture=1",
+        "state": {
+          "currentScreen": "OB-03",
+          "currentState": "default",
+          "draft": {
+            "id": "id-up8w1ug",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-y2acm1w",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": null
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 84,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 16,
+            "y": 283,
+            "width": 340,
+            "height": 60,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 464,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "toggle-multi",
+            "type": "submit",
+            "text": "Multi-member LLC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "toggle-single",
+            "type": "submit",
+            "text": "Single-member LLC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Apply",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "⋮",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "add-member-btn",
+            "type": "submit",
+            "text": "+\nAdd Member",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "confirm-ownership-checkbox",
+            "type": "checkbox",
+            "text": "",
+            "value": "on"
+          },
+          {
+            "tag": "BUTTON",
+            "id": "ob03-cta",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          }
+        ]
+      },
+      "selected": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-03&state=selected&capture=1",
+        "state": {
+          "currentScreen": "OB-03",
+          "currentState": "selected",
+          "draft": {
+            "id": "id-jcld37z",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-3iio9hp",
+                "name": "John Taylor",
+                "percent": "40.0"
+              },
+              {
+                "id": "id-776nxva",
+                "name": "Sarah Lee",
+                "percent": "20.0"
+              },
+              {
+                "id": "id-ht0gvl4",
+                "name": "Michael Davis",
+                "percent": "20.0"
+              },
+              {
+                "id": "id-v2wtvlj",
+                "name": "Elena Ruiz",
+                "percent": "20.0"
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": null
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 84,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 16,
+            "y": 283,
+            "width": 340,
+            "height": 213,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 600,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "toggle-multi",
+            "type": "submit",
+            "text": "Multi-member LLC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "toggle-single",
+            "type": "submit",
+            "text": "Single-member LLC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Apply",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": "John Taylor"
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": "40.0"
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "⋮",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": "Sarah Lee"
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": "20.0"
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "⋮",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": "Michael Davis"
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": "20.0"
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "⋮",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": "Elena Ruiz"
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": "20.0"
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "⋮",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "add-member-btn",
+            "type": "submit",
+            "text": "+\nAdd Member",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "confirm-ownership-checkbox",
+            "type": "checkbox",
+            "text": "",
+            "value": "on"
+          },
+          {
+            "tag": "BUTTON",
+            "id": "ob03-cta",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          }
+        ]
+      },
+      "validation-error": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-03&state=validation-error&capture=1",
+        "state": {
+          "currentScreen": "OB-03",
+          "currentState": "validation-error",
+          "draft": {
+            "id": "id-jxvckn2",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-wmw591z",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": null
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 84,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 16,
+            "y": 283,
+            "width": 340,
+            "height": 60,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 464,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "toggle-multi",
+            "type": "submit",
+            "text": "Multi-member LLC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "toggle-single",
+            "type": "submit",
+            "text": "Single-member LLC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Apply",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "⋮",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "add-member-btn",
+            "type": "submit",
+            "text": "+\nAdd Member",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "confirm-ownership-checkbox",
+            "type": "checkbox",
+            "text": "",
+            "value": "on"
+          },
+          {
+            "tag": "BUTTON",
+            "id": "ob03-cta",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          }
+        ]
+      },
+      "completed": {
+        "url": "http://127.0.0.1:56818/prototype/index.html?screen=OB-03&state=completed&capture=1",
+        "state": {
+          "currentScreen": "OB-03",
+          "currentState": "completed",
+          "draft": {
+            "id": "id-fq4617n",
+            "name": "",
+            "formationState": "",
+            "formationStateDisplay": "",
+            "formationDate": "",
+            "bookkeepingStartDate": "",
+            "taxClassification": "not_selected",
+            "taxClassificationDisplay": "Not selected",
+            "memberMode": "multi",
+            "members": [
+              {
+                "id": "id-tu6wwcw",
+                "name": "",
+                "percent": ""
+              }
+            ],
+            "ownershipConfirmed": false
+          },
+          "workspaces": [],
+          "activeWorkspaceId": null,
+          "errors": {},
+          "openPicker": null
+        },
+        "regions": [
+          {
+            "name": "logo",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "form",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "heading",
+            "x": 0,
+            "y": 110,
+            "width": 372,
+            "height": 84,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "member-list",
+            "x": 16,
+            "y": 283,
+            "width": 340,
+            "height": 60,
+            "background": "rgb(255, 255, 255)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "info",
+            "x": 14,
+            "y": 464,
+            "width": 344,
+            "height": 50,
+            "background": "rgb(238, 247, 242)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          },
+          {
+            "name": "primary-action",
+            "x": 0,
+            "y": 650,
+            "width": 372,
+            "height": 82,
+            "background": "rgba(0, 0, 0, 0)",
+            "color": "rgb(7, 21, 47)",
+            "font": "-apple-system, \"system-ui\", \"SF Pro Text\", \"SF Pro Display\", \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+            "fontSize": "16px"
+          }
+        ],
+        "overflow": false,
+        "controls": [
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "‹",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Skip",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "toggle-multi",
+            "type": "submit",
+            "text": "Multi-member LLC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "toggle-single",
+            "type": "submit",
+            "text": "Single-member LLC",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "Apply",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "",
+            "type": "text",
+            "text": "",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "",
+            "type": "submit",
+            "text": "⋮",
+            "value": ""
+          },
+          {
+            "tag": "BUTTON",
+            "id": "add-member-btn",
+            "type": "submit",
+            "text": "+\nAdd Member",
+            "value": ""
+          },
+          {
+            "tag": "INPUT",
+            "id": "confirm-ownership-checkbox",
+            "type": "checkbox",
+            "text": "",
+            "value": "on"
+          },
+          {
+            "tag": "BUTTON",
+            "id": "ob03-cta",
+            "type": "submit",
+            "text": "Continue\n→",
+            "value": ""
+          }
+        ]
+      }
+    }
+  }
+}
