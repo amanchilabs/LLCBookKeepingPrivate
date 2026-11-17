@@ -1,60 +1,55 @@
-# Visual Design Pilot Coverage Matrix (2026-11-16)
+# Visual Design Pilot Coverage Matrix (2026-11-16 — Revision R2d)
 
-## Summary of Scope
-This matrix documents every visual element, form field, interactive control, and state transition authored in the 2026-11-16 design pilot across screens `OB-01`, `OB-02`, and `OB-03`.
+## Scope & Classification
+- **A (Visual Parity)**: Faithfully reconstructs authoritative owner raster references within the 372×732 CSS viewport.
+- **B (Prototype UI Function)**: Browser design interaction capability (e.g. interactive calendar, workspace isolation).
+- **C (Governance / Decision)**: Proposal PENDING Owner C Decision (legal adequacy UNVERIFIED; not settled).
 
-### Classification Legend
-- **A (Visual Parity)**: Faithfully reconstructs approved owner raster references within the 372×732 CSS viewport.
-- **B (New UI Function)**: Interactive browser prototype capability (e.g. interactive calendar picker, multi-workspace isolation).
-- **C (Governance / Product Decision)**: PENDING Owner C Decision (prototype proposal only; not settled or legally defensible).
+## Field, Control & Native Gap Matrix
 
----
-
-## Detailed Element & Control Mapping
-
-| Ref Location | Element / Control | Prototype Behavior | Native Implementation | Class | Future Persistence Gap | Test / State Verification |
+| Ref / Screen | Element / Control | Prototype Behavior | Native Implementation (`BusinessSetupScreen.tsx`) | Class | Persistence & Architecture Gap | Verification State |
 |---|---|---|---|:---:|---|---|
-| **OB-01 (132,68)** | App Logo Squircle | Displays `assets/welcome-mark.png` with fallback vector SVG squircle | Native `BusinessSetupScreen` includes a 'welcome' step with 'Get started' action | A | None (static visual asset) | `window.pilot.goto('OB-01', 'default')` |
-| **OB-01 (186,178)** | Brand Title | Centered bold navy label `LLCBookKeepingPrivate` | None | A | None | Measured DOM anchor at y≈178px |
-| **OB-01 (186,187)** | Brand Accent Bar | 36×3.5px emerald pill bar `#009c3f` | None | A | None | Render check |
-| **OB-01 (186,242)** | Hero Headline | Serif title `Private bookkeeping for your LLC` | None | A | None | Checks serif font family and line wrap |
-| **OB-01 (186,321)** | Intro Subtitle | Explains local-first single and multi-member LLC app | None | A | None | Copy verification |
-| **OB-01 (30,378)** | Feature Card 1 | Lock icon + `Your books stay on your device` | Informational text in `BusinessSetupScreen` | A | None | Verification of local-only storage notice |
-| **OB-01 (30,442)** | Feature Card 2 | Offline icon + `Works offline` | Informational text | A | None | Offline operation notice |
-| **OB-01 (30,504)** | Feature Card 3 | Group icon + `Built for real LLCs` (CPA workpapers) | Informational text | C | None | Replaces unqualified 'CPA-ready' with workpapers |
-| **OB-01 (24,619)** | Get Started CTA | Emerald gradient button; navigates to `OB-02` | `moveTo('business')` | A | In-memory navigation | `click` opens OB-02 |
-| **OB-01 (330,14)** | Skip Action | Green top-right link; advances to `OB-02` without creating records | None | C | No silent record creation | Navigates to OB-02 with empty fields |
-| **OB-01 (186,680)** | Pager Indicator | 5 dots with active first dot | None | A | Visual parity | Dot index 0 active |
-| **OB-02 (20,14)** | Back Chevron | Navigates back to `OB-01` | `back()` | A | Preserves draft values | Back button click preserves state |
-| **OB-02 (186,14)** | Step Indicator | Text `2 of 5` | `setupStepLabels` (step 1 of 4 in native wizard) | C | Unresolved 5-stage reference vs 4-step native wizard (PENDING Owner C Decision) | Text verification |
-| **OB-02 (186,98)** | Step Progress Bar | 5 nodes (Node 1 checkmark, Node 2 active, Nodes 3-5 gray) | `SetupProgress` component | A | Presentation only | Progress width 25% |
-| **OB-02 (20,125)** | Header Icon | 52×52px squircle with bank/building icon | None | A | Visual parity | Render check |
+| **OB-01 (132,68)** | App Logo Squircle | `assets/welcome-mark.png` with vector SVG fallback | Welcome step with 'Get started' action | A | Static asset | `OB-01 default` |
+| **OB-01 (186,178)** | Brand Title | Bold navy label `LLCBookKeepingPrivate` | None | A | None | Measured y≈178 |
+| **OB-01 (186,187)** | Brand Accent Bar | 52×3.5px emerald pill bar `#009c3f` | None | A | None | Render check |
+| **OB-01 (186,242)** | Hero Headline | Serif title `Private bookkeeping for your LLC` | None | A | None | Serif check |
+| **OB-01 (186,321)** | Intro Subtitle | Local-first bookkeeping explanation | None | A | None | Copy check |
+| **OB-01 (30,378)** | Feature Card 1 | `Your books stay on your device` | Informational text | C | Device-only privacy claims PENDING Owner C Decision | Visual parity |
+| **OB-01 (30,442)** | Feature Card 2 | `Works offline` | Informational text | A | None | Visual parity |
+| **OB-01 (30,504)** | Feature Card 3 | `Built for real LLCs` (CPA workpapers) | Informational text | C | CPA workpapers claim copy PENDING Owner C Decision | Visual parity |
+| **OB-01 (24,619)** | Get Started CTA | Emerald gradient button; advances to `OB-02` | `moveTo('business')` | A | In-memory navigation | `goto('OB-02')` |
+| **OB-01 (330,52)** | Skip Action | Green top-right link; advances to `OB-02` without records | None | C | Skip semantics PENDING Owner C Decision | Navigates empty |
+| **OB-01 (186,680)** | Pager Indicator | 5 dots with active first dot | None | A | Visual parity | Dot 0 active |
+| **OB-02 (20,52)** | Back Chevron | Navigates back to `OB-01` | `back()` | A | Preserves draft values | Back click |
+| **OB-02 (186,52)** | Step Indicator | Text `2 of 5` | Step 1 of 4 in native wizard (`setupStepLabels`) | C | 5-stage reference vs 4-step native PENDING Owner C Decision | Text check |
+| **OB-02 (186,98)** | Step Progress Bar | 5 nodes (Node 1 check, Node 2 active) | `SetupProgress` component | A | Presentation only | Width 25% |
+| **OB-02 (20,125)** | Header Icon | 52×52px squircle with building icon | None | A | Visual parity | Render check |
 | **OB-02 (87,133)** | Header Title | `Your LLC` and subtitle | `Heading` component | A | Visual parity | Render check |
-| **OB-02 (14,201)** | Legal Name Input | Text input for legal LLC name; updates draft in real-time | `Field` name input | A | Stored in `BusinessSetupInput.name` | `updateDraft('name', 'Acme LLC')` |
-| **OB-02 (14,270)** | Formation State Trigger | Dropdown button displaying selected state; opens modal | Text input for 2-letter code | B | Stored in `formationState` (normalized 2-letter) | `openModal('state')` |
-| **OB-02 (Modal)** | State Picker Modal | Searchable list of 50 states + DC + grouped territories | None (native text field typed 2 letters) | B | Normalizes state name to 2-letter code | State picker modal selection updates display and code |
-| **OB-02 (14,338)** | Formation Date Trigger | Calendar picker trigger showing `Jan 15, 2024` | Text input `YYYY-MM-DD` | B | Stored as ISO `YYYY-MM-DD` | `openModal('formation-date')` |
-| **OB-02 (Modal)** | Formation Calendar | Interactive month calendar with prev/next controls | None | B | Validated via `assertValidCalendarDate` | Day cell click sets date and closes modal |
-| **OB-02 (186,338)** | Books Start Date Trigger | Calendar picker trigger showing `Jan 1, 2025` | Text input `YYYY-MM-DD` | B | Stored as ISO `YYYY-MM-DD` | `openModal('books-date')` |
-| **OB-02 (Modal)** | Books Date Calendar | Interactive month calendar with prev/next controls | None | B | Books start may precede formation date | Selects valid ISO date |
-| **OB-02 (14,408)** | Classification Trigger | Dropdown showing `Unknown / not yet determined` | Omitted in native `BusinessSetupScreen` | C | Unpersisted metadata; requires future schema | `openModal('tax-classification')` |
-| **OB-02 (Modal)** | Classification Modal | 5 options: Not selected, Unknown, Disregarded, Partnership, Corp | None | C | Proposed self-reported metadata | Selection updates draft |
-| **OB-02 (14,507)** | Settings Info Banner | Notes tax classification can be updated in Settings | None | A | Visual parity with reference | Render check |
-| **OB-02 (24,627)** | Continue CTA | Validates business name; advances to `OB-03` | `continueFromCurrentStep()` | A | In-memory draft progression | Advances to OB-03 on valid input |
-| **OB-02 (Error)** | Inline Validation Banner | Displays error when name is missing; keeps valid inputs | `FormError` | A | Non-destructive validation | `goto('OB-02', 'validation-error')` |
-| **OB-03 (20,14)** | Back Chevron | Navigates back to `OB-02` without data loss | `back()` | A | Preserves draft values | Back button click preserves state |
-| **OB-03 (186,14)** | Step Indicator | Text `3 of 5` | Step 2 of 4 in native wizard | C | Unresolved 5-stage reference vs 4-step native wizard (PENDING Owner C Decision) | Text verification |
-| **OB-03 (186,98)** | Step Progress Bar | Node 1 check, Node 2 check, Node 3 active | `SetupProgress` | A | Progress width 50% | Render check |
+| **OB-02 (14,201)** | Legal Name Input | Text input; per-field validation with `aria-invalid` | `Field` name input | A | Stored in `BusinessSetupInput.name` | `updateDraft('name')` |
+| **OB-02 (14,289)** | Formation State Trigger | Button opening accessible modal; normalizes 2-letter | Native text field typed 2 letters | B | Stored in `formationState` (2-letter code) | `openModal('state')` |
+| **OB-02 (Modal)** | State Picker Dialog | Searchable 50 states + DC + territories (`role="dialog"`) | None | B | Focus contained; Tab/Shift+Tab trap | State selection |
+| **OB-02 (14,357)** | Formation Date Trigger | Leading calendar icon; triggers interactive calendar | Text input `YYYY-MM-DD` | B | Stored as ISO `YYYY-MM-DD` | `openModal('formation-date')` |
+| **OB-02 (Modal)** | Formation Calendar | Interactive month calendar with trapped focus | None | B | `assertValidCalendarDate` | Day cell click |
+| **OB-02 (186,357)** | Books Date Trigger | Leading calendar icon; triggers interactive calendar | Text input `YYYY-MM-DD` | B | Stored as ISO `YYYY-MM-DD` | `openModal('books-date')` |
+| **OB-02 (Modal)** | Books Date Calendar | Interactive month calendar with trapped focus | None | B | Books start may precede formation date | Day cell click |
+| **OB-02 (14,427)** | Classification Trigger | Dropdown showing `Not selected` / `Unknown` | Omitted in native `BusinessSetupScreen.tsx` | C | Native model has NO classification field; future B/C | `openModal('tax-classification')` |
+| **OB-02 (Modal)** | Classification Dialog | 5 self-reported options (`role="dialog"`) | None | C | Self-reported metadata proposal only | Selection updates draft |
+| **OB-02 (14,507)** | Settings Info Banner | Notes classification can be updated in Settings | None | A | Visual parity | Render check |
+| **OB-02 (14,575)** | Inline Validation Banner | Per-field error alert; highlights only invalid inputs | `FormError` | A | Non-destructive validation | `OB-02 validation-error` |
+| **OB-02 (24,627)** | Continue CTA | Validates OB-02 fields; advances to `OB-03` | `continueFromCurrentStep()` | A | In-memory progression | Advances to OB-03 |
+| **OB-03 (20,52)** | Back Chevron | Navigates back to `OB-02` without data loss | `back()` | A | Preserves draft values | Back click |
+| **OB-03 (186,52)** | Step Indicator | Text `3 of 5` | Step 2 of 4 in native wizard | C | Step count discrepancy PENDING Owner C Decision | Text check |
+| **OB-03 (186,98)** | Step Progress Bar | Node 1 check, Node 2 check, Node 3 active | `SetupProgress` | A | Presentation only | Width 50% |
 | **OB-03 (17,115)** | Header Icon | 52×52px squircle with members icon | None | A | Visual parity | Render check |
 | **OB-03 (82,120)** | Header Title | `Members & Ownership` | `Heading` component | A | Visual parity | Render check |
-| **OB-03 (16,196)** | Mode Segmented Toggle | Multi-member vs Single-member pill toggle | `Choice` component | A | Stored in setup draft | Toggles between multi and single modes |
-| **OB-03 (16,239)** | Template Banner | Magic wand + `Use 4-member template (40/20/20/20)` | `createSuggestedMembers` | A | Populates suggested member array | Click injects 4 members totaling 100% |
-| **OB-03 (17,285)** | Member Rows | Initials avatar, name input, percent input, menu button | Dynamic member panels | A | Stored in `MemberInterestInput[]` | Real-time percent recalculation |
-| **OB-03 (Row Menu)** | Member Row Menu | Overflow menu with `Remove Member` action | Remove button | A | Removes member; switches to single if 1 left | Member removed on click |
-| **OB-03 (16,457)** | Total Ownership Row | Shows total with live checkmark or warning indicator | `formatPercent(ownershipTotal)` | A | Validated via `assertOwnershipTotals` | Warning displayed when total != 100% |
-| **OB-03 (16,484)** | Add Member Action | Pill button adding an empty member row | `addMember()` | A | Appends member draft | Adds new row to member list |
-| **OB-03 (16,514)** | Confirmation Checkbox | Explicit checkbox: `I confirm these ownership interests...` | `ownershipConfirmed` checkbox | C | Clears on any edit; required before save | Resets to unchecked on member change |
-| **OB-03 (14,534)** | Member Policy Banner | Notes ownership must total 100% | `uiStyles.rowDetail` | A | Visual parity | Render check |
-| **OB-03 (24,635)** | Continue CTA | Disabled unless total == 100% and confirmed; opens Summary | `continueFromCurrentStep()` | A | Validates 100% and confirmation | Disabled when invalid; proceeds to Summary |
-| **Summary** | Workspace Summary Card | Shows legal name, jurisdiction, dates, classification, members | Review step in native | B | In-memory summary | Render check |
-| **Summary** | Add Another LLC | Clears current draft, starts new empty LLC, preserves first | Workspaces list in Settings | B | Tests multi-workspace isolation | Proves LLC 1 not mutated by LLC 2 |
+| **OB-03 (17,196)** | Mode Segmented Toggle | Multi-member vs Single-member pill toggle | `Choice` component | A | In-memory draft mode | Mode switch |
+| **OB-03 (17,239)** | Template Banner | `Use 4-member template (40/20/20/20)` | `createSuggestedMembers` | A | Explicit apply only | Injects 4 members |
+| **OB-03 (17,285)** | Member List Card | Dynamic rows (avatar initials, name, %, menu) | Dynamic member panels | A | Stored in `MemberInterestInput[]` | Row edits |
+| **OB-03 (17,457)** | Total Ownership Row | Single-line total + circular emerald check badge | `formatPercent(ownershipTotal)` | A | Validated via `assertOwnershipTotals` | Live validation |
+| **OB-03 (73,484)** | Add Member Action | Pill button adding an empty member row | `addMember()` | A | Appends member draft | Adds new row |
+| **OB-03 (17,594)** | Confirmation Checkbox | Explicit checkbox; does not infer tax allocation | `ownershipConfirmed` checkbox | C | Ownership ≠ tax allocation disclaimer PENDING Owner C Decision | Checked before submit |
+| **OB-03 (17,534)** | Member Policy Banner | Notes ownership must total 100% | `uiStyles.rowDetail` | A | Visual parity | Render check |
+| **OB-03 (17,566)** | Error Banner | Reflows cleanly without overlapping controls | `FormError` | A | Alert role; orderly reflow | `OB-03 blocked` |
+| **OB-03 (24,635)** | Continue CTA | Disabled unless total==100% and confirmed | `continueFromCurrentStep()` | A | Non-mutating save; preserves single/multi | Advances to COMPLETE |
+| **COMPLETE** | Workspace Summary | Displays actual saved LLC facts without mutation | Native Review step | B | In-memory summary | Single-member preserved |
+| **COMPLETE** | Add Another LLC | Clears draft, creates independent secondary LLC | Workspaces list in Settings | B | Proves draft 2 does not mutate workspace 1 | Isolation check |

@@ -1172,10 +1172,13 @@
     }
     #screen-ob-02 .form-group {
       gap: 1px !important;
-      margin-bottom: 13px !important;
+      margin-bottom: 12px !important;
     }
     #screen-ob-02 .form-row-2col {
       margin-bottom: 14px !important;
+    }
+    #screen-ob-02 .form-row-2col .form-group {
+      margin-bottom: 0 !important;
     }
     #screen-ob-02 .form-card > .form-group:last-child {
       gap: 3px !important;
@@ -1362,6 +1365,30 @@
       margin: 0 !important;
       font-size: 13.5px !important;
     }
+    .total-badge-check {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #d7f0df;
+      color: #006837;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .total-badge-warn {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fef3f2;
+      color: var(--error);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
     #screen-ob-03 .add-member-container {
       position: absolute !important;
       left: 73px !important;
@@ -1404,6 +1431,27 @@
       align-items: center !important;
       gap: 8px !important;
       font-size: 12px !important;
+    }
+    /* Reflow error state on OB-03 to prevent overlap */
+    #screen-ob-03.has-error .members-card {
+      height: 120px !important;
+    }
+    #screen-ob-03.has-error .total-ownership-row {
+      top: 418px !important;
+    }
+    #screen-ob-03.has-error .add-member-container {
+      top: 446px !important;
+    }
+    #screen-ob-03.has-error .info-banner {
+      top: 490px !important;
+    }
+    #screen-ob-03.has-error #ob03-error {
+      top: 536px !important;
+      position: absolute !important;
+      z-index: 10 !important;
+    }
+    #screen-ob-03.has-error .ownership-confirm-row {
+      top: 594px !important;
     }
     #screen-ob-03 .screen-cta-container {
       position: absolute !important;
@@ -1474,12 +1522,18 @@
     <!-- Decorative Background Wave Geometry -->
     <svg class="bg-waves" viewBox="0 0 372 732" fill="none" xmlns="http://www.w3.org/2000/svg">
       <defs>
+        <linearGradient id="wave-mid-fade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#cef0d2" stop-opacity="0.6"/>
+          <stop offset="35%" stop-color="#e2f5e5" stop-opacity="0.35"/>
+          <stop offset="70%" stop-color="#ffffff" stop-opacity="0.95"/>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="1"/>
+        </linearGradient>
         <linearGradient id="wave-bottom-fade" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stop-color="#cef0d2" stop-opacity="0.9"/>
           <stop offset="100%" stop-color="#ffffff" stop-opacity="0.98"/>
         </linearGradient>
       </defs>
-      <path id="wave-mid" d="M0,281 C100,278 125,345 230,280 C285,230 325,195 372,180 L372,732 L0,732 Z" fill="#cef0d2" fill-opacity="0.5"/>
+      <path id="wave-mid" d="M0,281 C100,278 125,345 230,280 C285,230 325,195 372,180 L372,732 L0,732 Z" fill="url(#wave-mid-fade)"/>
       <path id="wave-bottom" d="M0,604 C80,565 96,584 170,597 C240,615 278,571 372,570 L372,732 L0,732 Z" fill="url(#wave-bottom-fade)"/>
     </svg>
 
@@ -1627,31 +1681,37 @@
 
         <div class="form-row-2col">
           <div class="form-group">
-            <label class="form-label">
+            <label class="form-label" for="formation-date-trigger">
               Formation date <span class="form-label-required">*</span>
             </label>
-            <button id="formation-date-trigger" class="form-select-trigger" onclick="window.pilot.openModal('formation-date')">
-              <span id="formation-date-display">Select date</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <button id="formation-date-trigger" class="form-select-trigger" aria-haspopup="dialog" aria-expanded="false" aria-describedby="ob02-error" onclick="window.pilot.openModal('formation-date')">
+              <span style="display:flex; align-items:center; gap:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span id="formation-date-display">Select date</span>
+              </span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
           </div>
           <div class="form-group">
-            <label class="form-label">
+            <label class="form-label" for="books-date-trigger">
               Bookkeeping start date <span class="form-label-required">*</span>
             </label>
-            <button id="books-date-trigger" class="form-select-trigger" onclick="window.pilot.openModal('books-date')">
-              <span id="books-date-display">Select date</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <button id="books-date-trigger" class="form-select-trigger" aria-haspopup="dialog" aria-expanded="false" aria-describedby="ob02-error" onclick="window.pilot.openModal('books-date')">
+              <span style="display:flex; align-items:center; gap:6px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                <span id="books-date-display">Select date</span>
+              </span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
             </button>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label">
+          <label class="form-label" for="tax-classification-trigger">
             Tax classification
             <span title="Self-reported classification for CPA reports" style="cursor:pointer; color:var(--navy-muted); font-size:12px;">ⓘ</span>
           </label>
-          <button id="tax-classification-trigger" class="form-select-trigger" onclick="window.pilot.openModal('tax-classification')">
+          <button id="tax-classification-trigger" class="form-select-trigger" aria-haspopup="dialog" aria-expanded="false" onclick="window.pilot.openModal('tax-classification')">
             <span id="tax-classification-display">Not selected</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
@@ -1663,7 +1723,7 @@
         <span class="info-text">You can update tax classification and other details later in Settings.</span>
       </div>
 
-      <div id="ob02-error" class="error-banner"></div>
+      <div id="ob02-error" class="error-banner" role="alert" aria-live="polite"></div>
 
       <div data-region="primary-action" class="screen-cta-container">
         <button class="screen-cta" onclick="window.pilot.submitOB02()">
@@ -1729,7 +1789,7 @@
       </div>
 
       <div class="total-ownership-row" id="total-ownership-indicator">
-        <span id="total-icon" style="color:var(--emerald-start);">✓</span>
+        <span id="total-icon" class="total-badge-check">✓</span>
         <span id="total-text">Total ownership: 100.0 %</span>
       </div>
 
@@ -1751,7 +1811,7 @@
         <span class="info-text">Ownership must total 100%. You can update members and ownership later.</span>
       </div>
 
-      <div id="ob03-error" class="error-banner"></div>
+      <div id="ob03-error" class="error-banner" role="alert" aria-live="polite"></div>
 
       <div data-region="primary-action" class="screen-cta-container">
         <button id="ob03-cta" class="screen-cta" onclick="window.pilot.submitOB03()">
@@ -1822,10 +1882,10 @@
     <!-- ==================== MODALS & PICKERS ==================== -->
     <!-- State Picker Modal -->
     <div id="modal-state" class="modal-overlay" onclick="if(event.target===this) window.pilot.closeModals()">
-      <div class="modal-sheet">
+      <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-state-title">
         <div class="modal-header">
-          <span class="modal-title">Formation State</span>
-          <button class="modal-close" onclick="window.pilot.closeModals()">✕</button>
+          <span id="modal-state-title" class="modal-title">Formation State</span>
+          <button class="modal-close" aria-label="Close formation state dialog" onclick="window.pilot.closeModals()">✕</button>
         </div>
         <input id="state-search-input" class="modal-search" type="text" placeholder="Search state or territory..." oninput="window.pilot.filterStates(this.value)" />
         <div id="state-list-container" class="modal-list">
@@ -1836,10 +1896,10 @@
 
     <!-- Formation Date Picker Modal -->
     <div id="modal-formation-date" class="modal-overlay" onclick="if(event.target===this) window.pilot.closeModals()">
-      <div class="modal-sheet">
+      <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-formation-title">
         <div class="modal-header">
-          <span class="modal-title">Formation Date</span>
-          <button class="modal-close" onclick="window.pilot.closeModals()">✕</button>
+          <span id="modal-formation-title" class="modal-title">Formation Date</span>
+          <button class="modal-close" aria-label="Close formation date dialog" onclick="window.pilot.closeModals()">✕</button>
         </div>
         <div class="calendar-controls">
           <button class="cal-btn" onclick="window.pilot.changeCalendarMonth('formation', -1)">‹ Prev</button>
@@ -1852,10 +1912,10 @@
 
     <!-- Books Start Date Picker Modal -->
     <div id="modal-books-date" class="modal-overlay" onclick="if(event.target===this) window.pilot.closeModals()">
-      <div class="modal-sheet">
+      <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-books-title">
         <div class="modal-header">
-          <span class="modal-title">Bookkeeping Start Date</span>
-          <button class="modal-close" onclick="window.pilot.closeModals()">✕</button>
+          <span id="modal-books-title" class="modal-title">Bookkeeping Start Date</span>
+          <button class="modal-close" aria-label="Close bookkeeping start date dialog" onclick="window.pilot.closeModals()">✕</button>
         </div>
         <div class="calendar-controls">
           <button class="cal-btn" onclick="window.pilot.changeCalendarMonth('books', -1)">‹ Prev</button>
@@ -1868,10 +1928,10 @@
 
     <!-- Tax Classification Picker Modal -->
     <div id="modal-tax-classification" class="modal-overlay" onclick="if(event.target===this) window.pilot.closeModals()">
-      <div class="modal-sheet">
+      <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modal-tax-title">
         <div class="modal-header">
-          <span class="modal-title">Tax Classification</span>
-          <button class="modal-close" onclick="window.pilot.closeModals()">✕</button>
+          <span id="modal-tax-title" class="modal-title">Tax Classification</span>
+          <button class="modal-close" aria-label="Close tax classification dialog" onclick="window.pilot.closeModals()">✕</button>
         </div>
         <div class="modal-list">
           <button class="modal-item" onclick="window.pilot.selectTaxClassification('not_selected', 'Not selected')">
@@ -2067,7 +2127,7 @@
 
         // Apply state presets (separate demo presets from actual empty flow)
         if (normScreen === 'OB-02') {
-          if (preset === 'populated' || preset === 'selected') {
+          if (preset === 'populated' || preset === 'selected' || preset === 'completed') {
             state.draft.name = 'Northstar Ventures LLC';
             state.draft.formationState = 'DE';
             state.draft.formationStateDisplay = 'Delaware';
@@ -2098,7 +2158,7 @@
             state.draft.ownershipConfirmed = true;
           }
         } else if (normScreen === 'COMPLETE') {
-          if (preset === 'completed' || preset === 'summary') {
+          if (preset === 'completed') {
             if (!state.draft.name) {
               state.draft.name = 'Northstar Ventures LLC';
               state.draft.formationState = 'DE';
@@ -2108,10 +2168,10 @@
               state.draft.taxClassification = 'unknown';
               state.draft.taxClassificationDisplay = 'Unknown / not yet determined';
             }
-            if (!state.draft.members || state.draft.members.length <= 1 || !state.draft.members[0].name) {
+            if (!state.draft.members || !state.draft.members.length || !state.draft.members[0].name) {
               this.applyTemplate();
+              state.draft.ownershipConfirmed = true;
             }
-            state.draft.ownershipConfirmed = true;
             this.saveCurrentWorkspace();
           }
         }
@@ -2183,7 +2243,7 @@
         const stateCode = (state.draft.formationState || '').toUpperCase().trim();
         const validState = US_STATES.find(s => s.code === stateCode);
         if (!stateCode || !validState) {
-          state.errors.name = 'Please select a supported U.S. formation state or territory.';
+          state.errors.state = 'Please select a supported U.S. formation state or territory.';
           this.renderErrors();
           return;
         }
@@ -2191,12 +2251,12 @@
         state.draft.formationStateDisplay = validState.name;
 
         if (!isValidIsoDate(state.draft.formationDate)) {
-          state.errors.name = 'Please select a valid formation date (YYYY-MM-DD).';
+          state.errors.formationDate = 'Please select a valid formation date (YYYY-MM-DD).';
           this.renderErrors();
           return;
         }
         if (!isValidIsoDate(state.draft.bookkeepingStartDate)) {
-          state.errors.name = 'Please select a valid bookkeeping start date (YYYY-MM-DD).';
+          state.errors.booksDate = 'Please select a valid bookkeeping start date (YYYY-MM-DD).';
           this.renderErrors();
           return;
         }
@@ -2337,17 +2397,25 @@
 
         if (isValid) {
           ind.className = 'total-ownership-row';
-          icon.textContent = '✓';
-          icon.style.color = 'var(--emerald-start)';
-          text.textContent = 'Total ownership: 100.00 %';
+          if (icon) {
+            icon.className = 'total-badge-check';
+            icon.textContent = '✓';
+            icon.style.color = '#006837';
+          }
+          if (text) text.textContent = 'Total ownership: 100.0 %';
         } else {
           ind.className = 'total-ownership-row invalid';
-          icon.textContent = '⚠';
-          icon.style.color = 'var(--error)';
-          if (bp === null) {
-            text.textContent = 'Total ownership: Invalid format (use 0-100, max 2 decimals)';
-          } else {
-            text.textContent = `Total ownership: ${(bp / 100).toFixed(2)} % (Must equal 100.0%)`;
+          if (icon) {
+            icon.className = 'total-badge-warn';
+            icon.textContent = '!';
+            icon.style.color = 'var(--error)';
+          }
+          if (text) {
+            if (bp === null) {
+              text.textContent = 'Total: Invalid % format';
+            } else {
+              text.textContent = `Total: ${(bp / 100).toFixed(2)}% (100% required)`;
+            }
           }
         }
 
@@ -2363,6 +2431,13 @@
         const target = document.getElementById('modal-' + modalId);
         if (target) {
           target.classList.add('active');
+          const trigger = document.getElementById(`${modalId}-select-trigger`) || document.getElementById(`${modalId}-trigger`) || state.activeTrigger;
+          if (trigger && trigger.setAttribute) trigger.setAttribute('aria-expanded', 'true');
+          const phoneScreens = document.querySelectorAll('.screen');
+          phoneScreens.forEach(s => s.setAttribute('aria-hidden', 'true'));
+          const revHeader = document.querySelector('.review-header');
+          if (revHeader) revHeader.setAttribute('aria-hidden', 'true');
+
           if (modalId === 'state') {
             this.renderStateList();
             const searchInput = document.getElementById('state-search-input');
@@ -2383,8 +2458,16 @@
       },
 
       closeModals() {
+        if (state.openPicker) {
+          const trigger = document.getElementById(`${state.openPicker}-select-trigger`) || document.getElementById(`${state.openPicker}-trigger`);
+          if (trigger && trigger.setAttribute) trigger.setAttribute('aria-expanded', 'false');
+        }
         state.openPicker = null;
         document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+        const phoneScreens = document.querySelectorAll('.screen');
+        phoneScreens.forEach(s => s.removeAttribute('aria-hidden'));
+        const revHeader = document.querySelector('.review-header');
+        if (revHeader) revHeader.removeAttribute('aria-hidden');
         if (state.activeTrigger && typeof state.activeTrigger.focus === 'function') {
           state.activeTrigger.focus();
         }
@@ -2495,24 +2578,46 @@
       renderErrors() {
         const ob02Error = document.getElementById('ob02-error');
         const ob03Error = document.getElementById('ob03-error');
+        const screenOb03 = document.getElementById('screen-ob-03');
         const nameInput = document.getElementById('llc-name-input');
+        const stateTrigger = document.getElementById('state-select-trigger');
+        const formDateTrigger = document.getElementById('formation-date-trigger');
+        const booksDateTrigger = document.getElementById('books-date-trigger');
 
-        if (state.errors.name) {
-          ob02Error.textContent = state.errors.name;
+        if (nameInput) {
+          nameInput.classList.toggle('error', !!state.errors.name);
+          nameInput.setAttribute('aria-invalid', !!state.errors.name);
+        }
+        if (stateTrigger) {
+          stateTrigger.classList.toggle('error', !!state.errors.state);
+          stateTrigger.setAttribute('aria-invalid', !!state.errors.state);
+        }
+        if (formDateTrigger) {
+          formDateTrigger.classList.toggle('error', !!state.errors.formationDate);
+          formDateTrigger.setAttribute('aria-invalid', !!state.errors.formationDate);
+        }
+        if (booksDateTrigger) {
+          booksDateTrigger.classList.toggle('error', !!state.errors.booksDate);
+          booksDateTrigger.setAttribute('aria-invalid', !!state.errors.booksDate);
+        }
+
+        const ob02Msg = state.errors.name || state.errors.state || state.errors.formationDate || state.errors.booksDate;
+        if (ob02Msg) {
+          ob02Error.textContent = ob02Msg;
           ob02Error.classList.add('active');
-          if (nameInput) nameInput.classList.add('error');
         } else {
           ob02Error.textContent = '';
           ob02Error.classList.remove('active');
-          if (nameInput) nameInput.classList.remove('error');
         }
 
         if (state.errors.members) {
           ob03Error.textContent = state.errors.members;
           ob03Error.classList.add('active');
+          if (screenOb03) screenOb03.classList.add('has-error');
         } else {
           ob03Error.textContent = '';
           ob03Error.classList.remove('active');
+          if (screenOb03) screenOb03.classList.remove('has-error');
         }
       },
 
@@ -2630,8 +2735,33 @@
         if (!this._keyBound) {
           this._keyBound = true;
           document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && state.openPicker) {
-              window.pilot.closeModals();
+            if (state.openPicker) {
+              if (e.key === 'Escape') {
+                e.preventDefault();
+                window.pilot.closeModals();
+                return;
+              }
+              if (e.key === 'Tab') {
+                const activeModal = document.getElementById('modal-' + state.openPicker);
+                if (activeModal) {
+                  const focusables = Array.from(activeModal.querySelectorAll('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])')).filter(el => el.offsetParent !== null);
+                  if (focusables.length > 0) {
+                    const first = focusables[0];
+                    const last = focusables[focusables.length - 1];
+                    if (e.shiftKey) {
+                      if (document.activeElement === first || !activeModal.contains(document.activeElement)) {
+                        e.preventDefault();
+                        last.focus();
+                      }
+                    } else {
+                      if (document.activeElement === last || !activeModal.contains(document.activeElement)) {
+                        e.preventDefault();
+                        first.focus();
+                      }
+                    }
+                  }
+                }
+              }
             }
           });
         }
