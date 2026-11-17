@@ -1,4 +1,5 @@
 {
+  "approval_status": "AWAITING_HUMAN_APPROVAL",
   "authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
   "authorized_scope": "Visual discovery/proposals/owner review only; no application implementation or scope expansion",
   "branch": "feature/reference-design-pilot-20261116",
@@ -10,8 +11,14 @@
     "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
     "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
   },
-  "head": "bc5bd0fbd0e289a1f14f87cba3f073b3a947b0cf",
-  "history": [],
+  "head": "2264d9b05b49f809f774601d6145b502a40cfd2b",
+  "history": [
+    {
+      "event": "pilot_delivery_report",
+      "native_implementation": false,
+      "path": "docs/design/pilot-20261116/PILOT-DELIVERY.md"
+    }
+  ],
   "id": "visual-run-8e6bce69ad34406f",
   "kind": "visual-review",
   "owner": "f7b8f9f975334b90be3163286280852e",
@@ -131,6 +138,11 @@
     ],
     "provider": "claude-code",
     "timeout_seconds": 1800
+  },
+  "screens": {
+    "OB-01": "AWAITING_HUMAN_APPROVAL",
+    "OB-02": "AWAITING_HUMAN_APPROVAL",
+    "OB-03": "AWAITING_HUMAN_APPROVAL"
   },
   "status": "WAITING_APPROVAL",
   "workspace": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate"
