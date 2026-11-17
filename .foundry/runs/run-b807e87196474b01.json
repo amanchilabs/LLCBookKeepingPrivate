@@ -9,10 +9,10 @@
     "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
     "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
   },
-  "head": "aa524849cb8f2829b911fdf8497852533322d230",
+  "head": "c789054f19295cb16630954cf867122b3933cb2f",
   "history": [],
   "id": "run-b807e87196474b01",
-  "next": 0,
+  "next": 1,
   "owner": "f7b8f9f975334b90be3163286280852e",
   "phase": "READY",
   "plan": {
@@ -99,6 +99,14 @@
     "timeout_seconds": 1000
   },
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
+  "provider_availability": {
+    "builder": {
+      "at": "2026-11-17T02:32:12.313619+00:00",
+      "exit_code": 0,
+      "profile": "agy-m5-llc-secondary",
+      "status": "AVAILABLE"
+    }
+  },
   "review_profile": {
     "allow_paid_fallback": false,
     "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
@@ -139,17 +147,58 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "READY",
+  "status": "COMPLETE",
   "stories": [
     {
+      "checks": [
+        {
+          "argv": [
+            "python3",
+            "-c",
+            "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2b.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} for p in x['patches'])"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
       "depends_on": [],
+      "evidence": ".foundry/evidence/CAP-BOOK-DESIGN-LAYOUT-R2B/run-b807e87196474b01/DESIGN-LAYOUT-R2B.json",
       "files": [
         "docs/design/pilot-20261116/corrections-r2b.json"
       ],
       "id": "DESIGN-LAYOUT-R2B",
+      "provider_result": {
+        "exit_code": 0,
+        "provider_usage": {
+          "credit_overages": false,
+          "model": "gemini-3.8-flash-high",
+          "provider": "agy",
+          "usage": {
+            "cache_read_tokens": 1015610,
+            "input_tokens": 155068,
+            "output_tokens": 66126,
+            "thinking_tokens": 56498,
+            "total_tokens": 221194
+          }
+        },
+        "stderr_sha256": "64009ae00de4edaff409a44d045e023a5cfc3e750086c594a6fd94b434945619",
+        "stdout_sha256": "e3b071e1af86c04e52ad5bca76bdcaba1f1d0063ab4991ccf7b307c454cb6b6a"
+      },
       "purpose": "AUTHORIZED DESIGN ONLY SMALL LITERAL PATCH PACKET. Behavior R2a now15actualbrowserchecksPASS; preserveworkingJS exceptaliasesbelow. Read prototype/index.html CSS and markup, BRIEF, REVIEW-R1. Do notregeneratewholepackage. WriteONLY docs/design/pilot-20261116/corrections-r2b.json JSON {\"base_package_sha256\":\"8997419422c63378b5eb241e6b6ce7c2475c87f53a6a24e68c3a271a4145f4fe\",\"patches\":[{\"file\":\"index.html\",\"old\":\"unique exact literal\",\"new\":\"replacement\"}]}. Allowedfilevalues index.html,RATIONALE.md,COVERAGE.md,DECISIONS.md; oldmustoccurONCEinpackagefiles andpatchorder sequential. No commands/Git/tests/native/schema/source/agents. Coordinatorappliesliteralstrings. FocusCSSgeometryusing small overridesbeforeunique</style> andbackgroundSVG replacement; max~8patches. Need actualreferencefaithful372x732 (referencecropsincomparison, actualreferencePNGsupplied). REQUIRED: OB01Skipy52not14; logoactualcroppedasset110x100NOoutersquircleframe/innerpadding; hero~y242,font31serif; featurecardsx30 y378/442/504,w318,h52(last62) fulltextwrapNOellipsis; icon57x52, accentbar52; CTAx24 y619w324h48. OB02navy54; progressy98 centersx109..272not46..319; headericon20,125,55square andheading87,133font28; form14,201,346,292; dateinputsBOTHy373withsinglelinelabelsfont12 aroundy357 (shortenBookkeepingstartlabelonlyifneeded, maintainmeaning); classlabel427/input445; infoy507; CTAx24y627w324h48NOT664. OB03heading82,120font23/icon17,115; toggley196h34; templatey239h35singlelinecompactfont12; memberlist17,285,338,160 four40pxrows; cleanunboxededitablenames notfullinputboxes; percentages78x28with%insideborder; totaly457; Addx73y484w230h36; infoy534; CTAy635h44. ExplicitownershipconfirmationadditionalCdecisionmustremainfunctional,positioninblankgapnear594withoutpushingCTA. Keepoverflowworkablewhen>4members/errors; noclipcontrols. Backgroundreferencepalesagewaves, NOdiagonalcornerwedges: setupbottomapproxM0,604 C80,565 96,584 170,597 C240,615 278,571 372,570 L372,732 L0,732Z fadingtowhite; OB01alsomidwaveM0,281 C100,278 125,345 230,280 C285,230 325,195 372,180. No solidgreenheader. Preserveexistingcolorsnavy/emeraldnearactualreference. FixgotoOB03'validation-error'aliascurrentlyonlyerror/blocked; 'completed'aliasmustshowvalidconfirmedreferencepresetwithoutsilentlyownerapproval. Documentsmustmarksecurity/privateclaimcopy, classificationoptions, confirmationplacement PENDINGownerC, notsettled/legallydefensible. Allchangesprototypeonly, noUIimplementation. Keepoutputsmallfor15minadapterlimit.",
       "review_required": false,
-      "status": "READY",
+      "source": "c789054f19295cb16630954cf867122b3933cb2f",
+      "status": "DONE",
       "validation": [
         [
           "python3",
@@ -163,6 +212,7 @@
         ]
       ],
       "validation_resources": [],
+      "visual_contracts": [],
       "visual_screens": []
     }
   ],
