@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLCBookKeepingPrivate — Visual Design Pilot (2026-11-16)</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+    :root {
+      --navy: #07152f;
+      --navy-muted: #5e6d7a;
+      --emerald-start: #009c3f;
+      --emerald-end: #00543b;
+      --emerald-gradient: linear-gradient(180deg, #009c3f 0%, #005f3b 100%);
+      --sage-bg: #e8f5ed;
+      --sage-tint: #edf7f1;
+      --surface: #ffffff;
+      --canvas: #f7f9f8;
+      --border: #d9e2dc;
+      --border-light: #e6ede8;
+      --error: #d92d20;
+      --error-bg: #fef3f2;
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-serif: "New York", Georgia, "Times New Roman", serif;
+    }
+    body {
+      font-family: var(--font-sans);
+      background-color: #e9eeea;
+      color: var(--navy);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px;
+    }
+    /* Review & demo toolbar */
+    .review-header {
+      width: 100%;
+      max-width: 960px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(7, 21, 47, 0.05);
+    }
+    .review-banner {
+      background: #fdf5d3;
+      color: #744210;
+      border: 1px solid #fae8a4;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .toolbar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .toolbar-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--navy);
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: #f0f4f1;
+      border-color: #c4d1c8;
+    }
+    .btn.active {
+      background: var(--navy);
+      color: #ffffff;
+      border-color: var(--navy);
+    }
+    .btn-emerald {
+      background: var(--emerald-start);
+      color: #ffffff;
+      border-color: var(--emerald-start);
+    }
+    .btn-emerald:hover {
+      background: var(--emerald-end);
+    }
+    .state-info-badge {
+      font-size: 11.5px;
+      color: var(--navy-muted);
+      background: #f4f6f5;
+      padding: 3px 8px;
+      border-radius: 4px;
+      border: 1px solid #e1e7e3;
+      font-family: monospace;
+    }
+
+    /* Phone container */
+    .phone-viewport {
+      width: 372px;
+      height: 732px;
+      min-width: 372px;
+      min-height: 732px;
+      max-width: 372px;
+      max-height: 732px;
+      background: #ffffff;
+      border-radius: 44px;
+      box-shadow: 0 16px 40px rgba(7, 21, 47, 0.15), 0 0 0 10px #1a2332;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Capture mode: strict 0,0 positioning, no frame, no toolbar */
+    body.capture-mode {
+      padding: 0 !important;
+      margin: 0 !important;
+      background: #ffffff !important;
+      overflow: hidden !important;
+    }
+    body.capture-mode .review-header,
+    body.capture-mode .state-inspector-panel {
+      display: none !important;
+    }
+    body.capture-mode .phone-viewport {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      margin: 0 !important;
+      width: 372px !important;
+      height: 732px !important;
+    }
+
+    /* Simulated iOS status bar */
+    .status-bar {
+      height: 44px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+      z-index: 10;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .dynamic-island {
+      position: absolute;
+      top: 9px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 26px;
+      background: #000000;
+      border-radius: 14px;
+    }
+    .status-icons {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    /* Background organic wave graphics */
+    .bg-waves {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Screen container */
+    .screen {
+      position: absolute;
+      inset: 0;
+      padding-top: 44px;
+      display: none;
+      flex-direction: column;
+      z-index: 5;
+      background: transparent;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    .screen.active {
+      display: flex;
+    }
+
+    /* Screen 1: OB-01 Welcome */
+    .ob01-skip {
+      position: absolute;
+      top: 14px;
+      right: 22px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--emerald-start);
+      text-decoration: none;
+      cursor: pointer;
+      z-index: 15;
+    }
+    .ob01-logo-container {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .ob01-logo-squircle {
+      width: 98px;
+      height: 98px;
+      border-radius: 22px;
+      background: #ffffff;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+    .ob01-brand {
+      margin-top: 14px;
+      font-size: 19.5px;
+      font-weight: 700;
+      color: var(--navy);
+      text-align: center;
+      letter-spacing: -0.3px;
+    }
+    .ob01-green-bar {
+      width: 36px;
+      height: 3.5px;
+      background: var(--emerald-start);
+      border-radius: 2px;
+      margin: 6px auto 0;
+    }
+    .ob01-hero {
+      margin-top: 20px;
+      font-family: var(--font-serif);
+      font-size: 29.5px;
+      font-weight: 700;
+      line-height: 33.5px;
+      color: var(--navy);
+      text-align: center;
+      padding: 0 20px;
+    }
+    .ob01-intro {
+      margin-top: 10px;
+      font-size: 15px;
+      line-height: 21px;
+      color: #4a5568;
+      text-align: center;
+      padding: 0 24px;
+    }
+    .ob01-cards {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      padding: 0 24px;
+      width: 100%;
+    }
+    .ob01-card {
+      height: 52px;
+      background: #ffffff;
+      border: 1px solid #eef2f0;
+      border-radius: 14px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+    .ob01-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--sage-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--emerald-start);
+    }
+    .ob01-card-text {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .ob01-card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .ob01-card-subtitle {
+      font-size: 12px;
+      color: var(--navy-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .ob01-cta {
+      position: absolute;
+      bottom: 58px;
+      left: 24px;
+      width: 324px;
+      height: 48px;
+      border-radius: 24px;
+      background: var(--emerald-gradient);
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 156, 63, 0.25);
+    }
+    .ob01-dots {
+      position: absolute;
+      bottom: 24px;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+    .dot {
+      width: 6.5px;
+      height: 6.5px;
+      border-radius: 50%;
+      background: #d0dad3;
+    }
+    .dot.active {
+      background: var(--emerald-start);
+    }
+
+    /* Common Top Nav on OB-02 / OB-03 */
+    .screen-nav {
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+    }
+    .nav-back {
+      background: none;
+      border: none;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--navy);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .nav-step-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--navy);
+    }
+    .nav-skip {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--emerald-start);
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* 5-step progress indicator */
+    .progress-bar-container {
+      padding: 4px 24px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .progress-track {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      max-width: 280px;
+      justify-content: space-between;
+      position: relative;
+    }
+    .progress-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #d9e2dc;
+      transform: translateY(-50%);
+      z-index: 1;
+    }
+    .progress-line-fill {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      height: 3px;
+      background: var(--emerald-start);
+      transform: translateY(-50%);
+      z-index: 2;
+      transition: width 0.2s ease;
+    }
+    .progress-node {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #d9e2dc;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: bold;
+    }
+    .progress-node.active {
+      background: var(--emerald-start);
+    }
+    .progress-node.completed {
+      background: var(--emerald-start);
+    }
+
+    /* Screen Header on OB-02 / OB-03 */
+    .page-header {
+      padding: 10px 18px 12px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .page-icon-squircle {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: var(--sage-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--emerald-start);
+      flex-shrink: 0;
+    }
+    .page-titles {
+      display: flex;
+      flex-direction: column;
+    }
+    .page-title {
+      font-size: 25px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.3px;
+    }
+    .page-subtitle {
+      font-size: 13.5px;
+      color: var(--navy-muted);
+      margin-top: 1px;
+    }
+
+    /* Form cards */
+    .form-card {
+      margin: 0 14px;
+      background: #ffffff;
+      border: 1px solid #e2e8e5;
+      border-radius: 16px;
+      padding: 14px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .form-label-required {
+      color: var(--error);
+    }
+    .form-input {
+      height: 40px;
+      border: 1px solid #d0d9d4;
+      border-radius: 8px;
+      padding: 0 10px;
+      font-size: 14.5px;
+      color: var(--navy);
+      outline: none;
+      background: #ffffff;
+      font-family: inherit;
+    }
+    .form-input:focus {
+      border-color: var(--emerald-start);
+      box-shadow: 0 0 0 2px rgba(0, 156, 63, 0.15);
+    }
+    .form-input.error {
+      border-color: var(--error);
+      background-color: var(--error-bg);
+    }
+    .form-select-trigger {
+      height: 40px;
+      border: 1px solid #d0d9d4;
+      border-radius: 8px;
+      padding: 0 10px;
+      font-size: 14.5px;
+      color: var(--navy);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      text-align: left;
+    }
+    .form-select-trigger:focus {
+      border-color: var(--emerald-start);
+      box-shadow: 0 0 0 2px rgba(0, 156, 63, 0.15);
+    }
+    .form-select-trigger.error {
+      border-color: var(--error);
+      background-color: var(--error-bg);
+    }
+    .form-row-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .info-banner {
+      margin: 12px 14px 0;
+      background: #eef7f2;
+      border-radius: 10px;
+      padding: 9px 12px;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .info-icon {
+      color: var(--emerald-start);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .info-text {
+      font-size: 12px;
+      color: #23503b;
+      line-height: 16px;
+    }
+    .error-banner {
+      margin: 8px 14px 0;
+      background: var(--error-bg);
+      border: 1px solid #fda29b;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12.5px;
+      color: var(--error);
+      line-height: 16px;
+      display: none;
+    }
+    .error-banner.active {
+      display: block;
+    }
+
+    /* Common bottom action */
+    .screen-cta-container {
+      margin-top: auto;
+      padding: 14px 24px 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .screen-cta {
+      width: 100%;
+      height: 48px;
+      border-radius: 24px;
+      background: var(--emerald-gradient);
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 156, 63, 0.25);
+      transition: opacity 0.15s ease;
+    }
+    .screen-cta:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Screen 3: OB-03 Specifics */
+    .member-toggle-container {
+      padding: 0 16px 10px;
+    }
+    .member-toggle {
+      background: #eef2ef;
+      border-radius: 17px;
+      padding: 2px;
+      display: flex;
+      height: 34px;
+    }
+    .toggle-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--navy);
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .toggle-btn.active {
+      background: var(--emerald-end);
+      color: #ffffff;
+    }
+    .template-banner {
+      margin: 0 16px 10px;
+      background: #eef7f2;
+      border-radius: 8px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 35px;
+    }
+    .template-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #07472d;
+    }
+    .template-apply-btn {
+      background: none;
+      border: none;
+      color: var(--emerald-start);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px 6px;
+    }
+    .template-apply-btn:hover {
+      text-decoration: underline;
+    }
+    .members-card {
+      margin: 0 16px;
+      background: #ffffff;
+      border: 1px solid #e2e8e5;
+      border-radius: 14px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .member-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      border-bottom: 1px solid #f0f4f2;
+      position: relative;
+    }
+    .member-row:last-child {
+      border-bottom: none;
+    }
+    .member-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #d7f0df;
+      color: #006837;
+      font-size: 12px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .member-name-input {
+      flex: 1;
+      height: 34px;
+      border: 1px solid #d0d9d4;
+      border-radius: 6px;
+      padding: 0 8px;
+      font-size: 13.5px;
+      color: var(--navy);
+    }
+    .member-percent-container {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .member-percent-input {
+      width: 58px;
+      height: 34px;
+      border: 1px solid #d0d9d4;
+      border-radius: 6px;
+      padding: 0 6px;
+      font-size: 13.5px;
+      text-align: right;
+      color: var(--navy);
+    }
+    .member-menu-btn {
+      background: none;
+      border: none;
+      color: var(--navy-muted);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .member-menu-dropdown {
+      position: absolute;
+      right: 0;
+      top: 38px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 20;
+      display: none;
+      min-width: 130px;
+    }
+    .member-menu-dropdown.active {
+      display: block;
+    }
+    .member-menu-item {
+      padding: 8px 12px;
+      font-size: 12.5px;
+      color: var(--error);
+      cursor: pointer;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+    .member-menu-item:hover {
+      background: #fff5f5;
+    }
+    .total-ownership-row {
+      margin: 10px 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .total-ownership-row.invalid {
+      color: var(--error);
+    }
+    .add-member-container {
+      margin: 8px 16px 0;
+      display: flex;
+      justify-content: center;
+    }
+    .add-member-btn {
+      width: 100%;
+      height: 36px;
+      border-radius: 18px;
+      border: 1px solid #d0d9d4;
+      background: #f7faf8;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--navy);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .add-member-btn:hover {
+      background: #edf3f0;
+    }
+    .ownership-confirm-row {
+      margin: 10px 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--navy);
+    }
+
+    /* Screen 4: Summary / Workspaces */
+    .summary-card {
+      margin: 10px 16px;
+      background: #ffffff;
+      border: 1px solid #e2e8e5;
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13.5px;
+      border-bottom: 1px solid #f2f5f3;
+      padding-bottom: 6px;
+    }
+    .summary-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .summary-label {
+      color: var(--navy-muted);
+    }
+    .summary-val {
+      font-weight: 600;
+      color: var(--navy);
+      text-align: right;
+    }
+    .workspace-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 16px;
+    }
+
+    /* Modals & Pickers */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(7, 21, 47, 0.45);
+      backdrop-filter: blur(2px);
+      z-index: 50;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-sheet {
+      width: 100%;
+      max-height: 80%;
+      background: #ffffff;
+      border-radius: 20px 20px 0 0;
+      padding: 16px 18px 24px;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 0.2s ease-out;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #eef2f0;
+    }
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: var(--navy-muted);
+      cursor: pointer;
+      padding: 4px;
+    }
+    .modal-search {
+      height: 36px;
+      border: 1px solid #d0d9d4;
+      border-radius: 8px;
+      padding: 0 10px;
+      font-size: 13.5px;
+      margin-bottom: 10px;
+    }
+    .modal-list {
+      overflow-y: auto;
+      max-height: 320px;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-group-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--navy-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 6px 8px;
+      background: #f7faf8;
+    }
+    .modal-item {
+      padding: 10px 8px;
+      font-size: 14px;
+      color: var(--navy);
+      border-bottom: 1px solid #f2f5f3;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: none;
+      border-left: none;
+      border-right: none;
+      border-top: none;
+      text-align: left;
+    }
+    .modal-item:hover {
+      background: #f0f7f3;
+    }
+    .modal-item.selected {
+      font-weight: 700;
+      color: var(--emerald-start);
+    }
+
+    /* Calendar Picker */
+    .calendar-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cal-btn {
+      background: #f0f4f2;
+      border: 1px solid #d0d9d4;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .cal-month-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+      text-align: center;
+    }
+    .cal-day-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--navy-muted);
+      padding: 4px 0;
+    }
+    .cal-cell {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .cal-cell:hover {
+      background: #eef7f2;
+    }
+    .cal-cell.empty {
+      cursor: default;
+      pointer-events: none;
+    }
+    .cal-cell.selected {
+      background: var(--emerald-start);
+      color: #ffffff;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Review Toolbar (hidden when ?capture=1) -->
+  <header class="review-header">
+    <div class="review-banner">
+      Interactive design prototype — synthetic only; not native implementation
+    </div>
+    <div class="toolbar-row">
+      <span class="toolbar-title">LLCBookKeepingPrivate Design Pilot (2026-11-16)</span>
+      <span id="state-badge" class="state-info-badge">screen: OB-01 | state: default</span>
+    </div>
+    <div class="toolbar-row">
+      <div class="btn-group">
+        <button class="btn active" onclick="window.pilot.goto('OB-01', 'default')">OB-01 (Welcome)</button>
+        <button class="btn" onclick="window.pilot.goto('OB-02', 'default')">OB-02 (Your LLC)</button>
+        <button class="btn" onclick="window.pilot.goto('OB-03', 'multi')">OB-03 (Members)</button>
+        <button class="btn" onclick="window.pilot.goto('COMPLETE', 'summary')">Summary / Workspaces</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn" onclick="window.pilot.goto('OB-02', 'populated')">Preload Northstar</button>
+        <button class="btn" onclick="window.pilot.goto('OB-02', 'state-picker-open')">State Picker</button>
+        <button class="btn" onclick="window.pilot.goto('OB-02', 'validation-error')">OB-02 Error</button>
+        <button class="btn" onclick="window.pilot.goto('OB-03', 'template-applied')">Apply 4-Member</button>
+        <button class="btn" onclick="window.pilot.goto('OB-03', 'blocked')">OB-03 Error</button>
+        <button class="btn" onclick="window.pilot.reset()">Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Device Viewport Frame (Exact 372x732 CSS pixels) -->
+  <div id="phone-frame" class="phone-viewport">
+
+    <!-- Simulated iOS Status Bar -->
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="dynamic-island"></div>
+      <div class="status-icons">
+        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
+          <path d="M1 8h2v3H1V8zm4-3h2v6H5V5zm4-3h2v9H9V2zm4-2h2v11h-2V0z"/>
+        </svg>
+        <svg width="15" height="11" viewBox="0 0 15 11" fill="currentColor">
+          <path d="M7.5 2.5C9.8 2.5 11.9 3.4 13.5 5l1.5-1.5C13 1.3 10.4 0 7.5 0S2 1.3 0 3.5L1.5 5c1.6-1.6 3.7-2.5 6-2.5zm0 4c1.4 0 2.6.5 3.5 1.5l1.5-1.5C11.3 5.3 9.5 4.5 7.5 4.5S3.7 5.3 2.5 6.5L4 8c.9-1 2.1-1.5 3.5-1.5zm0 4c.8 0 1.5.7 1.5 1.5S8.3 13.5 7.5 13.5 6 12.8 6 12s.7-1.5 1.5-1.5z"/>
+        </svg>
+        <svg width="22" height="11" viewBox="0 0 22 11" fill="currentColor">
+          <rect x="1" y="1" width="18" height="9" rx="2" stroke="currentColor" stroke-width="1" fill="none"/>
+          <rect x="3" y="3" width="13" height="5" rx="1" fill="currentColor"/>
+          <path d="M20 4v3a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Decorative Background Wave Geometry -->
+    <svg class="bg-waves" viewBox="0 0 372 732" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M220 0C280 60 360 80 372 120V0H220Z" fill="#eaf5ee" fill-opacity="0.6"/>
+      <path d="M0 560C80 540 180 580 240 640C290 690 330 710 372 715V732H0V560Z" fill="#edf7f1" fill-opacity="0.7"/>
+    </svg>
+
+    <!-- ==================== SCREEN 1: OB-01 WELCOME ==================== -->
+    <div id="screen-ob01" class="screen active" data-screen="OB-01">
+      <a class="ob01-skip" onclick="window.pilot.skipWelcome()">Skip</a>
+
+      <div data-region="logo" class="ob01-logo-container">
+        <div class="ob01-logo-squircle">
+          <img src="assets/welcome-mark.png" alt="Logo" style="width: 76px; height: 76px; object-fit: contain;" onerror="this.style.display='none'; document.getElementById('vector-logo-fallback').style.display='flex';" />
+          <div id="vector-logo-fallback" style="display:none; flex-direction:column; align-items:center; justify-content:center;">
+            <span style="font-size: 22px; font-weight: 800; color: #07152f; letter-spacing: -0.5px;">LLC</span>
+            <div style="display:flex; align-items:flex-end; gap:3px; margin-top:2px;">
+              <span style="width:4px; height:8px; background:#009c3f; border-radius:1px;"></span>
+              <span style="width:4px; height:13px; background:#009c3f; border-radius:1px;"></span>
+              <span style="width:4px; height:18px; background:#009c3f; border-radius:1px;"></span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#009c3f" style="margin-left:2px;">
+                <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-region="heading">
+        <div class="ob01-brand">LLCBookKeepingPrivate</div>
+        <div class="ob01-green-bar"></div>
+        <h1 class="ob01-hero">Private bookkeeping<br>for your LLC</h1>
+        <p class="ob01-intro">A simple, local-first bookkeeping app for single-member or multi-member LLCs.</p>
+      </div>
+
+      <div data-region="info" class="ob01-cards">
+        <div class="ob01-card">
+          <div class="ob01-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+          </div>
+          <div class="ob01-card-text">
+            <span class="ob01-card-title">Your books stay on your device</span>
+            <span class="ob01-card-subtitle">No account, no cloud copy, no data tracking.</span>
+          </div>
+        </div>
+
+        <div class="ob01-card">
+          <div class="ob01-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+              <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+              <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+              <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+              <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+              <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+          </div>
+          <div class="ob01-card-text">
+            <span class="ob01-card-title">Works offline</span>
+            <span class="ob01-card-subtitle">No bank connections or data uploads.</span>
+          </div>
+        </div>
+
+        <div class="ob01-card">
+          <div class="ob01-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <div class="ob01-card-text">
+            <span class="ob01-card-title">Built for real LLCs</span>
+            <span class="ob01-card-subtitle">Members, capital, payments, loans, and CPA workpapers.</span>
+          </div>
+        </div>
+      </div>
+
+      <div data-region="primary-action">
+        <button class="ob01-cta" onclick="window.pilot.goto('OB-02', 'default')">
+          Get Started <span style="font-size:18px;">→</span>
+        </button>
+      </div>
+
+      <div class="ob01-dots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 2: OB-02 YOUR LLC ==================== -->
+    <div id="screen-ob02" class="screen" data-screen="OB-02">
+      <div class="screen-nav">
+        <button class="nav-back" onclick="window.pilot.goto('OB-01', 'default')">‹</button>
+        <span class="nav-step-title">2 of 5</span>
+        <button class="nav-skip" onclick="window.pilot.goto('OB-03', 'multi')">Skip</button>
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-track">
+          <div class="progress-line"></div>
+          <div class="progress-line-fill" style="width: 25%;"></div>
+          <div class="progress-node completed">✓</div>
+          <div class="progress-node active"></div>
+          <div class="progress-node"></div>
+          <div class="progress-node"></div>
+          <div class="progress-node"></div>
+        </div>
+      </div>
+
+      <div data-region="heading" class="page-header">
+        <div class="page-icon-squircle">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+          </svg>
+        </div>
+        <div class="page-titles">
+          <h2 class="page-title">Your LLC</h2>
+          <span class="page-subtitle">Enter your LLC's basic information.</span>
+        </div>
+      </div>
+
+      <div data-region="form" class="form-card">
+        <div class="form-group">
+          <label class="form-label" for="llc-name-input">
+            Legal business name <span class="form-label-required">*</span>
+          </label>
+          <input id="llc-name-input" class="form-input" type="text" placeholder="Northstar Ventures LLC" value="" oninput="window.pilot.updateDraft('name', this.value)" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="state-select-trigger">
+            Formation state <span class="form-label-required">*</span>
+          </label>
+          <button id="state-select-trigger" class="form-select-trigger" onclick="window.pilot.openModal('state')">
+            <span id="state-display">Delaware</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        </div>
+
+        <div class="form-row-2col">
+          <div class="form-group">
+            <label class="form-label">
+              Formation date <span class="form-label-required">*</span>
+            </label>
+            <button id="formation-date-trigger" class="form-select-trigger" onclick="window.pilot.openModal('formation-date')">
+              <span id="formation-date-display">Jan 15, 2024</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </button>
+          </div>
+          <div class="form-group">
+            <label class="form-label">
+              Bookkeeping start date <span class="form-label-required">*</span>
+            </label>
+            <button id="books-date-trigger" class="form-select-trigger" onclick="window.pilot.openModal('books-date')">
+              <span id="books-date-display">Jan 1, 2025</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Tax classification
+            <span title="Self-reported classification for CPA reports" style="cursor:pointer; color:var(--navy-muted); font-size:12px;">ⓘ</span>
+          </label>
+          <button id="tax-classification-trigger" class="form-select-trigger" onclick="window.pilot.openModal('tax-classification')">
+            <span id="tax-classification-display">Unknown / not yet determined</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+        </div>
+      </div>
+
+      <div data-region="info" class="info-banner">
+        <span class="info-icon">ⓘ</span>
+        <span class="info-text">You can update tax classification and other details later in Settings.</span>
+      </div>
+
+      <div id="ob02-error" class="error-banner"></div>
+
+      <div data-region="primary-action" class="screen-cta-container">
+        <button class="screen-cta" onclick="window.pilot.submitOB02()">
+          Continue <span style="font-size:18px;">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 3: OB-03 MEMBERS & OWNERSHIP ==================== -->
+    <div id="screen-ob03" class="screen" data-screen="OB-03">
+      <div class="screen-nav">
+        <button class="nav-back" onclick="window.pilot.goto('OB-02', 'default')">‹</button>
+        <span class="nav-step-title">3 of 5</span>
+        <button class="nav-skip" onclick="window.pilot.goto('COMPLETE', 'summary')">Skip</button>
+      </div>
+
+      <div class="progress-bar-container">
+        <div class="progress-track">
+          <div class="progress-line"></div>
+          <div class="progress-line-fill" style="width: 50%;"></div>
+          <div class="progress-node completed">✓</div>
+          <div class="progress-node completed">✓</div>
+          <div class="progress-node active"></div>
+          <div class="progress-node"></div>
+          <div class="progress-node"></div>
+        </div>
+      </div>
+
+      <div data-region="heading" class="page-header">
+        <div class="page-icon-squircle">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+        <div class="page-titles">
+          <h2 class="page-title">Members &amp; Ownership</h2>
+          <span class="page-subtitle">Add LLC members and set ownership percentages.</span>
+        </div>
+      </div>
+
+      <div class="member-toggle-container">
+        <div class="member-toggle">
+          <button id="toggle-multi" class="toggle-btn active" onclick="window.pilot.setMemberMode('multi')">Multi-member LLC</button>
+          <button id="toggle-single" class="toggle-btn" onclick="window.pilot.setMemberMode('single')">Single-member LLC</button>
+        </div>
+      </div>
+
+      <div id="template-bar" class="template-banner">
+        <div class="template-banner-left">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M7.5 5.6L10 7 8.6 4.5 10 2 7.5 3.4 5 2l1.4 2.5L5 7zm12 9.8L17 14l1.4 2.5L17 19l2.5-1.4L22 19l-1.4-2.5L22 14zM22 2l-2.5 1.4L17 2l1.4 2.5L17 7l2.5-1.4L22 7l-1.4-2.5zm-7.63 5.29c-.39-.39-1.02-.39-1.41 0L1.29 18.96c-.39.39-.39 1.02 0 1.41l2.34 2.34c.39.39 1.02.39 1.41 0L16.7 11.05c.39-.39.39-1.02 0-1.41l-2.33-2.35zm-1.03 5.49l-2.12-2.12 2.44-2.44 2.12 2.12-2.44 2.44z"/>
+          </svg>
+          <span>Use 4-member template (40 / 20 / 20 / 20)</span>
+        </div>
+        <button class="template-apply-btn" onclick="window.pilot.applyTemplate()">Apply</button>
+      </div>
+
+      <div data-region="member-list" id="members-container" class="members-card">
+        <!-- Dynamic Member Rows injected by JS -->
+      </div>
+
+      <div class="total-ownership-row" id="total-ownership-indicator">
+        <span id="total-icon" style="color:var(--emerald-start);">✓</span>
+        <span id="total-text">Total ownership: 100.0 %</span>
+      </div>
+
+      <div class="add-member-container">
+        <button id="add-member-btn" class="add-member-btn" onclick="window.pilot.addMember()">
+          <span>+</span> Add Member
+        </button>
+      </div>
+
+      <div class="ownership-confirm-row">
+        <input id="confirm-ownership-checkbox" type="checkbox" onchange="window.pilot.toggleConfirmation(this.checked)" />
+        <label for="confirm-ownership-checkbox" style="cursor:pointer;">
+          I confirm these ownership interests are correct
+        </label>
+      </div>
+
+      <div data-region="info" class="info-banner" style="margin-top:8px;">
+        <span class="info-icon">ⓘ</span>
+        <span class="info-text">Ownership must total 100%. You can update members and ownership later.</span>
+      </div>
+
+      <div id="ob03-error" class="error-banner"></div>
+
+      <div data-region="primary-action" class="screen-cta-container">
+        <button id="ob03-cta" class="screen-cta" onclick="window.pilot.submitOB03()">
+          Continue <span style="font-size:18px;">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== SCREEN 4: SUMMARY & WORKSPACES ==================== -->
+    <div id="screen-complete" class="screen" data-screen="COMPLETE">
+      <div class="page-header" style="padding-top:20px;">
+        <div class="page-icon-squircle" style="background:#d7f0df; color:#006837;">
+          ✓
+        </div>
+        <div class="page-titles">
+          <h2 class="page-title">LLC Setup Summary</h2>
+          <span class="page-subtitle">Synthetic draft ready in-memory.</span>
+        </div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-item">
+          <span class="summary-label">LLC Name</span>
+          <span id="summary-name" class="summary-val">Northstar Ventures LLC</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Jurisdiction</span>
+          <span id="summary-state" class="summary-val">Delaware (DE)</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Formation Date</span>
+          <span id="summary-formation-date" class="summary-val">2024-01-15</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Books Start Date</span>
+          <span id="summary-books-date" class="summary-val">2025-01-01</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Classification</span>
+          <span id="summary-classification" class="summary-val">Unknown / not yet determined</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Members</span>
+          <span id="summary-members-count" class="summary-val">4 members (100.0%)</span>
+        </div>
+      </div>
+
+      <div class="workspace-actions">
+        <button class="btn btn-emerald" style="height:42px; font-size:14px;" onclick="window.pilot.addAnotherLLC()">
+          + Add Another LLC (Test Isolation)
+        </button>
+        <button class="btn" style="height:38px;" onclick="window.pilot.goto('OB-02', 'default')">
+          ← Back to Edit LLC Facts
+        </button>
+      </div>
+
+      <div class="info-banner" style="margin-top:10px;">
+        <span class="info-icon">ⓘ</span>
+        <span class="info-text">This completes the 3-screen visual design pilot (OB-01, OB-02, OB-03). No real-data storage or native persistence executed.</span>
+      </div>
+    </div>
+
+    <!-- ==================== MODALS & PICKERS ==================== -->
+    <!-- State Picker Modal -->
+    <div id="modal-state" class="modal-overlay" onclick="if(event.target===this) window.pilot.closeModals()">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <span class="modal-title">Formation State</span>
+          <button class="modal-close" onclick="window.pilot.closeModals()">✕</button>
+        </div>
+        <input id="state-search-input" class="modal-search" type="text" placeholder="Search state or territory..." oninput="window.pilot.filterStates(this.value)" />
+        <div id="state-list-container" class="modal-list">
+          <!-- Dynamic State List -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Formation Date Picker Modal -->
+    <div id="modal-formation-date" class="modal-overlay" onclick="if(event.target===this) window.pilot.closeModals()">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <span class="modal-title">Formation Date</span>
+          <button class="modal-close" onclick="window.pilot.closeModals()">✕</button>
+        </div>
+        <div class="calendar-controls">
+          <button class="cal-btn" onclick="window.pilot.changeCalendarMonth('formation', -1)">‹ Prev</button>
+          <span id="formation-cal-title" class="cal-month-title">January 2024</span>
+          <button class="cal-btn" onclick="window.pilot.changeCalendarMonth('formation', 1)">Next ›</button>
+        </div>
+        <div id="formation-cal-grid" class="cal-grid"></div>
+      </div>
+    </div>
+
+    <!-- Books Start Date Picker Modal -->
+    <div id="modal-books-date" class="modal-overlay" onclick="if(event.target===this) window.pilot.closeModals()">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <span class="modal-title">Bookkeeping Start Date</span>
+          <button class="modal-close" onclick="window.pilot.closeModals()">✕</button>
+        </div>
+        <div class="calendar-controls">
+          <button class="cal-btn" onclick="window.pilot.changeCalendarMonth('books', -1)">‹ Prev</button>
+          <span id="books-cal-title" class="cal-month-title">January 2025</span>
+          <button class="cal-btn" onclick="window.pilot.changeCalendarMonth('books', 1)">Next ›</button>
+        </div>
+        <div id="books-cal-grid" class="cal-grid"></div>
+      </div>
+    </div>
+
+    <!-- Tax Classification Picker Modal -->
+    <div id="modal-tax-classification" class="modal-overlay" onclick="if(event.target===this) window.pilot.closeModals()">
+      <div class="modal-sheet">
+        <div class="modal-header">
+          <span class="modal-title">Tax Classification</span>
+          <button class="modal-close" onclick="window.pilot.closeModals()">✕</button>
+        </div>
+        <div class="modal-list">
+          <button class="modal-item" onclick="window.pilot.selectTaxClassification('not_selected', 'Not selected')">
+            <span>Not selected</span>
+          </button>
+          <button class="modal-item" onclick="window.pilot.selectTaxClassification('unknown', 'Unknown / not yet determined')">
+            <span>Unknown / not yet determined</span>
+          </button>
+          <button class="modal-item" onclick="window.pilot.selectTaxClassification('disregarded_entity', 'Disregarded entity (single member)')">
+            <span>Disregarded entity</span>
+          </button>
+          <button class="modal-item" onclick="window.pilot.selectTaxClassification('partnership', 'Partnership (multiple members)')">
+            <span>Partnership</span>
+          </button>
+          <button class="modal-item" onclick="window.pilot.selectTaxClassification('corporation', 'Corporation (C-Corp or S-Corp election)')">
+            <span>Corporation</span>
+          </button>
+        </div>
+        <p style="font-size:11.5px; color:var(--navy-muted); margin-top:10px; line-height:15px;">
+          Self-reported classification for CPA workpapers only. Does not constitute tax advice or election.
+        </p>
+      </div>
+    </div>
+
+  </div> <!-- /phone-viewport -->
+
+  <!-- Client State & Pilot API Implementation -->
+  <script>
+    const US_STATES = [
+      { code: 'AL', name: 'Alabama', group: 'States' },
+      { code: 'AK', name: 'Alaska', group: 'States' },
+      { code: 'AZ', name: 'Arizona', group: 'States' },
+      { code: 'AR', name: 'Arkansas', group: 'States' },
+      { code: 'CA', name: 'California', group: 'States' },
+      { code: 'CO', name: 'Colorado', group: 'States' },
+      { code: 'CT', name: 'Connecticut', group: 'States' },
+      { code: 'DE', name: 'Delaware', group: 'States' },
+      { code: 'FL', name: 'Florida', group: 'States' },
+      { code: 'GA', name: 'Georgia', group: 'States' },
+      { code: 'HI', name: 'Hawaii', group: 'States' },
+      { code: 'ID', name: 'Idaho', group: 'States' },
+      { code: 'IL', name: 'Illinois', group: 'States' },
+      { code: 'IN', name: 'Indiana', group: 'States' },
+      { code: 'IA', name: 'Iowa', group: 'States' },
+      { code: 'KS', name: 'Kansas', group: 'States' },
+      { code: 'KY', name: 'Kentucky', group: 'States' },
+      { code: 'LA', name: 'Louisiana', group: 'States' },
+      { code: 'ME', name: 'Maine', group: 'States' },
+      { code: 'MD', name: 'Maryland', group: 'States' },
+      { code: 'MA', name: 'Massachusetts', group: 'States' },
+      { code: 'MI', name: 'Michigan', group: 'States' },
+      { code: 'MN', name: 'Minnesota', group: 'States' },
+      { code: 'MS', name: 'Mississippi', group: 'States' },
+      { code: 'MO', name: 'Missouri', group: 'States' },
+      { code: 'MT', name: 'Montana', group: 'States' },
+      { code: 'NE', name: 'Nebraska', group: 'States' },
+      { code: 'NV', name: 'Nevada', group: 'States' },
+      { code: 'NH', name: 'New Hampshire', group: 'States' },
+      { code: 'NJ', name: 'New Jersey', group: 'States' },
+      { code: 'NM', name: 'New Mexico', group: 'States' },
+      { code: 'NY', name: 'New York', group: 'States' },
+      { code: 'NC', name: 'North Carolina', group: 'States' },
+      { code: 'ND', name: 'North Dakota', group: 'States' },
+      { code: 'OH', name: 'Ohio', group: 'States' },
+      { code: 'OK', name: 'Oklahoma', group: 'States' },
+      { code: 'OR', name: 'Oregon', group: 'States' },
+      { code: 'PA', name: 'Pennsylvania', group: 'States' },
+      { code: 'RI', name: 'Rhode Island', group: 'States' },
+      { code: 'SC', name: 'South Carolina', group: 'States' },
+      { code: 'SD', name: 'South Dakota', group: 'States' },
+      { code: 'TN', name: 'Tennessee', group: 'States' },
+      { code: 'TX', name: 'Texas', group: 'States' },
+      { code: 'UT', name: 'Utah', group: 'States' },
+      { code: 'VT', name: 'Vermont', group: 'States' },
+      { code: 'VA', name: 'Virginia', group: 'States' },
+      { code: 'WA', name: 'Washington', group: 'States' },
+      { code: 'WV', name: 'West Virginia', group: 'States' },
+      { code: 'WI', name: 'Wisconsin', group: 'States' },
+      { code: 'WY', name: 'Wyoming', group: 'States' },
+      { code: 'DC', name: 'District of Columbia', group: 'States' },
+      { code: 'AS', name: 'American Samoa', group: 'Territories' },
+      { code: 'GU', name: 'Guam', group: 'Territories' },
+      { code: 'MP', name: 'Northern Mariana Islands', group: 'Territories' },
+      { code: 'PR', name: 'Puerto Rico', group: 'Territories' },
+      { code: 'VI', name: 'U.S. Virgin Islands', group: 'Territories' }
+    ];
+
+    const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    function makeId() {
+      return 'id-' + Math.random().toString(36).substring(2, 9);
+    }
+
+    function createDefaultDraft() {
+      return {
+        id: makeId(),
+        name: '',
+        formationState: 'DE',
+        formationStateDisplay: 'Delaware',
+        formationDate: '2024-01-15',
+        bookkeepingStartDate: '2025-01-01',
+        taxClassification: 'unknown',
+        taxClassificationDisplay: 'Unknown / not yet determined',
+        memberMode: 'multi',
+        members: [
+          { id: makeId(), name: 'John Taylor', percent: '40.0' },
+          { id: makeId(), name: 'Sarah Lee', percent: '20.0' },
+          { id: makeId(), name: 'Michael Davis', percent: '20.0' },
+          { id: makeId(), name: 'Elena Ruiz', percent: '20.0' }
+        ],
+        ownershipConfirmed: true
+      };
+    }
+
+    // In-memory application state
+    const state = {
+      currentScreen: 'OB-01',
+      currentState: 'default',
+      draft: createDefaultDraft(),
+      workspaces: [],
+      activeWorkspaceId: null,
+      errors: {},
+      openPicker: null,
+      calViews: {
+        formation: { year: 2024, month: 0 },
+        books: { year: 2025, month: 0 }
+      }
+    };
+
+    // Prototype Controller
+    window.pilot = {
+      goto(screenId, statePreset) {
+        state.currentScreen = screenId;
+        state.currentState = statePreset || 'default';
+        state.openPicker = null;
+        state.errors = {};
+
+        // Apply state presets
+        if (screenId === 'OB-02') {
+          if (statePreset === 'populated') {
+            state.draft.name = 'Northstar Ventures LLC';
+            state.draft.formationState = 'DE';
+            state.draft.formationStateDisplay = 'Delaware';
+            state.draft.formationDate = '2024-01-15';
+            state.draft.bookkeepingStartDate = '2025-01-01';
+          } else if (statePreset === 'validation-error') {
+            state.draft.name = '';
+            state.errors = { name: 'Legal business name is required.' };
+          }
+        } else if (screenId === 'OB-03') {
+          if (statePreset === 'template-applied') {
+            this.applyTemplate();
+          } else if (statePreset === 'single') {
+            this.setMemberMode('single');
+          } else if (statePreset === 'blocked') {
+            state.draft.members[0].percent = '30.0';
+            state.draft.ownershipConfirmed = false;
+            state.errors = { members: 'Member ownership interests must total 100% (currently 90.0%).' };
+          } else if (statePreset === 'confirmed') {
+            state.draft.ownershipConfirmed = true;
+          }
+        }
+
+        this.render();
+        this.closeModals();
+
+        // Open modal if preset specifies
+        if (statePreset === 'state-picker-open') this.openModal('state');
+        if (statePreset === 'formation-picker-open') this.openModal('formation-date');
+        if (statePreset === 'books-picker-open') this.openModal('books-date');
+        if (statePreset === 'classification-picker-open') this.openModal('tax-classification');
+      },
+
+      getState() {
+        return {
+          currentScreen: state.currentScreen,
+          currentState: state.currentState,
+          draft: JSON.parse(JSON.stringify(state.draft)),
+          workspaces: JSON.parse(JSON.stringify(state.workspaces)),
+          activeWorkspaceId: state.activeWorkspaceId,
+          errors: { ...state.errors },
+          openPicker: state.openPicker
+        };
+      },
+
+      reset() {
+        state.draft = createDefaultDraft();
+        state.errors = {};
+        this.goto('OB-01', 'default');
+      },
+
+      updateDraft(field, val) {
+        state.draft[field] = val;
+        if (state.errors[field]) delete state.errors[field];
+        this.updateBadge();
+      },
+
+      skipWelcome() {
+        this.goto('OB-02', 'default');
+      },
+
+      submitOB02() {
+        state.errors = {};
+        const name = (state.draft.name || '').trim();
+        if (!name) {
+          state.errors.name = 'Please enter your LLC legal business name.';
+          this.renderErrors();
+          return;
+        }
+        this.goto('OB-03', 'multi');
+      },
+
+      submitOB03() {
+        state.errors = {};
+        const total = this.calculateTotalPercent();
+        if (Math.abs(total - 100) > 0.001) {
+          state.errors.members = `Total ownership is ${total.toFixed(1)}%. It must equal exactly 100.0%.`;
+          this.renderErrors();
+          return;
+        }
+        if (!state.draft.ownershipConfirmed) {
+          state.errors.members = 'Please confirm that the ownership interests shown are correct before continuing.';
+          this.renderErrors();
+          return;
+        }
+        // Save workspace to in-memory list
+        this.saveCurrentWorkspace();
+        this.goto('COMPLETE', 'summary');
+      },
+
+      saveCurrentWorkspace() {
+        const existingIdx = state.workspaces.findIndex(w => w.id === state.draft.id);
+        const copy = JSON.parse(JSON.stringify(state.draft));
+        if (existingIdx >= 0) {
+          state.workspaces[existingIdx] = copy;
+        } else {
+          state.workspaces.push(copy);
+        }
+        state.activeWorkspaceId = copy.id;
+      },
+
+      addAnotherLLC() {
+        this.saveCurrentWorkspace();
+        state.draft = createDefaultDraft();
+        state.draft.name = '';
+        state.draft.id = makeId();
+        this.goto('OB-02', 'default');
+      },
+
+      setMemberMode(mode) {
+        state.draft.memberMode = mode;
+        state.draft.ownershipConfirmed = false;
+        if (mode === 'single') {
+          const firstName = state.draft.members[0]?.name || 'Primary Member';
+          state.draft.members = [{ id: makeId(), name: firstName, percent: '100.0' }];
+        } else {
+          this.applyTemplate();
+        }
+        this.render();
+      },
+
+      applyTemplate() {
+        state.draft.memberMode = 'multi';
+        state.draft.members = [
+          { id: makeId(), name: 'John Taylor', percent: '40.0' },
+          { id: makeId(), name: 'Sarah Lee', percent: '20.0' },
+          { id: makeId(), name: 'Michael Davis', percent: '20.0' },
+          { id: makeId(), name: 'Elena Ruiz', percent: '20.0' }
+        ];
+        state.draft.ownershipConfirmed = true;
+        this.render();
+      },
+
+      addMember() {
+        state.draft.members.push({ id: makeId(), name: '', percent: '0.0' });
+        state.draft.ownershipConfirmed = false;
+        this.render();
+      },
+
+      removeMember(idx) {
+        if (state.draft.members.length <= 1) return;
+        state.draft.members.splice(idx, 1);
+        if (state.draft.members.length === 1) {
+          state.draft.memberMode = 'single';
+          state.draft.members[0].percent = '100.0';
+        }
+        state.draft.ownershipConfirmed = false;
+        this.render();
+      },
+
+      updateMember(idx, field, val) {
+        state.draft.members[idx][field] = val;
+        state.draft.ownershipConfirmed = false;
+        this.renderMemberCalculations();
+      },
+
+      toggleConfirmation(checked) {
+        state.draft.ownershipConfirmed = checked;
+        this.renderMemberCalculations();
+      },
+
+      calculateTotalPercent() {
+        return state.draft.members.reduce((acc, m) => acc + (parseFloat(m.percent) || 0), 0);
+      },
+
+      renderMemberCalculations() {
+        const total = this.calculateTotalPercent();
+        const ind = document.getElementById('total-ownership-indicator');
+        const icon = document.getElementById('total-icon');
+        const text = document.getElementById('total-text');
+        const chk = document.getElementById('confirm-ownership-checkbox');
+        const cta = document.getElementById('ob03-cta');
+
+        if (chk) chk.checked = !!state.draft.ownershipConfirmed;
+
+        const isValid = Math.abs(total - 100) < 0.001;
+        if (isValid) {
+          ind.className = 'total-ownership-row';
+          icon.textContent = '✓';
+          icon.style.color = 'var(--emerald-start)';
+          text.textContent = 'Total ownership: 100.0 %';
+        } else {
+          ind.className = 'total-ownership-row invalid';
+          icon.textContent = '⚠';
+          icon.style.color = 'var(--error)';
+          text.textContent = `Total ownership: ${total.toFixed(1)} % (Must equal 100.0%)`;
+        }
+
+        if (cta) {
+          cta.disabled = !isValid || !state.draft.ownershipConfirmed;
+        }
+      },
+
+      openModal(modalId) {
+        state.openPicker = modalId;
+        document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('modal-' + modalId);
+        if (target) {
+          target.classList.add('active');
+          if (modalId === 'state') this.renderStateList();
+          if (modalId === 'formation-date') this.renderCalendar('formation');
+          if (modalId === 'books-date') this.renderCalendar('books');
+        }
+      },
+
+      closeModals() {
+        state.openPicker = null;
+        document.querySelectorAll('.modal-overlay').forEach(el => el.classList.remove('active'));
+      },
+
+      renderStateList(filter = '') {
+        const container = document.getElementById('state-list-container');
+        container.innerHTML = '';
+        const term = filter.toLowerCase().trim();
+        const filtered = US_STATES.filter(s => s.name.toLowerCase().includes(term) || s.code.toLowerCase().includes(term));
+
+        const groups = { 'States': [], 'Territories': [] };
+        filtered.forEach(s => groups[s.group].push(s));
+
+        for (const [groupName, items] of Object.entries(groups)) {
+          if (items.length === 0) continue;
+          const groupTitle = document.createElement('div');
+          groupTitle.className = 'modal-group-title';
+          groupTitle.textContent = groupName;
+          container.appendChild(groupTitle);
+
+          items.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'modal-item' + (state.draft.formationState === item.code ? ' selected' : '');
+            btn.innerHTML = `<span>${item.name}</span><span style="color:var(--navy-muted); font-size:12px;">${item.code}</span>`;
+            btn.onclick = () => {
+              state.draft.formationState = item.code;
+              state.draft.formationStateDisplay = item.name;
+              document.getElementById('state-display').textContent = item.name;
+              this.closeModals();
+            };
+            container.appendChild(btn);
+          });
+        }
+      },
+
+      filterStates(query) {
+        this.renderStateList(query);
+      },
+
+      selectTaxClassification(val, display) {
+        state.draft.taxClassification = val;
+        state.draft.taxClassificationDisplay = display;
+        document.getElementById('tax-classification-display').textContent = display;
+        this.closeModals();
+      },
+
+      changeCalendarMonth(calKey, delta) {
+        const view = state.calViews[calKey];
+        view.month += delta;
+        if (view.month > 11) {
+          view.month = 0;
+          view.year++;
+        } else if (view.month < 0) {
+          view.month = 11;
+          view.year--;
+        }
+        this.renderCalendar(calKey);
+      },
+
+      renderCalendar(calKey) {
+        const view = state.calViews[calKey];
+        const titleEl = document.getElementById(`${calKey}-cal-title`);
+        const gridEl = document.getElementById(`${calKey}-cal-grid`);
+        titleEl.textContent = `${MONTH_NAMES[view.month]} ${view.year}`;
+        gridEl.innerHTML = '';
+
+        ['S','M','T','W','T','F','S'].forEach(d => {
+          const header = document.createElement('div');
+          header.className = 'cal-day-header';
+          header.textContent = d;
+          gridEl.appendChild(header);
+        });
+
+        const firstDayIndex = new Date(view.year, view.month, 1).getDay();
+        const daysInMonth = new Date(view.year, view.month + 1, 0).getDate();
+
+        for (let i = 0; i < firstDayIndex; i++) {
+          const blank = document.createElement('div');
+          blank.className = 'cal-cell empty';
+          gridEl.appendChild(blank);
+        }
+
+        const selectedDateStr = calKey === 'formation' ? state.draft.formationDate : state.draft.bookkeepingStartDate;
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const cell = document.createElement('div');
+          const isoStr = `${view.year}-${String(view.month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          cell.className = 'cal-cell' + (isoStr === selectedDateStr ? ' selected' : '');
+          cell.textContent = d;
+          cell.onclick = () => {
+            const displayStr = `${MONTH_SHORT[view.month]} ${d}, ${view.year}`;
+            if (calKey === 'formation') {
+              state.draft.formationDate = isoStr;
+              document.getElementById('formation-date-display').textContent = displayStr;
+            } else {
+              state.draft.bookkeepingStartDate = isoStr;
+              document.getElementById('books-date-display').textContent = displayStr;
+            }
+            this.closeModals();
+          };
+          gridEl.appendChild(cell);
+        }
+      },
+
+      renderErrors() {
+        const ob02Error = document.getElementById('ob02-error');
+        const ob03Error = document.getElementById('ob03-error');
+        const nameInput = document.getElementById('llc-name-input');
+
+        if (state.errors.name) {
+          ob02Error.textContent = state.errors.name;
+          ob02Error.classList.add('active');
+          if (nameInput) nameInput.classList.add('error');
+        } else {
+          ob02Error.textContent = '';
+          ob02Error.classList.remove('active');
+          if (nameInput) nameInput.classList.remove('error');
+        }
+
+        if (state.errors.members) {
+          ob03Error.textContent = state.errors.members;
+          ob03Error.classList.add('active');
+        } else {
+          ob03Error.textContent = '';
+          ob03Error.classList.remove('active');
+        }
+      },
+
+      renderMembers() {
+        const container = document.getElementById('members-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        state.draft.members.forEach((member, idx) => {
+          const row = document.createElement('div');
+          row.className = 'member-row';
+
+          const initials = (member.name || '').trim().split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'M' + (idx + 1);
+
+          row.innerHTML = `
+            <div class="member-avatar">${initials}</div>
+            <input class="member-name-input" type="text" value="${member.name}" placeholder="Member name" oninput="window.pilot.updateMember(${idx}, 'name', this.value)" />
+            <div class="member-percent-container">
+              <input class="member-percent-input" type="text" value="${member.percent}" oninput="window.pilot.updateMember(${idx}, 'percent', this.value)" />
+              <span style="font-size:12.5px; color:var(--navy-muted);">%</span>
+            </div>
+            <button class="member-menu-btn" onclick="this.nextElementSibling.classList.toggle('active')">⋮</button>
+            <div class="member-menu-dropdown">
+              <button class="member-menu-item" onclick="window.pilot.removeMember(${idx})">Remove Member</button>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+
+        const toggleMulti = document.getElementById('toggle-multi');
+        const toggleSingle = document.getElementById('toggle-single');
+        const templateBar = document.getElementById('template-bar');
+        const addBtn = document.getElementById('add-member-btn');
+
+        if (state.draft.memberMode === 'single') {
+          toggleSingle.classList.add('active');
+          toggleMulti.classList.remove('active');
+          templateBar.style.display = 'none';
+          addBtn.style.display = 'none';
+        } else {
+          toggleMulti.classList.add('active');
+          toggleSingle.classList.remove('active');
+          templateBar.style.display = 'flex';
+          addBtn.style.display = 'flex';
+        }
+
+        this.renderMemberCalculations();
+      },
+
+      renderSummary() {
+        document.getElementById('summary-name').textContent = state.draft.name || '(Unspecified LLC)';
+        document.getElementById('summary-state').textContent = `${state.draft.formationStateDisplay} (${state.draft.formationState})`;
+        document.getElementById('summary-formation-date').textContent = state.draft.formationDate;
+        document.getElementById('summary-books-date').textContent = state.draft.bookkeepingStartDate;
+        document.getElementById('summary-classification').textContent = state.draft.taxClassificationDisplay;
+        document.getElementById('summary-members-count').textContent = `${state.draft.members.length} member${state.draft.members.length > 1 ? 's' : ''} (${this.calculateTotalPercent().toFixed(1)}%)`;
+      },
+
+      updateBadge() {
+        const badge = document.getElementById('state-badge');
+        if (badge) {
+          badge.textContent = `screen: ${state.currentScreen} | state: ${state.currentState}`;
+        }
+      },
+
+      render() {
+        // Switch visible screen container
+        document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+        const activeScreenEl = document.getElementById('screen-' + state.currentScreen.toLowerCase());
+        if (activeScreenEl) activeScreenEl.classList.add('active');
+
+        // Update Review toolbar buttons
+        document.querySelectorAll('.review-header .btn-group:first-child .btn').forEach((btn, idx) => {
+          const screens = ['OB-01', 'OB-02', 'OB-03', 'COMPLETE'];
+          if (screens[idx] === state.currentScreen) btn.classList.add('active');
+          else btn.classList.remove('active');
+        });
+
+        // Update OB-02 values
+        const nameInput = document.getElementById('llc-name-input');
+        if (nameInput) nameInput.value = state.draft.name || '';
+        const stateDisp = document.getElementById('state-display');
+        if (stateDisp) stateDisp.textContent = state.draft.formationStateDisplay || 'Delaware';
+
+        // Update OB-03
+        this.renderMembers();
+
+        // Update Summary
+        if (state.currentScreen === 'COMPLETE') {
+          this.renderSummary();
+        }
+
+        this.renderErrors();
+        this.updateBadge();
+      },
+
+      init() {
+        const params = new URLSearchParams(window.location.search);
+        const screenParam = params.get('screen');
+        const stateParam = params.get('state');
+        const captureParam = params.get('capture');
+
+        if (captureParam === '1') {
+          document.body.classList.add('capture-mode');
+        }
+
+        if (screenParam) {
+          this.goto(screenParam, stateParam || 'default');
+        } else {
+          this.goto('OB-01', 'default');
+        }
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.pilot.init();
+    });
+  </script>
+</body>
+</html>
