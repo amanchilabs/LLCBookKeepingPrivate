@@ -13,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "f2a76da7b1d16ca2e9c5a4f025e96ef7b1c719b7",
+  "head": "9419544d80a5a5f14a0f0ad4fe5d008a787af9df",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -370,6 +370,15 @@
         "typecheck": "PASS"
       },
       "verdict": "PASS"
+    },
+    {
+      "at": "2026-11-17T00:17:06.610836+00:00",
+      "event": "provider_exhaustion",
+      "profile": "claude-m5-llc-login",
+      "reason": "Local Claude session assistant error rate_limit at2026-11-17T00:15:35.754Z: five-hour limit",
+      "reported_reset": "8:50pm America/Los_Angeles",
+      "status": "WAITING_CAPACITY",
+      "story": "RECOVERY-003"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
@@ -383,7 +392,7 @@
   },
   "next": 2,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "READY",
+  "phase": "VALIDATING",
   "plan": {
     "id": "CAP-BOOK-RECOVERY-001",
     "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
@@ -586,10 +595,18 @@
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
   "provider_availability": {
     "builder": {
-      "at": "2026-11-17T00:00:45.519919+00:00",
-      "exit_code": 0,
+      "at": "2026-11-17T00:17:06.610836+00:00",
       "profile": "claude-m5-llc-login",
-      "status": "AVAILABLE"
+      "reason": "Local Claude session assistant error rate_limit at2026-11-17T00:15:35.754Z: five-hour limit",
+      "reported_reset": "8:50pm America/Los_Angeles",
+      "status": "WAITING_CAPACITY"
+    },
+    "builder_preferred": {
+      "at": "2026-11-17T00:17:06.610836+00:00",
+      "profile": "claude-m5-llc-login",
+      "reason": "Local Claude session assistant error rate_limit at2026-11-17T00:15:35.754Z: five-hour limit",
+      "reported_reset": "8:50pm America/Los_Angeles",
+      "status": "WAITING_CAPACITY"
     },
     "reviewer": {
       "context": "/root/recovery002_review",
@@ -647,7 +664,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "PAUSED",
+  "status": "BLOCKED",
   "stories": [
     {
       "checks": [
@@ -952,9 +969,15 @@
         "docs/recovery/VALIDATION.md"
       ],
       "id": "RECOVERY-003",
+      "provider_result": {
+        "exit_code": 1,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete recovery parity, isolated lifecycle and failure injection. Build non-UI restore orchestration around new modules. Always authenticate+validate before requesting isolated fresh candidate. Candidate local key comes from destination provisioning, never source key. No active catalog/device DB mutation or production activation in this milestone; return verified candidate only through explicit lifecycle contract, dispose rejected candidates and leave active source unchanged. Add native factory/non-UI integration if possible using existing SQLCipher/storage lease APIs WITHOUT altering proof store or UI; do not invent unsafe default adapter. A checked candidate must have complete row/relationship/history parity and balanced existing journal/report/reconciliation totals before eligibility. Create deterministic multi-workspace synthetic fixtures via existing domain/store APIs covering every supported table including reversal/correction, capital, guaranteed payments, loans/reversals, recurring, splits, reconciliation events and closed/reopened periods. Restore an actual encrypted backup into an isolated fresh file-backed DB with different synthetic destination key identity; compare complete rows and existing cash/P&L, balance/trial/general ledger and reconciliation reports. Tests inject failures at decrypt, candidate provision, schema, row import, verification and cleanup; verify original files/rows not modified, rejected target not published, cleanup failure surfaced and no active switch. Exercise meaningful supported legacy schema migration using existing migrations only on isolated candidate; unsupported newer schemas fail closed and source bytes stay unchanged. If legacy payload migration is not implemented, reject explicitly and document rather than claiming support. Document host plain SQLite versus native SQLCipher/device limits and exact reproducible coordinator validation commands. No user accessible controls; no simulator/physical-device commands or modifications.",
       "review_required": true,
-      "status": "READY",
+      "source": "9419544d80a5a5f14a0f0ad4fe5d008a787af9df",
+      "status": "VALIDATION",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",
@@ -980,6 +1003,7 @@
         ]
       ],
       "validation_resources": [],
+      "visual_contracts": [],
       "visual_screens": []
     }
   ],
