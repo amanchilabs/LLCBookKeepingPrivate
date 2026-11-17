@@ -9,10 +9,10 @@
     "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
     "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
   },
-  "head": "2c9b88ccdcb90da3993636f4a095be957d20310f",
+  "head": "3d28218687e8aff892091fd7601deaa8de028702",
   "history": [],
   "id": "run-ba8c3f6a7656417f",
-  "next": 0,
+  "next": 1,
   "owner": "f7b8f9f975334b90be3163286280852e",
   "phase": "READY",
   "plan": {
@@ -99,6 +99,14 @@
     "timeout_seconds": 1000
   },
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
+  "provider_availability": {
+    "builder": {
+      "at": "2026-11-17T03:02:43.211062+00:00",
+      "exit_code": 0,
+      "profile": "agy-m5-llc-secondary",
+      "status": "AVAILABLE"
+    }
+  },
   "review_profile": {
     "allow_paid_fallback": false,
     "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
@@ -139,17 +147,58 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "READY",
+  "status": "COMPLETE",
   "stories": [
     {
+      "checks": [
+        {
+          "argv": [
+            "python3",
+            "-c",
+            "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2d.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} and p['file']=='index.html' for p in x['patches']);assert set(x['documents'])=={'RATIONALE.md','COVERAGE.md','DECISIONS.md'}"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
       "depends_on": [],
+      "evidence": ".foundry/evidence/CAP-BOOK-DESIGN-REVIEW-R2D/run-ba8c3f6a7656417f/DESIGN-REVIEW-R2D.json",
       "files": [
         "docs/design/pilot-20261116/corrections-r2d.json"
       ],
       "id": "DESIGN-REVIEW-R2D",
+      "provider_result": {
+        "exit_code": 0,
+        "provider_usage": {
+          "credit_overages": false,
+          "model": "gemini-3.8-flash-high",
+          "provider": "agy",
+          "usage": {
+            "cache_read_tokens": 3281116,
+            "input_tokens": 228015,
+            "output_tokens": 86854,
+            "thinking_tokens": 66256,
+            "total_tokens": 314869
+          }
+        },
+        "stderr_sha256": "900360e2a63fe8c462604196160d8701d705bd23720e2d33718e900523b30938",
+        "stdout_sha256": "8d8844c8493de382f3341bf9570d558472aa89817a6a028441ee19f99b998170"
+      },
       "purpose": "AUTHORIZED BOUNDED DESIGN-ARTIFACT CORRECTION, NO NATIVE IMPLEMENTATION. Read actual prototype/index.html andREVIEW-R2C.md. WriteONLY docs/design/pilot-20261116/corrections-r2d.json JSON {\"base_package_sha256\":\"3ebd825d581a44f11bc80790b1358650bdf8067aad0d9aef32fd1884f8842672\",\"patches\":[{\"file\":\"index.html\",\"old\":\"unique exact literal\",\"new\":\"replacement literal\"}],\"documents\":{\"RATIONALE.md\":\"complete SHORT accurate replacement Markdown\",\"COVERAGE.md\":\"complete SHORT accurate field/control/nativegap A/B/C matrix\",\"DECISIONS.md\":\"complete SHORT pendingowner decisionregister\"}}. Coordinator mechanicallyapplies authoredliterals andmaterializes. No shell/commands/Git/tests/agents/native/source edits. DoNOTregenerate110KBwholeHTML. Keep~10focusedHTMLpatches andconcise3MD(avoidoldMDreprint;documentsprotocolreplacesliteralcontents). FixALLconsolidatedindependentreviewfindings: Independent read-only Codex /root/book_pilot_review REQUEST_CHANGES at97575e72d7a7d9e0cbdc6d000a92586078774be3; actual15PNG + ownercomparisons inspected, manifeste75dbb7cef04259d9abddeeb50a589a3d7cfbcd27a630d9a6e4c242b50043b3d verified. CRITICAL: normal submitOB03 saveslegitimate single-member, then goto COMPLETE,'summary' treats <=1member asdemo and applyTemplate+confirmationtrue+save overwrites sameIDwith4demomembers! Separate explicitdemo specimen initialization from NORMALnonmutatingnavigation. Preserve actualsingle/multimembernames,pct,class,dates,confirmation andsavedworkspaceidentical. HIGH OB02classificationtrigger y460..500 outsidecardbottom493(ref445). HIGH OB03validationerrorbannercoversinfo+confirmation(y566..607); defaultinvalidtotalwrapsoverAddat484. MEDIUM modal6Tabsescapeexternaltoolbarwhileopen, nodialogroles/focuscontainment; backgroundmustinactive, labelleddialogs, Escape/focusreturn anddescriptivefieldnames. MEDIUM missingstate/dateerroruseserrors.name redhighlightsvalidname; per-field errors+aria-invalid/aria-describedby andalertstatus. MEDIUM OB01middlewaveflatmintcontinuesentireintro/cards vsreffadestonearwhite. MEDIUM docsoutdated36pxbar,y14nav,reference'approved',privacyA,absentallocationdisclaimerclaims; legaladequacyUNVERIFIEDnot'notlegallydefensible'. Actualnative apps/mobile/bookkeeping/BusinessSetupScreen.tsx HASwelcome plus4numberedsteps; nofieldtaxclassification. MEDIUM OB02completedpresetfallsblank (onlyselected/populated hydrate). MINOR logorectboundary/vectoricons/calendarleadingicon/circulartotalcheck/featuretextwrapping differ; refineanddisclose. Responsive320attemptactualinnerWidth347NOT320certified. All64receipts/nativeunchanged. REQUIRED handling: normalgotoCOMPLETEsummarydoesNOTpopulate/confirm/modifydata/saveagain; submit'soriginalvalidsavepreserved. Explicitdemo'completed'presetsseparate, OB02completedpopulatedasselected. Noautoconfirmonrealnavigation. Errorstate mayreflow/scrollorderly(insteadfixedanchors)toavoidcollisions; normalreference-selectedgeometrymuststay. Shortdefaulttotalstringfitsoneline; fullerrorseparate. Placeclasslabel~427/input445h40 withinformend493 (currentCSScardpaddingabsolutechildoffsetcauses+15overflow; measureboxsizing). DialogfocuscontainmentTab/ShiftTab, role=dialog aria-modal labelledtitle, inactivebackgroundcontrolswhileopen, Escapeandtriggerrestore; doNOTinertdialogitselfsinceinsidephone. Correctper-fieldvalidationandassociatedreadableerror. FadeOB01middlewaveusingverticalgradienttoconvergetowhitebehindcardsnotflatwash; preserveoutlineandbottomwave. Nativecalendarcontrolsareprototypebuttonsnotproofnativewidget. Retainall24currentbrowserbehaviorsANDsingle-memberexactpreservation. DoNOTchangebookkeepingdateordering/security/accountingsemantics, realdata forbidden. Docsnewshortmatrixmustactualfields, nativecurrentmodel/persistencegaps, privacy/CPA/step/skip/confirmationownerpending. ReferenceauthoritativeNOTproposalapproved. Noexactowner/nativecertificationclaim. For320width eitherfixnormalreviewwrapperfitwithoutchanging372target ORexplicitlimitation; neverclaim320passfrom347viewport. Outputnaturallywithinexisting15minlimit.",
       "review_required": false,
-      "status": "READY",
+      "source": "3d28218687e8aff892091fd7601deaa8de028702",
+      "status": "DONE",
       "validation": [
         [
           "python3",
@@ -163,6 +212,7 @@
         ]
       ],
       "validation_resources": [],
+      "visual_contracts": [],
       "visual_screens": []
     }
   ],

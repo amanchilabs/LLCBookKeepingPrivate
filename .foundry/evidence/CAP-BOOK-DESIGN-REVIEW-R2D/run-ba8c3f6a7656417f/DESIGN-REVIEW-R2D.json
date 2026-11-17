@@ -1,0 +1,58 @@
+{
+  "branch": "feature/reference-design-pilot-20261116",
+  "capability": "CAP-BOOK-DESIGN-REVIEW-R2D",
+  "checks": [
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2d.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} and p['file']=='index.html' for p in x['patches']);assert set(x['documents'])=={'RATIONALE.md','COVERAGE.md','DECISIONS.md'}"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
+    "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
+  },
+  "id": "DESIGN-REVIEW-R2D",
+  "profile": "agy-m5-llc-secondary",
+  "provider_result": {
+    "exit_code": 0,
+    "provider_usage": {
+      "credit_overages": false,
+      "model": "gemini-3.8-flash-high",
+      "provider": "agy",
+      "usage": {
+        "cache_read_tokens": 3281116,
+        "input_tokens": 228015,
+        "output_tokens": 86854,
+        "thinking_tokens": 66256,
+        "total_tokens": 314869
+      }
+    },
+    "stderr_sha256": "900360e2a63fe8c462604196160d8701d705bd23720e2d33718e900523b30938",
+    "stdout_sha256": "8d8844c8493de382f3341bf9570d558472aa89817a6a028441ee19f99b998170"
+  },
+  "review": null,
+  "run": "run-ba8c3f6a7656417f",
+  "source": "3d28218687e8aff892091fd7601deaa8de028702",
+  "status": "VALIDATED",
+  "timestamp": "2026-11-17T03:02:43.361379+00:00",
+  "visual_contracts": [],
+  "visual_verification": null
+}
