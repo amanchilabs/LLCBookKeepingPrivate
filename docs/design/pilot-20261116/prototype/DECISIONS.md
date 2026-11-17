@@ -1,19 +1,22 @@
 # Visual Design Pilot Decisions (2026-11-16)
 
-## 1. CPA Workpapers and Representation Claims
-- **Decision**: Replace unqualified reference claims like "CPA-ready" with precise, legally defensible wording: "clear bookkeeping workpapers for a CPA" or "CPA workpapers".
-- **Governance Rationale**: In accordance with `CLAUDE.md`, the application is an offline bookkeeping tool for business owners, not a CPA firm, tax return preparer, or guarantor of tax outcomes. Promising that records are automatically tax-ready or filing-compliant creates regulatory exposure.
-- **Implementation**: Feature card 3 on `OB-01` and informational disclaimers in `OB-02`/`OB-03` clearly state that reports represent bookkeeping records intended for CPA review.
+## 1. CPA Workpapers and Privacy/Security Representation Claims (PENDING Owner C Decision)
+- **Status**: Proposal only — PENDING Owner C Decision. Not settled or legally defensible.
+- **Proposal**: Qualify reference claims like "CPA-ready" and device-only privacy claims with prototype wording ("clear bookkeeping workpapers for a CPA").
+- **Governance Rationale**: In accordance with `CLAUDE.md`, the application is an offline bookkeeping tool for business owners, not a CPA firm, tax return preparer, or guarantor of tax outcomes. Final claim copy requires explicit Owner C decision.
+- **Implementation**: Feature card 3 on `OB-01` and informational disclaimers in `OB-02`/`OB-03` present prototype proposal text pending owner review.
 
-## 2. Retention and Scope of the Tax Classification Selector
-- **Decision**: Retain the visual tax-classification selector on screen `OB-02` per the Owner's explicit 2026-11-16 instruction, but replace the mockup's misleading "Partnership (default)" with an honest unset choice: "Unknown / not yet determined".
-- **Governance Rationale**: Single-member and multi-member LLCs have distinct default classifications under IRS rules (disregarded entity vs. partnership), but owners may elect corporate taxation (Form 8832 / 2553). Inferring a tax classification or election without CPA consultation violates the product boundary.
-- **Data Architecture**: Tax classification is treated strictly as self-reported metadata for reports, not an active database election. No native database schema migration is implemented in this design-only pilot.
+## 2. Retention and Scope of the Tax Classification Selector (PENDING Owner C Decision)
+- **Status**: Metadata proposal only — PENDING Owner C Decision. Not settled or legally determined.
+- **Proposal**: Retain the visual tax-classification selector on screen `OB-02` per the Owner's explicit 2026-11-16 instruction, with an honest unset choice: "Unknown / not yet determined".
+- **Governance Rationale**: Single-member and multi-member LLCs have distinct default classifications under IRS rules, but owners may elect corporate taxation. Classification options are strictly self-reported metadata proposals pending Owner C decision.
+- **Data Architecture**: No database schema migration or automatic tax determination is implemented.
 
-## 3. Strict Separation of Ownership from Tax and Economic Allocations
-- **Decision**: Ownership percentages are displayed and recorded strictly as governance/equity ownership interests. They do NOT dictate automatic income, expense, profit, loss, or cash distribution allocations.
-- **Governance Rationale**: Partnership tax rules (IRC Subchapter K) permit special allocations that often differ from nominal ownership percentages. Assuming ownership equals allocation produces incorrect capital ledgers and misleading CPA workpapers.
-- **Implementation**: `OB-03` requires explicit owner confirmation of ownership interests and provides prominent disclaimer banners explaining that ownership is not a profit/tax allocation rule.
+## 3. Strict Separation of Ownership from Tax and Confirmation Placement (PENDING Owner C Decision)
+- **Status**: UI placement proposal only — PENDING Owner C Decision. Not settled.
+- **Proposal**: Ownership percentages represent governance/equity interests only. Explicit owner confirmation checkbox is positioned in the visual gap near y594 without displacing the CTA.
+- **Governance Rationale**: Partnership tax rules permit special allocations differing from equity percentages. Confirmation placement and exact policy remain pending Owner C approval.
+- **Implementation**: `OB-03` positions the functional confirmation checkbox near y594 with disclaimer banners explaining ownership is not an allocation rule.
 
 ## 4. Historical Bookkeeping Start Date & Pre-Formation Expenses
 - **Decision**: Allow the bookkeeping start date to precede the legal formation date.

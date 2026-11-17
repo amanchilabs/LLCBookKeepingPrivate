@@ -4,7 +4,7 @@
 - **Authority**: Bounded authorization under `CAP-BOOK-DESIGN-PILOT-20261116` approved on 2026-11-16. Final state remains `WAITING_APPROVAL`.
 - **Scope**: Authoring standalone, browser-rendered visual design artifacts (`index.html`, `RATIONALE.md`, `COVERAGE.md`, `DECISIONS.md`). Native UI implementation, schema migrations, and storage modifications are strictly forbidden.
 - **Dependencies**: Pure, self-contained HTML5, CSS3, and JavaScript. No external fonts, CDN assets, or network endpoints are utilized.
-- **Privacy & Security**: Zero remote financial transmissions or data capture. Complies with the local-only, synthetic-only principles mandated in `CLAUDE.md`.
+- **Privacy & Security**: Zero remote financial transmissions or data capture. Security/private claim copy, classification options, and confirmation placement are prototype proposals PENDING Owner C decision (not settled or legally defensible).
 
 ## 2. Geometric Anchors & Raster Reference Reconstruction
 Reconstruction maps the canonical reference screenshots (`Private LLC Bookkeeping Onboarding.png`, `LLC Setup Onboarding Screen.png`, `LLC Members and Ownership Setup.png`), each sized 1024×1536 px.

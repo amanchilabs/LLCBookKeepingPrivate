@@ -6,7 +6,7 @@ This matrix documents every visual element, form field, interactive control, and
 ### Classification Legend
 - **A (Visual Parity)**: Faithfully reconstructs approved owner raster references within the 372×732 CSS viewport.
 - **B (New UI Function)**: Interactive browser prototype capability (e.g. interactive calendar picker, multi-workspace isolation).
-- **C (Governance / Product Decision)**: Architectural or compliance decision aligning with `CLAUDE.md` and owner instructions.
+- **C (Governance / Product Decision)**: PENDING Owner C Decision (prototype proposal only; not settled or legally defensible).
 
 ---
 
