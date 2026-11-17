@@ -9,8 +9,44 @@
     "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
     "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
   },
-  "head": "4610c66f2fd5df85916eb0e2afdfcc40f0ea8fb2",
-  "history": [],
+  "head": "d33c9f12763d339c64d4d32a18b43e1daeb8b7b9",
+  "history": [
+    {
+      "at": "2026-11-17T02:09:25.462037+00:00",
+      "event": "bounded_artifact_output_revision_after_timeout",
+      "new_target": "docs/design/pilot-20261116/corrections-r2a.json",
+      "old_plan": {
+        "id": "CAP-BOOK-DESIGN-PILOT-R2",
+        "scope": "Owner-approved DESIGN ARTIFACT AUTHORING ONLY. Native UI implementation is forbidden. Read docs/design/pilot-20261116/BRIEF.md in full. Write exactly one JSON artifact package. No commands/tests/builds/Git/agents, no other files or dependencies. Independent design review happens only AFTER coordinator renders and exercises the package; this authoring Story cannot approve designs.",
+        "stories": [
+          {
+            "depends_on": [],
+            "files": [
+              "docs/design/pilot-20261116/package.json"
+            ],
+            "id": "DESIGN-CORRECTION-R2",
+            "purpose": "OWNER-AUTHORIZED DESIGN ARTIFACT CORRECTION ONLY. Read BRIEF and REVIEW-R1.md, actual reference PNGs and diagnosticTEMP PNGs; fix existing package.json ONLY, nootherfiles/commands/tests/native/Git/agents. Preserve all native source. Do not write anothergeneric redesign. Independent read-only Codex /root/book_pilot_review REQUEST_CHANGES for R1 source d5ba478737822919247c21840be70e2d248227e3. Actual rendered OB01/02/03 PNGs blank (DOMids screen-ob01, renderlooksfor screen-ob-01). DiagnosticTEMP images are liveDOMpatched only, not acceptance. HIGH: default/secondLLC prefill DE/dates/namedmembers/confirmedtrue; templates/mode auto-confirm. submitOB02 validates nameonly; validate selected supportedstate+ISOcalendardates, no formation/startordering. submitOB03 uses parseFloat allowing invalid/negative/>2decimal percentages/blanknames; use same exact integerbasispoint rules asdomain, total100%. Classificationdisplay addsmembership/election implications; exactneutral labels only. Goto missingselected/completed/validationaliases. Empty state displayfallsthroughDelaware. VisualHIGH: OB01Skipoverlapsstatus; logo doubleframed; descriptionsellipsized, wrongwaves. OB02progressx46..319 versusref109..272; formtop184 vs201; bookslabelwrap anddatebaseline16pxmisaligned; CTA664 vs627. OB03list283..496 vsref285..445 (~53pxto otall), pushes total510vs457/add532vs484/info602vs534/CTA664vs635; namefieldsboxedinsteadcleaneditabletext; templatewraps. MEDIUM: docs claimpendingcopydecisionssettled/'legallydefensible', validdatevalidation/emptySkipfieldsnotactuallypresent. Noownerapproval/nativecertification. REQUIRED corrections: standardizeactualDOMscreen IDs andqueryrenderer; supportBRIEF queryselected/completed/default/validationstates, allpickers visiblyopen. Defaultsfirst/secondLLC blankbusinessfields/unconfirmedownership, selectedpresetsfill referenceexamples separately. Neverauto-confirmtemplateormode/memberchanges. Unknownclassificationnoinference labels exactlyNotselected/Unknownnotyetdetermined/Disregardedentity/Partnership/Corporation (no membership/electionparentheticals). Allfields/date/membervalidation equivalentexistingdomain; keepvaluesaftererror/back. Escape usernames/percenttext inHTMLattributes orusevalue/textContent. Neverdelete existingworkspace; switch backshowspriorvalues. For fidelity use referencecoordinates fromBRIEF ratherthancurrentflexshifting: setupnavy54; progressy98 trackx109..272; OB02header(20,125); form(14,201,346,292), left+right dateinputs BOTH y373 withfont~12singlelinelabels; primarybutton actualrect(24,627,324,48), infoy507. OB03list(17,285,338,160), four40pxrows unboxededitablemembernames; templatey239 singlelinecompactfont12, totaly457, AddMemberx73,y484,w230,h36; explicitconfirmationcheckboxadditionalCdecisionfitnearinfo withoutpushingreferenceCTA635; infoy534. OB01Skiptop52 NOT14; actualreferenceillustration110x100 noouterwhiteframe/padding; fullfeaturetextwrap noellipsis (lastcard~62high), referencegreensagewaves NOTdiagonalcornerblocks. Approxbackgroundpathsetup M0,604 C80,565 96,584 170,597 C240,615 278,571 372,570 L372,732 L0,732Z; OB01 additionally midwaveM0,281 C100,278 125,345 230,280 C285,230 325,195 372,180. Transparentpalegreengradientblendswhite asactualimage. Do notintroduce solidgreenheader. Preservemobile viewport372x732 andactualcontrols. Markcopy/security/tax options asownerPENDING Cproposals, nolegalcertification. ReturncompletecorrectedJSONartifactpackagenot justreport.",
+            "review_required": false,
+            "validation": [
+              [
+                "python3",
+                "-c",
+                "import json,pathlib; x=json.loads(pathlib.Path('docs/design/pilot-20261116/package.json').read_text()); assert set(x)=={'files'}; assert set(x['files'])=={'index.html','RATIONALE.md','COVERAGE.md','DECISIONS.md'}; assert all(isinstance(v,str) and v for v in x['files'].values()); assert '<html' in x['files']['index.html'].lower()"
+              ],
+              [
+                "git",
+                "diff",
+                "--check"
+              ]
+            ],
+            "validation_resources": [],
+            "visual_screens": []
+          }
+        ]
+      },
+      "reason": "15min existing adapter timeout; no files changed; split same authorized design scope into literal patch packets. No permission/profile/billing changes."
+    }
+  ],
   "id": "run-466c23f623444780",
   "next": 0,
   "owner": "f7b8f9f975334b90be3163286280852e",
@@ -22,16 +58,16 @@
       {
         "depends_on": [],
         "files": [
-          "docs/design/pilot-20261116/package.json"
+          "docs/design/pilot-20261116/corrections-r2a.json"
         ],
         "id": "DESIGN-CORRECTION-R2",
-        "purpose": "OWNER-AUTHORIZED DESIGN ARTIFACT CORRECTION ONLY. Read BRIEF and REVIEW-R1.md, actual reference PNGs and diagnosticTEMP PNGs; fix existing package.json ONLY, nootherfiles/commands/tests/native/Git/agents. Preserve all native source. Do not write anothergeneric redesign. Independent read-only Codex /root/book_pilot_review REQUEST_CHANGES for R1 source d5ba478737822919247c21840be70e2d248227e3. Actual rendered OB01/02/03 PNGs blank (DOMids screen-ob01, renderlooksfor screen-ob-01). DiagnosticTEMP images are liveDOMpatched only, not acceptance. HIGH: default/secondLLC prefill DE/dates/namedmembers/confirmedtrue; templates/mode auto-confirm. submitOB02 validates nameonly; validate selected supportedstate+ISOcalendardates, no formation/startordering. submitOB03 uses parseFloat allowing invalid/negative/>2decimal percentages/blanknames; use same exact integerbasispoint rules asdomain, total100%. Classificationdisplay addsmembership/election implications; exactneutral labels only. Goto missingselected/completed/validationaliases. Empty state displayfallsthroughDelaware. VisualHIGH: OB01Skipoverlapsstatus; logo doubleframed; descriptionsellipsized, wrongwaves. OB02progressx46..319 versusref109..272; formtop184 vs201; bookslabelwrap anddatebaseline16pxmisaligned; CTA664 vs627. OB03list283..496 vsref285..445 (~53pxto otall), pushes total510vs457/add532vs484/info602vs534/CTA664vs635; namefieldsboxedinsteadcleaneditabletext; templatewraps. MEDIUM: docs claimpendingcopydecisionssettled/'legallydefensible', validdatevalidation/emptySkipfieldsnotactuallypresent. Noownerapproval/nativecertification. REQUIRED corrections: standardizeactualDOMscreen IDs andqueryrenderer; supportBRIEF queryselected/completed/default/validationstates, allpickers visiblyopen. Defaultsfirst/secondLLC blankbusinessfields/unconfirmedownership, selectedpresetsfill referenceexamples separately. Neverauto-confirmtemplateormode/memberchanges. Unknownclassificationnoinference labels exactlyNotselected/Unknownnotyetdetermined/Disregardedentity/Partnership/Corporation (no membership/electionparentheticals). Allfields/date/membervalidation equivalentexistingdomain; keepvaluesaftererror/back. Escape usernames/percenttext inHTMLattributes orusevalue/textContent. Neverdelete existingworkspace; switch backshowspriorvalues. For fidelity use referencecoordinates fromBRIEF ratherthancurrentflexshifting: setupnavy54; progressy98 trackx109..272; OB02header(20,125); form(14,201,346,292), left+right dateinputs BOTH y373 withfont~12singlelinelabels; primarybutton actualrect(24,627,324,48), infoy507. OB03list(17,285,338,160), four40pxrows unboxededitablemembernames; templatey239 singlelinecompactfont12, totaly457, AddMemberx73,y484,w230,h36; explicitconfirmationcheckboxadditionalCdecisionfitnearinfo withoutpushingreferenceCTA635; infoy534. OB01Skiptop52 NOT14; actualreferenceillustration110x100 noouterwhiteframe/padding; fullfeaturetextwrap noellipsis (lastcard~62high), referencegreensagewaves NOTdiagonalcornerblocks. Approxbackgroundpathsetup M0,604 C80,565 96,584 170,597 C240,615 278,571 372,570 L372,732 L0,732Z; OB01 additionally midwaveM0,281 C100,278 125,345 230,280 C285,230 325,195 372,180. Transparentpalegreengradientblendswhite asactualimage. Do notintroduce solidgreenheader. Preservemobile viewport372x732 andactualcontrols. Markcopy/security/tax options asownerPENDING Cproposals, nolegalcertification. ReturncompletecorrectedJSONartifactpackagenot justreport.",
+        "purpose": "SMALL OWNER-AUTHORIZED DESIGN ARTIFACT PATCH ONLY. Previous fullpackage rewrite timedout15minwithNOchanges. Do NOT reread/regenerate2000lineJSONpackage. Read current readable prototype/index.html only relevant functions near1500-2040; read domain validation ifneeded. Nativeappsourceforbidden. WriteONLY docs/design/pilot-20261116/corrections-r2a.json smallJSON with shape {\"base_package_sha256\":\"777d0bb5e77076bd3ccd03fda035454d7a511e0c3555675f2b1e3f3a389e0cf8\",\"patches\":[{\"file\":\"index.html\",\"old\":\"exact unique existing literal substring\",\"new\":\"replacement literal\"}]}. Coordinator mechanicallyapplies these literals to provider-authoredpackage, no generatedcodeexecution. oldstringmustoccur exactlyONCE, useenoughcontext; no duplicatepatchtargets. PatchcontentcontainsactualauthoredHTML/JS, no Python/programgenerator. No commands/tests/Git/agents/native/otherfiles. Limitthispass to behavior; visualCSSnextpass. FIX: renderlookup screenids mismatch blank (screen-ob01 vs screen-ob-01). Add workingselected/completed/error queryaliases asBRIEF; initialize actualvisiblefieldsfromstate. First/secondLLC businessfields empty(state/date placeholdersnotDelaware), unknownclassification honestunset; selecteddemo presetsseparatefromactualemptyflow; memberconfirmationfalse initially/aftertemplate/mode/memberedits, neverauto-confirm. OB02validate requiredname/normalizedsupportedstate/validcalendarISOdates, NO formation/startordering. OB03validatemembernames and exact0..100percent max2decimals/integerbasispointtotal100 (noparseFloatgarbage/negative/extra decimals), confirmationexplicit. Neutralclassification labels exactlyNotselected/Unknownnotyetdetermined/Disregardedentity/Partnership/Corporation; nomembership/electionparentheticals orauto inference. Escapeusernames/percentHTMLattributes oruseDOMvalue/textContent. Need actualworkspace-switch UI oncompletedprototype (notnative): keepclonedsavedworkspaces, AddanotherLLC isemptynewid, selectable priorworkspaces showownsaveddata unchanged. Do notskipvalidation orclaimlegalsafety. Atmost~12focusedliteralpatches; keepoutputsmallenoughtofinish. ReturnnaturallyafterwritingJSON. DoNOTmodify package.json directly; coordinatorowns literalapplication/materialization.",
         "review_required": false,
         "validation": [
           [
             "python3",
             "-c",
-            "import json,pathlib; x=json.loads(pathlib.Path('docs/design/pilot-20261116/package.json').read_text()); assert set(x)=={'files'}; assert set(x['files'])=={'index.html','RATIONALE.md','COVERAGE.md','DECISIONS.md'}; assert all(isinstance(v,str) and v for v in x['files'].values()); assert '<html' in x['files']['index.html'].lower()"
+            "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2a.json').read_text());assert set(x)=={'base_package_sha256','patches'};assert x['patches'];assert all(set(p)=={'file','old','new'} and p['file'] in ['index.html','RATIONALE.md','COVERAGE.md','DECISIONS.md'] for p in x['patches'])"
           ],
           [
             "git",
@@ -139,22 +175,27 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "READY",
+  "status": "PAUSED",
   "stories": [
     {
       "depends_on": [],
       "files": [
-        "docs/design/pilot-20261116/package.json"
+        "docs/design/pilot-20261116/corrections-r2a.json"
       ],
       "id": "DESIGN-CORRECTION-R2",
-      "purpose": "OWNER-AUTHORIZED DESIGN ARTIFACT CORRECTION ONLY. Read BRIEF and REVIEW-R1.md, actual reference PNGs and diagnosticTEMP PNGs; fix existing package.json ONLY, nootherfiles/commands/tests/native/Git/agents. Preserve all native source. Do not write anothergeneric redesign. Independent read-only Codex /root/book_pilot_review REQUEST_CHANGES for R1 source d5ba478737822919247c21840be70e2d248227e3. Actual rendered OB01/02/03 PNGs blank (DOMids screen-ob01, renderlooksfor screen-ob-01). DiagnosticTEMP images are liveDOMpatched only, not acceptance. HIGH: default/secondLLC prefill DE/dates/namedmembers/confirmedtrue; templates/mode auto-confirm. submitOB02 validates nameonly; validate selected supportedstate+ISOcalendardates, no formation/startordering. submitOB03 uses parseFloat allowing invalid/negative/>2decimal percentages/blanknames; use same exact integerbasispoint rules asdomain, total100%. Classificationdisplay addsmembership/election implications; exactneutral labels only. Goto missingselected/completed/validationaliases. Empty state displayfallsthroughDelaware. VisualHIGH: OB01Skipoverlapsstatus; logo doubleframed; descriptionsellipsized, wrongwaves. OB02progressx46..319 versusref109..272; formtop184 vs201; bookslabelwrap anddatebaseline16pxmisaligned; CTA664 vs627. OB03list283..496 vsref285..445 (~53pxto otall), pushes total510vs457/add532vs484/info602vs534/CTA664vs635; namefieldsboxedinsteadcleaneditabletext; templatewraps. MEDIUM: docs claimpendingcopydecisionssettled/'legallydefensible', validdatevalidation/emptySkipfieldsnotactuallypresent. Noownerapproval/nativecertification. REQUIRED corrections: standardizeactualDOMscreen IDs andqueryrenderer; supportBRIEF queryselected/completed/default/validationstates, allpickers visiblyopen. Defaultsfirst/secondLLC blankbusinessfields/unconfirmedownership, selectedpresetsfill referenceexamples separately. Neverauto-confirmtemplateormode/memberchanges. Unknownclassificationnoinference labels exactlyNotselected/Unknownnotyetdetermined/Disregardedentity/Partnership/Corporation (no membership/electionparentheticals). Allfields/date/membervalidation equivalentexistingdomain; keepvaluesaftererror/back. Escape usernames/percenttext inHTMLattributes orusevalue/textContent. Neverdelete existingworkspace; switch backshowspriorvalues. For fidelity use referencecoordinates fromBRIEF ratherthancurrentflexshifting: setupnavy54; progressy98 trackx109..272; OB02header(20,125); form(14,201,346,292), left+right dateinputs BOTH y373 withfont~12singlelinelabels; primarybutton actualrect(24,627,324,48), infoy507. OB03list(17,285,338,160), four40pxrows unboxededitablemembernames; templatey239 singlelinecompactfont12, totaly457, AddMemberx73,y484,w230,h36; explicitconfirmationcheckboxadditionalCdecisionfitnearinfo withoutpushingreferenceCTA635; infoy534. OB01Skiptop52 NOT14; actualreferenceillustration110x100 noouterwhiteframe/padding; fullfeaturetextwrap noellipsis (lastcard~62high), referencegreensagewaves NOTdiagonalcornerblocks. Approxbackgroundpathsetup M0,604 C80,565 96,584 170,597 C240,615 278,571 372,570 L372,732 L0,732Z; OB01 additionally midwaveM0,281 C100,278 125,345 230,280 C285,230 325,195 372,180. Transparentpalegreengradientblendswhite asactualimage. Do notintroduce solidgreenheader. Preservemobile viewport372x732 andactualcontrols. Markcopy/security/tax options asownerPENDING Cproposals, nolegalcertification. ReturncompletecorrectedJSONartifactpackagenot justreport.",
+      "provider_result": {
+        "exit_code": 1,
+        "stderr_sha256": "806369e188b77f368bf0b15b3367348ae31984b7c3bee44e1b36ea62e4c4366a",
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "purpose": "SMALL OWNER-AUTHORIZED DESIGN ARTIFACT PATCH ONLY. Previous fullpackage rewrite timedout15minwithNOchanges. Do NOT reread/regenerate2000lineJSONpackage. Read current readable prototype/index.html only relevant functions near1500-2040; read domain validation ifneeded. Nativeappsourceforbidden. WriteONLY docs/design/pilot-20261116/corrections-r2a.json smallJSON with shape {\"base_package_sha256\":\"777d0bb5e77076bd3ccd03fda035454d7a511e0c3555675f2b1e3f3a389e0cf8\",\"patches\":[{\"file\":\"index.html\",\"old\":\"exact unique existing literal substring\",\"new\":\"replacement literal\"}]}. Coordinator mechanicallyapplies these literals to provider-authoredpackage, no generatedcodeexecution. oldstringmustoccur exactlyONCE, useenoughcontext; no duplicatepatchtargets. PatchcontentcontainsactualauthoredHTML/JS, no Python/programgenerator. No commands/tests/Git/agents/native/otherfiles. Limitthispass to behavior; visualCSSnextpass. FIX: renderlookup screenids mismatch blank (screen-ob01 vs screen-ob-01). Add workingselected/completed/error queryaliases asBRIEF; initialize actualvisiblefieldsfromstate. First/secondLLC businessfields empty(state/date placeholdersnotDelaware), unknownclassification honestunset; selecteddemo presetsseparatefromactualemptyflow; memberconfirmationfalse initially/aftertemplate/mode/memberedits, neverauto-confirm. OB02validate requiredname/normalizedsupportedstate/validcalendarISOdates, NO formation/startordering. OB03validatemembernames and exact0..100percent max2decimals/integerbasispointtotal100 (noparseFloatgarbage/negative/extra decimals), confirmationexplicit. Neutralclassification labels exactlyNotselected/Unknownnotyetdetermined/Disregardedentity/Partnership/Corporation; nomembership/electionparentheticals orauto inference. Escapeusernames/percentHTMLattributes oruseDOMvalue/textContent. Need actualworkspace-switch UI oncompletedprototype (notnative): keepclonedsavedworkspaces, AddanotherLLC isemptynewid, selectable priorworkspaces showownsaveddata unchanged. Do notskipvalidation orclaimlegalsafety. Atmost~12focusedliteralpatches; keepoutputsmallenoughtofinish. ReturnnaturallyafterwritingJSON. DoNOTmodify package.json directly; coordinatorowns literalapplication/materialization.",
       "review_required": false,
       "status": "READY",
       "validation": [
         [
           "python3",
           "-c",
-          "import json,pathlib; x=json.loads(pathlib.Path('docs/design/pilot-20261116/package.json').read_text()); assert set(x)=={'files'}; assert set(x['files'])=={'index.html','RATIONALE.md','COVERAGE.md','DECISIONS.md'}; assert all(isinstance(v,str) and v for v in x['files'].values()); assert '<html' in x['files']['index.html'].lower()"
+          "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2a.json').read_text());assert set(x)=={'base_package_sha256','patches'};assert x['patches'];assert all(set(p)=={'file','old','new'} and p['file'] in ['index.html','RATIONALE.md','COVERAGE.md','DECISIONS.md'] for p in x['patches'])"
         ],
         [
           "git",
@@ -163,6 +204,7 @@
         ]
       ],
       "validation_resources": [],
+      "visual_contracts": [],
       "visual_screens": []
     }
   ],
