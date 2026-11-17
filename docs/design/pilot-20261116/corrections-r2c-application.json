@@ -1,0 +1,9 @@
+{
+  "patch_packet": "corrections-r2c.json",
+  "packet_sha256": "8a40aee8b50837e26f655564453389eb7ae9f7ff48f3adf09e573cd1472b7bd9",
+  "base_package_sha256": "f50ef0782260ff09c36b340f15b451dffa7bc0b67617efe362d5f77abaa55983",
+  "result_package_sha256": "3ebd825d581a44f11bc80790b1358650bdf8067aad0d9aef32fd1884f8842672",
+  "patch_count": 12,
+  "author": "agy-m5-llc-secondary",
+  "application": "Validated unique literal replacements only; no coordinator-authored UI code"
+}
