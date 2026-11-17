@@ -1,0 +1,24 @@
+{
+  "revision": "r2b",
+  "source": "9c84f5b9d80872f368533d78013c55af2a7198f3",
+  "approval": "NOT_APPROVED",
+  "tier": "Browser design prototype only; no native implementation proof",
+  "artifacts": {
+    "rendered-r2b/OB-02-validation-error.png": "a9d3037ec9f79c226bfa1f944cad22a319d38c76d0d1f6fbf955502a76471962",
+    "rendered-r2b/OB-02-state-picker-open.png": "85147a8e059608af06fe6705b3188fca726953246674c2ba405cf0d1fb4d321c",
+    "rendered-r2b/OB-02-classification-picker-open.png": "5a24b2745b2dec5d22738552acaa3c09bb8351795225ca61eec1d1810050821e",
+    "rendered-r2b/OB-03-default.png": "d574d848e05cfd6dccc06cff953e2786f1f37dd0eb24610af04438ae279ae117",
+    "rendered-r2b/OB-03-validation-error.png": "ac28314dcb58de3dfa3652a7b8b607ae95b6462f733417b2e4cababd8060b34d",
+    "rendered-r2b/OB-02-completed.png": "e2772850dce4f19fd228a873342bf3b9b1fcaaeb7296244f1b34febb0a34237e",
+    "rendered-r2b/OB-02-formation-picker-open.png": "89ed3dc15d7fdbb963f1314912aafa5da54b76c23cdc7a8d31f513b3921daf11",
+    "rendered-r2b/OB-03-completed.png": "1b2f6e7a2ee19445ca68221925322ac5dbc025e101d1bbef7b70c09d4d133a1f",
+    "rendered-r2b/OB-01-default.png": "19078a867708ecf37d02fe658c54d7e88326ba3dc819cbd4125093617a92a262",
+    "rendered-r2b/OB-02-selected.png": "fd7bfe9b18da31e560209149404e3635fc2095beafbff9bb4c4117041a902ad6",
+    "rendered-r2b/OB-02-books-picker-open.png": "4674520659e51f41bbb9a6def607dc6bdff061c7ace3d893b8b1f6fc09838a8a",
+    "rendered-r2b/OB-02-default.png": "e2772850dce4f19fd228a873342bf3b9b1fcaaeb7296244f1b34febb0a34237e",
+    "rendered-r2b/OB-03-selected.png": "99eb94afb40e9cb3c73c0c294207a6d4bff2986c0a1dfc151a474505c01cd653",
+    "render-evidence-r2b.json": "4a7a7fbda5acdfa59ae51bf206eb5f1d2391d6c053b5fe112bf26deccdccca7a",
+    "interactions-r2b.json": "8158d554647039c697ef32aa38203681706808b0c4b6b2f89476736bd104cf95",
+    "comparison/r2b/geometry.json": "450f136b3d29550111e7d85ea30a6d9013eb4abf8b5dc4579821b6fd21a78365"
+  }
+}
