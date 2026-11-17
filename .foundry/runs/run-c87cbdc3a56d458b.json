@@ -1,7 +1,6 @@
 {
   "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
   "blocked_role": "reviewer",
-  "blocker": "Validation failed; next Story was not started",
   "branch": "feature/bookkeeping-full-recovery-20261116",
   "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
   "created_at": "2026-11-16T06:52:19.603624+00:00",
@@ -14,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "9cf5d66262e58df338a0959a4fb94e12122d1e00",
+  "head": "0f010aa6fa77ffd7cc466b3366e7bcb74d693290",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -466,7 +465,7 @@
   },
   "next": 2,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "READY",
+  "phase": "READY_FOR_REVALIDATION",
   "plan": {
     "id": "CAP-BOOK-RECOVERY-001",
     "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
@@ -653,7 +652,7 @@
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
   "provider_availability": {
     "builder": {
-      "at": "2026-11-17T00:26:58.802313+00:00",
+      "at": "2026-11-17T00:41:32.035832+00:00",
       "exit_code": 0,
       "profile": "agy-m5-llc-secondary",
       "status": "AVAILABLE"
@@ -721,7 +720,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "PAUSED",
+  "status": "BLOCKED",
   "stories": [
     {
       "checks": [
@@ -1040,8 +1039,8 @@
             "test"
           ],
           "exit_code": 1,
-          "stderr_sha256": "5aa82286d1895fb3b4f243dac07b1f79eb1860a1ac81c5b2681e702a3e98b7cf",
-          "stdout_sha256": "09d4caddb4662c181a79f1344e03a639163907733a03846707d757cc4a57afd3"
+          "stderr_sha256": "8bb1c44d405a1dca8b30da8fbf3a44b63148c55f6f10556534dd482abc4962d5",
+          "stdout_sha256": "1be6c1a58b5f6d04ca7c9e1193d740eabb3be5a5f1e673d588e4fa04becf12d6"
         }
       ],
       "depends_on": [
@@ -1063,15 +1062,15 @@
           "model": "gemini-3.8-flash-high",
           "provider": "agy",
           "usage": {
-            "cache_read_tokens": 4867017,
-            "input_tokens": 246750,
-            "output_tokens": 64361,
-            "thinking_tokens": 50062,
-            "total_tokens": 311111
+            "cache_read_tokens": 9084418,
+            "input_tokens": 285657,
+            "output_tokens": 82079,
+            "thinking_tokens": 53466,
+            "total_tokens": 367736
           }
         },
-        "stderr_sha256": "c23c2a8ba80046cc5862be1f2555f3057e8189c4554d13f1586d3347f3de8607",
-        "stdout_sha256": "d0eaeb43b57cfbeb250f6a3a8406b8088f6792e6766c859f2cf535e3ec023dbd"
+        "stderr_sha256": "636325f4a7a518fed9844dcf650903a0ae5867fb4ff33dda3c6789acfa06acd9",
+        "stdout_sha256": "88ee8c477e8eb879a141f4879f9e1ad52bfadc22c687a1069210da8d3cacb28b"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete recovery parity, isolated lifecycle and failure injection. Build non-UI restore orchestration around new modules. Always authenticate+validate before requesting isolated fresh candidate. Candidate local key comes from destination provisioning, never source key. No active catalog/device DB mutation or production activation in this milestone; return verified candidate only through explicit lifecycle contract, dispose rejected candidates and leave active source unchanged. Add native factory/non-UI integration if possible using existing SQLCipher/storage lease APIs WITHOUT altering proof store or UI; do not invent unsafe default adapter. A checked candidate must have complete row/relationship/history parity and balanced existing journal/report/reconciliation totals before eligibility. Create deterministic multi-workspace synthetic fixtures via existing domain/store APIs covering every supported table including reversal/correction, capital, guaranteed payments, loans/reversals, recurring, splits, reconciliation events and closed/reopened periods. Restore an actual encrypted backup into an isolated fresh file-backed DB with different synthetic destination key identity; compare complete rows and existing cash/P&L, balance/trial/general ledger and reconciliation reports. Tests inject failures at decrypt, candidate provision, schema, row import, verification and cleanup; verify original files/rows not modified, rejected target not published, cleanup failure surfaced and no active switch. Exercise meaningful supported legacy schema migration using existing migrations only on isolated candidate; unsupported newer schemas fail closed and source bytes stay unchanged. If legacy payload migration is not implemented, reject explicitly and document rather than claiming support. Document host plain SQLite versus native SQLCipher/device limits and exact reproducible coordinator validation commands. No user accessible controls; no simulator/physical-device commands or modifications.",
       "resume_context": "Resume the existing implementation at d3cfe84769d139c5fc95374290c6e02aecd36818. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. BOUNDED REVIEW CORRECTIONS atb6d083c, preservefixture/modules notregenerate. Reviewer /root/recovery003_review FAIL: (1) AuthenticatedBookkeepingBackup publicconstructor(manifest,snapshot) brandsplaintextas genuine; only successfulauthfactory mayregister genuinesnapshot. Runtimeforgerywithvalidsnapshot mustfailbeforeprovision; do not relyon TSprivatealone. (2) Firstopen sqlite_master query isoutsidecleanup; queryfailure mustclose/dispose. Importfailure mustclose beforedispose; verificationclose errors mustnotbeswallowed or reportedclean. Trackall resourcefailures and preserve original+cleanup failures truthfully, includingundefinedthrows, withfixedsafeerrors and nonenumerable causes. Nonempty/protectedsource mustremainuntouched. (3) Isolatedmigrationcatch swallowscopy.disposefailure and saysdisposed. Surfaceboth failures andcleanupfailed; addrealAPI faulttests. (4) Accountingeligibility mustcheck EACH journal entry debits=credits, notonlyaggregate/business; twooffsetting unbalanced entries currentlypass. Addauthenticencryptedfixturefaultthat offsets twojournals samebusiness and provesrejection. Do not change accountingsemantics. (5) NativeStore open/dispose acceptunownedarbitraryidentity; requireinternallyissuedidentities, noalias/pathtraversal/activeDB access; closeownedconnections, deleteonlyowned DB+WAL/SHM/journal, surfacekey/file/closecleanupfailure withoutfalse disposed. Addhostmocknativecontracttests inexistingtestfile ifsafe. Ifsafe nativeadapter cannot be demonstrated withinboundedscope, replaceunsafe defaultwith explicitfailclosed native-unavailable behavior and truthfullydocumentthatgate; do not invent unsafe default or claim nativecertification. No devicecommands. (6) Actualtests25pass/3fail of28: lines653,675 missing expectedclose beforedispose, doNOTremoveclose. Legacyfixturetransactions=7 (opening,income,originalexpense,reversal,replacement,loanadvance,GPpayment), not6. Fix assertions truthfully preservechecks. (7) Add meaningfultests for query/close/dispose/migrationcleanup/authforgery andoffsettingjournals; docs mustmatchactualimplemented/tested/nativegap. Useoriginal5Story003files only, nonewdeps/UI/accountingrules; no commands/tests/Git/agents/native. Coordinatorvalidates exactsource, separateCodexreview follows.",
@@ -1121,8 +1120,8 @@
         "verdict": "FAIL"
       },
       "review_required": true,
-      "source": "b6d083c613b80584806a891690e489b08fa8fc40",
-      "status": "READY",
+      "source": "0f010aa6fa77ffd7cc466b3366e7bcb74d693290",
+      "status": "FAILED_VALIDATION",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",

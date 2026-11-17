@@ -26,8 +26,8 @@
         "test"
       ],
       "exit_code": 1,
-      "stderr_sha256": "5aa82286d1895fb3b4f243dac07b1f79eb1860a1ac81c5b2681e702a3e98b7cf",
-      "stdout_sha256": "09d4caddb4662c181a79f1344e03a639163907733a03846707d757cc4a57afd3"
+      "stderr_sha256": "8bb1c44d405a1dca8b30da8fbf3a44b63148c55f6f10556534dd482abc4962d5",
+      "stdout_sha256": "1be6c1a58b5f6d04ca7c9e1193d740eabb3be5a5f1e673d588e4fa04becf12d6"
     }
   ],
   "governance": {
@@ -48,15 +48,15 @@
       "model": "gemini-3.8-flash-high",
       "provider": "agy",
       "usage": {
-        "cache_read_tokens": 4867017,
-        "input_tokens": 246750,
-        "output_tokens": 64361,
-        "thinking_tokens": 50062,
-        "total_tokens": 311111
+        "cache_read_tokens": 9084418,
+        "input_tokens": 285657,
+        "output_tokens": 82079,
+        "thinking_tokens": 53466,
+        "total_tokens": 367736
       }
     },
-    "stderr_sha256": "c23c2a8ba80046cc5862be1f2555f3057e8189c4554d13f1586d3347f3de8607",
-    "stdout_sha256": "d0eaeb43b57cfbeb250f6a3a8406b8088f6792e6766c859f2cf535e3ec023dbd"
+    "stderr_sha256": "636325f4a7a518fed9844dcf650903a0ae5867fb4ff33dda3c6789acfa06acd9",
+    "stdout_sha256": "88ee8c477e8eb879a141f4879f9e1ad52bfadc22c687a1069210da8d3cacb28b"
   },
   "review": {
     "findings": [
@@ -104,9 +104,9 @@
     "verdict": "FAIL"
   },
   "run": "run-c87cbdc3a56d458b",
-  "source": "b6d083c613b80584806a891690e489b08fa8fc40",
-  "status": "FAILED_REVIEW",
-  "timestamp": "2026-11-17T00:28:59.353165+00:00",
+  "source": "0f010aa6fa77ffd7cc466b3366e7bcb74d693290",
+  "status": "FAILED_VALIDATION",
+  "timestamp": "2026-11-17T00:41:39.284933+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
