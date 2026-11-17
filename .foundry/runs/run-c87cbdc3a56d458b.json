@@ -13,7 +13,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "8b98f860e9b62c9e1a775069113c96111f7d1fc9",
+  "head": "2b0e451f1eaa0331978e1aa415eefb3f76be9872",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -523,6 +523,13 @@
         "typecheck": "PASS"
       },
       "verdict": "PASS"
+    },
+    {
+      "at": "2026-11-17T00:57:23.931681+00:00",
+      "event": "host_delivery_report",
+      "native_integration": "HOLD_UNAVAILABLE",
+      "path": "docs/recovery/RECOVERY-HOST-DELIVERY-20261116.md",
+      "real_data": "HOLD"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
