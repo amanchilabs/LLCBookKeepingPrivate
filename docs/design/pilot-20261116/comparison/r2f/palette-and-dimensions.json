@@ -1,0 +1,251 @@
+{
+  "method": "Same744x1464-pixel app-screen crop,372x732CSS atDPR2; photographic phonebezel excluded consistently. No universal similarity/pixel-perfect claim. Geometry anchors manually measured approximately from references.",
+  "screens": {
+    "OB-01": {
+      "colors": {
+        "reference": [
+          {
+            "rgb": "232,248,232",
+            "samples": 14073
+          },
+          {
+            "rgb": "8,8,8",
+            "samples": 5303
+          },
+          {
+            "rgb": "216,248,216",
+            "samples": 5132
+          },
+          {
+            "rgb": "8,120,56",
+            "samples": 3907
+          },
+          {
+            "rgb": "8,104,56",
+            "samples": 3522
+          },
+          {
+            "rgb": "8,136,56",
+            "samples": 3205
+          },
+          {
+            "rgb": "8,88,56",
+            "samples": 2968
+          },
+          {
+            "rgb": "8,24,56",
+            "samples": 2108
+          }
+        ],
+        "proposal": [
+          {
+            "rgb": "232,248,232",
+            "samples": 19124
+          },
+          {
+            "rgb": "216,248,216",
+            "samples": 11203
+          },
+          {
+            "rgb": "8,24,40",
+            "samples": 6269
+          },
+          {
+            "rgb": "8,104,56",
+            "samples": 3834
+          },
+          {
+            "rgb": "8,120,56",
+            "samples": 3820
+          },
+          {
+            "rgb": "8,136,56",
+            "samples": 3810
+          },
+          {
+            "rgb": "8,152,56",
+            "samples": 3600
+          },
+          {
+            "rgb": "8,8,8",
+            "samples": 2450
+          }
+        ]
+      },
+      "dimensions": {
+        "reference": [
+          744,
+          1464
+        ],
+        "proposal": [
+          744,
+          1464
+        ]
+      }
+    },
+    "OB-02": {
+      "colors": {
+        "reference": [
+          {
+            "rgb": "232,248,232",
+            "samples": 11510
+          },
+          {
+            "rgb": "8,8,8",
+            "samples": 8083
+          },
+          {
+            "rgb": "8,120,56",
+            "samples": 3744
+          },
+          {
+            "rgb": "8,72,40",
+            "samples": 3223
+          },
+          {
+            "rgb": "8,88,40",
+            "samples": 2592
+          },
+          {
+            "rgb": "8,104,56",
+            "samples": 2164
+          },
+          {
+            "rgb": "8,136,56",
+            "samples": 1845
+          },
+          {
+            "rgb": "232,232,232",
+            "samples": 1684
+          }
+        ],
+        "proposal": [
+          {
+            "rgb": "216,248,216",
+            "samples": 9596
+          },
+          {
+            "rgb": "232,248,232",
+            "samples": 6522
+          },
+          {
+            "rgb": "216,248,232",
+            "samples": 5862
+          },
+          {
+            "rgb": "8,120,56",
+            "samples": 3851
+          },
+          {
+            "rgb": "8,104,56",
+            "samples": 3834
+          },
+          {
+            "rgb": "8,136,56",
+            "samples": 3734
+          },
+          {
+            "rgb": "8,152,56",
+            "samples": 3689
+          },
+          {
+            "rgb": "8,24,40",
+            "samples": 3232
+          }
+        ]
+      },
+      "dimensions": {
+        "reference": [
+          744,
+          1464
+        ],
+        "proposal": [
+          744,
+          1464
+        ]
+      }
+    },
+    "OB-03": {
+      "colors": {
+        "reference": [
+          {
+            "rgb": "232,248,232",
+            "samples": 12494
+          },
+          {
+            "rgb": "8,8,8",
+            "samples": 5953
+          },
+          {
+            "rgb": "8,104,56",
+            "samples": 5867
+          },
+          {
+            "rgb": "8,88,56",
+            "samples": 4582
+          },
+          {
+            "rgb": "8,120,56",
+            "samples": 4201
+          },
+          {
+            "rgb": "216,248,216",
+            "samples": 2360
+          },
+          {
+            "rgb": "8,88,40",
+            "samples": 2071
+          },
+          {
+            "rgb": "232,232,232",
+            "samples": 1921
+          }
+        ],
+        "proposal": [
+          {
+            "rgb": "232,248,232",
+            "samples": 9901
+          },
+          {
+            "rgb": "216,248,216",
+            "samples": 9259
+          },
+          {
+            "rgb": "104,184,136",
+            "samples": 6622
+          },
+          {
+            "rgb": "104,168,136",
+            "samples": 4650
+          },
+          {
+            "rgb": "8,88,56",
+            "samples": 4265
+          },
+          {
+            "rgb": "216,248,232",
+            "samples": 4184
+          },
+          {
+            "rgb": "8,24,40",
+            "samples": 3510
+          },
+          {
+            "rgb": "8,8,8",
+            "samples": 2436
+          }
+        ]
+      },
+      "dimensions": {
+        "reference": [
+          744,
+          1464
+        ],
+        "proposal": [
+          744,
+          1464
+        ]
+      }
+    }
+  }
+}

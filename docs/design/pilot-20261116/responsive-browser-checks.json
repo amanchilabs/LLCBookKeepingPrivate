@@ -1,0 +1,54 @@
+[
+  {
+    "requestedWidth": 320,
+    "innerWidth": 320,
+    "clientWidth": 320,
+    "documentWidth": 320,
+    "horizontalOverflow": false,
+    "phone": {
+      "left": 22.359375,
+      "right": 297.625,
+      "width": 275.265625
+    },
+    "phoneFullyVisible": true
+  },
+  {
+    "requestedWidth": 372,
+    "innerWidth": 372,
+    "clientWidth": 372,
+    "documentWidth": 372,
+    "horizontalOverflow": false,
+    "phone": {
+      "left": 33.484375,
+      "right": 338.515625,
+      "width": 305.03125
+    },
+    "phoneFullyVisible": true
+  },
+  {
+    "requestedWidth": 375,
+    "innerWidth": 375,
+    "clientWidth": 375,
+    "documentWidth": 375,
+    "horizontalOverflow": false,
+    "phone": {
+      "left": 34.984375,
+      "right": 340.015625,
+      "width": 305.03125
+    },
+    "phoneFullyVisible": true
+  },
+  {
+    "requestedWidth": 430,
+    "innerWidth": 430,
+    "clientWidth": 430,
+    "documentWidth": 430,
+    "horizontalOverflow": false,
+    "phone": {
+      "left": 29,
+      "right": 401,
+      "width": 372
+    },
+    "phoneFullyVisible": true
+  }
+]
