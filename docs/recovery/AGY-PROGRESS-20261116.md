@@ -1,3 +1,5 @@
+> HISTORICAL CHECKPOINT — superseded by [Host recovery delivery and native HOLD](RECOVERY-HOST-DELIVERY-20261116.md). Current owner authorization permits independent Codex recovery reviews; all three host Story gates have since passed. The earlier capacity/cursor statements below are preserved as history.
+
 # Recovery progress — AGY activated; independent review capacity blocked
 
 Run run-c87cbdc3a56d458b remains at cursor0 / RECOVERY-001 on feature/bookkeeping-full-recovery-20261116. No new recovery run or implementation restart occurred. Claude remains preferred; agy-m5-llc-secondary is the sole explicitly authorized secondary builder. Codex was independently authorized for adapter/activation review ONLY, never bookkeeping implementation or recovery review.
