@@ -1434,21 +1434,34 @@
     }
     /* Reflow error state on OB-03 to prevent overlap */
     #screen-ob-03.has-error .members-card {
-      height: 120px !important;
+      height: 96px !important;
+      max-height: 96px !important;
     }
     #screen-ob-03.has-error .total-ownership-row {
-      top: 418px !important;
+      top: 387px !important;
     }
     #screen-ob-03.has-error .add-member-container {
-      top: 446px !important;
+      top: 410px !important;
+      height: 32px !important;
+    }
+    #screen-ob-03.has-error .add-member-btn {
+      height: 32px !important;
     }
     #screen-ob-03.has-error .info-banner {
-      top: 490px !important;
+      top: 446px !important;
+      padding: 5px 10px !important;
+    }
+    #screen-ob-03.has-error .info-text {
+      font-size: 11.5px !important;
+      line-height: 14px !important;
     }
     #screen-ob-03.has-error #ob03-error {
-      top: 536px !important;
+      top: 490px !important;
       position: absolute !important;
       z-index: 10 !important;
+      padding: 4px 8px !important;
+      font-size: 11px !important;
+      line-height: 14px !important;
     }
     #screen-ob-03.has-error .ownership-confirm-row {
       top: 594px !important;
@@ -1666,14 +1679,14 @@
           <label class="form-label" for="llc-name-input">
             Legal business name <span class="form-label-required">*</span>
           </label>
-          <input id="llc-name-input" class="form-input" type="text" placeholder="Northstar Ventures LLC" value="" oninput="window.pilot.updateDraft('name', this.value)" />
+          <input id="llc-name-input" class="form-input" type="text" placeholder="Northstar Ventures LLC" value="" aria-describedby="ob02-error" oninput="window.pilot.updateDraft('name', this.value)" />
         </div>
 
         <div class="form-group">
           <label class="form-label" for="state-select-trigger">
             Formation state <span class="form-label-required">*</span>
           </label>
-          <button id="state-select-trigger" class="form-select-trigger" onclick="window.pilot.openModal('state')">
+          <button id="state-select-trigger" class="form-select-trigger" aria-haspopup="dialog" aria-expanded="false" aria-describedby="ob02-error" onclick="window.pilot.openModal('state')">
             <span id="state-display">Select state</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
@@ -2587,18 +2600,22 @@
         if (nameInput) {
           nameInput.classList.toggle('error', !!state.errors.name);
           nameInput.setAttribute('aria-invalid', !!state.errors.name);
+          nameInput.setAttribute('aria-describedby', 'ob02-error');
         }
         if (stateTrigger) {
           stateTrigger.classList.toggle('error', !!state.errors.state);
           stateTrigger.setAttribute('aria-invalid', !!state.errors.state);
+          stateTrigger.setAttribute('aria-describedby', 'ob02-error');
         }
         if (formDateTrigger) {
           formDateTrigger.classList.toggle('error', !!state.errors.formationDate);
           formDateTrigger.setAttribute('aria-invalid', !!state.errors.formationDate);
+          formDateTrigger.setAttribute('aria-describedby', 'ob02-error');
         }
         if (booksDateTrigger) {
           booksDateTrigger.classList.toggle('error', !!state.errors.booksDate);
           booksDateTrigger.setAttribute('aria-invalid', !!state.errors.booksDate);
+          booksDateTrigger.setAttribute('aria-describedby', 'ob02-error');
         }
 
         const ob02Msg = state.errors.name || state.errors.state || state.errors.formationDate || state.errors.booksDate;

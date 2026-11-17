@@ -1,14 +1,14 @@
 {
-  "source_package_sha256": "95cd5df270b1753744ed602f262b4e9dcda8a6eea63d0fd22a8ba0682c3a2267",
-  "authoring_source": "19fc307f71ad12be898530e58e077c66a60ea512",
+  "source_package_sha256": "0529421e2b986a7fecbad1bbe80c8d3313f4098734d1450133224b683f1b8fae",
+  "authoring_source": "cd6c0f1b25e0fcf4dfbe63e0108abd3ea6734670",
   "builder": "agy-m5-llc-secondary",
   "materialization": "Literal strings copied, coordinator did not author prototype UI",
   "files": {
-    "index.html": "913174bdf22c9c833b001b0f307cdf9a18f45bfbaed2f0de9666f0c8479a2770",
+    "index.html": "d28005ccfb6f31bb041ffc8b4521337705d7274c0600f7e53ebe1223b3918797",
     "RATIONALE.md": "2dc606d08e8f5b445d6482dcda2884351c2a338440246fa75d4c75cbfa7543f1",
     "COVERAGE.md": "8df6b782b4573186ddcd2f003b31fff9b73e8eb70d31bd90a0338f7348b32ebf",
     "DECISIONS.md": "e88b8ec0d7aa6dd40af26ee526123a613cbd791d6f4887a58ccb64dbe313e4a6",
     "assets/welcome-mark.png": "ac2c55bc3afeb67215f70d9aad26135abfa21844e0a405499eea8dedb7f2ef8f"
   },
-  "prototype_revision": "c52aa33e9c024c939965c0e18f49e63cc78088f696710f8371fdc1523c9496b7"
+  "prototype_revision": "2c6498efd36dc2c974332a7c4ef6ec16c9c4fda3cad5bf3013f73a3418d5c3a3"
 }
