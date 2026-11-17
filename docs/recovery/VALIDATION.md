@@ -1,6 +1,6 @@
 # Complete Bookkeeping Recovery Validation & Verification Specification
 
-- Status: **Builder-delivered for RECOVERY-003; review findings addressed; coordinator validation and independent review pending; host SQLite synthetic evidence only**
+- Status: **Builder-delivered for RECOVERY-003; native candidate integration on hold fail-closed; host generic restoration, accounting report parity, and failure injection certified on host SQLite; coordinator validation and independent review pending**
 - Milestone / Capability: **CAP-BOOK-RECOVERY-001 — Complete Bookkeeping Recovery**
 - Story: **RECOVERY-003 — Complete dataset recovery parity, isolated restore lifecycle, failure injection, legacy migration, and native storage integration**
 - Authorization: **Owner authorization 2026-11-16 ([`AUTHORIZATION-20261116.md`](AUTHORIZATION-20261116.md))**
@@ -21,7 +21,8 @@ This document defines the validation criteria, lifecycle invariants, failure-inj
 
 ### Evidence Boundaries & Unverified Gates
 - **Host SQLite Evidence Only**: All automated test execution in [`packages/backup/test/bookkeeping-recovery.test.mjs`](../../packages/backup/test/bookkeeping-recovery.test.mjs) runs against real, file-backed, unencrypted SQLite via Node `DatabaseSync` (`node:sqlite`). This validates SQL relational behavior, schema migration, foreign key checks, SQLite integrity checks, and report calculations.
-- **No Native or Physical-Device Certification**: Host tests **do not** certify native SQLCipher encryption (`PRAGMA key`), native hardware keystores (iOS Keychain, Android Keystore), OS-level crash durability, power-loss resilience, or physical-device recovery. Physical-device recovery and native SQLCipher verification remain distinct evidence gates requiring physical-device builds.
+- **Native Candidate Storage Integration On Hold**: Default native candidate storage is explicitly held fail-closed pending separately verified storage ownership, connection closure guarantees, and physical-device engineering. `NativeBookkeepingCandidateStore` rejects all provision/open/dispose operations with `NATIVE_CANDIDATE_STORE_UNAVAILABLE_MESSAGE`, performing zero filesystem, Keychain, or database operations.
+- **No Native or Physical-Device Certification**: Host tests **do not** certify native SQLCipher encryption (`PRAGMA key`), native hardware keystores (iOS Keychain, Android Keystore), OS-level crash durability, power-loss resilience, or physical-device recovery. Physical-device recovery and native SQLCipher verification remain distinct evidence gates requiring physical-device builds. This milestone certifies host generic restoration and accounting report parity only.
 - **Strictly Non-UI Milestone**: Zero UI files or visual layouts are modified. All 64 owner change receipts and visual baseline designs remain binding and untouched.
 - **Synthetic Data Only**: All test fixtures use synthetic LLC entities, accounts, and transactions. Real financial records, receipts, and production deployment remain strictly barred pending full gate completion. Bank connections or automated scraping remain permanently unauthorized under the canonical vision ([`CLAUDE.md`](../../CLAUDE.md)).
 - **Separation from Proof Utilities**: The existing synthetic proof backup utility ([`packages/backup/src/native-portable-backup.ts`](../../packages/backup/src/native-portable-backup.ts)) remains distinct. No UI controls are wired to recovery orchestration.
@@ -128,12 +129,12 @@ A candidate database is only eligible for `verified-unpublished` status after pa
 - Guaranteed payment reversals (`guaranteed_payment_reversals`) and cash transaction corrections (`transaction_corrections`, `transaction_correction_roles`) are fully covered and verified.
 - Loan reversals are not part of the current bookkeeping domain model or store workflows and are therefore omitted from fixtures.
 
-### 4.4 Native Candidate Store Security & Isolation Contract
-- **Internally Issued Identities Only**: `NativeBookkeepingCandidateStore` tracks and verifies internally provisioned identities (`issuedIdentities`). Unowned or arbitrary identities passed to `open()` or `dispose()` are rejected with access denied.
-- **Strict Format & Traversal Prevention**: Candidate database IDs must conform strictly to `candidate-<timestamp>-<counter>-<hex>.db`. Path traversal characters (`..`, `/`, `\`) and active database names are rejected.
-- **Owned Connection Tracking**: The native candidate store tracks active database leases and releases/closes all open connections before deleting database files upon disposal.
-- **Sidecar Cleanup**: Disposal deletes the primary candidate database and all SQLite sidecars (`-wal`, `-shm`, `-journal`).
-- **Surface Cleanup Failures**: File deletion, SecureStore key deletion, and connection close errors are strictly surfaced; cleanup failures throw `Error` and prevent the candidate from being considered disposed.
+### 4.4 Native Candidate Integration Gap & Fail-Closed Boundary
+- **Native Candidate Storage Integration On Hold**: Following independent review of mock candidate storage risks (including identity mutation and connection lease ownership), default native candidate storage is explicitly held on hold pending separately verified storage ownership, connection closure guarantees, and physical-device engineering. No native candidate integration is claimed as complete in this milestone.
+- **Fail-Closed Default Store**: `NativeBookkeepingCandidateStore` is an explicitly unavailable, fail-closed implementation. Its `provision()`, `open()`, and `dispose()` methods reject immediately with `NATIVE_CANDIDATE_STORE_UNAVAILABLE_MESSAGE` (`Native bookkeeping candidate storage is unavailable pending verified storage ownership and device certification.`).
+- **Zero Resource Access & Deletion**: The default store performs zero filesystem I/O, zero Keychain/SecureStore item deletion or creation, and zero database opening or closing. It cannot alter or delete active key aliases or databases under any circumstances.
+- **Explicit Injected Candidate Store Only**: `createNativeBookkeepingRecoveryCandidate` operates only when an explicit candidate store is injected into options (`options.candidateStore`), running through the generic verified recovery core (`prepareBookkeepingRecoveryCandidate`). If `options.candidateStore` is omitted, it defaults to the fail-closed store and rejects with `candidate-provision-failed`, never claiming real native recovery.
+- **Milestone Scope**: This milestone certifies only host generic SQLite restoration, complete dataset parity, and accounting report equivalence across synthetic multi-workspace fixtures.
 
 ---
 
@@ -148,6 +149,7 @@ A candidate database is only eligible for `verified-unpublished` status after pa
 | **Authenticate** | Proof payload (`records` field) | `backup-rejected` | `not-requested` | Proof backup payloads rejected as books |
 | **Authenticate** | Plaintext snapshot constructor forgery | `lifecycle-violation` | `not-requested` | Plaintext snapshot cannot be branded genuine |
 | **Provision** | Injected storage provision error | `candidate-provision-failed` | `not-created` | Candidate not created; active DB untouched |
+| **Provision** | Default native candidate store | `candidate-provision-failed` | `not-created` | Native candidate store fail closed; zero resource effects |
 | **Provision** | Candidate is active DB | `candidate-not-isolated` | `not-touched` | Active DB protected; candidate not disposed |
 | **Provision** | Candidate reuses source key | `candidate-not-isolated` | `not-touched` | Source key not reused; active DB untouched |
 | **Provision** | Candidate file already has tables | `candidate-not-isolated` | `not-touched` | Preexisting data preserved; not disposed |
@@ -160,7 +162,7 @@ A candidate database is only eligible for `verified-unpublished` status after pa
 | **Verification** | Unbalanced journal lines | `candidate-verification-failed` | `disposed` | Unbalanced books rejected from eligibility |
 | **Verification** | Offsetting unbalanced journal entries | `candidate-verification-failed` | `disposed` | Per-journal entry balancing enforced |
 | **Verification** | Unbalanced reconciliation | `candidate-verification-failed` | `disposed` | Corrupt reconciliation rejected from eligibility |
-| **Verification** | Connection close failure on call 2 | `candidate-cleanup-failed` | `cleanup-failed` | Close failure not swallowed; surfaced |
+| **Verification** | Connection close failure on call 2 | `candidate-cleanup-failed` | `cleanup-failed` | Close failure not swallowed; retry close surfaced |
 | **Cleanup** | Injected disposal failure | `candidate-cleanup-failed` | `cleanup-failed` | Both errors surfaced; activation barred |
 | **Source Migration**| Newer source schema (v14) | `unsupported-source-schema` | `not-requested` | Source untouched; copy not requested |
 | **Source Migration**| Isolated copy is source | `candidate-not-isolated` | `not-touched` | Copy provider safety check |

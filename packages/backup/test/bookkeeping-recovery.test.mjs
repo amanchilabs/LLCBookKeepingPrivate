@@ -8,8 +8,9 @@
 // - The destination "key" is a synthetic identity held by a host keystore; it is
 //   not applied to the SQLite file. Native SQLCipher, QuickCrypto, Keychain or
 //   Keystore, crash durability and physical-device recovery are NOT exercised.
-// - `native-bookkeeping-recovery.ts` is never executed here; it is only read as
-//   text by one static boundary check.
+// - `native-bookkeeping-recovery.ts` is explicitly unavailable fail-closed; host
+//   tests verify zero resource effects and default rejection via static check
+//   and in-memory evaluation.
 // - All data is synthetic.
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -688,7 +689,7 @@ describe('failure injection leaves the source, the backup and the active databas
     expectRecoveryError(error, 'candidate-cleanup-failed', 'cleanup-failed');
     expect(error.stage).toBe('cleanup');
     expect(error.cleanupError).toBe(closeFailure);
-    expect(scenario.store.events).toEqual(['provision', 'open', 'close', 'open', 'close', 'dispose']);
+    expect(scenario.store.events).toEqual(['provision', 'open', 'close', 'open', 'close', 'close', 'dispose']);
     expectNothingChanged(scenario);
   }, CRYPTO_TEST_TIMEOUT_MS);
 
@@ -721,7 +722,15 @@ describe('failure injection leaves the source, the backup and the active databas
     const unbalancedPath = copyOfFile(sourcePath, 'offsetting-unbalanced.db');
     const raw = openFile(unbalancedPath);
     raw.database.exec(`UPDATE journal_lines SET debit_minor = CAST(CAST(debit_minor AS INTEGER) + 100 AS TEXT) WHERE id = 'alpha-income-1-je:line:1';`);
-    raw.database.exec(`UPDATE journal_lines SET credit_minor = CAST(CAST(credit_minor AS INTEGER) + 100 AS TEXT) WHERE id = 'alpha-expense-1-replacement-je:line:1';`);
+    raw.database.exec(`UPDATE journal_lines SET credit_minor = CAST(CAST(credit_minor AS INTEGER) + 100 AS TEXT) WHERE id = 'alpha-expense-1-replacement-je:line:3';`);
+
+    const accounting = await readBookkeepingAccountingSummary(raw);
+    expect(accounting.totalDebitsCents).toBe(accounting.totalCreditsCents);
+    const alphaSummary = accounting.businesses.find((business) => business.businessId === ALPHA);
+    expect(alphaSummary.journalBalance.totalDebitsCents).toBe(alphaSummary.journalBalance.totalCreditsCents);
+    expect(accounting.unbalancedJournalEntries.length).toBeGreaterThan(0);
+    expect(() => assertBookkeepingAccountingBalanced(accounting)).toThrow(/does not balance/i);
+
     const unbalancedSnapshot = await exportBookkeepingDataset(raw);
     raw.close();
 
@@ -927,7 +936,7 @@ describe('schema versions and legacy migration', () => {
   });
 });
 
-describe('native integration boundary (static source check only; the native module is not executed on the host)', () => {
+describe('native integration boundary (fail-closed host mock and static source verification)', () => {
   const nativeSource = readFileSync(new URL('../src/native-bookkeeping-recovery.ts', import.meta.url), 'utf8');
   const pureSource = readFileSync(new URL('../src/bookkeeping-recovery.ts', import.meta.url), 'utf8');
 
@@ -936,12 +945,10 @@ describe('native integration boundary (static source check only; the native modu
       'registerRestoreGeneration', 'activateRestoreGeneration', 'finishRestoreActivation', 'rollbackRestoreActivation',
       'deleteInactiveGeneration', 'ensureDatabaseCatalog', 'closeAllEncryptedDatabases', 'withStorageTransition',
       'withPortableBackupRestoreTransition', 'native-restore-store', 'restore-coordinator', 'native-portable-backup',
-      'apps/mobile', 'react',
+      'apps/mobile', 'react', 'expo-file-system', 'expo-secure-store', 'openEncryptedDatabase', 'createDatabaseLease',
     ]) {
       expect(nativeSource, forbidden).not.toContain(forbidden);
     }
-    // The candidate key is provisioned on the destination: no key is supplied when the candidate is created.
-    expect(nativeSource).toMatch(/openEncryptedDatabase\(databaseName, undefined, keyAlias\)/);
   });
 
   it('keeps the orchestration free of native modules and of any key parameter', () => {
@@ -950,20 +957,71 @@ describe('native integration boundary (static source check only; the native modu
     }
   });
 
-  it('native store contract: requires internally issued identities, rejects path traversal and unowned identities, closes connections, deletes sidecars, surfaces failures', () => {
-    // Internally issued identities check
-    expect(nativeSource).toMatch(/assertOwnedIdentity/);
-    expect(nativeSource).toMatch(/issuedIdentities/);
-    // Path traversal / regex validation
-    expect(nativeSource).toMatch(/CANDIDATE_ID_PATTERN/);
-    expect(nativeSource).toContain('..');
-    // Sidecars deletion: DB + WAL + SHM + journal
-    expect(nativeSource).toContain('-wal');
-    expect(nativeSource).toContain('-shm');
-    expect(nativeSource).toContain('-journal');
-    // Connection closing before file deletion
-    expect(nativeSource).toMatch(/openLeases/);
-    // Does not swallow SecureStore or file errors on dispose
-    expect(nativeSource).not.toMatch(/deleteItemAsync.*\.catch\(\(\)\s*=>\s*undefined\)/);
+  it('native candidate store contract: explicitly unavailable fail-closed with zero filesystem, keychain, or database effects', async () => {
+    // Static boundary assertions: zero storage/filesystem/secure-store/database access
+    expect(nativeSource).toContain('NativeBookkeepingCandidateStore');
+    expect(nativeSource).toContain('createNativeBookkeepingCandidateStore');
+    expect(nativeSource).toContain('createNativeBookkeepingRecoveryCandidate');
+    expect(nativeSource).toContain('NATIVE_CANDIDATE_STORE_UNAVAILABLE_MESSAGE');
+    for (const forbidden of [
+      'expo-file-system', 'expo-secure-store', 'Paths.document', 'deleteItemAsync',
+      'openEncryptedDatabase', 'createDatabaseLease', 'issuedIdentities', 'openLeases',
+    ]) {
+      expect(nativeSource, forbidden).not.toContain(forbidden);
+    }
+
+    // In-memory host mock evaluation of the native module
+    const jsSource = nativeSource
+      .replace(/import type\s*\{[^}]*\}\s*from\s*['"][^'"]*['"];?/g, '')
+      .replace(/import\s*\{[^}]*\}\s*from\s*['"][^'"]*['"];?/g, '')
+      .replace(/export\s+const\s+/g, 'const ')
+      .replace(/export\s+class\s+/g, 'class ')
+      .replace(/export\s+function\s+/g, 'function ')
+      .replace(/export\s+async\s+function\s+/g, 'async function ')
+      .replace(/implements\s+BookkeepingCandidateStore/g, '')
+      .replace(/: Promise<[^>]+>/g, '')
+      .replace(/: BookkeepingCandidateStore/g, '')
+      .replace(/: BookkeepingRecoveryCandidate/g, '')
+      .replace(/options\?:\s*Partial<BookkeepingRecoveryOptions>/g, 'options')
+      .replace(/backupBytes:\s*unknown/g, 'backupBytes')
+      .replace(/passphrase:\s*string/g, 'passphrase')
+      .replace(/_identity:\s*BookkeepingCandidateIdentity/g, '_identity');
+
+    const exports = {};
+    const moduleFn = new Function('prepareBookkeepingRecoveryCandidate', 'nativeBookkeepingBackupCrypto', 'exports', `
+      ${jsSource}
+      exports.NativeBookkeepingCandidateStore = NativeBookkeepingCandidateStore;
+      exports.createNativeBookkeepingCandidateStore = createNativeBookkeepingCandidateStore;
+      exports.createNativeBookkeepingRecoveryCandidate = createNativeBookkeepingRecoveryCandidate;
+      exports.NATIVE_CANDIDATE_STORE_UNAVAILABLE_MESSAGE = NATIVE_CANDIDATE_STORE_UNAVAILABLE_MESSAGE;
+    `);
+    moduleFn(prepareBookkeepingRecoveryCandidate, crypto, exports);
+
+    const store = exports.createNativeBookkeepingCandidateStore();
+    expect(store).toBeInstanceOf(exports.NativeBookkeepingCandidateStore);
+
+    // Default unavailability: provision, open, dispose all reject with fixed clear native-unavailable error
+    await expect(store.provision()).rejects.toThrow(exports.NATIVE_CANDIDATE_STORE_UNAVAILABLE_MESSAGE);
+    await expect(store.open({ candidateId: 'candidate-test.db', keyIdentity: 'test-key' })).rejects.toThrow(exports.NATIVE_CANDIDATE_STORE_UNAVAILABLE_MESSAGE);
+    await expect(store.dispose({ candidateId: 'candidate-test.db', keyIdentity: 'test-key' })).rejects.toThrow(exports.NATIVE_CANDIDATE_STORE_UNAVAILABLE_MESSAGE);
+
+    // Zero resource effects: mutating identity does not permit active key deletion or filesystem changes
+    const activeIdentity = { candidateId: ACTIVE_DESTINATION_IDENTITY.candidateId, keyIdentity: ACTIVE_DESTINATION_IDENTITY.keyIdentity };
+    await expect(store.dispose(activeIdentity)).rejects.toThrow(exports.NATIVE_CANDIDATE_STORE_UNAVAILABLE_MESSAGE);
+
+    // createNativeBookkeepingRecoveryCandidate fails closed when candidateStore is absent
+    await expect(
+      exports.createNativeBookkeepingRecoveryCandidate(backupBytes, PASSPHRASE),
+    ).rejects.toThrow();
+
+    // createNativeBookkeepingRecoveryCandidate operates with explicit injected candidateStore through generic verified core
+    const scenario = newScenario();
+    const candidate = await exports.createNativeBookkeepingRecoveryCandidate(
+      backupBytes,
+      PASSPHRASE,
+      { candidateStore: scenario.store, crypto },
+    );
+    expect(candidate.state()).toBe('verified-unpublished');
+    await candidate.discard();
   });
 });
