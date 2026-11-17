@@ -1,0 +1,170 @@
+{
+  "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "branch": "feature/reference-design-pilot-20261116",
+  "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
+  "created_at": "2026-11-17T02:33:53.683441+00:00",
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
+    "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
+  },
+  "head": "c36df878cf790fcc056cc9b86c7fdc8fee18b8a2",
+  "history": [],
+  "id": "run-2f4f165917484e5e",
+  "next": 0,
+  "owner": "f7b8f9f975334b90be3163286280852e",
+  "phase": "READY",
+  "plan": {
+    "id": "CAP-BOOK-DESIGN-SAFETY-R2C",
+    "scope": "Owner-approved DESIGN ARTIFACT AUTHORING ONLY. Native UI implementation is forbidden. Read docs/design/pilot-20261116/BRIEF.md in full. Write exactly one JSON artifact package. No commands/tests/builds/Git/agents, no other files or dependencies. Independent design review happens only AFTER coordinator renders and exercises the package; this authoring Story cannot approve designs.",
+    "stories": [
+      {
+        "depends_on": [],
+        "files": [
+          "docs/design/pilot-20261116/corrections-r2c.json"
+        ],
+        "id": "DESIGN-SAFETY-R2C",
+        "purpose": "OWNER-AUTHORIZED SMALL DESIGN PROTOTYPE PATCH ONLY. No nativeUI/schema/appimplementation. WriteONLY docs/design/pilot-20261116/corrections-r2c.json JSON {\"base_package_sha256\":\"f50ef0782260ff09c36b340f15b451dffa7bc0b67617efe362d5f77abaa55983\",\"patches\":[{\"file\":\"index.html\",\"old\":\"unique exact literal\",\"new\":\"replacement\"}]}. Read relevant prototype/index.html and prototype/*.md only. Coordinator appliesliterals to packagefiles; filevaluesindex.html/RATIONALE.md/COVERAGE.md/DECISIONS.md. No commands/Git/tests/agents. Smallfocusedfixes (doNOTrewritewholepackage): (1) renderSummary currently inserts user-suppliedworkspace w.name into innerHTML: useDOMtextContent forbusinessname/code; markupmustnotbeinterpreted. (2) OB02andOB03Skipcurrentlygotoaftervalidationbypass; preservevisibleSkip,but blockincompletesetupwithoutcreatingworkspace. Useexisting submitvalidationandexplicitinlineexplanationwhere needed, preserveenteredvalues; documentexactSkipsemanticsasPENDINGownerC since referenceSkipdoesnotauthorize silentlysavinginvalidsetup. Do notalterexistingnativebehavior. (3) Calendar daycellsinteractiveDIVnotkeyboard; makeactualbutton(orrole/tabindex+EnterSpace) preservingCSSappearance. Add basicEscapecloseandfocusrestorationforpickers; forward Tab fromtriggerreachableactualselectablecontrols. Do notclaimfullaccessibilitycertification. (4) Correctdocumentationfalseclaims: decisionrecommendationsnotownerdecisions, CPA/privacy/securitywordingPENDINGexplicitC, classmetadata futurepersistenceB/C (noschema), no tax/legalcertification, existingdatevalidationnoorderingNOTnewbusinessrule, step5v4/referencedotscountunresolvednot'harmonizedapproved'. COVERAGEnativeapphaswelcome route? Inspectactualapps/mobile/src/screens/BusinessSetupScreen.tsx/onboarding-flowifneededread-only tocorrectclaim; no inventednativefunctionselectState. Existingbrowser17checks useactualcontrols. Updateoldcoordinates/geometryclaimsifnecessarycitecomparisonmeasurementnotfalsecertification. Nativecurrentstorage/recoveryunchanged, all64receiptsunchanged. PatchesmustmatcholduniqueONCE; max~12smallpatches, preferparagraph/linecorrectionsnotfullMDreprint. ReturnnaturallyafterwritingJSON. FINAL ACTUAL-RENDER FIXES R2b: memberlistframecorrect17,285,338,160 BUT rowsstill48CSSdueflex/minheight/padding sofourthrowclipped; requirefour40pxrowsALLnamesfullyvisible within160, correctminheight/flex/boxsizing/padding, permitlistinternal scrollONLY>4. OB01heromeasuredy228.5versusreference242; movehero+introdown~13.5px preservingcardsy378. OB02formframecorrect14,201,346,292 BUTdateinputsactualy361h38vsreference373h40; classactual~427? label410/input427vsref427/445. Fixinnerfieldspacing/explicitanchors: nameinput236h40, statedrop305h40, dateinputs373h40 BOTH, classinput445h40; labels220/289/357/427. User wants Bookkeeping Start Date label actualfieldmeaningpreserved, compactfontifneeded. Backgroundwavecurrentlyflatpale#eef7f2, targetreferencepalesageregreenapprox#cef0d2 fadingwhite; welcomeonlymidwave, setupscreenswhiteupperbackground(bottomwaveonly). ActualreferenceOB03 lastmemberElenaRuizmustnotclip. Preserveall17workingbrowserchecks. Theseareboundedcorrectionsoftheexisting3screenpilot, notnewdesignscope. Keepoutputsmall enough15minlimit.",
+        "review_required": false,
+        "validation": [
+          [
+            "python3",
+            "-c",
+            "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2c.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} for p in x['patches'])"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ]
+        ],
+        "validation_resources": [],
+        "visual_screens": []
+      }
+    ]
+  },
+  "product": {
+    "canonical_vision": "docs/design/pilot-20261116/BRIEF.md",
+    "execution_contract": "CLAUDE.md",
+    "execution_scope": "Owner-authorized 2026-11-16 visual design pilot ONLY; design package/prototype artifacts, no native UI/schema/financial/recovery changes, no merge/release.",
+    "id": "llcbookkeepingprivate",
+    "provider_assignment": "docs/design-governance/provider-assignment.json",
+    "records": {
+      "pilot": "docs/design/pilot-20261116/BRIEF.md"
+    },
+    "repository_path": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate",
+    "repository_remote": "https://github.com/amanchilabs/LLCBookKeepingPrivate.git",
+    "workspace_policy": "canonical"
+  },
+  "profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "google-account-quota; session credit overages disabled",
+    "commands": {
+      "implement": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/agy",
+        "implement"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/.local/bin/agy",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/secondary.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/providers.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/runner.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/__main__.py"
+    ],
+    "id": "agy-m5-llc-secondary",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/agy",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/agy",
+        "preflight"
+      ]
+    ],
+    "provider": "gemini-cli",
+    "timeout_seconds": 1000
+  },
+  "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
+  "review_profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
+    "commands": {
+      "review": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "review"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/.local/bin/claude",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/design-discovery-workflow.md"
+    ],
+    "id": "claude-m5-llc-review",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "help"
+      ]
+    ],
+    "provider": "claude-code",
+    "timeout_seconds": 1800
+  },
+  "schema_version": 1,
+  "status": "READY",
+  "stories": [
+    {
+      "depends_on": [],
+      "files": [
+        "docs/design/pilot-20261116/corrections-r2c.json"
+      ],
+      "id": "DESIGN-SAFETY-R2C",
+      "purpose": "OWNER-AUTHORIZED SMALL DESIGN PROTOTYPE PATCH ONLY. No nativeUI/schema/appimplementation. WriteONLY docs/design/pilot-20261116/corrections-r2c.json JSON {\"base_package_sha256\":\"f50ef0782260ff09c36b340f15b451dffa7bc0b67617efe362d5f77abaa55983\",\"patches\":[{\"file\":\"index.html\",\"old\":\"unique exact literal\",\"new\":\"replacement\"}]}. Read relevant prototype/index.html and prototype/*.md only. Coordinator appliesliterals to packagefiles; filevaluesindex.html/RATIONALE.md/COVERAGE.md/DECISIONS.md. No commands/Git/tests/agents. Smallfocusedfixes (doNOTrewritewholepackage): (1) renderSummary currently inserts user-suppliedworkspace w.name into innerHTML: useDOMtextContent forbusinessname/code; markupmustnotbeinterpreted. (2) OB02andOB03Skipcurrentlygotoaftervalidationbypass; preservevisibleSkip,but blockincompletesetupwithoutcreatingworkspace. Useexisting submitvalidationandexplicitinlineexplanationwhere needed, preserveenteredvalues; documentexactSkipsemanticsasPENDINGownerC since referenceSkipdoesnotauthorize silentlysavinginvalidsetup. Do notalterexistingnativebehavior. (3) Calendar daycellsinteractiveDIVnotkeyboard; makeactualbutton(orrole/tabindex+EnterSpace) preservingCSSappearance. Add basicEscapecloseandfocusrestorationforpickers; forward Tab fromtriggerreachableactualselectablecontrols. Do notclaimfullaccessibilitycertification. (4) Correctdocumentationfalseclaims: decisionrecommendationsnotownerdecisions, CPA/privacy/securitywordingPENDINGexplicitC, classmetadata futurepersistenceB/C (noschema), no tax/legalcertification, existingdatevalidationnoorderingNOTnewbusinessrule, step5v4/referencedotscountunresolvednot'harmonizedapproved'. COVERAGEnativeapphaswelcome route? Inspectactualapps/mobile/src/screens/BusinessSetupScreen.tsx/onboarding-flowifneededread-only tocorrectclaim; no inventednativefunctionselectState. Existingbrowser17checks useactualcontrols. Updateoldcoordinates/geometryclaimsifnecessarycitecomparisonmeasurementnotfalsecertification. Nativecurrentstorage/recoveryunchanged, all64receiptsunchanged. PatchesmustmatcholduniqueONCE; max~12smallpatches, preferparagraph/linecorrectionsnotfullMDreprint. ReturnnaturallyafterwritingJSON. FINAL ACTUAL-RENDER FIXES R2b: memberlistframecorrect17,285,338,160 BUT rowsstill48CSSdueflex/minheight/padding sofourthrowclipped; requirefour40pxrowsALLnamesfullyvisible within160, correctminheight/flex/boxsizing/padding, permitlistinternal scrollONLY>4. OB01heromeasuredy228.5versusreference242; movehero+introdown~13.5px preservingcardsy378. OB02formframecorrect14,201,346,292 BUTdateinputsactualy361h38vsreference373h40; classactual~427? label410/input427vsref427/445. Fixinnerfieldspacing/explicitanchors: nameinput236h40, statedrop305h40, dateinputs373h40 BOTH, classinput445h40; labels220/289/357/427. User wants Bookkeeping Start Date label actualfieldmeaningpreserved, compactfontifneeded. Backgroundwavecurrentlyflatpale#eef7f2, targetreferencepalesageregreenapprox#cef0d2 fadingwhite; welcomeonlymidwave, setupscreenswhiteupperbackground(bottomwaveonly). ActualreferenceOB03 lastmemberElenaRuizmustnotclip. Preserveall17workingbrowserchecks. Theseareboundedcorrectionsoftheexisting3screenpilot, notnewdesignscope. Keepoutputsmall enough15minlimit.",
+      "review_required": false,
+      "status": "READY",
+      "validation": [
+        [
+          "python3",
+          "-c",
+          "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2c.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} for p in x['patches'])"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ]
+      ],
+      "validation_resources": [],
+      "visual_screens": []
+    }
+  ],
+  "workspace": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate"
+}
