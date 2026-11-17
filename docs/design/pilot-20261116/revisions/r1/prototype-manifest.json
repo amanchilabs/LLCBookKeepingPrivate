@@ -1,0 +1,14 @@
+{
+  "source_package_sha256": "777d0bb5e77076bd3ccd03fda035454d7a511e0c3555675f2b1e3f3a389e0cf8",
+  "authoring_source": "c7fc545623fff14bb8456f7796e1906a13c10a78",
+  "builder": "agy-m5-llc-secondary",
+  "materialization": "Literal strings copied, coordinator did not author prototype UI",
+  "files": {
+    "index.html": "9ad9a94b1b14597f35d3711123ff51de6973b5eb7d91be11596642a6e68cbdaa",
+    "RATIONALE.md": "b23592036f4110880e688340073f11190c6257fa511b390185a620e6294fa536",
+    "COVERAGE.md": "97194296b8355e6f99b22b65171331468b27b7ec6ae9c60709801db9d72f1d9a",
+    "DECISIONS.md": "b1afce8b6806d78903787a9b2f092f17618391062781e2e8a661461f7beef311",
+    "assets/welcome-mark.png": "ac2c55bc3afeb67215f70d9aad26135abfa21844e0a405499eea8dedb7f2ef8f"
+  },
+  "prototype_revision": "c0683184770492e446f08d2fe1ac6196d3a55a905ba33a2b4ab11f486ab972bc"
+}
