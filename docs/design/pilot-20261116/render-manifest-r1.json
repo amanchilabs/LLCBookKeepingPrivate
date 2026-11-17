@@ -1,0 +1,25 @@
+{
+  "revision": "r1",
+  "design_approval": "NOT_APPROVED",
+  "prototype_authoring_sha": "d5ba478737822919247c21840be70e2d248227e3",
+  "artifacts": {
+    "rendered/OB-02-validation-error.png": "fcb2160194713102ffa869f9658f8eae72891918f88021b01251829ab821b50d",
+    "rendered/OB-02-state-picker-open.png": "d7f143d03b1edc248fd0d078be5610c10c0a1efb84a3bff6477716baf51c8d77",
+    "rendered/OB-02-classification-picker-open.png": "2937c70c09702386cdd6a3a6192442a369896d6126a3414f00f9c841094db4e0",
+    "rendered/OB-03-default.png": "2e5c355b2a790f28f65cf104be855f94ae2419a6f28b2e91a839c11a769924b8",
+    "rendered/OB-03-validation-error.png": "2e5c355b2a790f28f65cf104be855f94ae2419a6f28b2e91a839c11a769924b8",
+    "rendered/OB-02-completed.png": "fcb2160194713102ffa869f9658f8eae72891918f88021b01251829ab821b50d",
+    "rendered/OB-02-formation-picker-open.png": "17d0dd1485b5208aee9ce4e88f0d73c2c5a4b524797f61639b1ec336a7b3048a",
+    "rendered/OB-03-completed.png": "2e5c355b2a790f28f65cf104be855f94ae2419a6f28b2e91a839c11a769924b8",
+    "rendered/OB-01-default.png": "fcb2160194713102ffa869f9658f8eae72891918f88021b01251829ab821b50d",
+    "rendered/OB-02-selected.png": "2e5c355b2a790f28f65cf104be855f94ae2419a6f28b2e91a839c11a769924b8",
+    "rendered/OB-02-books-picker-open.png": "8004d6bed16da6f2eba54ca3ca29ab693821a58566255a569b59d173d9a3446e",
+    "rendered/OB-02-default.png": "2e5c355b2a790f28f65cf104be855f94ae2419a6f28b2e91a839c11a769924b8",
+    "rendered/OB-03-selected.png": "2e5c355b2a790f28f65cf104be855f94ae2419a6f28b2e91a839c11a769924b8",
+    "diagnostic/OB-03-TEMP-DOM-ID-PATCH.png": "8c592c98ff3596753d6a6b16b52dc96de7f3b45644f70ca8fdec2f13f9ffaed6",
+    "diagnostic/OB-01-TEMP-DOM-ID-PATCH.png": "d960d9aae0c8b8eb396b7d419e2d257ed5e8a8de2f0d2bcd0e577165ea0e977c",
+    "diagnostic/OB-02-TEMP-DOM-ID-PATCH.png": "6b34b00f9cc30fea5de29a96fba67dcae12c58b9eff472ec2305c8a17654460c",
+    "diagnostic/NOTICE.txt": "5b79a9ab90afa274564a633b9a8208d0e2db34a9242e982cb49c7bab1c1b4c46",
+    "render-evidence.json": "0c8bc88f52b1ff45f296f2c5e8ac0aed92b6afb558827209ff75ea70e557e6dc"
+  }
+}
