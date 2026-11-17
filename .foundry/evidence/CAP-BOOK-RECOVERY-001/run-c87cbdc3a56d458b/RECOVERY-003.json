@@ -61,52 +61,37 @@
   "review": {
     "findings": [
       {
-        "issue": "Native dispose suppresses key deletion failure and omits SQLite sidecars; import failure disposes without closing connection. May falsely report disposed with live resources.",
+        "issue": "Native provision stores and returns same mutable identity; modifying keyIdentity alters ownership map and permits deleting activekeyalias.",
         "severity": "HIGH"
       },
       {
-        "issue": "Native open/dispose accept arbitrary identities without issuance/ownership check, weakening isolation; cannot permit access/deletion of active database/key.",
-        "severity": "HIGH"
-      },
-      {
-        "issue": "Public AuthenticatedBookkeepingBackup constructor(snapshot) inserts plaintext snapshot into genuineSnapshots and bypasses auth; existing forged test omits snapshot.",
+        "issue": "Native close drops/marksreleased lease before actualclose success; underlying lease also marksreleased before rawclose succeeds, allowing false cleanupsuccess.",
         "severity": "MEDIUM"
       },
       {
-        "issue": "sqlite_master emptiness query afteropen outside protectedcleanup leaks connection/candidate on rejection.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "Isolated migration catch suppresses dispose error and falsely reports disposed; preserve both failures.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "Aggregate journal/business balances can hide two offsetting unbalanced entries; verify each journal.",
-        "severity": "MEDIUM"
-      },
-      {
-        "issue": "Tests653,675 must expect close beforedispose; legacyfixture756 must expect7transactions independentlyconfirmed.",
+        "issue": "Test691 must expect retryclose; offsettingjournalfixture724 violates one-sided row constraint instead of reaching recoveryAPI.",
         "severity": "MEDIUM"
       }
     ],
     "implementation_ownership": false,
+    "prior_findings": "Purecore authforgery/querycleanup/importclose/perentrybalance/migrationcleanup corrected in source. Native unavailable failclosed permitted by manifest conditional safe integration.",
     "reviewer": "/root/recovery003_review",
-    "source": "b6d083c613b80584806a891690e489b08fa8fc40",
+    "source": "0f010aa6fa77ffd7cc466b3366e7bcb74d693290",
     "tests": {
       "controller_typecheck": "PASS",
-      "independent_method": "Source review; known failing test run not duplicated.",
-      "parent_focused_restore": {
-        "failed": 3,
-        "passed": 25,
-        "total": 28
+      "independent_host_mock_native_probe": "Actual native module transpiled in memory with stubs, no native operations: mutating issued identity allowed active key alias deletion; failed close lost lease and dispose falsely succeeded.",
+      "parent_restore": {
+        "failed": 2,
+        "passed": 31,
+        "total": 33
       }
     },
     "verdict": "FAIL"
   },
   "run": "run-c87cbdc3a56d458b",
   "source": "0f010aa6fa77ffd7cc466b3366e7bcb74d693290",
-  "status": "FAILED_VALIDATION",
-  "timestamp": "2026-11-17T00:41:39.284933+00:00",
+  "status": "FAILED_REVIEW",
+  "timestamp": "2026-11-17T00:44:26.982714+00:00",
   "visual_contracts": [],
   "visual_verification": null
 }
