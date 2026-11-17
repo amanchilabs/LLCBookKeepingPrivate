@@ -1,0 +1,170 @@
+{
+  "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "branch": "feature/reference-design-pilot-20261116",
+  "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
+  "created_at": "2026-11-17T03:14:46.266110+00:00",
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
+    "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
+  },
+  "head": "5f7aeb797ee98c7106aba79b9390c5a61e4b342b",
+  "history": [],
+  "id": "run-f794a70fc90e4ae8",
+  "next": 0,
+  "owner": "f7b8f9f975334b90be3163286280852e",
+  "phase": "READY",
+  "plan": {
+    "id": "CAP-BOOK-REVIEW-WRAPPER-R2F",
+    "scope": "Owner-approved DESIGN ARTIFACT AUTHORING ONLY. Native UI implementation is forbidden. Read docs/design/pilot-20261116/BRIEF.md in full. Write exactly one JSON artifact package. No commands/tests/builds/Git/agents, no other files or dependencies. Independent design review happens only AFTER coordinator renders and exercises the package; this authoring Story cannot approve designs.",
+    "stories": [
+      {
+        "depends_on": [],
+        "files": [
+          "docs/design/pilot-20261116/corrections-r2f.json"
+        ],
+        "id": "DESIGN-WRAPPER-R2F",
+        "purpose": "OWNER-AUTHORIZED TINY DESIGN-ARTIFACT CORRECTION ONLY. Independent review R2e no critical/high; ONE remaining medium requirement. Read prototype/index.html outerreviewwrapper CSS andREVIEW-R2E.md. WriteONLY docs/design/pilot-20261116/corrections-r2f.json JSON {\"base_package_sha256\":\"0529421e2b986a7fecbad1bbe80c8d3313f4098734d1450133224b683f1b8fae\",\"patches\":[{\"file\":\"index.html\",\"old\":\"unique exact literal\",\"new\":\"replacementliteral\"}]}. Allowedfilevalues index.html,RATIONALE.md,DECISIONS.md,COVERAGE.md. MAX4smallliteralpatches. Nootherfiles/shell/Git/tests/agents/native/source/schema. Fix normal browser presentation attrue320px(and375/372/430) soouterwrapper andphoneboundsfitviewport without horizontal clipping/scrolling. Current .phone min-width372 plusreviewmarginscauses actualinnerWidth320/clientWidth320/document.scrollWidth346. Preservefull372x732CSS capture=1 specimen EXACTLY at372, allfields/referencegeometryunchanged. Normalmode may responsivelyscale outerphonepresentation only while keeping372logicaldesign. Avoid simply hidingoverflow/clippingcontent or changingminimumviewport/zoommetadata tofakemetrics. Headercontrols mustwrapandremainreachable. Preserveall33behaviorchecks/singlememberdata/modalfocus. Update shortdocsparagraphsclaimingexpectedscrollbelow372toaccuratelystateimplementedfit(no mobile/device/accessibilitycertification). Nootherdesignchanges/scope. Keepoutputsmall, returnnaturallyafterwritingJSON.",
+        "review_required": false,
+        "validation": [
+          [
+            "python3",
+            "-c",
+            "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2f.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} for p in x['patches'])"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ]
+        ],
+        "validation_resources": [],
+        "visual_screens": []
+      }
+    ]
+  },
+  "product": {
+    "canonical_vision": "docs/design/pilot-20261116/BRIEF.md",
+    "execution_contract": "CLAUDE.md",
+    "execution_scope": "Owner-authorized 2026-11-16 visual design pilot ONLY; design package/prototype artifacts, no native UI/schema/financial/recovery changes, no merge/release.",
+    "id": "llcbookkeepingprivate",
+    "provider_assignment": "docs/design-governance/provider-assignment.json",
+    "records": {
+      "pilot": "docs/design/pilot-20261116/BRIEF.md"
+    },
+    "repository_path": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate",
+    "repository_remote": "https://github.com/amanchilabs/LLCBookKeepingPrivate.git",
+    "workspace_policy": "canonical"
+  },
+  "profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "google-account-quota; session credit overages disabled",
+    "commands": {
+      "implement": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/agy",
+        "implement"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/.local/bin/agy",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/secondary.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/providers.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/runner.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/__main__.py"
+    ],
+    "id": "agy-m5-llc-secondary",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/agy",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/agy",
+        "preflight"
+      ]
+    ],
+    "provider": "gemini-cli",
+    "timeout_seconds": 1000
+  },
+  "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
+  "review_profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
+    "commands": {
+      "review": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "review"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/.local/bin/claude",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/design-discovery-workflow.md"
+    ],
+    "id": "claude-m5-llc-review",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "help"
+      ]
+    ],
+    "provider": "claude-code",
+    "timeout_seconds": 1800
+  },
+  "schema_version": 1,
+  "status": "READY",
+  "stories": [
+    {
+      "depends_on": [],
+      "files": [
+        "docs/design/pilot-20261116/corrections-r2f.json"
+      ],
+      "id": "DESIGN-WRAPPER-R2F",
+      "purpose": "OWNER-AUTHORIZED TINY DESIGN-ARTIFACT CORRECTION ONLY. Independent review R2e no critical/high; ONE remaining medium requirement. Read prototype/index.html outerreviewwrapper CSS andREVIEW-R2E.md. WriteONLY docs/design/pilot-20261116/corrections-r2f.json JSON {\"base_package_sha256\":\"0529421e2b986a7fecbad1bbe80c8d3313f4098734d1450133224b683f1b8fae\",\"patches\":[{\"file\":\"index.html\",\"old\":\"unique exact literal\",\"new\":\"replacementliteral\"}]}. Allowedfilevalues index.html,RATIONALE.md,DECISIONS.md,COVERAGE.md. MAX4smallliteralpatches. Nootherfiles/shell/Git/tests/agents/native/source/schema. Fix normal browser presentation attrue320px(and375/372/430) soouterwrapper andphoneboundsfitviewport without horizontal clipping/scrolling. Current .phone min-width372 plusreviewmarginscauses actualinnerWidth320/clientWidth320/document.scrollWidth346. Preservefull372x732CSS capture=1 specimen EXACTLY at372, allfields/referencegeometryunchanged. Normalmode may responsivelyscale outerphonepresentation only while keeping372logicaldesign. Avoid simply hidingoverflow/clippingcontent or changingminimumviewport/zoommetadata tofakemetrics. Headercontrols mustwrapandremainreachable. Preserveall33behaviorchecks/singlememberdata/modalfocus. Update shortdocsparagraphsclaimingexpectedscrollbelow372toaccuratelystateimplementedfit(no mobile/device/accessibilitycertification). Nootherdesignchanges/scope. Keepoutputsmall, returnnaturallyafterwritingJSON.",
+      "review_required": false,
+      "status": "READY",
+      "validation": [
+        [
+          "python3",
+          "-c",
+          "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2f.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} for p in x['patches'])"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ]
+      ],
+      "validation_resources": [],
+      "visual_screens": []
+    }
+  ],
+  "workspace": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate"
+}
