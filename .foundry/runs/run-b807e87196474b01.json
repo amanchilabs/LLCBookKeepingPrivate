@@ -1,0 +1,170 @@
+{
+  "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
+  "branch": "feature/reference-design-pilot-20261116",
+  "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
+  "created_at": "2026-11-17T02:23:55.918711+00:00",
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
+    "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
+  },
+  "head": "aa524849cb8f2829b911fdf8497852533322d230",
+  "history": [],
+  "id": "run-b807e87196474b01",
+  "next": 0,
+  "owner": "f7b8f9f975334b90be3163286280852e",
+  "phase": "READY",
+  "plan": {
+    "id": "CAP-BOOK-DESIGN-LAYOUT-R2B",
+    "scope": "Owner-approved DESIGN ARTIFACT AUTHORING ONLY. Native UI implementation is forbidden. Read docs/design/pilot-20261116/BRIEF.md in full. Write exactly one JSON artifact package. No commands/tests/builds/Git/agents, no other files or dependencies. Independent design review happens only AFTER coordinator renders and exercises the package; this authoring Story cannot approve designs.",
+    "stories": [
+      {
+        "depends_on": [],
+        "files": [
+          "docs/design/pilot-20261116/corrections-r2b.json"
+        ],
+        "id": "DESIGN-LAYOUT-R2B",
+        "purpose": "AUTHORIZED DESIGN ONLY SMALL LITERAL PATCH PACKET. Behavior R2a now15actualbrowserchecksPASS; preserveworkingJS exceptaliasesbelow. Read prototype/index.html CSS and markup, BRIEF, REVIEW-R1. Do notregeneratewholepackage. WriteONLY docs/design/pilot-20261116/corrections-r2b.json JSON {\"base_package_sha256\":\"8997419422c63378b5eb241e6b6ce7c2475c87f53a6a24e68c3a271a4145f4fe\",\"patches\":[{\"file\":\"index.html\",\"old\":\"unique exact literal\",\"new\":\"replacement\"}]}. Allowedfilevalues index.html,RATIONALE.md,COVERAGE.md,DECISIONS.md; oldmustoccurONCEinpackagefiles andpatchorder sequential. No commands/Git/tests/native/schema/source/agents. Coordinatorappliesliteralstrings. FocusCSSgeometryusing small overridesbeforeunique</style> andbackgroundSVG replacement; max~8patches. Need actualreferencefaithful372x732 (referencecropsincomparison, actualreferencePNGsupplied). REQUIRED: OB01Skipy52not14; logoactualcroppedasset110x100NOoutersquircleframe/innerpadding; hero~y242,font31serif; featurecardsx30 y378/442/504,w318,h52(last62) fulltextwrapNOellipsis; icon57x52, accentbar52; CTAx24 y619w324h48. OB02navy54; progressy98 centersx109..272not46..319; headericon20,125,55square andheading87,133font28; form14,201,346,292; dateinputsBOTHy373withsinglelinelabelsfont12 aroundy357 (shortenBookkeepingstartlabelonlyifneeded, maintainmeaning); classlabel427/input445; infoy507; CTAx24y627w324h48NOT664. OB03heading82,120font23/icon17,115; toggley196h34; templatey239h35singlelinecompactfont12; memberlist17,285,338,160 four40pxrows; cleanunboxededitablenames notfullinputboxes; percentages78x28with%insideborder; totaly457; Addx73y484w230h36; infoy534; CTAy635h44. ExplicitownershipconfirmationadditionalCdecisionmustremainfunctional,positioninblankgapnear594withoutpushingCTA. Keepoverflowworkablewhen>4members/errors; noclipcontrols. Backgroundreferencepalesagewaves, NOdiagonalcornerwedges: setupbottomapproxM0,604 C80,565 96,584 170,597 C240,615 278,571 372,570 L372,732 L0,732Z fadingtowhite; OB01alsomidwaveM0,281 C100,278 125,345 230,280 C285,230 325,195 372,180. No solidgreenheader. Preserveexistingcolorsnavy/emeraldnearactualreference. FixgotoOB03'validation-error'aliascurrentlyonlyerror/blocked; 'completed'aliasmustshowvalidconfirmedreferencepresetwithoutsilentlyownerapproval. Documentsmustmarksecurity/privateclaimcopy, classificationoptions, confirmationplacement PENDINGownerC, notsettled/legallydefensible. Allchangesprototypeonly, noUIimplementation. Keepoutputsmallfor15minadapterlimit.",
+        "review_required": false,
+        "validation": [
+          [
+            "python3",
+            "-c",
+            "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2b.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} for p in x['patches'])"
+          ],
+          [
+            "git",
+            "diff",
+            "--check"
+          ]
+        ],
+        "validation_resources": [],
+        "visual_screens": []
+      }
+    ]
+  },
+  "product": {
+    "canonical_vision": "docs/design/pilot-20261116/BRIEF.md",
+    "execution_contract": "CLAUDE.md",
+    "execution_scope": "Owner-authorized 2026-11-16 visual design pilot ONLY; design package/prototype artifacts, no native UI/schema/financial/recovery changes, no merge/release.",
+    "id": "llcbookkeepingprivate",
+    "provider_assignment": "docs/design-governance/provider-assignment.json",
+    "records": {
+      "pilot": "docs/design/pilot-20261116/BRIEF.md"
+    },
+    "repository_path": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate",
+    "repository_remote": "https://github.com/amanchilabs/LLCBookKeepingPrivate.git",
+    "workspace_policy": "canonical"
+  },
+  "profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "google-account-quota; session credit overages disabled",
+    "commands": {
+      "implement": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/agy",
+        "implement"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/.local/bin/agy",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/secondary.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/providers.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/runner.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/__main__.py"
+    ],
+    "id": "agy-m5-llc-secondary",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/agy",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/agy.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/agy",
+        "preflight"
+      ]
+    ],
+    "provider": "gemini-cli",
+    "timeout_seconds": 1000
+  },
+  "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
+  "review_profile": {
+    "allow_paid_fallback": false,
+    "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
+    "commands": {
+      "review": [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "review"
+      ]
+    },
+    "fingerprint_files": [
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/execution.py",
+      "/Users/veerrajuamanchi/.local/bin/claude",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/design_transport.py",
+      "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/docs/design-discovery-workflow.md"
+    ],
+    "id": "claude-m5-llc-review",
+    "probes": [
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "version"
+      ],
+      [
+        "/opt/homebrew/bin/python3.11",
+        "/Users/veerrajuamanchi/amanchi-labs/autonomous-foundry/foundry/claude.py",
+        "--cli",
+        "/Users/veerrajuamanchi/.local/bin/claude",
+        "help"
+      ]
+    ],
+    "provider": "claude-code",
+    "timeout_seconds": 1800
+  },
+  "schema_version": 1,
+  "status": "READY",
+  "stories": [
+    {
+      "depends_on": [],
+      "files": [
+        "docs/design/pilot-20261116/corrections-r2b.json"
+      ],
+      "id": "DESIGN-LAYOUT-R2B",
+      "purpose": "AUTHORIZED DESIGN ONLY SMALL LITERAL PATCH PACKET. Behavior R2a now15actualbrowserchecksPASS; preserveworkingJS exceptaliasesbelow. Read prototype/index.html CSS and markup, BRIEF, REVIEW-R1. Do notregeneratewholepackage. WriteONLY docs/design/pilot-20261116/corrections-r2b.json JSON {\"base_package_sha256\":\"8997419422c63378b5eb241e6b6ce7c2475c87f53a6a24e68c3a271a4145f4fe\",\"patches\":[{\"file\":\"index.html\",\"old\":\"unique exact literal\",\"new\":\"replacement\"}]}. Allowedfilevalues index.html,RATIONALE.md,COVERAGE.md,DECISIONS.md; oldmustoccurONCEinpackagefiles andpatchorder sequential. No commands/Git/tests/native/schema/source/agents. Coordinatorappliesliteralstrings. FocusCSSgeometryusing small overridesbeforeunique</style> andbackgroundSVG replacement; max~8patches. Need actualreferencefaithful372x732 (referencecropsincomparison, actualreferencePNGsupplied). REQUIRED: OB01Skipy52not14; logoactualcroppedasset110x100NOoutersquircleframe/innerpadding; hero~y242,font31serif; featurecardsx30 y378/442/504,w318,h52(last62) fulltextwrapNOellipsis; icon57x52, accentbar52; CTAx24 y619w324h48. OB02navy54; progressy98 centersx109..272not46..319; headericon20,125,55square andheading87,133font28; form14,201,346,292; dateinputsBOTHy373withsinglelinelabelsfont12 aroundy357 (shortenBookkeepingstartlabelonlyifneeded, maintainmeaning); classlabel427/input445; infoy507; CTAx24y627w324h48NOT664. OB03heading82,120font23/icon17,115; toggley196h34; templatey239h35singlelinecompactfont12; memberlist17,285,338,160 four40pxrows; cleanunboxededitablenames notfullinputboxes; percentages78x28with%insideborder; totaly457; Addx73y484w230h36; infoy534; CTAy635h44. ExplicitownershipconfirmationadditionalCdecisionmustremainfunctional,positioninblankgapnear594withoutpushingCTA. Keepoverflowworkablewhen>4members/errors; noclipcontrols. Backgroundreferencepalesagewaves, NOdiagonalcornerwedges: setupbottomapproxM0,604 C80,565 96,584 170,597 C240,615 278,571 372,570 L372,732 L0,732Z fadingtowhite; OB01alsomidwaveM0,281 C100,278 125,345 230,280 C285,230 325,195 372,180. No solidgreenheader. Preserveexistingcolorsnavy/emeraldnearactualreference. FixgotoOB03'validation-error'aliascurrentlyonlyerror/blocked; 'completed'aliasmustshowvalidconfirmedreferencepresetwithoutsilentlyownerapproval. Documentsmustmarksecurity/privateclaimcopy, classificationoptions, confirmationplacement PENDINGownerC, notsettled/legallydefensible. Allchangesprototypeonly, noUIimplementation. Keepoutputsmallfor15minadapterlimit.",
+      "review_required": false,
+      "status": "READY",
+      "validation": [
+        [
+          "python3",
+          "-c",
+          "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2b.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} for p in x['patches'])"
+        ],
+        [
+          "git",
+          "diff",
+          "--check"
+        ]
+      ],
+      "validation_resources": [],
+      "visual_screens": []
+    }
+  ],
+  "workspace": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate"
+}
