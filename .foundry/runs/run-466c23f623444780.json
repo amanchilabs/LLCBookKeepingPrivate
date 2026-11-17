@@ -9,7 +9,7 @@
     "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
     "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
   },
-  "head": "d33c9f12763d339c64d4d32a18b43e1daeb8b7b9",
+  "head": "85a1ad9b1be09edd651624f85997117c34ac1e53",
   "history": [
     {
       "at": "2026-11-17T02:09:25.462037+00:00",
@@ -48,7 +48,7 @@
     }
   ],
   "id": "run-466c23f623444780",
-  "next": 0,
+  "next": 1,
   "owner": "f7b8f9f975334b90be3163286280852e",
   "phase": "READY",
   "plan": {
@@ -135,6 +135,14 @@
     "timeout_seconds": 1000
   },
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
+  "provider_availability": {
+    "builder": {
+      "at": "2026-11-17T02:18:48.902640+00:00",
+      "exit_code": 0,
+      "profile": "agy-m5-llc-secondary",
+      "status": "AVAILABLE"
+    }
+  },
   "review_profile": {
     "allow_paid_fallback": false,
     "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
@@ -175,22 +183,58 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "PAUSED",
+  "status": "COMPLETE",
   "stories": [
     {
+      "checks": [
+        {
+          "argv": [
+            "python3",
+            "-c",
+            "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2a.json').read_text());assert set(x)=={'base_package_sha256','patches'};assert x['patches'];assert all(set(p)=={'file','old','new'} and p['file'] in ['index.html','RATIONALE.md','COVERAGE.md','DECISIONS.md'] for p in x['patches'])"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
       "depends_on": [],
+      "evidence": ".foundry/evidence/CAP-BOOK-DESIGN-PILOT-R2/run-466c23f623444780/DESIGN-CORRECTION-R2.json",
       "files": [
         "docs/design/pilot-20261116/corrections-r2a.json"
       ],
       "id": "DESIGN-CORRECTION-R2",
       "provider_result": {
-        "exit_code": 1,
-        "stderr_sha256": "806369e188b77f368bf0b15b3367348ae31984b7c3bee44e1b36ea62e4c4366a",
-        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        "exit_code": 0,
+        "provider_usage": {
+          "credit_overages": false,
+          "model": "gemini-3.8-flash-high",
+          "provider": "agy",
+          "usage": {
+            "cache_read_tokens": 2302018,
+            "input_tokens": 191897,
+            "output_tokens": 75031,
+            "thinking_tokens": 58495,
+            "total_tokens": 266928
+          }
+        },
+        "stderr_sha256": "4a09d3ef27ca1ecb3549abd50c80d48eb636a8b257586ef032627088c80d109a",
+        "stdout_sha256": "5b5e3ac382b7f2acb9a521d4b3c31ee4b45f4bbedef1d7d48b6640eab1812a48"
       },
       "purpose": "SMALL OWNER-AUTHORIZED DESIGN ARTIFACT PATCH ONLY. Previous fullpackage rewrite timedout15minwithNOchanges. Do NOT reread/regenerate2000lineJSONpackage. Read current readable prototype/index.html only relevant functions near1500-2040; read domain validation ifneeded. Nativeappsourceforbidden. WriteONLY docs/design/pilot-20261116/corrections-r2a.json smallJSON with shape {\"base_package_sha256\":\"777d0bb5e77076bd3ccd03fda035454d7a511e0c3555675f2b1e3f3a389e0cf8\",\"patches\":[{\"file\":\"index.html\",\"old\":\"exact unique existing literal substring\",\"new\":\"replacement literal\"}]}. Coordinator mechanicallyapplies these literals to provider-authoredpackage, no generatedcodeexecution. oldstringmustoccur exactlyONCE, useenoughcontext; no duplicatepatchtargets. PatchcontentcontainsactualauthoredHTML/JS, no Python/programgenerator. No commands/tests/Git/agents/native/otherfiles. Limitthispass to behavior; visualCSSnextpass. FIX: renderlookup screenids mismatch blank (screen-ob01 vs screen-ob-01). Add workingselected/completed/error queryaliases asBRIEF; initialize actualvisiblefieldsfromstate. First/secondLLC businessfields empty(state/date placeholdersnotDelaware), unknownclassification honestunset; selecteddemo presetsseparatefromactualemptyflow; memberconfirmationfalse initially/aftertemplate/mode/memberedits, neverauto-confirm. OB02validate requiredname/normalizedsupportedstate/validcalendarISOdates, NO formation/startordering. OB03validatemembernames and exact0..100percent max2decimals/integerbasispointtotal100 (noparseFloatgarbage/negative/extra decimals), confirmationexplicit. Neutralclassification labels exactlyNotselected/Unknownnotyetdetermined/Disregardedentity/Partnership/Corporation; nomembership/electionparentheticals orauto inference. Escapeusernames/percentHTMLattributes oruseDOMvalue/textContent. Need actualworkspace-switch UI oncompletedprototype (notnative): keepclonedsavedworkspaces, AddanotherLLC isemptynewid, selectable priorworkspaces showownsaveddata unchanged. Do notskipvalidation orclaimlegalsafety. Atmost~12focusedliteralpatches; keepoutputsmallenoughtofinish. ReturnnaturallyafterwritingJSON. DoNOTmodify package.json directly; coordinatorowns literalapplication/materialization.",
       "review_required": false,
-      "status": "READY",
+      "source": "85a1ad9b1be09edd651624f85997117c34ac1e53",
+      "status": "DONE",
       "validation": [
         [
           "python3",
