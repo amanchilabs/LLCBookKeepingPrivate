@@ -1,0 +1,68 @@
+{
+  "branch": "feature/bookkeeping-full-recovery-20261116",
+  "capability": "CAP-BOOK-RECOVERY-001",
+  "checks": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/fnm",
+        "exec",
+        "--using",
+        "24.22.2",
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "0e30b28a5b9e47f41458c247c54bd2e0daf0604feb46a73476c81e7412f0f986"
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/fnm",
+        "exec",
+        "--using",
+        "24.22.2",
+        "npm",
+        "test"
+      ],
+      "exit_code": 1,
+      "stderr_sha256": "5aa82286d1895fb3b4f243dac07b1f79eb1860a1ac81c5b2681e702a3e98b7cf",
+      "stdout_sha256": "09d4caddb4662c181a79f1344e03a639163907733a03846707d757cc4a57afd3"
+    }
+  ],
+  "governance": {
+    "AGENTS.md": "ae2047c6a6cb52ead0c220cec96209a38d4ae2da95691709231f10a88ce6b3fc",
+    "CLAUDE.md": "e2b251d7933758e498aacf30c3efef31f41c97a2f8a6b29f6800c91a7b398451",
+    "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
+    "docs/design/implementation/feature-preservation-matrix.md": "2558160d8f1b6f2ead23022287de88b0f9503a8e7b562e016c2617af0b04ba84",
+    "docs/design/proposed/design-decisions.md": "38abc3c3c783c75e0d2c80125981659f642afebca9beec54fbc767962f2ffb48",
+    "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
+    "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
+  },
+  "id": "RECOVERY-003",
+  "profile": "agy-m5-llc-secondary",
+  "provider_result": {
+    "exit_code": 0,
+    "provider_usage": {
+      "credit_overages": false,
+      "model": "gemini-3.8-flash-high",
+      "provider": "agy",
+      "usage": {
+        "cache_read_tokens": 4867017,
+        "input_tokens": 246750,
+        "output_tokens": 64361,
+        "thinking_tokens": 50062,
+        "total_tokens": 311111
+      }
+    },
+    "stderr_sha256": "c23c2a8ba80046cc5862be1f2555f3057e8189c4554d13f1586d3347f3de8607",
+    "stdout_sha256": "d0eaeb43b57cfbeb250f6a3a8406b8088f6792e6766c859f2cf535e3ec023dbd"
+  },
+  "review": null,
+  "run": "run-c87cbdc3a56d458b",
+  "source": "b6d083c613b80584806a891690e489b08fa8fc40",
+  "status": "FAILED_VALIDATION",
+  "timestamp": "2026-11-17T00:27:05.437446+00:00",
+  "visual_contracts": [],
+  "visual_verification": null
+}
