@@ -1,6 +1,7 @@
 {
   "approval_authority_sha256": "236685ecdeddb1f870b9fe8d1496921c6ba5250a4c6184e2a04a4e557b1973a3",
   "blocked_role": "reviewer",
+  "blocker": "Validation failed; next Story was not started",
   "branch": "feature/bookkeeping-full-recovery-20261116",
   "common_dir": "/Users/veerrajuamanchi/amanchi-labs/LLCBookKeepingPrivate/.git",
   "created_at": "2026-11-16T06:52:19.603624+00:00",
@@ -13,7 +14,7 @@
     "docs/design/proposed/screen-specifications.md": "f87d8b6c04c0d8e26881be0f38184c508592f5bd8658529723fad4743760735e",
     "docs/recovery/AUTHORIZATION-20261116.md": "638c5b0d694d2838852cc6195dc1e1e210a26d81b7270b7ca2ffc5824508406f"
   },
-  "head": "933e35f84eb712e8d7fced0799125bca79cfb726",
+  "head": "d3cfe84769d139c5fc95374290c6e02aecd36818",
   "history": [
     {
       "at": "2026-11-16T07:06:16.486720+00:00",
@@ -439,6 +440,13 @@
         }
       },
       "verdict": "FAIL"
+    },
+    {
+      "at": "2026-11-17T00:29:02.171956+00:00",
+      "event": "profile_handoff",
+      "from": "agy-m5-llc-secondary",
+      "head": "d3cfe84769d139c5fc95374290c6e02aecd36818",
+      "to": "agy-m5-llc-secondary"
     }
   ],
   "id": "run-c87cbdc3a56d458b",
@@ -452,7 +460,7 @@
   },
   "next": 2,
   "owner": "f7b8f9f975334b90be3163286280852e",
-  "phase": "READY_FOR_REVALIDATION",
+  "phase": "READY",
   "plan": {
     "id": "CAP-BOOK-RECOVERY-001",
     "scope": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete supported dataset backup, isolated recovery and validation only. Three sequential independently reviewed Stories. Physical-device and installed SQLCipher recovery remain distinct evidence gates; no real-data certification from host fixtures. Preserve all visual gates and 64 change receipts.",
@@ -707,7 +715,7 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "BLOCKED",
+  "status": "PAUSED",
   "stories": [
     {
       "checks": [
@@ -1060,7 +1068,7 @@
         "stdout_sha256": "d0eaeb43b57cfbeb250f6a3a8406b8088f6792e6766c859f2cf535e3ec023dbd"
       },
       "purpose": "Read docs/recovery/AUTHORIZATION-20261116.md and IMPLEMENTATION-PLAN-20261116.md. Owner-authorized non-UI only; no UI/assets/registry/approval edits, dependencies, accounting semantics changes, new agents, native commands, branch changes, commits or pushes. Write meaningful failing tests first; coordinator executes checks. Reuse existing patterns, keep files focused. Document exact limits. Complete recovery parity, isolated lifecycle and failure injection. Build non-UI restore orchestration around new modules. Always authenticate+validate before requesting isolated fresh candidate. Candidate local key comes from destination provisioning, never source key. No active catalog/device DB mutation or production activation in this milestone; return verified candidate only through explicit lifecycle contract, dispose rejected candidates and leave active source unchanged. Add native factory/non-UI integration if possible using existing SQLCipher/storage lease APIs WITHOUT altering proof store or UI; do not invent unsafe default adapter. A checked candidate must have complete row/relationship/history parity and balanced existing journal/report/reconciliation totals before eligibility. Create deterministic multi-workspace synthetic fixtures via existing domain/store APIs covering every supported table including reversal/correction, capital, guaranteed payments, loans/reversals, recurring, splits, reconciliation events and closed/reopened periods. Restore an actual encrypted backup into an isolated fresh file-backed DB with different synthetic destination key identity; compare complete rows and existing cash/P&L, balance/trial/general ledger and reconciliation reports. Tests inject failures at decrypt, candidate provision, schema, row import, verification and cleanup; verify original files/rows not modified, rejected target not published, cleanup failure surfaced and no active switch. Exercise meaningful supported legacy schema migration using existing migrations only on isolated candidate; unsupported newer schemas fail closed and source bytes stay unchanged. If legacy payload migration is not implemented, reject explicitly and document rather than claiming support. Document host plain SQLite versus native SQLCipher/device limits and exact reproducible coordinator validation commands. No user accessible controls; no simulator/physical-device commands or modifications.",
-      "resume_context": "Resume the existing implementation at 283a7061778ca554a30af800ae5f111caff35901. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete. Claude produced packages/backup/test/bookkeeping-recovery-fixture.mjs (797lines) at9419544 beforefivehourlimit,reset8:50pm. Preserve and use existing fixture; do not regenerate fromscratch. Story001and002already independentlyPASS; reuse them. Complete ONLY missing Story003modules/tests/docs. Must authenticate+validate backup before candidateprovision, isolatefresh target fromsource/catalog; compare exactdataset and actual accounting/report/reconciliation integrity before eligibility (notmerely successfuldecrypt). Safelydispose rejectedcandidate and surfacecleanupfailures without losing originalerror. Complete synthetic file-backed restoretestwithdifferentdestinationkeyidentity (labelplainSQLitehostnotSQLCipher); all27supportedtablecoverage/history and financialreports parity. Meaningful isolatedcandidate legacy schema migration usingexistingmigrations, unsupportedpayloadversions explicitlyreject. Native nonUI adapter only ifsafeexistingstoragecontracts; never invent unsafeactivecatalogswitch or editUI. Testfailurepaths genuinelythroughpublicAPI, assertactive/sourceunchanged. Use5originalStory003files only. No commands/tests/Git/agents/dependencies/native operations; coordinatorvalidates. Preserveallpartialwork; no providerprobeorrepeateddiscovery.",
+      "resume_context": "Resume the existing implementation at d3cfe84769d139c5fc95374290c6e02aecd36818. Preserve existing code and tests; do not rebuild from scratch. Complete missing deliverables and necessary corrections within this Story only. Previously completed Stories stay complete.",
       "review": {
         "findings": [
           {
@@ -1108,7 +1116,7 @@
       },
       "review_required": true,
       "source": "b6d083c613b80584806a891690e489b08fa8fc40",
-      "status": "FAILED_REVIEW",
+      "status": "READY",
       "validation": [
         [
           "/opt/homebrew/bin/fnm",
