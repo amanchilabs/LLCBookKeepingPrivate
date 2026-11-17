@@ -9,10 +9,10 @@
     "docs/design-governance/provider-assignment.json": "7b3c7ce7e3b19dbdbd35a9feeb5c942c2a61add06651bdcd9987d5d092b76737",
     "docs/design/pilot-20261116/BRIEF.md": "0f411cb09fedfe963b7b1d2afd6a4d5330886a01535716461a85db545ca2f911"
   },
-  "head": "ff591169204bc42104b612167e8dc22093d7b58c",
+  "head": "1e68883dde7c3bdbba6ca42c633a7acbb751d124",
   "history": [],
   "id": "run-89830e05a40145f0",
-  "next": 0,
+  "next": 1,
   "owner": "f7b8f9f975334b90be3163286280852e",
   "phase": "READY",
   "plan": {
@@ -99,6 +99,14 @@
     "timeout_seconds": 1000
   },
   "provider_assignment_hash": "b061c09513a87309d8131bf76b588dec8bb15299da66794192c15b6306aee060",
+  "provider_availability": {
+    "builder": {
+      "at": "2026-11-17T03:11:39.081591+00:00",
+      "exit_code": 0,
+      "profile": "agy-m5-llc-secondary",
+      "status": "AVAILABLE"
+    }
+  },
   "review_profile": {
     "allow_paid_fallback": false,
     "auth_mode": "Existing first-party Claude.ai Pro subscription; CLI default model; no API fallback",
@@ -139,17 +147,58 @@
     "timeout_seconds": 1800
   },
   "schema_version": 1,
-  "status": "READY",
+  "status": "COMPLETE",
   "stories": [
     {
+      "checks": [
+        {
+          "argv": [
+            "python3",
+            "-c",
+            "import json,pathlib;x=json.loads(pathlib.Path('docs/design/pilot-20261116/corrections-r2e.json').read_text());assert x['patches'];assert all(set(p)=={'file','old','new'} and p['file']=='index.html' for p in x['patches'])"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "argv": [
+            "git",
+            "diff",
+            "--check"
+          ],
+          "exit_code": 0,
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
       "depends_on": [],
+      "evidence": ".foundry/evidence/CAP-BOOK-DESIGN-FINAL-R2E/run-89830e05a40145f0/DESIGN-FINAL-R2E.json",
       "files": [
         "docs/design/pilot-20261116/corrections-r2e.json"
       ],
       "id": "DESIGN-FINAL-R2E",
+      "provider_result": {
+        "exit_code": 0,
+        "provider_usage": {
+          "credit_overages": false,
+          "model": "gemini-3.8-flash-high",
+          "provider": "agy",
+          "usage": {
+            "cache_read_tokens": 1554636,
+            "input_tokens": 139396,
+            "output_tokens": 45752,
+            "thinking_tokens": 41825,
+            "total_tokens": 185148
+          }
+        },
+        "stderr_sha256": "d8cee86628c7e0bc1f1d0df09774d9dac93b797b9800e859fb640819efe28b1a",
+        "stdout_sha256": "2fb5c9029416aa902418bd3fb6d5eeb79a5f5846ffdd386099e155ed3d7ef81d"
+      },
       "purpose": "AUTHORIZED DESIGN-ONLY TINY FINAL PATCH. Read prototype/index.html relevantrenderErrors/CSS andREVIEW-R2D-CHECKS.md. WriteONLY docs/design/pilot-20261116/corrections-r2e.json JSON{'base_package_sha256':'95cd5df270b1753744ed602f262b4e9dcda8a6eea63d0fd22a8ba0682c3a2267','patches':[{'file':'index.html','old':'unique exact literal','new':'replacementliteral'}]} withproperDOUBLEQUOTEDJSON. No documentskeyneeded, nootherfiles/Git/commands/tests/agents/native/appcode. MAX4focusedliteralpatches, nofullHTML. FixONLY: (1) Current state/namefields setaria-invalidperfield butmissingaria-describedby='ob02-error'; datefieldsalreadyhaveassociation. Ensureallfailingbusinessfieldsprogrammaticallyassociatedwithactualerror. (2) Ownershiperrorstateinfo490..540overlapserror536..578by4px; longestpercentageerrormessage mayalsooverlapconfirmation594. Makeerrorstate orderlynonoverlappingforALLexistingmessages, info/confirmation/actionsvisibleandoperable. May compacterrortextpreservingmeaningoradjusterror-onlyflow/positions, keepselectedreferencegeometryunchanged. Errorlayoutmustkeepallmembernamesavailablebymemberlistscroll. Retainstrictpercentvalidation, originalsubmittedmembersincludingSINGLEmember, separateexplicitdemopresets, focuscontainment/Escape, inputsretained,32previouschecks. DoNOTintroducenewscopeormodifydocs/native/storage. Keep outputVERYSMALL, returnnaturallyafterwritingJSON.",
       "review_required": false,
-      "status": "READY",
+      "source": "1e68883dde7c3bdbba6ca42c633a7acbb751d124",
+      "status": "DONE",
       "validation": [
         [
           "python3",
@@ -163,6 +212,7 @@
         ]
       ],
       "validation_resources": [],
+      "visual_contracts": [],
       "visual_screens": []
     }
   ],
